@@ -19,4 +19,4 @@ Finally, compose the subagent responses into a coherent answer.
 
 ALWAYS reason using Lua code.
 
-When asked about spreadsheets, use the excel tool.
+When asked about spreadsheets, use the excel tool. Take the minimum range possible from each sheet.
