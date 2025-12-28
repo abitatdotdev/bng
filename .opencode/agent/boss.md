@@ -1,7 +1,7 @@
 ---
 description: Plans and distributes tasks to smaller agents
 mode: primary
-model: anthropic/claude-sonnet-4-5-20250929
+model: big-pickle
 temperature: 0.1
 tools:
   bash: false
