@@ -91,8 +91,8 @@ function getCellValue(sheet, row, col) {
 /**
  * Convert Yes/No to boolean
  */
-function toBoolean(value) {
-    if (value === null || value === undefined || value === '') return false;
+function toMaybeBoolean(value) {
+    if (value === null || value === undefined || value === '' || value === 'Yes/No') return undefined;
     return String(value).toLowerCase() === 'yes';
 }
 
@@ -227,7 +227,7 @@ function readHabitatData(filePath) {
 
         // Process irreplaceable
         const rawIrreplaceable = getCellValue(sheet, row, COLUMNS.irreplaceable);
-        habitat.irreplaceable = toBoolean(rawIrreplaceable);
+        habitat.irreplaceable = toMaybeBoolean(rawIrreplaceable);
 
         habitats.push(habitat);
     }

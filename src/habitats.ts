@@ -1717,7 +1717,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Individual trees - Rural tree',
@@ -1739,7 +1739,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Wetland - Blanket bog',
@@ -1805,7 +1805,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Wetland - Lowland raised bog',
@@ -1827,7 +1827,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Wetland - Oceanic valley mire[1] (D2.1)',
@@ -1937,7 +1937,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Lowland beech and yew woodland',
@@ -1959,7 +1959,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Lowland mixed deciduous woodland',
@@ -1981,7 +1981,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Native pine woodlands',
@@ -2003,7 +2003,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Other coniferous woodland',
@@ -2025,7 +2025,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Other Scot\'s pine woodland',
@@ -2047,7 +2047,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.medium,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Other woodland; broadleaved',
@@ -2069,7 +2069,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Other woodland; mixed',
@@ -2091,7 +2091,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Upland birchwoods',
@@ -2113,7 +2113,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.medium,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Upland mixed ashwoods',
@@ -2135,7 +2135,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Upland oakwood',
@@ -2157,7 +2157,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Wet woodland',
@@ -2179,7 +2179,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.medium,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Wood-pasture and parkland',
@@ -2201,7 +2201,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.high,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Woodland and forest - Felled',
@@ -2223,7 +2223,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.low,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Coastal lagoons - Coastal lagoons',
@@ -2443,7 +2443,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.medium,
         description: '',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Coastal saltmarsh - Artificial saltmarshes and saline reedbeds',
@@ -2465,7 +2465,7 @@ export const allHabitats = [
         technicalDifficultyEnhancementMultiplier: difficulty.medium,
         description: 'For these habitats the artificial nature is determined by the underlying substrate, most restoration activities will fall under the net gain definition of recreated natural habitats. Situations that fall under artificial will be limited but not impossible and include any base substrate that falls under artificial in the definition above. Example: floating habitat creation systems where the underlying substrate is artificially contained.',
         conditionAssessmentNotes: '',
-        irreplaceable: false,
+        irreplaceable: undefined,
     },
     {
         label: 'Intertidal sediment - Littoral coarse sediment',
