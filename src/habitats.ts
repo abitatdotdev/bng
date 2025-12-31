@@ -1,7 +1,7 @@
 // THIS FILE IS GENERATED AUTOMATICALLY
 
-import { difficulty } from "difficulty"
-import { distinctivenessCategories } from "distinctivenessCategories"
+import { difficulty } from "./difficulty"
+import { distinctivenessCategories } from "./distinctivenessCategories"
 
 export const allHabitats = [
     {
