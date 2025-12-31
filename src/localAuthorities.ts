@@ -377,7 +377,7 @@ export const localAuthorities = [
     "Wycombe District Council",
     "Wyre Council",
     "Wyre Forest District Council",
-] as const
+] as const;
 
 export const applicationType = [
     "Householder planning consent",
@@ -395,7 +395,7 @@ export const applicationType = [
     "Notification of proposed works to trees in conservation areas",
     "Application for non-material amendments",
     "Nationally Significant Infrastructure Habitats (NSIP'S)",
-] as const
+] as const;
 
 export const habitats = [
     "Cropland - Arable field margins cultivated annually",
@@ -517,5 +517,5 @@ export const habitats = [
     "Intertidal sediment - Artificial littoral seagrass",
     "Intertidal sediment - Artificial littoral biogenic reefs",
     "Individual trees - Rural tree"
-] as const
+] as const;
 
