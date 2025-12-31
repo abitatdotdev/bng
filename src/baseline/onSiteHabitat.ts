@@ -6,8 +6,9 @@ class OnSiteHabitat<
     H extends Habitat,
     BH extends BroadHabitat
 > {
-    habitatData: H;
-    irreplaceable: boolean;
+    data: H;
+    public irreplaceable: boolean;
+    public distinctiveness: Habitat['distinctivenessCategory']
 
     constructor(
         public broadHabitat: BH,
@@ -16,15 +17,13 @@ class OnSiteHabitat<
         public area: number,
         irreplaceable?: boolean,
     ) {
-        this.habitatData = allHabitats.find(h => h.level2Code === broadHabitat && h.type === habitatType) as H;
+        this.data = allHabitats.find(h => h.level2Code === broadHabitat && h.type === habitatType) as H;
 
-        let resolvedIrreplaceable = this.habitatData.irreplaceable || irreplaceable;
-        assert(!!resolvedIrreplaceable, `${this.habitatData.label} must have it's "irreplaceable" value defined`);
+        let resolvedIrreplaceable = this.data.irreplaceable || irreplaceable;
+        assert(!!resolvedIrreplaceable, `${this.data.label} must have it's "irreplaceable" value defined`);
         this.irreplaceable = resolvedIrreplaceable;
-    }
 
-    get isIrreplaceableHabitat(): boolean | undefined {
-        return this.habitatData.irreplaceable;
+        this.distinctiveness = this.data.distinctivenessCategory;
     }
 }
 
