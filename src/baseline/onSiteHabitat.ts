@@ -1,29 +1,25 @@
 import { assert } from "@std/assert";
-import { allHabitats } from "../habitats";
-import type { BroadHabitat, Habitat, HabitatTypeByBroadHabitat } from "../types";
+import { allHabitats, type Habitat, type HabitatLabel } from "../habitats";
 
-class OnSiteHabitat<
-    H extends Habitat,
-    BH extends BroadHabitat
-> {
+export class OnSiteHabitat<L extends HabitatLabel, H extends Habitat<L>> {
     data: H;
     public irreplaceable: boolean;
-    public distinctiveness: Habitat['distinctivenessCategory']
 
     constructor(
-        public broadHabitat: BH,
-        public habitatType: HabitatTypeByBroadHabitat<BH>,
+        public label: L,
         /* Area in hectares */
         public area: number,
+        public condition: keyof H['conditions'],
         irreplaceable?: boolean,
     ) {
-        this.data = allHabitats.find(h => h.level2Code === broadHabitat && h.type === habitatType) as H;
+        this.data = allHabitats[label] as H;
 
         let resolvedIrreplaceable = this.data.irreplaceable || irreplaceable;
         assert(!!resolvedIrreplaceable, `${this.data.label} must have it's "irreplaceable" value defined`);
         this.irreplaceable = resolvedIrreplaceable;
-
-        this.distinctiveness = this.data.distinctivenessCategory;
     }
+
+    get distinctiveness() { return this.data.distinctivenessCategory }
+    get distinctivenessScore() { return this.data.distinctivenessScore }
 }
 

@@ -2,8 +2,8 @@
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
 
-export const allHabitats = [
-    {
+export const allHabitats = {
+    'Cropland - Arable field margins cultivated annually': {
         label: 'Cropland - Arable field margins cultivated annually',
         type: 'Arable field margins cultivated annually',
         code: 'c1a7',
@@ -24,8 +24,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Arable field margins game bird mix': {
         label: 'Cropland - Arable field margins game bird mix',
         type: 'Arable field margins game bird mix',
         code: 'c1a8',
@@ -46,8 +49,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Arable field margins pollen and nectar': {
         label: 'Cropland - Arable field margins pollen and nectar',
         type: 'Arable field margins pollen and nectar',
         code: 'c1a6',
@@ -68,8 +74,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Arable field margins tussocky': {
         label: 'Cropland - Arable field margins tussocky',
         type: 'Arable field margins tussocky',
         code: 'c1a5',
@@ -90,8 +99,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Cereal crops': {
         label: 'Cropland - Cereal crops',
         type: 'Cereal crops',
         code: 'c1c',
@@ -112,8 +124,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Winter stubble': {
         label: 'Cropland - Winter stubble',
         type: 'Winter stubble',
         code: 'c1c5',
@@ -134,8 +149,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Horticulture': {
         label: 'Cropland - Horticulture',
         type: 'Horticulture',
         code: 'c1f',
@@ -156,8 +174,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Intensive orchards': {
         label: 'Cropland - Intensive orchards',
         type: 'Intensive orchards',
         code: 'c1e',
@@ -178,8 +199,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Non-cereal crops': {
         label: 'Cropland - Non-cereal crops',
         type: 'Non-cereal crops',
         code: 'c1d',
@@ -200,8 +224,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Cropland - Temporary grass and clover leys': {
         label: 'Cropland - Temporary grass and clover leys',
         type: 'Temporary grass and clover leys',
         code: 'c1b',
@@ -222,8 +249,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Grassland - Traditional orchards': {
         label: 'Grassland - Traditional orchards',
         type: 'Traditional orchards',
         code: '27',
@@ -244,8 +274,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Bracken': {
         label: 'Grassland - Bracken',
         type: 'Bracken',
         code: 'g1c',
@@ -266,8 +303,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Grassland - Floodplain wetland mosaic and CFGM': {
         label: 'Grassland - Floodplain wetland mosaic and CFGM',
         type: 'Floodplain wetland mosaic and CFGM',
         code: 'NE0011',
@@ -288,8 +328,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Lowland calcareous grassland': {
         label: 'Grassland - Lowland calcareous grassland',
         type: 'Lowland calcareous grassland',
         code: 'g2a',
@@ -310,8 +357,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Lowland dry acid grassland': {
         label: 'Grassland - Lowland dry acid grassland',
         type: 'Lowland dry acid grassland',
         code: 'g1a',
@@ -332,8 +386,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Lowland meadows': {
         label: 'Grassland - Lowland meadows',
         type: 'Lowland meadows',
         code: 'g3a',
@@ -354,8 +415,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Modified grassland': {
         label: 'Grassland - Modified grassland',
         type: 'Modified grassland',
         code: 'g4',
@@ -376,8 +444,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Other lowland acid grassland': {
         label: 'Grassland - Other lowland acid grassland',
         type: 'Other lowland acid grassland',
         code: 'g1d',
@@ -398,8 +473,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Other neutral grassland': {
         label: 'Grassland - Other neutral grassland',
         type: 'Other neutral grassland',
         code: 'g3c',
@@ -420,8 +502,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Tall herb communities (H6430)': {
         label: 'Grassland - Tall herb communities (H6430)',
         type: 'Tall herb communities (H6430)',
         code: 's1a9',
@@ -442,8 +531,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Upland acid grassland': {
         label: 'Grassland - Upland acid grassland',
         type: 'Upland acid grassland',
         code: 'g1b',
@@ -464,8 +560,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Upland calcareous grassland': {
         label: 'Grassland - Upland calcareous grassland',
         type: 'Upland calcareous grassland',
         code: 'g2b',
@@ -486,8 +589,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Grassland - Upland hay meadows': {
         label: 'Grassland - Upland hay meadows',
         type: 'Upland hay meadows',
         code: 'g3b',
@@ -508,8 +618,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Blackthorn scrub': {
         label: 'Heathland and shrub - Blackthorn scrub',
         type: 'Blackthorn scrub',
         code: 'h3a',
@@ -530,8 +647,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Bramble scrub': {
         label: 'Heathland and shrub - Bramble scrub',
         type: 'Bramble scrub',
         code: 'h3d',
@@ -552,8 +676,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Heathland and shrub - Gorse scrub': {
         label: 'Heathland and shrub - Gorse scrub',
         type: 'Gorse scrub',
         code: 'h3e',
@@ -574,8 +701,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Hawthorn scrub': {
         label: 'Heathland and shrub - Hawthorn scrub',
         type: 'Hawthorn scrub',
         code: 'h3f',
@@ -596,8 +730,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Hazel scrub': {
         label: 'Heathland and shrub - Hazel scrub',
         type: 'Hazel scrub',
         code: 'h3b',
@@ -618,8 +759,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Lowland heathland': {
         label: 'Heathland and shrub - Lowland heathland',
         type: 'Lowland heathland',
         code: 'h1a',
@@ -640,8 +788,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Mixed scrub': {
         label: 'Heathland and shrub - Mixed scrub',
         type: 'Mixed scrub',
         code: 'h3h',
@@ -662,8 +817,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Mountain heaths and willow scrub': {
         label: 'Heathland and shrub - Mountain heaths and willow scrub',
         type: 'Mountain heaths and willow scrub',
         code: 'h1c',
@@ -684,8 +846,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Rhododendron scrub': {
         label: 'Heathland and shrub - Rhododendron scrub',
         type: 'Rhododendron scrub',
         code: 'h3g',
@@ -706,8 +875,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Heathland and shrub - Dunes with sea buckthorn (H2160)': {
         label: 'Heathland and shrub - Dunes with sea buckthorn (H2160)',
         type: 'Dunes with sea buckthorn (H2160)',
         code: 'h3c5',
@@ -728,8 +900,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Other sea buckthorn scrub': {
         label: 'Heathland and shrub - Other sea buckthorn scrub',
         type: 'Other sea buckthorn scrub',
         code: 'h3c6',
@@ -750,8 +929,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Heathland and shrub - Willow scrub': {
         label: 'Heathland and shrub - Willow scrub',
         type: 'Willow scrub',
         code: 'h3j',
@@ -772,8 +954,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Heathland and shrub - Upland heathland': {
         label: 'Heathland and shrub - Upland heathland',
         type: 'Upland heathland',
         code: 'h1b',
@@ -794,8 +983,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Aquifer fed naturally fluctuating water bodies': {
         label: 'Lakes - Aquifer fed naturally fluctuating water bodies',
         type: 'Aquifer fed naturally fluctuating water bodies',
         code: 'r1d',
@@ -816,8 +1012,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Ornamental lake or pond': {
         label: 'Lakes - Ornamental lake or pond',
         type: 'Ornamental lake or pond',
         code: '46',
@@ -838,8 +1041,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - High alkalinity lakes': {
         label: 'Lakes - High alkalinity lakes',
         type: 'High alkalinity lakes',
         code: 'NE0001',
@@ -860,8 +1070,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Low alkalinity lakes': {
         label: 'Lakes - Low alkalinity lakes',
         type: 'Low alkalinity lakes',
         code: 'NE0002',
@@ -882,8 +1099,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Marl lakes': {
         label: 'Lakes - Marl lakes',
         type: 'Marl lakes',
         code: 'NE0003',
@@ -904,8 +1128,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Moderate alkalinity lakes': {
         label: 'Lakes - Moderate alkalinity lakes',
         type: 'Moderate alkalinity lakes',
         code: 'NE0004',
@@ -926,8 +1157,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Peat lakes': {
         label: 'Lakes - Peat lakes',
         type: 'Peat lakes',
         code: 'NE0005',
@@ -948,8 +1186,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Ponds (priority habitat)': {
         label: 'Lakes - Ponds (priority habitat)',
         type: 'Ponds (priority habitat)',
         code: 'NE0006',
@@ -970,8 +1215,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Ponds (non-priority habitat)': {
         label: 'Lakes - Ponds (non-priority habitat)',
         type: 'Ponds (non-priority habitat)',
         code: '41',
@@ -992,8 +1244,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Reservoirs': {
         label: 'Lakes - Reservoirs',
         type: 'Reservoirs',
         code: '45',
@@ -1014,8 +1273,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Lakes - Temporary lakes ponds and pools (H3170)': {
         label: 'Lakes - Temporary lakes ponds and pools (H3170)',
         type: 'Temporary lakes ponds and pools (H3170)',
         code: 'NE0013',
@@ -1036,8 +1302,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Calaminarian grasslands': {
         label: 'Sparsely vegetated land - Calaminarian grasslands',
         type: 'Calaminarian grasslands',
         code: 's1c',
@@ -1058,8 +1331,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Coastal sand dunes': {
         label: 'Sparsely vegetated land - Coastal sand dunes',
         type: 'Coastal sand dunes',
         code: 's3a',
@@ -1080,8 +1360,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: true,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Coastal vegetated shingle': {
         label: 'Sparsely vegetated land - Coastal vegetated shingle',
         type: 'Coastal vegetated shingle',
         code: 's3b',
@@ -1102,8 +1389,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Ruderal/Ephemeral': {
         label: 'Sparsely vegetated land - Ruderal/Ephemeral',
         type: 'Ruderal/Ephemeral',
         code: '81',
@@ -1124,8 +1418,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Tall forbs': {
         label: 'Sparsely vegetated land - Tall forbs',
         type: 'Tall forbs',
         code: '16',
@@ -1146,8 +1447,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Inland rock outcrop and scree habitats': {
         label: 'Sparsely vegetated land - Inland rock outcrop and scree habitats',
         type: 'Inland rock outcrop and scree habitats',
         code: 's1a',
@@ -1168,8 +1476,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Limestone pavement': {
         label: 'Sparsely vegetated land - Limestone pavement',
         type: 'Limestone pavement',
         code: 's1b',
@@ -1190,8 +1505,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: true,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Maritime cliff and slopes': {
         label: 'Sparsely vegetated land - Maritime cliff and slopes',
         type: 'Maritime cliff and slopes',
         code: 's2a',
@@ -1212,8 +1534,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Sparsely vegetated land - Other inland rock and scree': {
         label: 'Sparsely vegetated land - Other inland rock and scree',
         type: 'Other inland rock and scree',
         code: 's1d',
@@ -1234,8 +1563,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Allotments': {
         label: 'Urban - Allotments',
         type: 'Allotments',
         code: '616',
@@ -1256,8 +1592,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Artificial unvegetated, unsealed surface': {
         label: 'Urban - Artificial unvegetated, unsealed surface',
         type: 'Artificial unvegetated, unsealed surface',
         code: 'u1c',
@@ -1278,8 +1621,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'N/A - Other': 0,
+        },
     },
-    {
+    'Urban - Bioswale': {
         label: 'Urban - Bioswale',
         type: 'Bioswale',
         code: '849',
@@ -1300,8 +1646,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Intensive green roof': {
         label: 'Urban - Intensive green roof',
         type: 'Intensive green roof',
         code: '88',
@@ -1322,8 +1675,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Built linear features': {
         label: 'Urban - Built linear features',
         type: 'Built linear features',
         code: 'u1e',
@@ -1344,8 +1704,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'N/A - Other': 0,
+        },
     },
-    {
+    'Urban - Cemeteries and churchyards': {
         label: 'Urban - Cemeteries and churchyards',
         type: 'Cemeteries and churchyards',
         code: '90',
@@ -1366,8 +1729,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Developed land; sealed surface': {
         label: 'Urban - Developed land; sealed surface',
         type: 'Developed land; sealed surface',
         code: 'u1b',
@@ -1388,8 +1758,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'N/A - Other': 0,
+        },
     },
-    {
+    'Urban - Other green roof': {
         label: 'Urban - Other green roof',
         type: 'Other green roof',
         code: '89',
@@ -1410,8 +1783,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Urban - Facade-bound green wall': {
         label: 'Urban - Facade-bound green wall',
         type: 'Facade-bound green wall',
         code: '843',
@@ -1432,8 +1808,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Ground based green wall': {
         label: 'Urban - Ground based green wall',
         type: 'Ground based green wall',
         code: '842',
@@ -1454,8 +1837,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Ground level planters': {
         label: 'Urban - Ground level planters',
         type: 'Ground level planters',
         code: '845',
@@ -1476,8 +1866,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Urban - Biodiverse green roof': {
         label: 'Urban - Biodiverse green roof',
         type: 'Biodiverse green roof',
         code: '87',
@@ -1498,8 +1891,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Introduced shrub': {
         label: 'Urban - Introduced shrub',
         type: 'Introduced shrub',
         code: '847',
@@ -1520,8 +1920,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Urban - Open mosaic habitats on previously developed land': {
         label: 'Urban - Open mosaic habitats on previously developed land',
         type: 'Open mosaic habitats on previously developed land',
         code: '80',
@@ -1542,8 +1945,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Rain garden': {
         label: 'Urban - Rain garden',
         type: 'Rain garden',
         code: '850',
@@ -1564,8 +1974,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Actively worked sand pit quarry or open cast mine': {
         label: 'Urban - Actively worked sand pit quarry or open cast mine',
         type: 'Actively worked sand pit quarry or open cast mine',
         code: '85',
@@ -1586,8 +2003,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Urban - Sustainable drainage system': {
         label: 'Urban - Sustainable drainage system',
         type: 'Sustainable drainage system',
         code: '848',
@@ -1608,8 +2028,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Unvegetated garden': {
         label: 'Urban - Unvegetated garden',
         type: 'Unvegetated garden',
         code: '829',
@@ -1630,8 +2057,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'N/A - Other': 0,
+        },
     },
-    {
+    'Urban - Vacant or derelict land': {
         label: 'Urban - Vacant or derelict land',
         type: 'Vacant or derelict land',
         code: '82',
@@ -1652,8 +2082,15 @@ export const allHabitats = [
         description: 'Justify why not Open Mosaic Habitat.',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Bare ground': {
         label: 'Urban - Bare ground',
         type: 'Bare ground',
         code: '510',
@@ -1674,8 +2111,15 @@ export const allHabitats = [
         description: 'Justify why not Open Mosaic Habitat.',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Urban - Vegetated garden': {
         label: 'Urban - Vegetated garden',
         type: 'Vegetated garden',
         code: '828',
@@ -1696,8 +2140,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Condition Assessment N/A': 1,
+        },
     },
-    {
+    'Individual trees - Urban tree': {
         label: 'Individual trees - Urban tree',
         type: 'Urban tree',
         code: 'NE0014',
@@ -1718,8 +2165,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Individual trees - Rural tree': {
         label: 'Individual trees - Rural tree',
         type: 'Rural tree',
         code: 'NE0016',
@@ -1740,8 +2194,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Blanket bog': {
         label: 'Wetland - Blanket bog',
         type: 'Blanket bog',
         code: 'f1a',
@@ -1762,8 +2223,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: true,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Depressions on peat substrates (H7150)': {
         label: 'Wetland - Depressions on peat substrates (H7150)',
         type: 'Depressions on peat substrates (H7150)',
         code: '56',
@@ -1784,8 +2252,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Fens (upland and lowland)': {
         label: 'Wetland - Fens (upland and lowland)',
         type: 'Fens (upland and lowland)',
         code: 'NE0020',
@@ -1806,8 +2281,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Lowland raised bog': {
         label: 'Wetland - Lowland raised bog',
         type: 'Lowland raised bog',
         code: 'f1b',
@@ -1828,8 +2310,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Oceanic valley mire[1] (D2.1)': {
         label: 'Wetland - Oceanic valley mire[1] (D2.1)',
         type: 'Oceanic valley mire[1] (D2.1)',
         code: 'NE0010',
@@ -1850,8 +2339,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Purple moor grass and rush pastures': {
         label: 'Wetland - Purple moor grass and rush pastures',
         type: 'Purple moor grass and rush pastures',
         code: 'f2b',
@@ -1872,8 +2368,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Reedbeds': {
         label: 'Wetland - Reedbeds',
         type: 'Reedbeds',
         code: 'f2e',
@@ -1894,8 +2397,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Wetland - Transition mires and quaking bogs (H7140)': {
         label: 'Wetland - Transition mires and quaking bogs (H7140)',
         type: 'Transition mires and quaking bogs (H7140)',
         code: 'NE0021',
@@ -1916,8 +2426,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Felled': {
         label: 'Woodland and forest - Felled',
         type: 'Felled',
         code: '206',
@@ -1938,8 +2455,11 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+        },
     },
-    {
+    'Woodland and forest - Lowland beech and yew woodland': {
         label: 'Woodland and forest - Lowland beech and yew woodland',
         type: 'Lowland beech and yew woodland',
         code: 'w1c',
@@ -1960,8 +2480,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Lowland mixed deciduous woodland': {
         label: 'Woodland and forest - Lowland mixed deciduous woodland',
         type: 'Lowland mixed deciduous woodland',
         code: 'w1f',
@@ -1982,8 +2509,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Native pine woodlands': {
         label: 'Woodland and forest - Native pine woodlands',
         type: 'Native pine woodlands',
         code: 'w2a',
@@ -2004,8 +2538,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Other coniferous woodland': {
         label: 'Woodland and forest - Other coniferous woodland',
         type: 'Other coniferous woodland',
         code: 'w2c',
@@ -2026,8 +2567,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Other Scot\'s pine woodland': {
         label: 'Woodland and forest - Other Scot\'s pine woodland',
         type: 'Other Scot\'s pine woodland',
         code: 'w2b',
@@ -2048,8 +2596,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Other woodland; broadleaved': {
         label: 'Woodland and forest - Other woodland; broadleaved',
         type: 'Other woodland; broadleaved',
         code: 'w1g',
@@ -2070,8 +2625,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Other woodland; mixed': {
         label: 'Woodland and forest - Other woodland; mixed',
         type: 'Other woodland; mixed',
         code: 'w1h',
@@ -2092,8 +2654,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Upland birchwoods': {
         label: 'Woodland and forest - Upland birchwoods',
         type: 'Upland birchwoods',
         code: 'w1e',
@@ -2114,8 +2683,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Upland mixed ashwoods': {
         label: 'Woodland and forest - Upland mixed ashwoods',
         type: 'Upland mixed ashwoods',
         code: 'w1b',
@@ -2136,8 +2712,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Upland oakwood': {
         label: 'Woodland and forest - Upland oakwood',
         type: 'Upland oakwood',
         code: 'w1a',
@@ -2158,8 +2741,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Wet woodland': {
         label: 'Woodland and forest - Wet woodland',
         type: 'Wet woodland',
         code: 'w1d',
@@ -2180,8 +2770,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Woodland and forest - Wood-pasture and parkland': {
         label: 'Woodland and forest - Wood-pasture and parkland',
         type: 'Wood-pasture and parkland',
         code: '26',
@@ -2202,30 +2799,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
-        label: 'Woodland and forest - Felled',
-        type: 'Replacement for felled woodland',
-        code: '206',
-        level1: 'Terrestrial',
-        level2Code: '',
-        level2Label: 'Woodland and Trees',
-        level3Code: '',
-        level3Label: 'Other woodland',
-        level4Code: '',
-        level4Label: 'Felled',
-        distinctivenessCategory: 'high',
-        distinctivenessScore: distinctivenessCategories.high.score,
-        distinctivenessTradingRules: distinctivenessCategories.high.suggestedAction,
-        technicalDifficultyCreation: 'high',
-        technicalDifficultyCreationMultiplier: difficulty.high,
-        technicalDifficultyEnhancement: 'low',
-        technicalDifficultyEnhancementMultiplier: difficulty.low,
-        description: '',
-        conditionAssessmentNotes: '',
-        irreplaceable: undefined,
-    },
-    {
+    'Coastal lagoons - Coastal lagoons': {
         label: 'Coastal lagoons - Coastal lagoons',
         type: 'Coastal lagoons',
         code: 'x02',
@@ -2246,8 +2828,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - High energy littoral rock': {
         label: 'Rocky shore - High energy littoral rock',
         type: 'High energy littoral rock',
         code: 'a1.1',
@@ -2268,8 +2857,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - High energy littoral rock - on peat, clay or chalk': {
         label: 'Rocky shore - High energy littoral rock - on peat, clay or chalk',
         type: 'High energy littoral rock - on peat, clay or chalk',
         code: 'A1.1',
@@ -2290,8 +2886,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Moderate energy littoral rock': {
         label: 'Rocky shore - Moderate energy littoral rock',
         type: 'Moderate energy littoral rock',
         code: 'A1.2',
@@ -2312,8 +2915,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Moderate energy littoral rock - on peat, clay or chalk': {
         label: 'Rocky shore - Moderate energy littoral rock - on peat, clay or chalk',
         type: 'Moderate energy littoral rock - on peat, clay or chalk',
         code: 'A1.2 PCC',
@@ -2334,8 +2944,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Low energy littoral rock': {
         label: 'Rocky shore - Low energy littoral rock',
         type: 'Low energy littoral rock',
         code: 'A1.3',
@@ -2356,8 +2973,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Low energy littoral rock - on peat, clay or chalk': {
         label: 'Rocky shore - Low energy littoral rock - on peat, clay or chalk',
         type: 'Low energy littoral rock - on peat, clay or chalk',
         code: 'A1.3 PCC',
@@ -2378,8 +3002,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Features of littoral rock': {
         label: 'Rocky shore - Features of littoral rock',
         type: 'Features of littoral rock',
         code: 'A1.4',
@@ -2400,8 +3031,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Rocky shore - Features of littoral rock - on peat, clay or chalk': {
         label: 'Rocky shore - Features of littoral rock - on peat, clay or chalk',
         type: 'Features of littoral rock - on peat, clay or chalk',
         code: 'A1.PCC',
@@ -2422,8 +3060,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Coastal saltmarsh - Saltmarshes and saline reedbeds': {
         label: 'Coastal saltmarsh - Saltmarshes and saline reedbeds',
         type: 'Saltmarshes and saline reedbeds',
         code: 'A2.5',
@@ -2444,8 +3089,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Coastal saltmarsh - Artificial saltmarshes and saline reedbeds': {
         label: 'Coastal saltmarsh - Artificial saltmarshes and saline reedbeds',
         type: 'Artificial saltmarshes and saline reedbeds',
         code: 'ART_A2.5',
@@ -2466,8 +3118,15 @@ export const allHabitats = [
         description: 'For these habitats the artificial nature is determined by the underlying substrate, most restoration activities will fall under the net gain definition of recreated natural habitats. Situations that fall under artificial will be limited but not impossible and include any base substrate that falls under artificial in the definition above. Example: floating habitat creation systems where the underlying substrate is artificially contained.',
         conditionAssessmentNotes: '',
         irreplaceable: undefined,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral coarse sediment': {
         label: 'Intertidal sediment - Littoral coarse sediment',
         type: 'Littoral coarse sediment',
         code: 'A2.1',
@@ -2488,8 +3147,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral mud': {
         label: 'Intertidal sediment - Littoral mud',
         type: 'Littoral mud',
         code: 'A2.3',
@@ -2510,8 +3176,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral mixed sediments': {
         label: 'Intertidal sediment - Littoral mixed sediments',
         type: 'Littoral mixed sediments',
         code: 'A2.4',
@@ -2532,8 +3205,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral seagrass': {
         label: 'Intertidal sediment - Littoral seagrass',
         type: 'Littoral seagrass',
         code: 'A2.6',
@@ -2554,8 +3234,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral seagrass on peat, clay or chalk': {
         label: 'Intertidal sediment - Littoral seagrass on peat, clay or chalk',
         type: 'Littoral seagrass on peat, clay or chalk',
         code: 'A2.6 PCC',
@@ -2576,8 +3263,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral biogenic reefs - Mussels': {
         label: 'Intertidal sediment - Littoral biogenic reefs - Mussels',
         type: 'Littoral biogenic reefs - Mussels',
         code: 'A2.7 M',
@@ -2598,8 +3292,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral biogenic reefs - Sabellaria': {
         label: 'Intertidal sediment - Littoral biogenic reefs - Sabellaria',
         type: 'Littoral biogenic reefs - Sabellaria',
         code: 'A2.7 S',
@@ -2620,8 +3321,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Features of littoral sediment': {
         label: 'Intertidal sediment - Features of littoral sediment',
         type: 'Features of littoral sediment',
         code: 'A2.8',
@@ -2642,8 +3350,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral coarse sediment': {
         label: 'Intertidal sediment - Artificial littoral coarse sediment',
         type: 'Artificial littoral coarse sediment',
         code: 'ART_A2.1',
@@ -2664,8 +3379,15 @@ export const allHabitats = [
         description: 'Artificial sedimentary habitats will be those that cannot meet the general natural definition, particularly in respect to using substrate that is not of marine origin or that cannot remain in situation without significant engineering. Beneficial use & beach recharge or replenishment: Provided these use the same sediment type as originally present they fall into enhancement of existing habitats. In these situations, do not use the artificial habitat definition. Ensuring condition is as good as or better than originally and still requiring the 10% biodiversity unit gain. If it’s a different sediment type then it will be habitat creation – to be considered natural sediment creation the scheme must meet the natural habitat definition including an aim for biodiversity conservation. Otherwise, they will be considered artificial in the metric. Examples of artificial littoral sediment habitats: Sediments deposited around artificial islands, sediments contained in floating devices',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral mud': {
         label: 'Intertidal sediment - Artificial littoral mud',
         type: 'Artificial littoral mud',
         code: 'ART_A2.3',
@@ -2686,8 +3408,15 @@ export const allHabitats = [
         description: 'See above',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral sand': {
         label: 'Intertidal sediment - Artificial littoral sand',
         type: 'Artificial littoral sand',
         code: 'ART_A2.21/A2.22/A2.23',
@@ -2708,8 +3437,15 @@ export const allHabitats = [
         description: 'See above',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral muddy sand': {
         label: 'Intertidal sediment - Artificial littoral muddy sand',
         type: 'Artificial littoral muddy sand',
         code: 'ART_A2.24',
@@ -2730,8 +3466,15 @@ export const allHabitats = [
         description: 'See above',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral mixed sediments': {
         label: 'Intertidal sediment - Artificial littoral mixed sediments',
         type: 'Artificial littoral mixed sediments',
         code: 'ART_A2.4',
@@ -2752,8 +3495,15 @@ export const allHabitats = [
         description: 'See above',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral seagrass': {
         label: 'Intertidal sediment - Artificial littoral seagrass',
         type: 'Artificial littoral seagrass',
         code: 'ART_A2.6',
@@ -2774,8 +3524,15 @@ export const allHabitats = [
         description: 'See basic description for \'Artificial saltmarshes and saline reedbeds\'.',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Artificial littoral biogenic reefs': {
         label: 'Intertidal sediment - Artificial littoral biogenic reefs',
         type: 'Artificial littoral biogenic reefs',
         code: 'ART_A2.7',
@@ -2796,8 +3553,15 @@ export const allHabitats = [
         description: 'See basic description for \'Artificial saltmarshes and saline reedbeds\'.',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral sand': {
         label: 'Intertidal sediment - Littoral sand',
         type: 'Littoral sand',
         code: 'A2.21/A2.22/A2.23',
@@ -2818,8 +3582,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal sediment - Littoral muddy sand': {
         label: 'Intertidal sediment - Littoral muddy sand',
         type: 'Littoral muddy sand',
         code: 'A2.24',
@@ -2840,8 +3611,15 @@ export const allHabitats = [
         description: '',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal hard structures - Artificial hard structures': {
         label: 'Intertidal hard structures - Artificial hard structures',
         type: 'Artificial hard structures',
         code: 'ART_A1',
@@ -2862,8 +3640,15 @@ export const allHabitats = [
         description: 'Artificial hard structures are man-made structures fulfilling a range of functions (for example coastal defences, port, harbour and marina installations, energy infrastructure, aquaculture). They can be made of various hard materials (artificial or natural rock, wood, plastics, metal) that would not normally be found in the area they are being deployed. Examples: seawalls, breakwaters, groynes, jetties, pilings, aquaculture trestles.',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal hard structures - Artificial features of hard structures': {
         label: 'Intertidal hard structures - Artificial features of hard structures',
         type: 'Artificial features of hard structures',
         code: 'ART_A1.4',
@@ -2884,8 +3669,15 @@ export const allHabitats = [
         description: 'Where man-made materials are used to create artificial versions of A1.4 Features of littoral rock',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)': {
         label: 'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
         type: 'Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
         code: 'ART_A1_IGGI',
@@ -2906,8 +3698,15 @@ export const allHabitats = [
         description: 'Where natural materials (most commonly naturally occurring rock) are used to create man-made structures for a range of functions (for example coastal defences, aquaculture). The structures’ designs must maximise likeness to the naturally occurring hard habitats from that area in terms of material (for example geological origin), position (tidal level, exposure, aspect), topographic complexity (surface roughness, availability of microhabitat like rock pools or crevices, slope), to support their colonisation with species naturally occurring in the area and to maximise benefits for biodiversity and ecosystem function. Examples: breakwaters or seawalls built with materials local to the region, and with depressions (rock pools) added during the design process or retrospectively',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'Good': 3,
+            'Fairly Good': 2.5,
+            'Moderate': 2,
+            'Fairly Poor': 1.5,
+            'Poor': 1,
+        },
     },
-    {
+    'Watercourse footprint - Watercourse footprint': {
         label: 'Watercourse footprint - Watercourse footprint',
         type: 'Watercourse footprint',
         code: 'NE0017',
@@ -2928,5 +3727,13 @@ export const allHabitats = [
         description: 'Area footprint of watercourse included in the watercourse tab',
         conditionAssessmentNotes: '',
         irreplaceable: false,
+        conditions: {
+            'N/A - Other': 0,
+        },
     }
-] as const
+} as const
+
+export type HabitatLabel = keyof typeof allHabitats;
+export type Habitat<L extends HabitatLabel = HabitatLabel> = typeof allHabitats[L]
+export type HabitatType = Habitat['type']
+export type BroadHabitat = Habitat['level2Label']

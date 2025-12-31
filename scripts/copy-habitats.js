@@ -2,6 +2,18 @@
 
 import XLSX from 'xlsx';
 import fs from 'fs';
+import { readFileSync } from 'fs';
+
+// Condition columns from conditions.tsv
+const conditionColumns = [
+    'Good',
+    'Fairly Good',
+    'Moderate',
+    'Fairly Poor',
+    'Poor',
+    'Condition Assessment N/A',
+    'N/A - Other'
+];
 
 // Lookup tables for conversions
 const distinctivenessMap = {
@@ -152,9 +164,42 @@ function escapeString(str) {
 }
 
 /**
+ * Read conditions TSV file and create condition map
+ */
+function readConditionsData() {
+    const content = readFileSync('./examples/conditions.tsv', 'utf-8');
+    const lines = content.trim().split('\n');
+    const header = lines[0];
+    const dataLines = lines.slice(1);
+
+    const conditionMap = {};
+
+    dataLines.forEach(line => {
+        const row = line.split('\t');
+        const habitat = row[0];
+
+        if (!habitat) return;
+
+        conditionMap[habitat] = {};
+
+        conditionColumns.forEach((condition, index) => {
+            const value = row[index + 1];
+            const numValue = parseFloat(value);
+
+            if (value && !isNaN(numValue)) {
+                conditionMap[habitat][condition] = numValue;
+            }
+        });
+    });
+
+    console.log(`Read conditions for ${Object.keys(conditionMap).length} habitats`);
+    return conditionMap;
+}
+
+/**
  * Read Excel file and extract habitat data
  */
-function readHabitatData(filePath) {
+function readHabitatData(filePath, conditionMap) {
     console.log(`Reading Excel file: ${filePath}`);
 
     const workbook = XLSX.readFile(filePath);
@@ -177,8 +222,10 @@ function readHabitatData(filePath) {
         const label = getCellValue(sheet, row, COLUMNS.label);
         if (!label) continue;
 
+        const labelStr = String(label).trim();
+
         const habitat = {
-            label: String(label).trim(),
+            label: labelStr,
             type: String(getCellValue(sheet, row, COLUMNS.type) || '').trim(),
             code: String(getCellValue(sheet, row, COLUMNS.code) || '').trim(),
             level1: String(getCellValue(sheet, row, COLUMNS.level1) || '').trim(),
@@ -198,7 +245,13 @@ function readHabitatData(filePath) {
             description: String(getCellValue(sheet, row, COLUMNS.description) || '').trim(),
             conditionAssessmentNotes: String(getCellValue(sheet, row, COLUMNS.conditionAssessmentNotes) || '').trim(),
             irreplaceable: false,
+            conditions: null,
         };
+
+        // Add condition data if available
+        if (conditionMap[labelStr]) {
+            habitat.conditions = conditionMap[labelStr];
+        }
 
         // Process distinctiveness category
         const rawCategory = getCellValue(sheet, row, COLUMNS.distinctivenessCategory);
@@ -244,11 +297,11 @@ function generateTypeScriptCode(habitats) {
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
 
-export const allHabitats = [
+export const allHabitats = {
 `
 
     habitats.forEach((habitat, index) => {
-        code += '    {\n';
+        code += `    '${escapeString(habitat.label)}': {\n`;
         code += `        label: '${escapeString(habitat.label)}',\n`;
         code += `        type: '${escapeString(habitat.type)}',\n`;
         code += `        code: '${escapeString(habitat.code)}',\n`;
@@ -269,6 +322,15 @@ export const allHabitats = [
         code += `        description: '${escapeString(habitat.description)}',\n`;
         code += `        conditionAssessmentNotes: '${escapeString(habitat.conditionAssessmentNotes)}',\n`;
         code += `        irreplaceable: ${habitat.irreplaceable},\n`;
+        if (habitat.conditions) {
+            code += `        conditions: {\n`;
+            Object.entries(habitat.conditions).forEach(([condition, value]) => {
+                code += `            '${condition}': ${value},\n`;
+            });
+            code += `        },\n`;
+        } else {
+            code += `        conditions: null,\n`;
+        }
         code += '    }';
 
         if (index < habitats.length - 1) {
@@ -278,7 +340,7 @@ export const allHabitats = [
         }
     });
 
-    code += '] as const\n';
+    code += '} as const\n';
 
     return code;
 }
@@ -295,8 +357,11 @@ async function main() {
             throw new Error(`File not found: ${filePath}`);
         }
 
+        // Read conditions data
+        const conditionMap = readConditionsData();
+
         // Read habitat data from Excel
-        const habitats = readHabitatData(filePath);
+        const habitats = readHabitatData(filePath, conditionMap);
 
         // Generate TypeScript code
         const typeScriptCode = generateTypeScriptCode(habitats);
