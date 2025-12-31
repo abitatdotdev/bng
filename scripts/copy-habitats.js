@@ -46,6 +46,7 @@ const difficultyMultipliers = {
 // Column indices (0-based)
 const COLUMNS = {
     label: 1,           // B
+    type: 0,           // A
     code: 2,            // C
     level1: 3,          // D
     level2Code: 4,      // E
@@ -178,6 +179,7 @@ function readHabitatData(filePath) {
 
         const habitat = {
             label: String(label).trim(),
+            type: String(getCellValue(sheet, row, COLUMNS.type) || '').trim(),
             code: String(getCellValue(sheet, row, COLUMNS.code) || '').trim(),
             level1: String(getCellValue(sheet, row, COLUMNS.level1) || '').trim(),
             level2Code: String(getCellValue(sheet, row, COLUMNS.level2Code) || '').trim(),
@@ -239,8 +241,8 @@ function readHabitatData(filePath) {
  */
 function generateTypeScriptCode(habitats) {
     let code = `// THIS FILE IS GENERATED AUTOMATICALLY
-import { difficulty } from "difficulty"
-import { distinctivenessCategories } from "distinctivenessCategories"
+import { difficulty } from "./difficulty"
+import { distinctivenessCategories } from "./distinctivenessCategories"
 
 export const allHabitats = [
 `
@@ -248,6 +250,7 @@ export const allHabitats = [
     habitats.forEach((habitat, index) => {
         code += '    {\n';
         code += `        label: '${escapeString(habitat.label)}',\n`;
+        code += `        type: '${escapeString(habitat.type)}',\n`;
         code += `        code: '${escapeString(habitat.code)}',\n`;
         code += `        level1: '${escapeString(habitat.level1)}',\n`;
         code += `        level2Code: '${escapeString(habitat.level2Code)}',\n`;
@@ -305,7 +308,7 @@ async function main() {
         console.log(typeScriptCode);
 
         // Optionally save to file
-        const outputPath = './habitats-generated.ts';
+        const outputPath = './src/habitats.ts';
         fs.writeFileSync(outputPath, typeScriptCode);
         console.log(`\nCode saved to: ${outputPath}`);
 

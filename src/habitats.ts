@@ -1,11 +1,11 @@
 // THIS FILE IS GENERATED AUTOMATICALLY
-
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
 
 export const allHabitats = [
     {
         label: 'Cropland - Arable field margins cultivated annually',
+        type: 'Arable field margins cultivated annually',
         code: 'c1a7',
         level1: 'Terrestrial',
         level2Code: 'c',
@@ -27,6 +27,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Arable field margins game bird mix',
+        type: 'Arable field margins game bird mix',
         code: 'c1a8',
         level1: 'Terrestrial',
         level2Code: '',
@@ -48,6 +49,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Arable field margins pollen and nectar',
+        type: 'Arable field margins pollen and nectar',
         code: 'c1a6',
         level1: 'Terrestrial',
         level2Code: '',
@@ -69,6 +71,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Arable field margins tussocky',
+        type: 'Arable field margins tussocky',
         code: 'c1a5',
         level1: 'Terrestrial',
         level2Code: '',
@@ -90,6 +93,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Cereal crops',
+        type: 'Cereal crops',
         code: 'c1c',
         level1: 'Terrestrial',
         level2Code: '',
@@ -111,6 +115,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Winter stubble',
+        type: 'Winter stubble',
         code: 'c1c5',
         level1: 'Terrestrial',
         level2Code: '',
@@ -132,6 +137,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Horticulture',
+        type: 'Horticulture',
         code: 'c1f',
         level1: 'Terrestrial',
         level2Code: '',
@@ -153,6 +159,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Intensive orchards',
+        type: 'Intensive orchards',
         code: 'c1e',
         level1: 'Terrestrial',
         level2Code: '',
@@ -174,6 +181,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Non-cereal crops',
+        type: 'Non-cereal crops',
         code: 'c1d',
         level1: 'Terrestrial',
         level2Code: '',
@@ -195,6 +203,7 @@ export const allHabitats = [
     },
     {
         label: 'Cropland - Temporary grass and clover leys',
+        type: 'Temporary grass and clover leys',
         code: 'c1b',
         level1: 'Terrestrial',
         level2Code: '',
@@ -216,6 +225,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Traditional orchards',
+        type: 'Traditional orchards',
         code: '27',
         level1: 'Terrestrial',
         level2Code: '',
@@ -237,6 +247,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Bracken',
+        type: 'Bracken',
         code: 'g1c',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -258,6 +269,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Floodplain wetland mosaic and CFGM',
+        type: 'Floodplain wetland mosaic and CFGM',
         code: 'NE0011',
         level1: 'Terrestrial',
         level2Code: '',
@@ -279,6 +291,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Lowland calcareous grassland',
+        type: 'Lowland calcareous grassland',
         code: 'g2a',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -300,6 +313,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Lowland dry acid grassland',
+        type: 'Lowland dry acid grassland',
         code: 'g1a',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -321,6 +335,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Lowland meadows',
+        type: 'Lowland meadows',
         code: 'g3a',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -342,6 +357,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Modified grassland',
+        type: 'Modified grassland',
         code: 'g4',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -363,6 +379,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Other lowland acid grassland',
+        type: 'Other lowland acid grassland',
         code: 'g1d',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -384,6 +401,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Other neutral grassland',
+        type: 'Other neutral grassland',
         code: 'g3c',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -405,6 +423,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Tall herb communities (H6430)',
+        type: 'Tall herb communities (H6430)',
         code: 's1a9',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -426,6 +445,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Upland acid grassland',
+        type: 'Upland acid grassland',
         code: 'g1b',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -447,6 +467,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Upland calcareous grassland',
+        type: 'Upland calcareous grassland',
         code: 'g2b',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -468,6 +489,7 @@ export const allHabitats = [
     },
     {
         label: 'Grassland - Upland hay meadows',
+        type: 'Upland hay meadows',
         code: 'g3b',
         level1: 'Terrestrial',
         level2Code: 'g',
@@ -489,6 +511,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Blackthorn scrub',
+        type: 'Blackthorn scrub',
         code: 'h3a',
         level1: 'Terrestrial',
         level2Code: 'h',
@@ -510,6 +533,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Bramble scrub',
+        type: 'Bramble scrub',
         code: 'h3d',
         level1: 'Terrestrial',
         level2Code: '',
@@ -531,6 +555,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Gorse scrub',
+        type: 'Gorse scrub',
         code: 'h3e',
         level1: 'Terrestrial',
         level2Code: '',
@@ -552,6 +577,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Hawthorn scrub',
+        type: 'Hawthorn scrub',
         code: 'h3f',
         level1: 'Terrestrial',
         level2Code: '',
@@ -573,6 +599,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Hazel scrub',
+        type: 'Hazel scrub',
         code: 'h3b',
         level1: 'Terrestrial',
         level2Code: '',
@@ -594,6 +621,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Lowland heathland',
+        type: 'Lowland heathland',
         code: 'h1a',
         level1: 'Terrestrial',
         level2Code: '',
@@ -615,6 +643,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Mixed scrub',
+        type: 'Mixed scrub',
         code: 'h3h',
         level1: 'Terrestrial',
         level2Code: '',
@@ -636,6 +665,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Mountain heaths and willow scrub',
+        type: 'Mountain heaths and willow scrub',
         code: 'h1c',
         level1: 'Terrestrial',
         level2Code: '',
@@ -657,6 +687,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Rhododendron scrub',
+        type: 'Rhododendron scrub',
         code: 'h3g',
         level1: 'Terrestrial',
         level2Code: '',
@@ -678,6 +709,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Dunes with sea buckthorn (H2160)',
+        type: 'Dunes with sea buckthorn (H2160)',
         code: 'h3c5',
         level1: 'Terrestrial',
         level2Code: '',
@@ -699,6 +731,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Other sea buckthorn scrub',
+        type: 'Other sea buckthorn scrub',
         code: 'h3c6',
         level1: 'Terrestrial',
         level2Code: '',
@@ -720,6 +753,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Willow scrub',
+        type: 'Willow scrub',
         code: 'h3j',
         level1: 'Terrestrial',
         level2Code: '',
@@ -741,6 +775,7 @@ export const allHabitats = [
     },
     {
         label: 'Heathland and shrub - Upland heathland',
+        type: 'Upland heathland',
         code: 'h1b',
         level1: 'Terrestrial',
         level2Code: '',
@@ -762,6 +797,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Aquifer fed naturally fluctuating water bodies',
+        type: 'Aquifer fed naturally fluctuating water bodies',
         code: 'r1d',
         level1: 'Freshwater',
         level2Code: 'r',
@@ -783,6 +819,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Ornamental lake or pond',
+        type: 'Ornamental lake or pond',
         code: '46',
         level1: 'Terrestrial',
         level2Code: '',
@@ -804,6 +841,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - High alkalinity lakes',
+        type: 'High alkalinity lakes',
         code: 'NE0001',
         level1: 'Freshwater',
         level2Code: '',
@@ -825,6 +863,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Low alkalinity lakes',
+        type: 'Low alkalinity lakes',
         code: 'NE0002',
         level1: 'Freshwater',
         level2Code: '',
@@ -846,6 +885,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Marl lakes',
+        type: 'Marl lakes',
         code: 'NE0003',
         level1: 'Freshwater',
         level2Code: '',
@@ -867,6 +907,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Moderate alkalinity lakes',
+        type: 'Moderate alkalinity lakes',
         code: 'NE0004',
         level1: 'Freshwater',
         level2Code: '',
@@ -888,6 +929,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Peat lakes',
+        type: 'Peat lakes',
         code: 'NE0005',
         level1: 'Freshwater',
         level2Code: '',
@@ -909,6 +951,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Ponds (priority habitat)',
+        type: 'Ponds (priority habitat)',
         code: 'NE0006',
         level1: 'Freshwater',
         level2Code: '',
@@ -930,6 +973,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Ponds (non-priority habitat)',
+        type: 'Ponds (non-priority habitat)',
         code: '41',
         level1: 'Freshwater',
         level2Code: '',
@@ -951,6 +995,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Reservoirs',
+        type: 'Reservoirs',
         code: '45',
         level1: 'Freshwater',
         level2Code: '',
@@ -972,6 +1017,7 @@ export const allHabitats = [
     },
     {
         label: 'Lakes - Temporary lakes ponds and pools (H3170)',
+        type: 'Temporary lakes ponds and pools (H3170)',
         code: 'NE0013',
         level1: 'Freshwater',
         level2Code: '',
@@ -993,6 +1039,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Calaminarian grasslands',
+        type: 'Calaminarian grasslands',
         code: 's1c',
         level1: 'Freshwater',
         level2Code: 's',
@@ -1014,6 +1061,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Coastal sand dunes',
+        type: 'Coastal sand dunes',
         code: 's3a',
         level1: 'Freshwater',
         level2Code: 's',
@@ -1035,6 +1083,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Coastal vegetated shingle',
+        type: 'Coastal vegetated shingle',
         code: 's3b',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -1056,6 +1105,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Ruderal/Ephemeral',
+        type: 'Ruderal/Ephemeral',
         code: '81',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1077,6 +1127,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Tall forbs',
+        type: 'Tall forbs',
         code: '16',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1098,6 +1149,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Inland rock outcrop and scree habitats',
+        type: 'Inland rock outcrop and scree habitats',
         code: 's1a',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -1119,6 +1171,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Limestone pavement',
+        type: 'Limestone pavement',
         code: 's1b',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -1140,6 +1193,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Maritime cliff and slopes',
+        type: 'Maritime cliff and slopes',
         code: 's2a',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -1161,6 +1215,7 @@ export const allHabitats = [
     },
     {
         label: 'Sparsely vegetated land - Other inland rock and scree',
+        type: 'Other inland rock and scree',
         code: 's1d',
         level1: 'Terrestrial',
         level2Code: 's',
@@ -1182,6 +1237,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Allotments',
+        type: 'Allotments',
         code: '616',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1203,6 +1259,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Artificial unvegetated, unsealed surface',
+        type: 'Artificial unvegetated, unsealed surface',
         code: 'u1c',
         level1: 'Terrestrial',
         level2Code: 'u',
@@ -1224,6 +1281,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Bioswale',
+        type: 'Bioswale',
         code: '849',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1245,6 +1303,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Intensive green roof',
+        type: 'Intensive green roof',
         code: '88',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1266,6 +1325,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Built linear features',
+        type: 'Built linear features',
         code: 'u1e',
         level1: 'Terrestrial',
         level2Code: 'u',
@@ -1287,6 +1347,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Cemeteries and churchyards',
+        type: 'Cemeteries and churchyards',
         code: '90',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1308,6 +1369,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Developed land; sealed surface',
+        type: 'Developed land; sealed surface',
         code: 'u1b',
         level1: 'Terrestrial',
         level2Code: 'u',
@@ -1329,6 +1391,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Other green roof',
+        type: 'Other green roof',
         code: '89',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1350,6 +1413,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Facade-bound green wall',
+        type: 'Facade-bound green wall',
         code: '843',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1371,6 +1435,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Ground based green wall',
+        type: 'Ground based green wall',
         code: '842',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1392,6 +1457,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Ground level planters',
+        type: 'Ground level planters',
         code: '845',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1413,6 +1479,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Biodiverse green roof',
+        type: 'Biodiverse green roof',
         code: '87',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1434,6 +1501,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Introduced shrub',
+        type: 'Introduced shrub',
         code: '847',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1455,6 +1523,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Open mosaic habitats on previously developed land',
+        type: 'Open mosaic habitats on previously developed land',
         code: '80',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1476,6 +1545,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Rain garden',
+        type: 'Rain garden',
         code: '850',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1497,6 +1567,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Actively worked sand pit quarry or open cast mine',
+        type: 'Actively worked sand pit quarry or open cast mine',
         code: '85',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1518,6 +1589,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Sustainable drainage system',
+        type: 'Sustainable drainage system',
         code: '848',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1539,6 +1611,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Unvegetated garden',
+        type: 'Unvegetated garden',
         code: '829',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1560,6 +1633,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Vacant or derelict land',
+        type: 'Vacant or derelict land',
         code: '82',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1581,6 +1655,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Bare ground',
+        type: 'Bare ground',
         code: '510',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1602,6 +1677,7 @@ export const allHabitats = [
     },
     {
         label: 'Urban - Vegetated garden',
+        type: 'Vegetated garden',
         code: '828',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1623,6 +1699,7 @@ export const allHabitats = [
     },
     {
         label: 'Individual trees - Urban tree',
+        type: 'Urban tree',
         code: 'NE0014',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1644,6 +1721,7 @@ export const allHabitats = [
     },
     {
         label: 'Individual trees - Rural tree',
+        type: 'Rural tree',
         code: 'NE0016',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1665,6 +1743,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Blanket bog',
+        type: 'Blanket bog',
         code: 'f1a',
         level1: 'Terrestrial',
         level2Code: 'f',
@@ -1686,6 +1765,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Depressions on peat substrates (H7150)',
+        type: 'Depressions on peat substrates (H7150)',
         code: '56',
         level1: 'Terrestrial',
         level2Code: 'f',
@@ -1707,6 +1787,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Fens (upland and lowland)',
+        type: 'Fens (upland and lowland)',
         code: 'NE0020',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1728,6 +1809,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Lowland raised bog',
+        type: 'Lowland raised bog',
         code: 'f1b',
         level1: 'Terrestrial',
         level2Code: 'f',
@@ -1749,6 +1831,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Oceanic valley mire[1] (D2.1)',
+        type: 'Oceanic valley mire[1] (D2.1)',
         code: 'NE0010',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1770,6 +1853,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Purple moor grass and rush pastures',
+        type: 'Purple moor grass and rush pastures',
         code: 'f2b',
         level1: 'Terrestrial',
         level2Code: 'f',
@@ -1791,6 +1875,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Reedbeds',
+        type: 'Reedbeds',
         code: 'f2e',
         level1: 'Terrestrial',
         level2Code: 'f',
@@ -1812,6 +1897,7 @@ export const allHabitats = [
     },
     {
         label: 'Wetland - Transition mires and quaking bogs (H7140)',
+        type: 'Transition mires and quaking bogs (H7140)',
         code: 'NE0021',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1833,6 +1919,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Felled',
+        type: 'Felled',
         code: '206',
         level1: 'Terrestrial',
         level2Code: '',
@@ -1854,6 +1941,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Lowland beech and yew woodland',
+        type: 'Lowland beech and yew woodland',
         code: 'w1c',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1875,6 +1963,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Lowland mixed deciduous woodland',
+        type: 'Lowland mixed deciduous woodland',
         code: 'w1f',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1896,6 +1985,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Native pine woodlands',
+        type: 'Native pine woodlands',
         code: 'w2a',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1917,6 +2007,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Other coniferous woodland',
+        type: 'Other coniferous woodland',
         code: 'w2c',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1938,6 +2029,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Other Scot\'s pine woodland',
+        type: 'Other Scot\'s pine woodland',
         code: 'w2b',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1959,6 +2051,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Other woodland; broadleaved',
+        type: 'Other woodland; broadleaved',
         code: 'w1g',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -1980,6 +2073,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Other woodland; mixed',
+        type: 'Other woodland; mixed',
         code: 'w1h',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2001,6 +2095,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Upland birchwoods',
+        type: 'Upland birchwoods',
         code: 'w1e',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2022,6 +2117,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Upland mixed ashwoods',
+        type: 'Upland mixed ashwoods',
         code: 'w1b',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2043,6 +2139,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Upland oakwood',
+        type: 'Upland oakwood',
         code: 'w1a',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2064,6 +2161,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Wet woodland',
+        type: 'Wet woodland',
         code: 'w1d',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2085,6 +2183,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Wood-pasture and parkland',
+        type: 'Wood-pasture and parkland',
         code: '26',
         level1: 'Terrestrial',
         level2Code: 'w',
@@ -2106,6 +2205,7 @@ export const allHabitats = [
     },
     {
         label: 'Woodland and forest - Felled',
+        type: 'Replacement for felled woodland',
         code: '206',
         level1: 'Terrestrial',
         level2Code: '',
@@ -2127,6 +2227,7 @@ export const allHabitats = [
     },
     {
         label: 'Coastal lagoons - Coastal lagoons',
+        type: 'Coastal lagoons',
         code: 'x02',
         level1: 'Intertidal',
         level2Code: 'X02/03',
@@ -2148,6 +2249,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - High energy littoral rock',
+        type: 'High energy littoral rock',
         code: 'a1.1',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2169,6 +2271,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - High energy littoral rock - on peat, clay or chalk',
+        type: 'High energy littoral rock - on peat, clay or chalk',
         code: 'A1.1',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2190,6 +2293,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Moderate energy littoral rock',
+        type: 'Moderate energy littoral rock',
         code: 'A1.2',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2211,6 +2315,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Moderate energy littoral rock - on peat, clay or chalk',
+        type: 'Moderate energy littoral rock - on peat, clay or chalk',
         code: 'A1.2 PCC',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2232,6 +2337,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Low energy littoral rock',
+        type: 'Low energy littoral rock',
         code: 'A1.3',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2253,6 +2359,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Low energy littoral rock - on peat, clay or chalk',
+        type: 'Low energy littoral rock - on peat, clay or chalk',
         code: 'A1.3 PCC',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2274,6 +2381,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Features of littoral rock',
+        type: 'Features of littoral rock',
         code: 'A1.4',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2295,6 +2403,7 @@ export const allHabitats = [
     },
     {
         label: 'Rocky shore - Features of littoral rock - on peat, clay or chalk',
+        type: 'Features of littoral rock - on peat, clay or chalk',
         code: 'A1.PCC',
         level1: 'Intertidal',
         level2Code: 'A1',
@@ -2316,6 +2425,7 @@ export const allHabitats = [
     },
     {
         label: 'Coastal saltmarsh - Saltmarshes and saline reedbeds',
+        type: 'Saltmarshes and saline reedbeds',
         code: 'A2.5',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2337,6 +2447,7 @@ export const allHabitats = [
     },
     {
         label: 'Coastal saltmarsh - Artificial saltmarshes and saline reedbeds',
+        type: 'Artificial saltmarshes and saline reedbeds',
         code: 'ART_A2.5',
         level1: '',
         level2Code: '',
@@ -2358,6 +2469,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral coarse sediment',
+        type: 'Littoral coarse sediment',
         code: 'A2.1',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2379,6 +2491,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral mud',
+        type: 'Littoral mud',
         code: 'A2.3',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2400,6 +2513,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral mixed sediments',
+        type: 'Littoral mixed sediments',
         code: 'A2.4',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2421,6 +2535,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral seagrass',
+        type: 'Littoral seagrass',
         code: 'A2.6',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2442,6 +2557,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral seagrass on peat, clay or chalk',
+        type: 'Littoral seagrass on peat, clay or chalk',
         code: 'A2.6 PCC',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2463,6 +2579,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral biogenic reefs - Mussels',
+        type: 'Littoral biogenic reefs - Mussels',
         code: 'A2.7 M',
         level1: '',
         level2Code: '',
@@ -2484,6 +2601,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral biogenic reefs - Sabellaria',
+        type: 'Littoral biogenic reefs - Sabellaria',
         code: 'A2.7 S',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2505,6 +2623,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Features of littoral sediment',
+        type: 'Features of littoral sediment',
         code: 'A2.8',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2526,6 +2645,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral coarse sediment',
+        type: 'Artificial littoral coarse sediment',
         code: 'ART_A2.1',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2547,6 +2667,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral mud',
+        type: 'Artificial littoral mud',
         code: 'ART_A2.3',
         level1: '',
         level2Code: '',
@@ -2568,6 +2689,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral sand',
+        type: 'Artificial littoral sand',
         code: 'ART_A2.21/A2.22/A2.23',
         level1: '',
         level2Code: '',
@@ -2589,6 +2711,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral muddy sand',
+        type: 'Artificial littoral muddy sand',
         code: 'ART_A2.24',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2610,6 +2733,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral mixed sediments',
+        type: 'Artificial littoral mixed sediments',
         code: 'ART_A2.4',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2631,6 +2755,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral seagrass',
+        type: 'Artificial littoral seagrass',
         code: 'ART_A2.6',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2652,6 +2777,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Artificial littoral biogenic reefs',
+        type: 'Artificial littoral biogenic reefs',
         code: 'ART_A2.7',
         level1: 'Intertidal',
         level2Code: 'A2',
@@ -2673,6 +2799,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral sand',
+        type: 'Littoral sand',
         code: 'A2.21/A2.22/A2.23',
         level1: 'Intertidal',
         level2Code: '',
@@ -2694,6 +2821,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal sediment - Littoral muddy sand',
+        type: 'Littoral muddy sand',
         code: 'A2.24',
         level1: 'Intertidal',
         level2Code: '',
@@ -2715,6 +2843,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal hard structures - Artificial hard structures',
+        type: 'Artificial hard structures',
         code: 'ART_A1',
         level1: 'Intertidal',
         level2Code: '',
@@ -2736,6 +2865,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal hard structures - Artificial features of hard structures',
+        type: 'Artificial features of hard structures',
         code: 'ART_A1.4',
         level1: 'Intertidal',
         level2Code: '',
@@ -2757,6 +2887,7 @@ export const allHabitats = [
     },
     {
         label: 'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
+        type: 'Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
         code: 'ART_A1_IGGI',
         level1: 'Intertidal',
         level2Code: '',
@@ -2778,6 +2909,7 @@ export const allHabitats = [
     },
     {
         label: 'Watercourse footprint - Watercourse footprint',
+        type: 'Watercourse footprint',
         code: 'NE0017',
         level1: 'Watercourse footprint',
         level2Code: '',
