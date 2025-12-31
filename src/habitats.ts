@@ -3733,7 +3733,13 @@ export const allHabitats = {
     }
 } as const
 
-export type HabitatLabel = keyof typeof allHabitats;
-export type Habitat<L extends HabitatLabel = HabitatLabel> = typeof allHabitats[L]
-export type HabitatType = Habitat['type']
-export type BroadHabitat = Habitat['level2Label']
+export type HabitatMap = typeof allHabitats;
+export type HabitatLabel = keyof HabitatMap;
+export type Habitat<L extends HabitatLabel> = HabitatMap[L]
+export type HabitatType<L extends HabitatLabel> = Habitat<L>['type']
+export type BroadHabitat<L extends HabitatLabel> = Habitat<L>['level2Label']
+
+/* This function preserves type safety when fetching a habitat from the map */
+export function getHabitat<L extends HabitatLabel>(label: L): Habitat<L> {
+    return allHabitats[label];
+}
