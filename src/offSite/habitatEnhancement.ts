@@ -5,10 +5,10 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { habitatByBroadAndType } from '../habitats';
 import { freeTextSchema, yearsSchema } from '../schemaUtils';
-import { onSiteHabitatBaselineSchema } from './habitatBaseline';
+import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 
 const inputSchema = v.object({
-    baseline: onSiteHabitatBaselineSchema,
+    baseline: offSiteHabitatBaselineSchema,
     broadHabitat: broadHabitatSchema,
     habitatType: habitatTypeSchema,
     condition: conditionSchema,
@@ -18,15 +18,16 @@ const inputSchema = v.object({
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
+    offSiteReferenceNumber: freeTextSchema,
 })
 type OutputSchema = v.InferOutput<typeof inputSchema>
 
-export const onSiteHabitatEnhancementSchema = v.pipe(
+export const offSiteHabitatEnhancementSchema = v.pipe(
     inputSchema,
     v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
     v.check(isValidCondition, "The condition for this habitat is invalid"),
 )
-export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>
+export type OffSiteHabitatEnhancementSchema = v.InferInput<typeof offSiteHabitatEnhancementSchema>
 
 function isValidHabitat({ broadHabitat, habitatType }: OutputSchema): boolean {
     return !!habitatByBroadAndType(broadHabitat, habitatType);
