@@ -7,42 +7,38 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { habitatByBroadAndType } from '../habitats';
 import { areaSchema, freeTextSchema } from '../schemaUtils';
 
+const yearsSchema = v.pipe(
+    v.number(),
+    v.integer(),
+    v.toMinValue(0),
+    v.toMaxValue(30),
+)
+
 const inputSchema =
     v.object({
         broadHabitat: broadHabitatSchema,
         habitatType: habitatTypeSchema,
-        irreplaceableHabitat: v.boolean(),
         area: areaSchema,
         distinctiveness: distinctivenessSchema,
         condition: conditionSchema,
         strategicSignificance: strategicSignificanceSchema,
-        areaRetained: areaSchema,
-        areaEnhanced: areaSchema,
-        bespokeCompensationAgreed: freeTextSchema,
+        habitatCreationInAdvance: v.optional(yearsSchema, 0),
+        habitatCreationDelay: v.optional(yearsSchema, 0),
         userComments: freeTextSchema,
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
     })
 type OutputSchema = v.InferOutput<typeof inputSchema>
 
-export const onSiteHabitatBaselineSchema = v.pipe(
+export const onSiteHabitatCreationSchema = v.pipe(
     inputSchema,
     v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
-    v.check(isValidIrreplaceable, "This habitat cannot be irreplaceable"),
     v.check(isValidCondition, "The condition for this habitat is invalid"),
 )
-export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
+export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
 
 function isValidHabitat({ broadHabitat, habitatType }: OutputSchema): boolean {
     return !!habitatByBroadAndType(broadHabitat, habitatType);
-}
-
-function isValidIrreplaceable({ broadHabitat, habitatType, irreplaceableHabitat }: OutputSchema): boolean {
-    const habitat = habitatByBroadAndType(broadHabitat, habitatType);
-    if (!habitat) return false
-
-    if (!habitat.irreplaceable) return true
-    return irreplaceableHabitat === habitat.irreplaceable;
 }
 
 function isValidCondition({ broadHabitat, habitatType, condition }: OutputSchema): boolean {
