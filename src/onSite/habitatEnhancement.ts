@@ -1,34 +1,29 @@
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
 import { habitatTypeSchema } from '../habitatTypes';
-import { distinctivenessSchema } from '../distinctivenessCategories';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { habitatByBroadAndType } from '../habitats';
-import { areaSchema, freeTextSchema, yearsSchema } from '../schemaUtils';
+import { yearsSchema } from '../schemaUtils';
+import { onSiteHabitatBaselineSchema } from './habitatBaseline';
 
-const inputSchema =
-    v.object({
-        broadHabitat: broadHabitatSchema,
-        habitatType: habitatTypeSchema,
-        area: areaSchema,
-        distinctiveness: distinctivenessSchema,
-        condition: conditionSchema,
-        strategicSignificance: strategicSignificanceSchema,
-        habitatCreationInAdvance: v.optional(yearsSchema, 0),
-        habitatCreationDelay: v.optional(yearsSchema, 0),
-        userComments: freeTextSchema,
-        planningAuthorityComments: freeTextSchema,
-        habitatReferenceNumber: freeTextSchema,
-    })
+const inputSchema = v.object({
+    baseline: onSiteHabitatBaselineSchema,
+    broadHabitat: broadHabitatSchema,
+    habitatType: habitatTypeSchema,
+    condition: conditionSchema,
+    strategicSignificance: strategicSignificanceSchema,
+    habitatEnhancedInAdvance: v.optional(yearsSchema, 0),
+    habitatEnhancedDelay: v.optional(yearsSchema, 0),
+})
 type OutputSchema = v.InferOutput<typeof inputSchema>
 
-export const onSiteHabitatCreationSchema = v.pipe(
+export const onSiteHabitatEnhancementSchema = v.pipe(
     inputSchema,
     v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
     v.check(isValidCondition, "The condition for this habitat is invalid"),
 )
-export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
+export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>
 
 function isValidHabitat({ broadHabitat, habitatType }: OutputSchema): boolean {
     return !!habitatByBroadAndType(broadHabitat, habitatType);
