@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import * as v from 'valibot';
-import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaselineSchema } from "./onSiteHabitat";
+import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
 
 export function fixture(overrides: Partial<OnSiteHabitatBaselineSchema> = {}): OnSiteHabitatBaselineSchema {
     return {
