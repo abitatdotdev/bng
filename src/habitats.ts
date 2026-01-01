@@ -1,6 +1,9 @@
 // THIS FILE IS GENERATED AUTOMATICALLY
+import * as v from 'valibot';
+import { broadHabitatSchema, type BroadHabitat } from "./broadHabitats";
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
+import type { HabitatType } from "./habitatTypes";
 
 export const allHabitats = {
     'Cropland - Arable field margins cultivated annually': {
@@ -3735,11 +3738,17 @@ export const allHabitats = {
 
 export type HabitatMap = typeof allHabitats;
 export type HabitatLabel = keyof HabitatMap;
-export type Habitat<L extends HabitatLabel> = HabitatMap[L]
-export type HabitatType<L extends HabitatLabel> = Habitat<L>['type']
-export type BroadHabitat<L extends HabitatLabel> = Habitat<L>['level2Label']
+export type Habitat = HabitatMap[HabitatLabel]
 
-/* This function preserves type safety when fetching a habitat from the map */
-export function getHabitat<L extends HabitatLabel>(label: L): Habitat<L> {
-    return allHabitats[label];
+const habitatsByBroadHabitat = new Map<BroadHabitat, Habitat[]>();
+Object.values(allHabitats).forEach(hab => {
+    const key = v.parse(broadHabitatSchema, hab.label.split(' - ')[0])
+    const existing = habitatsByBroadHabitat.get(key) || [];
+    existing.push(hab);
+    habitatsByBroadHabitat.set(key, existing)
+})
+
+export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: HabitatType): HabitatMap[HabitatLabel] | undefined {
+    const habitats = habitatsByBroadHabitat.get(broadHabitat) || [];
+    return habitats.find(h => h.type === habitatType);
 }

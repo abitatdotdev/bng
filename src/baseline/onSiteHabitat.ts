@@ -1,31 +1,59 @@
-import { assert } from "@std/assert";
-import { getHabitat, type Habitat, type HabitatLabel } from "../habitats";
+import * as v from 'valibot';
+import { broadHabitatSchema } from '../broadHabitats';
+import { habitatTypeSchema } from '../habitatTypes';
+import { distinctivenessSchema } from '../distinctivenessCategories';
+import { conditionSchema } from '../conditions';
+import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
+import { habitatByBroadAndType } from '../habitats';
 
-export class OnSiteHabitat<L extends HabitatLabel> {
-    data: Habitat<L>;
-    public irreplaceable: boolean;
+const areaSchema = v.pipe(
+    v.number(),
+    v.toMinValue(0),
+)
 
-    constructor(
-        public label: L,
-        /* Area in hectares */
-        public area: number,
-        public condition: keyof Habitat<L>['conditions'],
-        irreplaceable?: boolean,
-    ) {
-        this.data = getHabitat(label);
+const freeTextSchema = v.optional(v.string());
 
-        let resolvedIrreplaceable = this.data.irreplaceable || irreplaceable;
-        assert(!!resolvedIrreplaceable, `${this.data.label} must have it's "irreplaceable" value defined`);
-        this.irreplaceable = resolvedIrreplaceable;
-    }
+const inputSchema =
+    v.object({
+        broadHabitat: broadHabitatSchema,
+        habitatType: habitatTypeSchema,
+        irreplaceableHabitat: v.boolean(),
+        area: areaSchema,
+        distinctiveness: distinctivenessSchema,
+        condition: conditionSchema,
+        strategicSignificance: strategicSignificanceSchema,
+        areaRetained: areaSchema,
+        areaEnhanced: areaSchema,
+        bespokeCompensationAgreed: freeTextSchema,
+        userComments: freeTextSchema,
+        planningAuthorityComments: freeTextSchema,
+        habitatReferenceNumber: freeTextSchema,
+    })
+type InputSchema = v.InferOutput<typeof inputSchema>
 
-    get distinctiveness() { return this.data.distinctivenessCategory }
-    get distinctivenessScore() { return this.data.distinctivenessScore }
+export const onSiteHabitatBaselineSchema = v.pipe(
+    inputSchema,
+    v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
+    v.check(isValidIrreplaceable, "This habitat cannot be irreplaceable"),
+    v.check(isValidCondition, "The condition for this habitat is invalid"),
+)
+export type OnSiteHabitatBaselineSchema = v.InferOutput<typeof onSiteHabitatBaselineSchema>
 
-    get conditionScore() {
-        return this.data.conditions[this.condition];
-    }
+function isValidHabitat({ broadHabitat, habitatType }: InputSchema): boolean {
+    return !!habitatByBroadAndType(broadHabitat, habitatType);
 }
 
-const test = new OnSiteHabitat("Grassland - Modified grassland", 2, "Good")
-test.condition
+function isValidIrreplaceable({ broadHabitat, habitatType, irreplaceableHabitat }: InputSchema): boolean {
+    const habitat = habitatByBroadAndType(broadHabitat, habitatType);
+    if (!habitat) return false
+
+    if (!habitat.irreplaceable) return true
+    return irreplaceableHabitat === habitat.irreplaceable;
+}
+
+function isValidCondition({ broadHabitat, habitatType, condition }: InputSchema): boolean {
+    const habitat = habitatByBroadAndType(broadHabitat, habitatType);
+    if (!habitat) return false
+
+    return Object.keys(habitat.conditions).includes(condition);
+}

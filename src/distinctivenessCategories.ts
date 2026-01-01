@@ -1,4 +1,14 @@
-// SHEET G-1
+import * as v from 'valibot';
+
+export const distinctivenessSchema = v.picklist([
+    'V.High',
+    'High',
+    'Medium',
+    'Low',
+    'V. Low',
+    'Irreplaceable',
+])
+
 export const distinctivenessCategories = {
     vHigh: { score: 8 as const, suggestedAction: 'Same habitat required – bespoke compensation option ⚠' as const },
     high: { score: 6 as const, suggestedAction: 'Same habitat required =' as const },
