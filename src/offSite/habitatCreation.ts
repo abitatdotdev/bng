@@ -5,6 +5,7 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { habitatByBroadAndType } from '../habitats';
 import { areaSchema, freeTextSchema, yearsSchema } from '../schemaUtils';
+import { spatialRiskCategorySchema } from '../spatialRisk';
 
 const inputSchema =
     v.object({
@@ -15,18 +16,21 @@ const inputSchema =
         strategicSignificance: strategicSignificanceSchema,
         habitatCreationInAdvance: v.optional(yearsSchema, 0),
         habitatCreationDelay: v.optional(yearsSchema, 0),
+        spatialRiskCategory: spatialRiskCategorySchema,
         userComments: freeTextSchema,
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
+        offSiteReferenceNumber: freeTextSchema,
+        baselineReferenceNumber: freeTextSchema,
     })
 type OutputSchema = v.InferOutput<typeof inputSchema>
 
-export const onSiteHabitatCreationSchema = v.pipe(
+export const offSiteHabitatCreationSchema = v.pipe(
     inputSchema,
     v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
     v.check(isValidCondition, "The condition for this habitat is invalid"),
 )
-export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
+export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>
 
 function isValidHabitat({ broadHabitat, habitatType }: OutputSchema): boolean {
     return !!habitatByBroadAndType(broadHabitat, habitatType);

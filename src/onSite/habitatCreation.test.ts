@@ -7,7 +7,6 @@ export function fixture(overrides: Partial<OnSiteHabitatCreationSchema> = {}): O
         broadHabitat: "Woodland and forest",
         habitatType: "Lowland mixed deciduous woodland",
         area: 1,
-        distinctiveness: "Medium",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         condition: "Good",
         ...overrides,
