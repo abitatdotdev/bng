@@ -4,6 +4,7 @@ import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { bespokeCompensationSchema } from '../bespokeCompensation';
 
 const inputSchema =
     v.object({
@@ -15,7 +16,7 @@ const inputSchema =
         strategicSignificance: strategicSignificanceSchema,
         areaRetained: v.optional(areaSchema, 0),
         areaEnhanced: v.optional(areaSchema, 0),
-        bespokeCompensationAgreed: freeTextSchema,
+        bespokeCompensationAgreed: bespokeCompensationSchema,
         userComments: freeTextSchema,
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,

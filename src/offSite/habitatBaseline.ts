@@ -6,6 +6,7 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
+import { bespokeCompensationSchema } from '../bespokeCompensation';
 
 const inputSchema =
     v.object({
@@ -19,7 +20,7 @@ const inputSchema =
         spatialRiskCategory: spatialRiskCategorySchema,
         areaRetained: areaSchema,
         areaEnhanced: areaSchema,
-        bespokeCompensationAgreed: freeTextSchema,
+        bespokeCompensationAgreed: bespokeCompensationSchema,
         userComments: freeTextSchema,
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
