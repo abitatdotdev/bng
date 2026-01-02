@@ -25,10 +25,9 @@ export function fixture(overrides: Partial<OffSiteHabitatEnhancementSchema> = {}
 }
 
 test("valid combinations of broad habitat and habitat type", () => {
-    expect(v.safeParse(offSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Woodland and forest", habitatType: "Felled" })).success).toBeTrue()
     expect(v.safeParse(offSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree" })).success).toBeTrue()
 
-    expect(v.safeParse(offSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Felled" })).success).toBeFalse()
+    expect(v.safeParse(offSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Lowland" })).success).toBeFalse()
 })
 
 test("condition validation", () => {

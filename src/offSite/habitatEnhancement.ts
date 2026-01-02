@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
-import { habitatTypeSchema } from '../habitatTypes';
+import { enhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { habitatByBroadAndType } from '../habitats';
@@ -10,7 +10,7 @@ import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
     broadHabitat: broadHabitatSchema,
-    habitatType: habitatTypeSchema,
+    habitatType: enhancedHabitatType,
     condition: conditionSchema,
     strategicSignificance: strategicSignificanceSchema,
     habitatEnhancedInAdvance: v.optional(yearsSchema, 0),

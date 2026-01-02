@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 
-export const habitatTypeSchema = v.picklist([
+const sharedHabitatTypes = [
     "Arable field margins cultivated annually",
     "Arable field margins game bird mix",
     "Arable field margins pollen and nectar",
@@ -88,7 +88,6 @@ export const habitatTypeSchema = v.picklist([
     "Purple moor grass and rush pastures",
     "Reedbeds",
     "Transition mires and quaking bogs (H7140)",
-    "Felled",
     "Lowland beech and yew woodland",
     "Lowland mixed deciduous woodland",
     "Native pine woodlands",
@@ -101,7 +100,6 @@ export const habitatTypeSchema = v.picklist([
     "Upland oakwood",
     "Wet woodland",
     "Wood-pasture and parkland",
-    "Replacement for felled woodland",
     "Coastal lagoons",
     "High energy littoral rock",
     "High energy littoral rock - on peat, clay or chalk",
@@ -134,5 +132,19 @@ export const habitatTypeSchema = v.picklist([
     "Artificial features of hard structures",
     "Artificial hard structures with integrated greening of grey infrastructure (IGGI)",
     "Watercourse footprint",
+]
+
+export const baselineHabitatType = v.picklist([
+    ...sharedHabitatTypes,
+    "Felled",
+])
+export type BaselineHabitatType = v.InferOutput<typeof baselineHabitatType>;
+
+export const creationHabitatType = v.picklist(sharedHabitatTypes);
+export type CreationHabitatType = v.InferOutput<typeof creationHabitatType>;
+
+export const enhancedHabitatType = v.picklist([
+    ...sharedHabitatTypes,
+    "Replacement for felled woodland",
 ]);
-export type HabitatType = v.InferOutput<typeof habitatTypeSchema>;
+export type EnhancedHabitatType = v.InferOutput<typeof enhancedHabitatType>;
