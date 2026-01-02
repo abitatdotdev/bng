@@ -1,8 +1,9 @@
 import * as v from 'valibot';
-import { habitatByBroadAndType } from './habitats';
+import { habitatByBroadAndType, type Habitat } from './habitats';
 import { type BroadHabitat } from './broadHabitats';
 import { type BaselineHabitatType, type CreationHabitatType, type EnhancedHabitatType } from './habitatTypes';
 import type { Condition } from './conditions';
+import { getStrategicSignificance, type StrategicSignificance, type StrategicSignificanceDescription } from './strategicSignificanceSchema';
 
 export const areaSchema = v.pipe(
     v.number(),
@@ -35,4 +36,29 @@ export function isValidCondition(broadHabitat: BroadHabitat, habitatType: Baseli
     if (!habitat) return false
 
     return Object.keys(habitat.conditions).includes(condition);
+}
+
+type EnrichedHabitatData = {
+    distinctiveness: Habitat['distinctivenessCategory'],
+    distinctivenessScore: Habitat['distinctivenessScore'],
+    // @ts-ignore-line
+    conditionScore: Habitat['conditions'][Condition],
+    strategicSignificanceCategory: StrategicSignificance['significance'],
+    strategicSignificanceMultiplier: StrategicSignificance['multiplier'],
+}
+
+export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription }>(data: Data): Data & EnrichedHabitatData => {
+    const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
+
+    return {
+        ...data,
+        distinctiveness: habitat.distinctivenessCategory,
+        distinctivenessScore: habitat.distinctivenessScore,
+
+        // @ts-ignore-line This is covered by the isValidCondition check above
+        conditionScore: habitat.conditions[data.condition],
+
+        strategicSignificanceCategory: getStrategicSignificance(data.strategicSignificance).significance,
+        strategicSignificanceMultiplier: getStrategicSignificance(data.strategicSignificance).multiplier,
+    }
 }

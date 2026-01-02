@@ -4,8 +4,7 @@ import { baselineHabitatType } from '../habitatTypes';
 import { distinctivenessSchema } from '../distinctivenessCategories';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { habitatByBroadAndType } from '../habitats';
-import { areaSchema, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 
 const inputSchema =
@@ -33,6 +32,7 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
     v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"),
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
+    v.transform(enrichWithHabitatData),
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>
 
