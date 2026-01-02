@@ -53,9 +53,9 @@ test("enrichWithBaselineUnitsData calculations", () => {
 
     const result = enrichWithBaselineUnitsData(inputData)
 
-    expect(result.baselineUnitsRetained).toBe(6 * 2 * 0.8 * 1.5)
-    expect(result.baselineUnitsEnhanced).toBe(3 * 2 * 0.8 * 1.5)
-    expect(result.areaHabitatLost).toBe(10 - 6 - 3)
+    expect(result.baselineUnitsRetained).toEqual(6 * 2 * 0.8 * 1.5)
+    expect(result.baselineUnitsEnhanced).toEqual(3 * 2 * 0.8 * 1.5)
+    expect(result.areaHabitatLost).toEqual(10 - 6 - 3)
     expect(result).toMatchObject(inputData)
 })
 
@@ -72,9 +72,9 @@ test("enrichWithBaselineUnitsData with zero areas", () => {
 
     const result = enrichWithBaselineUnitsData(inputData)
 
-    expect(result.baselineUnitsRetained).toBe(0)
-    expect(result.baselineUnitsEnhanced).toBe(0)
-    expect(result.areaHabitatLost).toBe(5)
+    expect(result.baselineUnitsRetained).toEqual(0)
+    expect(result.baselineUnitsEnhanced).toEqual(0)
+    expect(result.areaHabitatLost).toEqual(5)
 })
 
 test("enrichWithBaselineUnitsData full retention", () => {
@@ -90,16 +90,16 @@ test("enrichWithBaselineUnitsData full retention", () => {
 
     const result = enrichWithBaselineUnitsData(inputData)
 
-    expect(result.baselineUnitsRetained).toBe(8 * 3 * 0.9 * 2)
-    expect(result.baselineUnitsEnhanced).toBe(0)
-    expect(result.areaHabitatLost).toBe(0)
+    expect(result.baselineUnitsRetained).toEqual(8 * 3 * 0.9 * 2)
+    expect(result.baselineUnitsEnhanced).toEqual(0)
+    expect(result.areaHabitatLost).toEqual(0)
 })
 
 test("enrichWithBaselineUnitsData zero when irreplaceable", () => {
     const inputData = {
         irreplaceableHabitat: true,
         area: 8,
-        areaRetained: 8,
+        areaRetained: 7,
         areaEnhanced: 0,
         distinctivenessScore: 3,
         conditionScore: 0.9,
@@ -108,7 +108,7 @@ test("enrichWithBaselineUnitsData zero when irreplaceable", () => {
 
     const result = enrichWithBaselineUnitsData(inputData)
 
-    expect(result.baselineUnitsRetained).toBe(0)
-    expect(result.baselineUnitsEnhanced).toBe(0)
-    expect(result.areaHabitatLost).toBe(0)
+    expect(result.baselineUnitsRetained).toEqual(0)
+    expect(result.baselineUnitsEnhanced).toEqual(0)
+    expect(result.areaHabitatLost).toEqual(1)
 })

@@ -5,7 +5,6 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { addTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { bespokeCompensationSchema } from '../bespokeCompensation';
-import type { argv0 } from 'process';
 
 const inputSchema =
     v.object({
@@ -53,9 +52,7 @@ export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSc
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean; area: number; areaRetained: number; areaEnhanced: number; distinctivenessScore: number; conditionScore: number; strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const baselineUnitsRetained = data.irreplaceableHabitat
-        ? 0
-        : data.areaRetained
+    const baselineUnitsRetained = data.areaRetained
         * data.distinctivenessScore
         * data.conditionScore
         * data.strategicSignificanceMultiplier;
@@ -66,7 +63,9 @@ export function enrichWithBaselineUnitsData<Data extends {
     const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
     return {
         ...data,
-        baselineUnitsRetained,
+        baselineUnitsRetained: data.irreplaceableHabitat
+            ? 0
+            : baselineUnitsRetained,
         baselineUnitsEnhanced,
         areaHabitatLost,
     }
