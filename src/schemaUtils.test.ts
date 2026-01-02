@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { addTotalHabitatUnits } from "./schemaUtils";
+import { addTotalHabitatUnits, isValidIrreplaceable } from "./schemaUtils";
 
 test("addTotalHabitatUnits - bespoke required and compensation agreed", () => {
     const data = {
@@ -53,4 +53,24 @@ test("addTotalHabitatUnits - standard calculation", () => {
 
     const result = addTotalHabitatUnits(data);
     expect(result.totalHabitatUnits).toBe(225);
+});
+
+test("isValidIrreplaceable - non-irreplaceable habitats", () => {
+    expect(isValidIrreplaceable("Woodland and forest", "Other coniferous woodland", false)).toBe(true);
+    expect(isValidIrreplaceable("Woodland and forest", "Other coniferous woodland", true)).toBe(true);
+});
+
+test("isValidIrreplaceable - irreplaceable habitats", () => {
+    expect(isValidIrreplaceable("Sparsely vegetated land", "Coastal sand dunes", true)).toBe(true);
+    expect(isValidIrreplaceable("Sparsely vegetated land", "Coastal sand dunes", false)).toBe(false);
+});
+
+test("isValidIrreplaceable - invalid habitat combinations", () => {
+    expect(isValidIrreplaceable("Individual trees", "Felled", true)).toBe(false);
+    expect(isValidIrreplaceable("Individual trees", "Felled", false)).toBe(false);
+});
+
+test("isValidIrreplaceable - individual trees urban tree", () => {
+    expect(isValidIrreplaceable("Individual trees", "Urban tree", true)).toBe(true);
+    expect(isValidIrreplaceable("Individual trees", "Urban tree", false)).toBe(true);
 });

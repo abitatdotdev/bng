@@ -50,7 +50,7 @@ type EnrichedHabitatData = {
     requiredAction: SuggestedTradingActions,
 }
 
-export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription, irreplaceableHabitat: boolean }>(data: Data): Data & EnrichedHabitatData => {
+export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription, irreplaceableHabitat?: boolean }>(data: Data): Data & EnrichedHabitatData => {
     const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
 
     return {

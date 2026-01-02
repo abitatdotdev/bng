@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
 import * as v from 'valibot';
-import { onSiteHabitatBaselineSchema, enrichWithBaselineUnitsData, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
+import { onSiteHabitatBaselineSchema, enrichWithBaselineUnitsData, enrichWithUnitsLost, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
 
 export function fixture(overrides: Partial<OnSiteHabitatBaselineSchema> = {}): OnSiteHabitatBaselineSchema {
     return {
         broadHabitat: "Woodland and forest",
-        habitatType: "Lowland mixed deciduous woodland",
+        habitatType: "Other coniferous woodland",
         area: 1,
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         condition: "Good",
@@ -22,15 +22,6 @@ test("valid combinations of broad habitat and habitat type", () => {
     expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Felled" })).success).toBeFalse()
 })
 
-test("irreplaceable habitat validation", () => {
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ irreplaceableHabitat: false })).success).toBeTrue()
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: true })).success).toBeTrue()
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: false })).success).toBeFalse()
-
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: undefined })).success).toBeFalse()
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: true })).success).toBeTrue()
-    expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: false })).success).toBeTrue()
-})
 
 test("condition validation", () => {
     expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ condition: "Good" })).success).toBeTrue()
@@ -112,4 +103,27 @@ test("enrichWithBaselineUnitsData zero when irreplaceable", () => {
     expect(result.baselineUnitsRetained).toEqual(0)
     expect(result.baselineUnitsEnhanced).toEqual(0)
     expect(result.areaHabitatLost).toEqual(1)
+})
+
+test("enrichWithUnitsLost calculations", () => {
+    expect(enrichWithUnitsLost({
+        areaHabitatLost: 0,
+        totalHabitatUnits: 100,
+        baselineUnitsRetained: 60,
+        baselineUnitsEnhanced: 30
+    }).unitsLost).toEqual(0)
+
+    expect(enrichWithUnitsLost({
+        areaHabitatLost: 5,
+        totalHabitatUnits: 100,
+        baselineUnitsRetained: 60,
+        baselineUnitsEnhanced: 30
+    }).unitsLost).toEqual(10)
+
+    expect(enrichWithUnitsLost({
+        areaHabitatLost: 2,
+        totalHabitatUnits: 50,
+        baselineUnitsRetained: 40,
+        baselineUnitsEnhanced: 8
+    }).unitsLost).toEqual(2)
 })

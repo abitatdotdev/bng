@@ -3,7 +3,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { addTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { addTotalHabitatUnits as enrichWithTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { bespokeCompensationSchema } from '../bespokeCompensation';
 
 const inputSchema =
@@ -43,7 +43,12 @@ export const onSiteHabitatBaselineSchema = v.pipe(
         && !(s.areaRetained > 0 || s.areaEnhanced > 0)
         && s.bespokeCompensationAgreed === "No"
     ), "Any loss unacceptable"),
-    v.transform(addTotalHabitatUnits),
+    v.transform(enrichWithTotalHabitatUnits),
+    // Checks from within the units lost cell (X)
+    v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Area sums do not add up"),
+    v.check(s => !(s.bespokeCompensationAgreed === "Pending" && (s.requiredAction === "Same habitat required – bespoke compensation option ⚠" || s.requiredAction === "Bespoke compensation likely to be required")), "Bespoke compensation must be agreed"),
+    v.check(s => s.requiredAction !== "Bespoke compensation likely to be required", "Any loss unacceptable"),
+    v.transform(enrichWithUnitsLost),
 )
 
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
@@ -69,4 +74,18 @@ export function enrichWithBaselineUnitsData<Data extends {
         baselineUnitsEnhanced,
         areaHabitatLost,
     }
+}
+
+// See https://opncd.ai/share/4Z0sTzAw for translation
+export function enrichWithUnitsLost<Data extends {
+    areaHabitatLost: number,
+    totalHabitatUnits: number,
+    baselineUnitsRetained: number,
+    baselineUnitsEnhanced: number,
+}>(data: Data) {
+    const unitsLost = data.areaHabitatLost === 0 ? 0 : data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced;
+    return {
+        ...data,
+        unitsLost,
+    };
 }
