@@ -10,6 +10,7 @@ export function fixture(overrides: Partial<OnSiteHabitatBaselineSchema> = {}): O
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         condition: "Good",
         irreplaceableHabitat: false,
+        areaRetained: 1,
         ...overrides,
     }
 }

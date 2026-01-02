@@ -12,8 +12,7 @@ export function fixture(overrides: Partial<OffSiteHabitatBaselineSchema> = {}): 
         condition: "Good",
         irreplaceableHabitat: false,
         spatialRiskCategory: "This metric is being used by an off-site provider",
-        areaEnhanced: 0,
-        areaRetained: 0,
+        areaRetained: 1,
         ...overrides,
     }
 }
