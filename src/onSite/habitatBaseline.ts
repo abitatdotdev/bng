@@ -3,7 +3,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { addTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { bespokeCompensationSchema } from '../bespokeCompensation';
 
 const inputSchema =
@@ -16,7 +16,7 @@ const inputSchema =
         strategicSignificance: strategicSignificanceSchema,
         areaRetained: v.optional(areaSchema, 0),
         areaEnhanced: v.optional(areaSchema, 0),
-        bespokeCompensationAgreed: bespokeCompensationSchema,
+        bespokeCompensationAgreed: v.optional(bespokeCompensationSchema, "No"),
         userComments: freeTextSchema,
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
@@ -45,8 +45,23 @@ export const onSiteHabitatBaselineSchema = v.pipe(
             baselineUnitsEnhanced,
             areaHabitatLost,
         }
-    })
+    }),
+    // Checks from within the total habitat units cell (Q)
+    // See https://opncd.ai/share/5IiLnaI4 for translation
+    v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "You cannot enhance irreplaceable individual trees ▲"),
+    v.check(s => !(
+        s.irreplaceableHabitat
+        && (s.areaRetained + s.areaEnhanced) < s.area
+        && s.bespokeCompensationAgreed === "No"
+    ), "Any loss unacceptable"),
+    v.check(s => !(
+        s.requiredAction === "Bespoke compensation likely to be required"
+        && !(s.areaRetained > 0 || s.areaEnhanced > 0)
+        && s.bespokeCompensationAgreed === "No"
+    ), "Any loss unacceptable"),
+    v.transform(addTotalHabitatUnits),
 )
+
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
 export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSchema>
 

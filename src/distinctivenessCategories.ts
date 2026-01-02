@@ -19,3 +19,4 @@ export const distinctivenessCategories = {
     "Irreplaceable": { score: Infinity, suggestedAction: 'Bespoke compensation likely to be required' as const }
 } as const satisfies { [K in DistinctivenessCategory]: any };
 
+export type SuggestedTradingActions = typeof distinctivenessCategories[DistinctivenessCategory]['suggestedAction']

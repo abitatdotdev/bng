@@ -8,6 +8,7 @@ const row = v.parse(onSiteHabitatBaselineSchema, {
     area: 0.176,
     condition: "Poor",
     strategicSignificance: "Formally identified in local strategy",
+    areaRetained: 0.072,
 })
 
 console.info(row);

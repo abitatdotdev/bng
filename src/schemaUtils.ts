@@ -4,6 +4,8 @@ import { type BroadHabitat } from './broadHabitats';
 import { type BaselineHabitatType, type CreationHabitatType, type EnhancedHabitatType } from './habitatTypes';
 import type { Condition } from './conditions';
 import { getStrategicSignificance, type StrategicSignificance, type StrategicSignificanceDescription } from './strategicSignificanceSchema';
+import type { SuggestedTradingActions } from './distinctivenessCategories';
+import type { BespokeCompensation } from './bespokeCompensation';
 
 export const areaSchema = v.pipe(
     v.number(),
@@ -45,6 +47,7 @@ type EnrichedHabitatData = {
     conditionScore: Habitat['conditions'][Condition],
     strategicSignificanceCategory: StrategicSignificance['significance'],
     strategicSignificanceMultiplier: StrategicSignificance['multiplier'],
+    requiredAction: SuggestedTradingActions,
 }
 
 export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription }>(data: Data): Data & EnrichedHabitatData => {
@@ -64,3 +67,36 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
         requiredAction: habitat.distinctivenessTradingRules,
     }
 }
+
+export function addTotalHabitatUnits<Data extends {
+    requiredAction: SuggestedTradingActions,
+    area: number,
+    areaRetained: number,
+    areaEnhanced: number,
+    bespokeCompensationAgreed: BespokeCompensation,
+    baselineUnitsRetained: number,
+    baselineUnitsEnhanced: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+}>(data: Data) {
+    const bespokeRequired = data.requiredAction === "Bespoke compensation likely to be required";
+    const hasRetention = data.areaRetained > 0;
+    const hasEnhancement = data.areaEnhanced > 0;
+    const hasBiodiversityGain = hasRetention || hasEnhancement;
+
+    let totalHabitatUnits: number = 0;
+
+    if (bespokeRequired && !hasBiodiversityGain && data.bespokeCompensationAgreed === "Yes") {
+        totalHabitatUnits = 0;
+    } else if (bespokeRequired && hasBiodiversityGain) {
+        totalHabitatUnits = data.baselineUnitsRetained + data.baselineUnitsEnhanced;
+    } else {
+
+        totalHabitatUnits = data.area * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier;
+    }
+    return {
+        ...data,
+        totalHabitatUnits,
+    };
+};
