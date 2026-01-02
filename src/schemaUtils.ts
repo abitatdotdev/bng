@@ -60,5 +60,7 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
 
         strategicSignificanceCategory: getStrategicSignificance(data.strategicSignificance).significance,
         strategicSignificanceMultiplier: getStrategicSignificance(data.strategicSignificance).multiplier,
+
+        requiredAction: habitat.distinctivenessTradingRules,
     }
 }
