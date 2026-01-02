@@ -28,6 +28,23 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"),
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
     v.transform(enrichWithHabitatData),
+    v.transform(data => {
+        const baselineUnitsRetained = data.areaRetained
+            * data.distinctivenessScore
+            * data.conditionScore
+            * data.strategicSignificanceMultiplier;
+        const baselineUnitsEnhanced = data.areaEnhanced
+            * data.distinctivenessScore
+            * data.conditionScore
+            * data.strategicSignificanceMultiplier;
+        const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
+        return {
+            ...data,
+            baselineUnitsRetained,
+            baselineUnitsEnhanced,
+            areaHabitatLost,
+        }
+    })
 )
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
 export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSchema>
