@@ -4,7 +4,7 @@ import { type BroadHabitat } from './broadHabitats';
 import { type BaselineHabitatType, type CreationHabitatType, type EnhancedHabitatType } from './habitatTypes';
 import type { Condition } from './conditions';
 import { getStrategicSignificance, type StrategicSignificance, type StrategicSignificanceDescription } from './strategicSignificanceSchema';
-import type { SuggestedTradingActions } from './distinctivenessCategories';
+import { distinctivenessCategories, type SuggestedTradingActions } from './distinctivenessCategories';
 import type { BespokeCompensation } from './bespokeCompensation';
 
 export const areaSchema = v.pipe(
@@ -50,7 +50,7 @@ type EnrichedHabitatData = {
     requiredAction: SuggestedTradingActions,
 }
 
-export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription }>(data: Data): Data & EnrichedHabitatData => {
+export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription, irreplaceableHabitat: boolean }>(data: Data): Data & EnrichedHabitatData => {
     const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
 
     return {
@@ -64,7 +64,7 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
         strategicSignificanceCategory: getStrategicSignificance(data.strategicSignificance).significance,
         strategicSignificanceMultiplier: getStrategicSignificance(data.strategicSignificance).multiplier,
 
-        requiredAction: habitat.distinctivenessTradingRules,
+        requiredAction: data.irreplaceableHabitat ? distinctivenessCategories['Irreplaceable'].suggestedAction : habitat.distinctivenessTradingRules,
     }
 }
 

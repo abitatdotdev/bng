@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import * as v from 'valibot';
-import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
+import { onSiteHabitatBaselineSchema, enrichWithBaselineUnitsData, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
 
 export function fixture(overrides: Partial<OnSiteHabitatBaselineSchema> = {}): OnSiteHabitatBaselineSchema {
     return {
@@ -40,3 +40,75 @@ test("condition validation", () => {
     expect(v.safeParse(onSiteHabitatBaselineSchema, fixture({ condition: "N/A - Other" })).success).toBeFalse()
 })
 
+test("enrichWithBaselineUnitsData calculations", () => {
+    const inputData = {
+        irreplaceableHabitat: false,
+        area: 10,
+        areaRetained: 6,
+        areaEnhanced: 3,
+        distinctivenessScore: 2,
+        conditionScore: 0.8,
+        strategicSignificanceMultiplier: 1.5,
+    }
+
+    const result = enrichWithBaselineUnitsData(inputData)
+
+    expect(result.baselineUnitsRetained).toBe(6 * 2 * 0.8 * 1.5)
+    expect(result.baselineUnitsEnhanced).toBe(3 * 2 * 0.8 * 1.5)
+    expect(result.areaHabitatLost).toBe(10 - 6 - 3)
+    expect(result).toMatchObject(inputData)
+})
+
+test("enrichWithBaselineUnitsData with zero areas", () => {
+    const inputData = {
+        irreplaceableHabitat: false,
+        area: 5,
+        areaRetained: 0,
+        areaEnhanced: 0,
+        distinctivenessScore: 1,
+        conditionScore: 1,
+        strategicSignificanceMultiplier: 1,
+    }
+
+    const result = enrichWithBaselineUnitsData(inputData)
+
+    expect(result.baselineUnitsRetained).toBe(0)
+    expect(result.baselineUnitsEnhanced).toBe(0)
+    expect(result.areaHabitatLost).toBe(5)
+})
+
+test("enrichWithBaselineUnitsData full retention", () => {
+    const inputData = {
+        irreplaceableHabitat: false,
+        area: 8,
+        areaRetained: 8,
+        areaEnhanced: 0,
+        distinctivenessScore: 3,
+        conditionScore: 0.9,
+        strategicSignificanceMultiplier: 2,
+    }
+
+    const result = enrichWithBaselineUnitsData(inputData)
+
+    expect(result.baselineUnitsRetained).toBe(8 * 3 * 0.9 * 2)
+    expect(result.baselineUnitsEnhanced).toBe(0)
+    expect(result.areaHabitatLost).toBe(0)
+})
+
+test("enrichWithBaselineUnitsData zero when irreplaceable", () => {
+    const inputData = {
+        irreplaceableHabitat: true,
+        area: 8,
+        areaRetained: 8,
+        areaEnhanced: 0,
+        distinctivenessScore: 3,
+        conditionScore: 0.9,
+        strategicSignificanceMultiplier: 2,
+    }
+
+    const result = enrichWithBaselineUnitsData(inputData)
+
+    expect(result.baselineUnitsRetained).toBe(0)
+    expect(result.baselineUnitsEnhanced).toBe(0)
+    expect(result.areaHabitatLost).toBe(0)
+})

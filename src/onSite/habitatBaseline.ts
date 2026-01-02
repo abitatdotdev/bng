@@ -5,6 +5,7 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { addTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { bespokeCompensationSchema } from '../bespokeCompensation';
+import type { argv0 } from 'process';
 
 const inputSchema =
     v.object({
@@ -29,23 +30,7 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"),
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
     v.transform(enrichWithHabitatData),
-    v.transform(data => {
-        const baselineUnitsRetained = data.areaRetained
-            * data.distinctivenessScore
-            * data.conditionScore
-            * data.strategicSignificanceMultiplier;
-        const baselineUnitsEnhanced = data.areaEnhanced
-            * data.distinctivenessScore
-            * data.conditionScore
-            * data.strategicSignificanceMultiplier;
-        const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
-        return {
-            ...data,
-            baselineUnitsRetained,
-            baselineUnitsEnhanced,
-            areaHabitatLost,
-        }
-    }),
+    v.transform(enrichWithBaselineUnitsData),
     // Checks from within the total habitat units cell (Q)
     // See https://opncd.ai/share/5IiLnaI4 for translation
     v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "You cannot enhance irreplaceable individual trees ▲"),
@@ -65,3 +50,24 @@ export const onSiteHabitatBaselineSchema = v.pipe(
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
 export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSchema>
 
+export function enrichWithBaselineUnitsData<Data extends {
+    irreplaceableHabitat: boolean; area: number; areaRetained: number; areaEnhanced: number; distinctivenessScore: number; conditionScore: number; strategicSignificanceMultiplier: number;
+}>(data: Data) {
+    const baselineUnitsRetained = data.irreplaceableHabitat
+        ? 0
+        : data.areaRetained
+        * data.distinctivenessScore
+        * data.conditionScore
+        * data.strategicSignificanceMultiplier;
+    const baselineUnitsEnhanced = data.areaEnhanced
+        * data.distinctivenessScore
+        * data.conditionScore
+        * data.strategicSignificanceMultiplier;
+    const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
+    return {
+        ...data,
+        baselineUnitsRetained,
+        baselineUnitsEnhanced,
+        areaHabitatLost,
+    }
+}
