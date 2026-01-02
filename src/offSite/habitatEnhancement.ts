@@ -3,8 +3,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { enhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { habitatByBroadAndType } from '../habitats';
-import { freeTextSchema, yearsSchema } from '../schemaUtils';
+import { freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
 import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 
 const inputSchema = v.object({
@@ -24,18 +23,8 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
 
 export const offSiteHabitatEnhancementSchema = v.pipe(
     inputSchema,
-    v.check(isValidHabitat, "The broad habitat and habitat type are incompatible"),
-    v.check(isValidCondition, "The condition for this habitat is invalid"),
+    v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
+    v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
 )
 export type OffSiteHabitatEnhancementSchema = v.InferInput<typeof offSiteHabitatEnhancementSchema>
 
-function isValidHabitat({ broadHabitat, habitatType }: OutputSchema): boolean {
-    return !!habitatByBroadAndType(broadHabitat, habitatType);
-}
-
-function isValidCondition({ broadHabitat, habitatType, condition }: OutputSchema): boolean {
-    const habitat = habitatByBroadAndType(broadHabitat, habitatType);
-    if (!habitat) return false
-
-    return Object.keys(habitat.conditions).includes(condition);
-}

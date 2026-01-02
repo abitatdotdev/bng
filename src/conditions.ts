@@ -9,4 +9,5 @@ export const conditionSchema = v.union([
     v.literal("Condition Assessment N/A"),
     v.literal("N/A - Other"),
 ])
+export type Condition = v.InferOutput<typeof conditionSchema>
 

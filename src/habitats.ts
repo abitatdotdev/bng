@@ -2,7 +2,7 @@
 import { type BroadHabitat } from "./broadHabitats";
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
-import type { BaselineHabitatType } from "./habitatTypes";
+import type { BaselineHabitatType, CreationHabitatType, EnhancedHabitatType } from "./habitatTypes";
 
 export const allHabitats = {
     'Cropland - Arable field margins cultivated annually': {
@@ -3900,7 +3900,7 @@ export type HabitatLabel = Habitat['label']
 export function habitatByLabel(label: HabitatLabel): Habitat | undefined {
     return Object.values(allHabitats).find(h => h.label === label);
 }
-export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType): Habitat | undefined {
+export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): Habitat | undefined {
     return Object.values(allHabitats).find(h => h.broadHabitat === broadHabitat && h.type === habitatType);
 }
 
