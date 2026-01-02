@@ -15,30 +15,20 @@ const conditionColumns = [
     'N/A - Other'
 ];
 
-// Lookup tables for conversions
-const distinctivenessMap = {
-    'V.High': 'vHigh',
-    'Very High': 'vHigh',
-    'High': 'high',
-    'Medium': 'medium',
-    'Low': 'low',
-    'V.Low': 'vLow',
-};
-
 const distinctivenessScores = {
-    vHigh: 8,
-    high: 6,
-    medium: 4,
-    low: 2,
-    vLow: 0,
+    'V.High': 8,
+    'High': 6,
+    'Medium': 4,
+    'Low': 2,
+    'V.Low': 0,
 };
 
 const distinctivenessTradingRules = {
-    vHigh: 'Same habitat required – bespoke compensation option ⚠',
-    high: 'Same habitat required =',
-    medium: 'Same broad habitat or a higher distinctiveness habitat required (≥)',
-    low: 'Same distinctiveness or better habitat required ≥',
-    vLow: 'Compensation Not Required',
+    'V.High': 'Same habitat required – bespoke compensation option ⚠',
+    'High': 'Same habitat required =',
+    'Medium': 'Same broad habitat or a higher distinctiveness habitat required (≥)',
+    'Low': 'Same distinctiveness or better habitat required ≥',
+    'V.Low': 'Compensation Not Required',
 };
 
 const difficultyMap = {
@@ -80,18 +70,6 @@ const COLUMNS = {
 };
 
 /**
- * Convert Excel cell reference to column index
- * e.g., "A" -> 0, "B" -> 1, "Z" -> 25, "AA" -> 26
- */
-function colLetterToIndex(letter) {
-    let index = 0;
-    for (let i = 0; i < letter.length; i++) {
-        index = index * 26 + (letter.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
-    }
-    return index - 1;
-}
-
-/**
  * Get cell value from worksheet
  */
 function getCellValue(sheet, row, col) {
@@ -113,8 +91,9 @@ function toMaybeBoolean(value) {
  */
 function convertDistinctivenessCategory(rawValue) {
     if (!rawValue) return 'low';
-    const normalized = String(rawValue).trim();
-    return distinctivenessMap[normalized] || 'low';
+    const cleaned = String(rawValue).trim();
+    if (cleaned === "V.low") return "V.Low"
+    return cleaned
 }
 
 /**
@@ -150,6 +129,10 @@ function getTradingRules(category) {
     return distinctivenessTradingRules[normalized] || 'Compensation Not Required';
 }
 
+function getBroadHabitat(label) {
+    return label.split(' - ')[0];
+}
+
 /**
  * Escape special characters in strings for TypeScript output
  */
@@ -169,7 +152,6 @@ function escapeString(str) {
 function readConditionsData() {
     const content = readFileSync('./examples/conditions.tsv', 'utf-8');
     const lines = content.trim().split('\n');
-    const header = lines[0];
     const dataLines = lines.slice(1);
 
     const conditionMap = {};
@@ -226,6 +208,7 @@ function readHabitatData(filePath, conditionMap) {
 
         const habitat = {
             label: labelStr,
+            broadHabitat: String(getBroadHabitat(labelStr)),
             type: String(getCellValue(sheet, row, COLUMNS.type) || '').trim(),
             code: String(getCellValue(sheet, row, COLUMNS.code) || '').trim(),
             level1: String(getCellValue(sheet, row, COLUMNS.level1) || '').trim(),
@@ -294,15 +277,19 @@ function readHabitatData(filePath, conditionMap) {
  */
 function generateTypeScriptCode(habitats) {
     let code = `// THIS FILE IS GENERATED AUTOMATICALLY
+import * as v from 'valibot';
+import { broadHabitatSchema, type BroadHabitat } from "./broadHabitats";
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
+import type { HabitatType } from "./habitatTypes";
 
 export const allHabitats = {
 `
 
     habitats.forEach((habitat, index) => {
-        code += `    '${escapeString(habitat.label)}': {\n`;
+        code += `    '${escapeString(`${habitat.broadHabitat} - ${habitat.type}`)}': {\n`;
         code += `        label: '${escapeString(habitat.label)}',\n`;
+        code += `        broadHabitat: '${escapeString(habitat.broadHabitat)}',\n`;
         code += `        type: '${escapeString(habitat.type)}',\n`;
         code += `        code: '${escapeString(habitat.code)}',\n`;
         code += `        level1: '${escapeString(habitat.level1)}',\n`;
@@ -313,8 +300,8 @@ export const allHabitats = {
         code += `        level4Code: '${escapeString(habitat.level4Code)}',\n`;
         code += `        level4Label: '${escapeString(habitat.level4Label)}',\n`;
         code += `        distinctivenessCategory: ${habitat.distinctivenessCategory ? `'${habitat.distinctivenessCategory}'` : 'null'},\n`;
-        code += `        distinctivenessScore: ${habitat.distinctivenessCategory ? `distinctivenessCategories.${habitat.distinctivenessCategory}.score` : 'null'},\n`;
-        code += `        distinctivenessTradingRules: ${habitat.distinctivenessCategory ? `distinctivenessCategories.${habitat.distinctivenessCategory}.suggestedAction` : "''"},\n`;
+        code += `        distinctivenessScore: ${habitat.distinctivenessCategory ? `distinctivenessCategories["${habitat.distinctivenessCategory}"].score` : 'null'},\n`;
+        code += `        distinctivenessTradingRules: ${habitat.distinctivenessCategory ? `distinctivenessCategories["${habitat.distinctivenessCategory}"].suggestedAction` : "''"},\n`;
         code += `        technicalDifficultyCreation: ${habitat.technicalDifficultyCreation ? `'${habitat.technicalDifficultyCreation}'` : 'null'},\n`;
         code += `        technicalDifficultyCreationMultiplier: ${habitat.technicalDifficultyCreation ? `difficulty.${habitat.technicalDifficultyCreation}` : '1'},\n`;
         code += `        technicalDifficultyEnhancement: ${habitat.technicalDifficultyEnhancement ? `'${habitat.technicalDifficultyEnhancement}'` : 'null'},\n`;
@@ -340,7 +327,21 @@ export const allHabitats = {
         }
     });
 
-    code += '} as const\n';
+    code += '} as const';
+    code += `
+export type HabitatMap = typeof allHabitats;
+type HabitatMapLabel = keyof HabitatMap;
+export type Habitat = HabitatMap[HabitatMapLabel]
+export type HabitatLabel = Habitat['label']
+
+export function habitatByLabel(label: HabitatLabel): Habitat | undefined {
+    return Object.values(allHabitats).find(h => h.label === label);
+}
+export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: HabitatType): Habitat | undefined {
+    return Object.values(allHabitats).find(h => h.broadHabitat === broadHabitat && h.type === habitatType);
+}
+
+`
 
     return code;
 }

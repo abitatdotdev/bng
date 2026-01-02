@@ -1,8 +1,24 @@
 import * as v from 'valibot';
 
-export const strategicSignificanceSchema = v.union([
-    v.literal("Formally identified in local strategy"),
-    v.literal("Location ecologically desirable but not in local strategy"),
-    v.literal("Area/compensation not in local strategy/ no local strategy"),
-]);
+const strategicSignificance = [
+    {
+        description: "Formally identified in local strategy",
+        significance: "High strategic significance", multiplier: 1.15,
+    },
+    {
+        description: "Location ecologically desirable but not in local strategy",
+        significance: "Medium strategic significance", multiplier: 1.1
+    },
+    {
+        description: "Area/compensation not in local strategy/ no local strategy",
+        significance: "Low strategic significance", multiplier: 1,
+    },
+];
 
+export const strategicSignificanceSchema = v.picklist(
+    strategicSignificance.map(s => s.description),
+);
+
+export const getStrategicSignificance = (desc: v.InferInput<typeof strategicSignificanceSchema>) => {
+    return strategicSignificance.find(s => s.description === desc)!;
+}
