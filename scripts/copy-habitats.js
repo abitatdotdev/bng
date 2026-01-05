@@ -182,9 +182,35 @@ function readConditionsData() {
 }
 
 /**
+ * Read temporal multipliers sheet
+ */
+function readTemporalMultipliersData() {
+    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const worksheet = workbook.Sheets['G-4 Temporal multipliers'];
+    const data = XLSX.utils.sheet_to_json(worksheet, { range: 'F3:M135' });
+
+    const temporalMultipliersMap = {};
+
+    data.forEach(row => {
+        const name = row["Habitat Description"]
+        temporalMultipliersMap[name] = {}
+
+        for (const key of conditionKeys) {
+            const value = row[key]
+            const parsed = parseFloat(value);
+            if (isNaN(parsed)) continue
+            temporalMultipliersMap[name][key] = parsed
+        }
+    });
+
+    console.log(`Read temporal multipliers for ${Object.keys(temporalMultipliersMap).length} habitats`);
+    return temporalMultipliersMap;
+}
+
+/**
  * Read Excel file and extract habitat data
  */
-function readHabitatData(filePath, conditionMap) {
+function readHabitatData(filePath, conditionMap, temporalMultipliersMap) {
     console.log(`Reading Excel file: ${filePath}`);
 
     const workbook = XLSX.readFile(filePath);
@@ -232,11 +258,17 @@ function readHabitatData(filePath, conditionMap) {
             conditionAssessmentNotes: String(getCellValue(sheet, row, COLUMNS.conditionAssessmentNotes) || '').trim(),
             irreplaceable: false,
             conditions: null,
+            temporalMultipliers: null,
         };
 
         // Add condition data if available
         if (conditionMap[labelStr]) {
             habitat.conditions = conditionMap[labelStr];
+        }
+
+        // Add temporal multipliers data if available
+        if (temporalMultipliersMap[labelStr]) {
+            habitat.temporalMultipliers = temporalMultipliersMap[labelStr];
         }
 
         // Process distinctiveness category
@@ -320,6 +352,15 @@ export const allHabitats = {
         } else {
             code += `        conditions: null,\n`;
         }
+        if (habitat.temporalMultipliers) {
+            code += `        temporalMultipliers: {\n`;
+            Object.entries(habitat.temporalMultipliers).forEach(([condition, value]) => {
+                code += `            '${condition}': ${value},\n`;
+            });
+            code += `        },\n`;
+        } else {
+            code += `        temporalMultipliers: null,\n`;
+        }
         code += '    }';
 
         if (index < habitats.length - 1) {
@@ -363,8 +404,11 @@ async function main() {
         // Read conditions data
         const conditionMap = readConditionsData();
 
+        // Read temporal multipliers data
+        const temporalMultipliersMap = readTemporalMultipliersData();
+
         // Read habitat data from Excel
-        const habitats = readHabitatData(filePath, conditionMap);
+        const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap);
 
         // Generate TypeScript code
         const typeScriptCode = generateTypeScriptCode(habitats);
