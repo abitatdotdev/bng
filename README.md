@@ -1,15 +1,22 @@
-# bng
+# DEFRA statutory biodiversity metric tool
 
-To install dependencies:
+> [!NOTE]
+> This repository is a work in progress. Reach out to hello@abitat.dev to contribute.
 
-```bash
-bun install
-```
+The code here provides an open source, generally available version of the
+[statutory biodiversity metric calculation tool](https://www.gov.uk/government/publications/statutory-biodiversity-metric-tools-and-guides)
+published by [DEFRA](https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs).
 
-To run:
+The aims of this library are:
+* directly mirror the existing spreadsheet calculation tool
+* remain compatiblity with the spreadsheet format to enable seamless read/write with either tool
+* work in all javascript environments (server, web, serverless)
+* document and test the functionality/inner workings of the calculations
 
-```bash
-bun run index.ts
-```
+By doing so, we wish to facilitate better tooling for BNG.
 
-This project was created using `bun init` in bun v1.3.4. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## Community contributions
+
+We encourage community contributions, but it's too early to be directly involved.
+If you would like to contribute to this project, please get in touch at
+[hello@abitat.dev](mailto:hello@abitat.dev).
