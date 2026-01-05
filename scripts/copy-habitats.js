@@ -281,7 +281,7 @@ import * as v from 'valibot';
 import { broadHabitatSchema, type BroadHabitat } from "./broadHabitats";
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
-import type { HabitatType } from "./habitatTypes";
+import type { BaselineHabitatType, CreationHabitatType, EnhancedHabitatType } from "./habitatTypes";
 
 export const allHabitats = {
 `
@@ -337,7 +337,7 @@ export type HabitatLabel = Habitat['label']
 export function habitatByLabel(label: HabitatLabel): Habitat | undefined {
     return Object.values(allHabitats).find(h => h.label === label);
 }
-export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: HabitatType): Habitat | undefined {
+export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): Habitat | undefined {
     return Object.values(allHabitats).find(h => h.broadHabitat === broadHabitat && h.type === habitatType);
 }
 
