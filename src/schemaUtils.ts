@@ -55,6 +55,7 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
 
     return {
         ...data,
+        _habitat: habitat,
         distinctiveness: habitat.distinctivenessCategory,
         distinctivenessScore: habitat.distinctivenessScore,
 
@@ -65,6 +66,17 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
         strategicSignificanceMultiplier: getStrategicSignificance(data.strategicSignificance).multiplier,
 
         requiredAction: data.irreplaceableHabitat ? distinctivenessCategories['Irreplaceable'].suggestedAction : habitat.distinctivenessTradingRules,
+    }
+}
+
+export const enrichWithCreationData = <Data extends { broadHabitat: BroadHabitat; habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType; condition: string; }>(data: Data) => {
+    const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
+
+    return {
+        ...data,
+
+        // @ts-ignore-line This is covered by the isValidCondition check above
+        timeToTargetCondition: habitat.temporalMultipliers[data.condition],
     }
 }
 
