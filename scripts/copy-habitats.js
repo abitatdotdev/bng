@@ -146,32 +146,35 @@ function escapeString(str) {
         .replace(/\t/g, '\\t');
 }
 
+const conditionKeys = [
+    "Good",
+    "Fairly Good",
+    "Moderate",
+    "Fairly Poor",
+    "Poor",
+    "Condition Assessment N/A",
+    "N/A - Other",
+]
 /**
- * Read conditions TSV file and create condition map
+ * Read conditions sheet
  */
 function readConditionsData() {
-    const content = readFileSync('./examples/conditions.tsv', 'utf-8');
-    const lines = content.trim().split('\n');
-    const dataLines = lines.slice(1);
+    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const worksheet = workbook.Sheets['G-8 Condition Look up'];
+    const data = XLSX.utils.sheet_to_json(worksheet, { range: 'A3:H135' });
 
     const conditionMap = {};
 
-    dataLines.forEach(line => {
-        const row = line.split('\t');
-        const habitat = row[0];
+    data.forEach(row => {
+        const name = row["Habitat Description"]
+        conditionMap[name] = {}
 
-        if (!habitat) return;
-
-        conditionMap[habitat] = {};
-
-        conditionColumns.forEach((condition, index) => {
-            const value = row[index + 1];
-            const numValue = parseFloat(value);
-
-            if (value && !isNaN(numValue)) {
-                conditionMap[habitat][condition] = numValue;
-            }
-        });
+        for (const key of conditionKeys) {
+            const value = row[key]
+            const parsed = parseFloat(value);
+            if (isNaN(parsed)) continue
+            conditionMap[name][key] = parsed
+        }
     });
 
     console.log(`Read conditions for ${Object.keys(conditionMap).length} habitats`);
@@ -277,8 +280,7 @@ function readHabitatData(filePath, conditionMap) {
  */
 function generateTypeScriptCode(habitats) {
     let code = `// THIS FILE IS GENERATED AUTOMATICALLY
-import * as v from 'valibot';
-import { broadHabitatSchema, type BroadHabitat } from "./broadHabitats";
+import { type BroadHabitat } from "./broadHabitats";
 import { difficulty } from "./difficulty"
 import { distinctivenessCategories } from "./distinctivenessCategories"
 import type { BaselineHabitatType, CreationHabitatType, EnhancedHabitatType } from "./habitatTypes";
@@ -370,8 +372,6 @@ async function main() {
         // Output the code
         console.log('\n' + '='.repeat(80));
         console.log('Generated TypeScript Code:');
-        console.log('='.repeat(80) + '\n');
-        console.log(typeScriptCode);
 
         // Optionally save to file
         const outputPath = './src/habitats.ts';
