@@ -169,6 +169,36 @@ const enrichWithDifficultyData = <Data extends {
     };
 }
 
+/**
+ * Calculates habitat units delivered for on-site habitat creation.
+ *
+ * Formula: Area × Distinctiveness Score × Condition Score × Strategic Significance Multiplier
+ *          × Final Time to Target Multiplier × Difficulty Multiplier
+ *
+ * Corresponds to column Y in Excel sheet A-2
+ */
+const calculateHabitatUnitsDelivered = <Data extends {
+    area: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number,
+    difficultyMultiplierApplied: number
+}>(data: Data) => {
+    const habitatUnitsDelivered =
+        data.area *
+        data.distinctivenessScore *
+        data.conditionScore *
+        data.strategicSignificanceMultiplier *
+        data.finalTimeToTargetMultiplier *
+        data.difficultyMultiplierApplied;
+
+    return {
+        ...data,
+        habitatUnitsDelivered
+    };
+}
+
 export const onSiteHabitatCreationSchema = v.pipe(
     inputSchema,
     v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
@@ -180,7 +210,8 @@ export const onSiteHabitatCreationSchema = v.pipe(
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
     v.transform(calculateFinalTimeToTargetValues),
-    v.transform(enrichWithDifficultyData)
+    v.transform(enrichWithDifficultyData),
+    v.transform(calculateHabitatUnitsDelivered)
 )
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
 

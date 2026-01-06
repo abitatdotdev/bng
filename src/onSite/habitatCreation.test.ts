@@ -216,3 +216,57 @@ test("difficulty - enhancement difficulty not applied to excluded habitats", () 
     expect(result.appliedDifficultyMultiplier).toEqual("Standard difficulty applied")
     expect(result.finalDifficultyOfCreation).toEqual(result.standardDifficultyOfCreation)
 })
+
+test("habitat units delivered - basic calculation", () => {
+    // Test the basic habitat units calculation with no advance or delay
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Woodland and forest",
+        habitatType: "Lowland mixed deciduous woodland",
+        condition: "Good",
+        area: 1,
+        strategicSignificance: "Formally identified in local strategy",
+        habitatCreationInAdvance: 0,
+        habitatCreationDelay: 0
+    }))
+
+    // Expected: 1 (area) × 6 (distinctiveness) × 3 (condition) × 1.15 (strategic sig) × 0.3197967361 (temporal) × 0.33 (difficulty)
+    const expected = 1 * 6 * 3 * 1.15 * 0.3197967361 * 0.33
+    expect(result.habitatUnitsDelivered).toBeCloseTo(expected, 5)
+})
+
+test("habitat units delivered - with habitat creation in advance", () => {
+    // Lowland calcareous grassland with 20 years advance reaches target condition (low difficulty)
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Lowland calcareous grassland",
+        condition: "Good",
+        area: 2.5,
+        strategicSignificance: "Location ecologically desirable but not in local strategy",
+        habitatCreationInAdvance: 20,
+        habitatCreationDelay: 0
+    }))
+
+    // Expected: 2.5 (area) × 6 (distinctiveness) × 3 (condition) × 1.1 (strategic sig) × 1 (temporal=0) × 1 (low difficulty)
+    const expected = 2.5 * 6 * 3 * 1.1 * 1 * 1
+    expect(result.habitatUnitsDelivered).toBeCloseTo(expected, 5)
+})
+
+test("habitat units delivered - with delay", () => {
+    // Test with habitat creation delay
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Lowland calcareous grassland",
+        condition: "Good",
+        area: 1.5,
+        strategicSignificance: "Formally identified in local strategy",
+        habitatCreationInAdvance: 0,
+        habitatCreationDelay: 5
+    }))
+
+    // 20 years + 5 delay = 25 years
+    expect(result.finalTimeToTargetCondition).toEqual(25)
+
+    // Area × distinctiveness × condition × strategic sig × temporal multiplier for 25 × difficulty
+    const expected = 1.5 * 6 * 3 * 1.15 * result.finalTimeToTargetMultiplier * 0.33
+    expect(result.habitatUnitsDelivered).toBeCloseTo(expected, 5)
+})
