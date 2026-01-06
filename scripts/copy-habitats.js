@@ -225,9 +225,40 @@ function readTemporalMultipliersData() {
 }
 
 /**
+ * Read difficulty multipliers from G-3 Multipliers sheet
+ */
+function readDifficultyMultipliersData() {
+    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const worksheet = workbook.Sheets['G-3 Multipliers'];
+
+    const difficultyMultipliersMap = {};
+
+    // Read data from rows 3 to 134 (0-indexed rows 2 to 133)
+    for (let row = 2; row <= 133; row++) {
+        const name = getCellValue(worksheet, row, 0); // Column A: Habitat Description
+        if (!name) continue;
+
+        const creationDifficulty = getCellValue(worksheet, row, 1); // Column B
+        const creationMultiplier = getCellValue(worksheet, row, 2); // Column C
+        const enhancementDifficulty = getCellValue(worksheet, row, 3); // Column D
+        const enhancementMultiplier = getCellValue(worksheet, row, 4); // Column E
+
+        difficultyMultipliersMap[String(name).trim()] = {
+            technicalDifficultyCreation: creationDifficulty ? String(creationDifficulty).trim() : null,
+            technicalDifficultyCreationMultiplier: creationMultiplier ? parseFloat(creationMultiplier) : 1,
+            technicalDifficultyEnhancement: enhancementDifficulty ? String(enhancementDifficulty).trim() : null,
+            technicalDifficultyEnhancementMultiplier: enhancementMultiplier ? parseFloat(enhancementMultiplier) : 1,
+        };
+    }
+
+    console.log(`Read difficulty multipliers for ${Object.keys(difficultyMultipliersMap).length} habitats`);
+    return difficultyMultipliersMap;
+}
+
+/**
  * Read Excel file and extract habitat data
  */
-function readHabitatData(filePath, conditionMap, temporalMultipliersMap) {
+function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap) {
     console.log(`Reading Excel file: ${filePath}`);
 
     const workbook = XLSX.readFile(filePath);
@@ -288,6 +319,19 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap) {
             habitat.temporalMultipliers = temporalMultipliersMap[labelStr];
         }
 
+        // Add difficulty multipliers from G-3 Multipliers sheet if available
+        if (difficultyMultipliersMap[labelStr]) {
+            const diffData = difficultyMultipliersMap[labelStr];
+            if (diffData.technicalDifficultyCreation) {
+                habitat.technicalDifficultyCreation = convertDifficulty(diffData.technicalDifficultyCreation);
+                habitat.technicalDifficultyCreationMultiplier = diffData.technicalDifficultyCreationMultiplier;
+            }
+            if (diffData.technicalDifficultyEnhancement) {
+                habitat.technicalDifficultyEnhancement = convertDifficulty(diffData.technicalDifficultyEnhancement);
+                habitat.technicalDifficultyEnhancementMultiplier = diffData.technicalDifficultyEnhancementMultiplier;
+            }
+        }
+
         // Process distinctiveness category
         const rawCategory = getCellValue(sheet, row, COLUMNS.distinctivenessCategory);
         if (rawCategory) {
@@ -295,22 +339,6 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap) {
             habitat.distinctivenessCategory = category;
             habitat.distinctivenessScore = getDistinctivenessScore(category);
             habitat.distinctivenessTradingRules = getTradingRules(category);
-        }
-
-        // Process technical difficulty creation
-        const rawCreationDifficulty = getCellValue(sheet, row, COLUMNS.technicalDifficultyCreation);
-        if (rawCreationDifficulty) {
-            const difficulty = convertDifficulty(rawCreationDifficulty);
-            habitat.technicalDifficultyCreation = difficulty;
-            habitat.technicalDifficultyCreationMultiplier = getMultiplier(difficulty);
-        }
-
-        // Process technical difficulty enhancement
-        const rawEnhancementDifficulty = getCellValue(sheet, row, COLUMNS.technicalDifficultyEnhancement);
-        if (rawEnhancementDifficulty) {
-            const difficulty = convertDifficulty(rawEnhancementDifficulty);
-            habitat.technicalDifficultyEnhancement = difficulty;
-            habitat.technicalDifficultyEnhancementMultiplier = getMultiplier(difficulty);
         }
 
         // Process irreplaceable
@@ -426,8 +454,11 @@ async function main() {
         // Read temporal multipliers data
         const temporalMultipliersMap = readTemporalMultipliersData();
 
+        // Read difficulty multipliers data from G-3 Multipliers sheet
+        const difficultyMultipliersMap = readDifficultyMultipliersData();
+
         // Read habitat data from Excel
-        const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap);
+        const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap);
 
         // Generate TypeScript code
         const typeScriptCode = generateTypeScriptCode(habitats);
