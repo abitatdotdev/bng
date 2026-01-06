@@ -225,6 +225,76 @@ function readTemporalMultipliersData() {
 }
 
 /**
+ * Read enhancement temporal multipliers from G-5 Enhancement Temporal sheet
+ * This sheet contains years to target for enhancement pathways (baseline condition → target condition)
+ */
+function readEnhancementTemporalData() {
+    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const worksheet = workbook.Sheets['G-5 Enhancement Temporal'];
+
+    const enhancementTemporalMap = {};
+
+    // Special string values that should be preserved
+    const specialValues = ['30+', 'Not Possible ▲'];
+
+    // First, read the header row (row 4, 0-indexed row 3) to get enhancement pathway names
+    // Pathway names are in columns D onwards (column index 3+)
+    const pathwayNamesRow = 3; // Row 4 (0-indexed)
+    const pathwayNames = [];
+    const pathwayStartCol = 3; // Column D (0-indexed)
+
+    // Read pathway names from row 4
+    for (let col = pathwayStartCol; col < 100; col++) { // Read up to column 100 to be safe
+        const pathwayName = getCellValue(worksheet, pathwayNamesRow, col);
+        if (!pathwayName) break; // Stop when we hit empty columns
+        pathwayNames.push(String(pathwayName).trim());
+    }
+
+    console.log(`Found ${pathwayNames.length} enhancement pathways`);
+
+    // Now read data rows starting from row 5 (0-indexed row 4)
+    const startRow = 4; // Row 5 (0-indexed)
+    const endRow = 138; // Row 139 (0-indexed) - extended to match G-1 All Habitats range
+
+    for (let row = startRow; row <= endRow; row++) {
+        // Column C (index 2) contains the habitat name
+        const habitatName = getCellValue(worksheet, row, 2);
+
+        // Skip if no habitat name
+        if (!habitatName) continue;
+
+        const habitatNameStr = String(habitatName).trim();
+        enhancementTemporalMap[habitatNameStr] = {};
+
+        // Read temporal values for each pathway
+        pathwayNames.forEach((pathwayName, index) => {
+            const col = pathwayStartCol + index;
+            const value = getCellValue(worksheet, row, col);
+
+            // Skip empty/undefined values
+            if (value === null || value === undefined || value === '') return;
+
+            const stringValue = String(value).trim();
+
+            // Check if it's a special string value
+            if (specialValues.includes(stringValue)) {
+                enhancementTemporalMap[habitatNameStr][pathwayName] = stringValue;
+                return;
+            }
+
+            // Try to parse as number
+            const parsed = parseFloat(value);
+            if (!isNaN(parsed)) {
+                enhancementTemporalMap[habitatNameStr][pathwayName] = parsed;
+            }
+        });
+    }
+
+    console.log(`Read enhancement temporal data for ${Object.keys(enhancementTemporalMap).length} habitats`);
+    return enhancementTemporalMap;
+}
+
+/**
  * Read difficulty multipliers from G-3 Multipliers sheet
  * Returns both the habitat-specific data and the unique difficulty levels
  */
@@ -278,7 +348,7 @@ function readDifficultyMultipliersData() {
 /**
  * Read Excel file and extract habitat data
  */
-function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap) {
+function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap, enhancementTemporalMap) {
     console.log(`Reading Excel file: ${filePath}`);
 
     const workbook = XLSX.readFile(filePath);
@@ -327,6 +397,7 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficu
             irreplaceable: false,
             conditions: null,
             temporalMultipliers: null,
+            enhancementTemporalMultipliers: null,
         };
 
         // Add condition data if available
@@ -337,6 +408,11 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficu
         // Add temporal multipliers data if available
         if (temporalMultipliersMap[labelStr]) {
             habitat.temporalMultipliers = temporalMultipliersMap[labelStr];
+        }
+
+        // Add enhancement temporal multipliers data if available
+        if (enhancementTemporalMap && enhancementTemporalMap[labelStr]) {
+            habitat.enhancementTemporalMultipliers = enhancementTemporalMap[labelStr];
         }
 
         // Add difficulty multipliers from G-3 Multipliers sheet if available
@@ -454,6 +530,17 @@ export const allHabitats = {
         } else {
             code += `        temporalMultipliers: null,\n`;
         }
+        if (habitat.enhancementTemporalMultipliers) {
+            code += `        enhancementTemporalMultipliers: {\n`;
+            Object.entries(habitat.enhancementTemporalMultipliers).forEach(([pathway, value]) => {
+                // Handle string values like "30+" and "Not Possible ▲"
+                const formattedValue = typeof value === 'string' ? `'${escapeString(value)}'` : value;
+                code += `            '${escapeString(pathway)}': ${formattedValue},\n`;
+            });
+            code += `        },\n`;
+        } else {
+            code += `        enhancementTemporalMultipliers: null,\n`;
+        }
         code += '    }';
 
         if (index < habitats.length - 1) {
@@ -500,6 +587,9 @@ async function main() {
         // Read temporal multipliers data
         const temporalMultipliersMap = readTemporalMultipliersData();
 
+        // Read enhancement temporal multipliers data
+        const enhancementTemporalMap = readEnhancementTemporalData();
+
         // Read difficulty multipliers data from G-3 Multipliers sheet
         const { difficultyMultipliersMap, difficultyLevels } = readDifficultyMultipliersData();
 
@@ -510,7 +600,7 @@ async function main() {
         console.log(`Difficulty code saved to: ${difficultyOutputPath}`);
 
         // Read habitat data from Excel
-        const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap);
+        const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap, enhancementTemporalMap);
 
         // Generate TypeScript code
         const typeScriptCode = generateTypeScriptCode(habitats);

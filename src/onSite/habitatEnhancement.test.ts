@@ -9,30 +9,48 @@ export function fixture(overrides: Partial<OnSiteHabitatEnhancementSchema> = {})
             habitatType: "Lowland mixed deciduous woodland",
             area: 1,
             strategicSignificance: "Location ecologically desirable but not in local strategy",
-            condition: "Good",
+            condition: "Poor",  // Changed from "Good" to "Poor" for valid enhancement
             irreplaceableHabitat: false,
-            areaEnhanced: 0,
-            areaRetained: 1,
+            areaEnhanced: 1,  // Changed from 0 to 1 - area being enhanced
+            areaRetained: 0,  // Changed from 1 to 0
         },
         broadHabitat: "Woodland and forest",
         habitatType: "Lowland mixed deciduous woodland",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        condition: "Good",
+        condition: "Good",  // Enhancing from Poor to Good
         ...overrides,
     }
 }
 
 test("valid combinations of broad habitat and habitat type", () => {
-    expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree" })).success).toBeTrue()
+    expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Individual trees",
+            habitatType: "Urban tree",
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+        },
+        broadHabitat: "Individual trees",
+        habitatType: "Urban tree"
+    })).success).toBeTrue()
 
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Lowland" })).success).toBeFalse()
 })
 
 test("condition validation", () => {
+    // Valid enhancements: Poor (baseline) → better condition
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Good" })).success).toBeTrue()
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Moderate" })).success).toBeTrue()
-    expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Poor" })).success).toBeTrue()
+    expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Fairly Poor" })).success).toBeTrue()
 
+    // Invalid: Same condition without distinctiveness upgrade
+    expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Poor" })).success).toBeFalse()
+
+    // Invalid condition types for enhancement
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "Condition Assessment N/A" })).success).toBeFalse()
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fixture({ condition: "N/A - Other" })).success).toBeFalse()
 })
