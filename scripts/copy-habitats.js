@@ -343,11 +343,11 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficu
         if (difficultyMultipliersMap[labelStr]) {
             const diffData = difficultyMultipliersMap[labelStr];
             if (diffData.technicalDifficultyCreation) {
-                habitat.technicalDifficultyCreation = convertDifficulty(diffData.technicalDifficultyCreation);
+                habitat.technicalDifficultyCreation = diffData.technicalDifficultyCreation;
                 habitat.technicalDifficultyCreationMultiplier = diffData.technicalDifficultyCreationMultiplier;
             }
             if (diffData.technicalDifficultyEnhancement) {
-                habitat.technicalDifficultyEnhancement = convertDifficulty(diffData.technicalDifficultyEnhancement);
+                habitat.technicalDifficultyEnhancement = diffData.technicalDifficultyEnhancement;
                 habitat.technicalDifficultyEnhancementMultiplier = diffData.technicalDifficultyEnhancementMultiplier;
             }
         }
@@ -376,14 +376,6 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficu
  * Generate TypeScript code for difficulty.ts file
  */
 function generateDifficultyCode(difficultyLevels) {
-    // Convert difficulty levels to normalized keys
-    const difficultyMap = {
-        'Low': 'low',
-        'Medium': 'medium',
-        'High': 'high',
-        'Very High': 'vHigh',
-    };
-
     let code = `// THIS FILE IS GENERATED AUTOMATICALLY\n`;
     code += `// Difficulty multipliers from G-3 Multipliers sheet\n\n`;
     code += `export const difficulty = {\n`;
@@ -393,8 +385,7 @@ function generateDifficultyCode(difficultyLevels) {
         .sort((a, b) => b[1] - a[1]);
 
     sortedLevels.forEach(([level, multiplier], index) => {
-        const key = difficultyMap[level] || level.toLowerCase().replace(/\s+/g, '');
-        code += `    ${key}: ${multiplier} as const`;
+        code += `    '${escapeString(level)}': ${multiplier} as const`;
         if (index < sortedLevels.length - 1) {
             code += ',\n';
         } else {
@@ -436,10 +427,10 @@ export const allHabitats = {
         code += `        distinctivenessCategory: ${habitat.distinctivenessCategory ? `'${habitat.distinctivenessCategory}'` : 'null'},\n`;
         code += `        distinctivenessScore: ${habitat.distinctivenessCategory ? `distinctivenessCategories["${habitat.distinctivenessCategory}"].score` : 'null'},\n`;
         code += `        distinctivenessTradingRules: ${habitat.distinctivenessCategory ? `distinctivenessCategories["${habitat.distinctivenessCategory}"].suggestedAction` : "''"},\n`;
-        code += `        technicalDifficultyCreation: ${habitat.technicalDifficultyCreation ? `'${habitat.technicalDifficultyCreation}'` : 'null'},\n`;
-        code += `        technicalDifficultyCreationMultiplier: ${habitat.technicalDifficultyCreation ? `difficulty.${habitat.technicalDifficultyCreation}` : '1'},\n`;
-        code += `        technicalDifficultyEnhancement: ${habitat.technicalDifficultyEnhancement ? `'${habitat.technicalDifficultyEnhancement}'` : 'null'},\n`;
-        code += `        technicalDifficultyEnhancementMultiplier: ${habitat.technicalDifficultyEnhancement ? `difficulty.${habitat.technicalDifficultyEnhancement}` : '1'},\n`;
+        code += `        technicalDifficultyCreation: ${habitat.technicalDifficultyCreation ? `'${escapeString(habitat.technicalDifficultyCreation)}'` : 'null'},\n`;
+        code += `        technicalDifficultyCreationMultiplier: ${habitat.technicalDifficultyCreation ? `difficulty['${escapeString(habitat.technicalDifficultyCreation)}']` : '1'},\n`;
+        code += `        technicalDifficultyEnhancement: ${habitat.technicalDifficultyEnhancement ? `'${escapeString(habitat.technicalDifficultyEnhancement)}'` : 'null'},\n`;
+        code += `        technicalDifficultyEnhancementMultiplier: ${habitat.technicalDifficultyEnhancement ? `difficulty['${escapeString(habitat.technicalDifficultyEnhancement)}']` : '1'},\n`;
         code += `        description: '${escapeString(habitat.description)}',\n`;
         code += `        conditionAssessmentNotes: '${escapeString(habitat.conditionAssessmentNotes)}',\n`;
         code += `        irreplaceable: ${habitat.irreplaceable},\n`;

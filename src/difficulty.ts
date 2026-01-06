@@ -2,8 +2,8 @@
 // Difficulty multipliers from G-3 Multipliers sheet
 
 export const difficulty = {
-    low: 1 as const,
-    medium: 0.67 as const,
-    high: 0.33 as const,
-    vHigh: 0.1 as const
+    'Low': 1 as const,
+    'Medium': 0.67 as const,
+    'High': 0.33 as const,
+    'Very High': 0.1 as const
 } as const;
