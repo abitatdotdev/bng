@@ -26,12 +26,15 @@ function readTemporalMultipliers(filePath: string) {
     }
 
     const sheet = workbook.Sheets[sheetName];
+    if (!sheet) {
+        throw new Error(`Sheet "${sheetName}" not found in workbook`);
+    }
 
     // Read data from A4:C37
     const startRow = 3;  // Row 4 (0-indexed)
     const endRow = 36;   // Row 37 (0-indexed)
 
-    const multipliers: Array<{ key: string | number; multiplier: number }> = [];
+    const multipliers: Array<{ key: string; multiplier: number }> = [];
 
     for (let row = startRow; row <= endRow; row++) {
         const key = getCellValue(sheet, row, 0);  // Column A
