@@ -48,6 +48,32 @@ export type TemporalMultiplierKey = keyof typeof temporalMultipliers;
  * @param years - Number of years to reach target condition, or special keys like "30+" or "Not Possible ▲"
  * @returns The temporal multiplier value, or undefined if not found
  */
-export function getTemporalMultiplier(years: TemporalMultiplierKey) {
+export function getTemporalMultiplier(years: TemporalMultiplierKey): number | undefined {
     return temporalMultipliers[years];
+}
+
+/**
+ * Looks up a temporal multiplier with error handling similar to Excel's IFERROR
+ * Corresponds to: IFERROR(IF(value="Check Data ⚠","Check Data ⚠",VLOOKUP(...)),"")
+ *
+ * @param value - The input value (years or special key)
+ * @returns The multiplier value, "Check Data ⚠" if input is invalid, or empty string on error
+ */
+export function lookupTemporalMultiplier(value: string | number): number | string {
+    if (value === "Check Data ⚠") {
+        return "Check Data ⚠";
+    }
+
+    try {
+        const key = String(value) as TemporalMultiplierKey;
+        const multiplier = getTemporalMultiplier(key);
+
+        if (multiplier === undefined) {
+            return "";
+        }
+
+        return multiplier;
+    } catch (error) {
+        return "";
+    }
 }
