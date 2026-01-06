@@ -9,7 +9,7 @@ published by [DEFRA](https://www.gov.uk/government/organisations/department-for-
 
 The aims of this library are:
 * directly mirror the existing spreadsheet calculation tool
-* remain compatiblity with the spreadsheet format to enable seamless read/write with either tool
+* remain compatible with the spreadsheet format to enable seamless read/write with either tool
 * work in all javascript environments (server, web, serverless)
 * document and test the functionality/inner workings of the calculations
 
