@@ -36,7 +36,7 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
  *
  * Corresponds to formula in Excel cell S12 of sheet A-2
  */
-const calculateFinalTimeToTargetCondition = <Data extends {
+const calculateFinalTimeToTargetValues = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number,
     habitatCreationDelay: number
@@ -96,7 +96,7 @@ export const onSiteHabitatCreationSchema = v.pipe(
     ),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
-    v.transform(calculateFinalTimeToTargetCondition)
+    v.transform(calculateFinalTimeToTargetValues)
 )
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
 
