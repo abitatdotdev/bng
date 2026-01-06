@@ -226,12 +226,14 @@ function readTemporalMultipliersData() {
 
 /**
  * Read difficulty multipliers from G-3 Multipliers sheet
+ * Returns both the habitat-specific data and the unique difficulty levels
  */
 function readDifficultyMultipliersData() {
     const workbook = XLSX.readFile('./examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-3 Multipliers'];
 
     const difficultyMultipliersMap = {};
+    const difficultyLevels = new Map(); // Map of difficulty level -> multiplier
 
     // Read data from rows 3 to 134 (0-indexed rows 2 to 133)
     for (let row = 2; row <= 133; row++) {
@@ -243,6 +245,22 @@ function readDifficultyMultipliersData() {
         const enhancementDifficulty = getCellValue(worksheet, row, 3); // Column D
         const enhancementMultiplier = getCellValue(worksheet, row, 4); // Column E
 
+        // Track unique difficulty levels and their multipliers
+        if (creationDifficulty && creationMultiplier) {
+            const level = String(creationDifficulty).trim();
+            const multiplier = parseFloat(creationMultiplier);
+            if (!isNaN(multiplier)) {
+                difficultyLevels.set(level, multiplier);
+            }
+        }
+        if (enhancementDifficulty && enhancementMultiplier) {
+            const level = String(enhancementDifficulty).trim();
+            const multiplier = parseFloat(enhancementMultiplier);
+            if (!isNaN(multiplier)) {
+                difficultyLevels.set(level, multiplier);
+            }
+        }
+
         difficultyMultipliersMap[String(name).trim()] = {
             technicalDifficultyCreation: creationDifficulty ? String(creationDifficulty).trim() : null,
             technicalDifficultyCreationMultiplier: creationMultiplier ? parseFloat(creationMultiplier) : 1,
@@ -252,7 +270,9 @@ function readDifficultyMultipliersData() {
     }
 
     console.log(`Read difficulty multipliers for ${Object.keys(difficultyMultipliersMap).length} habitats`);
-    return difficultyMultipliersMap;
+    console.log(`Found ${difficultyLevels.size} unique difficulty levels`);
+
+    return { difficultyMultipliersMap, difficultyLevels };
 }
 
 /**
@@ -350,6 +370,41 @@ function readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficu
 
     console.log(`Read ${habitats.length} habitats from Excel`);
     return habitats;
+}
+
+/**
+ * Generate TypeScript code for difficulty.ts file
+ */
+function generateDifficultyCode(difficultyLevels) {
+    // Convert difficulty levels to normalized keys
+    const difficultyMap = {
+        'Low': 'low',
+        'Medium': 'medium',
+        'High': 'high',
+        'Very High': 'vHigh',
+    };
+
+    let code = `// THIS FILE IS GENERATED AUTOMATICALLY\n`;
+    code += `// Difficulty multipliers from G-3 Multipliers sheet\n\n`;
+    code += `export const difficulty = {\n`;
+
+    // Sort by multiplier value (descending) to maintain consistent order
+    const sortedLevels = Array.from(difficultyLevels.entries())
+        .sort((a, b) => b[1] - a[1]);
+
+    sortedLevels.forEach(([level, multiplier], index) => {
+        const key = difficultyMap[level] || level.toLowerCase().replace(/\s+/g, '');
+        code += `    ${key}: ${multiplier} as const`;
+        if (index < sortedLevels.length - 1) {
+            code += ',\n';
+        } else {
+            code += '\n';
+        }
+    });
+
+    code += `} as const;\n`;
+
+    return code;
 }
 
 /**
@@ -455,7 +510,13 @@ async function main() {
         const temporalMultipliersMap = readTemporalMultipliersData();
 
         // Read difficulty multipliers data from G-3 Multipliers sheet
-        const difficultyMultipliersMap = readDifficultyMultipliersData();
+        const { difficultyMultipliersMap, difficultyLevels } = readDifficultyMultipliersData();
+
+        // Generate difficulty.ts code
+        const difficultyCode = generateDifficultyCode(difficultyLevels);
+        const difficultyOutputPath = './src/difficulty.ts';
+        fs.writeFileSync(difficultyOutputPath, difficultyCode);
+        console.log(`Difficulty code saved to: ${difficultyOutputPath}`);
 
         // Read habitat data from Excel
         const habitats = readHabitatData(filePath, conditionMap, temporalMultipliersMap, difficultyMultipliersMap);
