@@ -19,7 +19,7 @@ test("valid combinations of broad habitat and habitat type", () => {
     expect(v.safeParse(onSiteHabitatCreationSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Lowland" })).success).toBeFalse()
 })
 
-test("condition validation", () => {
+test("conditions can only match available options", () => {
     expect(v.safeParse(onSiteHabitatCreationSchema, fixture({ condition: "Good" })).success).toBeTrue()
     expect(v.safeParse(onSiteHabitatCreationSchema, fixture({ condition: "Moderate" })).success).toBeTrue()
     expect(v.safeParse(onSiteHabitatCreationSchema, fixture({ condition: "Poor" })).success).toBeTrue()
@@ -28,12 +28,12 @@ test("condition validation", () => {
     expect(v.safeParse(onSiteHabitatCreationSchema, fixture({ condition: "N/A - Other" })).success).toBeFalse()
 })
 
-test("default years values", () => {
+test("years values default to zero", () => {
     expect(v.parse(onSiteHabitatCreationSchema, fixture()).habitatCreationInAdvance).toEqual(0)
     expect(v.parse(onSiteHabitatCreationSchema, fixture()).habitatCreationDelay).toEqual(0)
 })
 
-test("cannot have both advance and delay", () => {
+test("cannot have both advanced and delayed habitat creation", () => {
     const result = v.safeParse(onSiteHabitatCreationSchema, fixture({
         habitatCreationInAdvance: 5,
         habitatCreationDelay: 3
@@ -68,6 +68,7 @@ test("final time to target condition - no advance or delay", () => {
         habitatCreationDelay: 0
     }))
     expect(result.finalTimeToTargetCondition).toEqual(20)
+    expect(result.finalTimeToTargetMultiplier).toBeCloseTo(0.4903952635, 5)
 })
 
 test("final time to target condition - with advance", () => {
@@ -80,6 +81,7 @@ test("final time to target condition - with advance", () => {
         habitatCreationDelay: 0
     }))
     expect(result.finalTimeToTargetCondition).toEqual(15)
+    expect(result.finalTimeToTargetMultiplier).toBeCloseTo(0.5860163055, 5)
 })
 
 test("final time to target condition - with delay", () => {
@@ -104,6 +106,7 @@ test("final time to target condition - advance >= standard time returns 0", () =
         habitatCreationDelay: 0
     }))
     expect(result.finalTimeToTargetCondition).toEqual(0)
+    expect(result.finalTimeToTargetMultiplier).toEqual(1)
 
     // 20 years standard - 25 years advance = 0 (capped)
     const result2 = v.parse(onSiteHabitatCreationSchema, fixture({
@@ -114,6 +117,7 @@ test("final time to target condition - advance >= standard time returns 0", () =
         habitatCreationDelay: 0
     }))
     expect(result2.finalTimeToTargetCondition).toEqual(0)
+    expect(result2.finalTimeToTargetMultiplier).toEqual(1)
 })
 
 test("final time to target condition - result > 30 gets capped to 30+", () => {
@@ -126,6 +130,7 @@ test("final time to target condition - result > 30 gets capped to 30+", () => {
         habitatCreationDelay: 10
     }))
     expect(result.finalTimeToTargetCondition).toEqual("30+")
+    expect(result.finalTimeToTargetMultiplier).toBeCloseTo(0.3197967361, 5)
 })
 
 test("final time to target condition - 30+ standard time stays as 30+", () => {
@@ -138,6 +143,7 @@ test("final time to target condition - 30+ standard time stays as 30+", () => {
         habitatCreationDelay: 0
     }))
     expect(result.finalTimeToTargetCondition).toEqual("30+")
+    expect(result.finalTimeToTargetMultiplier).toBeCloseTo(0.3197967361, 5)
 })
 
 test("final time to target condition - advance reduces 30+ standard time", () => {

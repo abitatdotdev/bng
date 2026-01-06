@@ -4,6 +4,7 @@ import { creationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
+import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 
 const inputSchema =
     v.object({
@@ -21,7 +22,7 @@ const inputSchema =
 type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
- * Calculates the final time to target condition based on:
+ * Calculates the final time to target condition and its corresponding multiplier based on:
  * - Standard time to target condition (from habitat temporal multipliers)
  * - Years of habitat creation in advance
  * - Years of delay in starting habitat creation
@@ -30,6 +31,8 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
  * - Capped at "30+" if result > 30
  * - Returns 0 if advance >= standardTime
  * - Returns "Not Possible" if standardTime is "Not Possible ▲"
+ *
+ * Also looks up the temporal multiplier for the calculated final time.
  *
  * Corresponds to formula in Excel cell S12 of sheet A-2
  */
@@ -40,53 +43,46 @@ const calculateFinalTimeToTargetCondition = <Data extends {
 }>(data: Data) => {
     const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay } = data;
 
+    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
+
     // If standard time is "Not Possible", final time is also "Not Possible"
     if (timeToTargetCondition === "Not Possible ▲") {
-        return {
-            ...data,
-            finalTimeToTargetCondition: "Not Possible ▲" as const
-        };
+        finalTimeToTargetCondition = "Not Possible ▲";
     }
-
     // Handle "30+" standard time
-    if (timeToTargetCondition === "30+") {
+    else if (timeToTargetCondition === "30+") {
         if (habitatCreationInAdvance === 0) {
-            return {
-                ...data,
-                finalTimeToTargetCondition: "30+" as const
-            };
+            finalTimeToTargetCondition = "30+";
+        } else {
+            // 30 - advance (capped at 0)
+            finalTimeToTargetCondition = Math.max(0, 30 - habitatCreationInAdvance);
         }
-        // 30 - advance (capped at 0)
-        const result = Math.max(0, 30 - habitatCreationInAdvance);
-        return {
-            ...data,
-            finalTimeToTargetCondition: result
-        };
     }
-
     // If advance >= standard time, final time is 0
-    if (habitatCreationInAdvance >= timeToTargetCondition) {
-        return {
-            ...data,
-            finalTimeToTargetCondition: 0
-        };
+    else if (habitatCreationInAdvance >= timeToTargetCondition) {
+        finalTimeToTargetCondition = 0;
     }
-
     // Calculate: standardTime - advance + delay
-    const result = timeToTargetCondition - habitatCreationInAdvance + habitatCreationDelay;
+    else {
+        const result = timeToTargetCondition - habitatCreationInAdvance + habitatCreationDelay;
 
-    // Cap at "30+" if result > 30
-    if (result > 30) {
-        return {
-            ...data,
-            finalTimeToTargetCondition: "30+" as const
-        };
+        // Cap at "30+" if result > 30
+        if (result > 30) {
+            finalTimeToTargetCondition = "30+";
+        } else {
+            // Ensure non-negative result
+            finalTimeToTargetCondition = Math.max(0, result);
+        }
     }
 
-    // Ensure non-negative result
+    // Look up the temporal multiplier for the final time
+    const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
+    const finalTimeToTargetMultiplier = getTemporalMultiplier(multiplierKey);
+
     return {
         ...data,
-        finalTimeToTargetCondition: Math.max(0, result)
+        finalTimeToTargetCondition,
+        finalTimeToTargetMultiplier
     };
 }
 
