@@ -5,6 +5,8 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
+import { habitatByBroadAndType } from '../habitats';
+import { difficulty } from '../difficulty';
 
 const inputSchema =
     v.object({
@@ -86,6 +88,87 @@ const calculateFinalTimeToTargetValues = <Data extends {
     };
 }
 
+/**
+ * Enriches data with difficulty-related properties.
+ *
+ * Calculates:
+ * - standardDifficultyOfCreation: The standard technical difficulty for habitat creation
+ * - appliedDifficultyMultiplier: A message indicating which difficulty logic was applied
+ * - finalDifficultyOfCreation: The actual difficulty level used for calculations
+ * - difficultyMultiplierApplied: The numeric multiplier value
+ *
+ * Corresponds to columns U-X in Excel sheet A-2
+ */
+const enrichWithDifficultyData = <Data extends {
+    broadHabitat: string,
+    habitatType: string,
+    timeToTargetCondition: number | "30+" | "Not Possible ▲",
+    habitatCreationInAdvance: number,
+    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
+}>(data: Data) => {
+    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    // Standard difficulty of creation (column U)
+    const standardDifficultyOfCreation = habitat.technicalDifficultyCreation;
+
+    // Get the time to Poor condition to check if the threshold has been reached
+    const timeToPoorCondition = habitat.temporalMultipliers['Poor'];
+
+    // List of habitats that should not use enhancement difficulty
+    const excludedHabitats = [
+        "Traditional orchards",
+        "Ornamental lake or pond",
+        "Ponds (non-priority habitat)",
+        "Ruderal/Ephemeral",
+        "Tall forbs",
+        "Developed land; sealed surface"
+    ];
+
+    // Determine if habitat has reached target condition (advance >= standard time)
+    const hasReachedTargetCondition =
+        data.habitatCreationInAdvance > 0 &&
+        data.finalTimeToTargetCondition === 0;
+
+    // Determine if habitat creation started and Poor threshold reached
+    const hasReachedPoorThreshold =
+        data.habitatCreationInAdvance > 0 &&
+        timeToPoorCondition !== "Not Possible ▲" &&
+        (timeToPoorCondition === 0 ||
+         (typeof timeToPoorCondition === 'number' && data.habitatCreationInAdvance >= timeToPoorCondition)) &&
+        !hasReachedTargetCondition;
+
+    // Applied difficulty multiplier (column V)
+    let appliedDifficultyMultiplier: string;
+    if (hasReachedTargetCondition) {
+        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
+    } else if (hasReachedPoorThreshold && !excludedHabitats.includes(data.habitatType)) {
+        appliedDifficultyMultiplier = "Enhancement difficulty applied";
+    } else {
+        appliedDifficultyMultiplier = "Standard difficulty applied";
+    }
+
+    // Final difficulty of creation (column W)
+    let finalDifficultyOfCreation: keyof typeof difficulty;
+    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
+        finalDifficultyOfCreation = "Low";
+    } else if (appliedDifficultyMultiplier === "Enhancement difficulty applied") {
+        finalDifficultyOfCreation = habitat.technicalDifficultyEnhancement;
+    } else {
+        finalDifficultyOfCreation = standardDifficultyOfCreation;
+    }
+
+    // Difficulty multiplier applied (column X)
+    const difficultyMultiplierApplied = difficulty[finalDifficultyOfCreation];
+
+    return {
+        ...data,
+        standardDifficultyOfCreation,
+        appliedDifficultyMultiplier,
+        finalDifficultyOfCreation,
+        difficultyMultiplierApplied
+    };
+}
+
 export const onSiteHabitatCreationSchema = v.pipe(
     inputSchema,
     v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
@@ -96,7 +179,8 @@ export const onSiteHabitatCreationSchema = v.pipe(
     ),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
-    v.transform(calculateFinalTimeToTargetValues)
+    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(enrichWithDifficultyData)
 )
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
 

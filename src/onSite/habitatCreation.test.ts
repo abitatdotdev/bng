@@ -157,3 +157,62 @@ test("final time to target condition - advance reduces 30+ standard time", () =>
     }))
     expect(result.finalTimeToTargetCondition).toEqual(25)
 })
+
+test("difficulty - standard difficulty applied when no advance", () => {
+    // Lowland calcareous grassland with no advance should use standard difficulty
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Lowland calcareous grassland",
+        condition: "Good",
+        habitatCreationInAdvance: 0,
+        habitatCreationDelay: 0
+    }))
+    expect(result.standardDifficultyOfCreation).toEqual("High")
+    expect(result.appliedDifficultyMultiplier).toEqual("Standard difficulty applied")
+    expect(result.finalDifficultyOfCreation).toEqual("High")
+    expect(result.difficultyMultiplierApplied).toEqual(0.33)
+})
+
+test("difficulty - low difficulty when target condition reached", () => {
+    // Lowland calcareous grassland in Good condition: 20 years standard - 20 years advance = 0 (target reached)
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Lowland calcareous grassland",
+        condition: "Good",
+        habitatCreationInAdvance: 20,
+        habitatCreationDelay: 0
+    }))
+    expect(result.appliedDifficultyMultiplier).toEqual("Low Difficulty - only applicable if all habitat created before losses ⚠")
+    expect(result.finalDifficultyOfCreation).toEqual("Low")
+    expect(result.difficultyMultiplierApplied).toEqual(1)
+})
+
+test("difficulty - enhancement difficulty when Poor threshold reached", () => {
+    // Lowland calcareous grassland in Good condition: 20 years to Good, 5 years to Poor
+    // With 5 years advance, Poor threshold is reached but not Good
+    // Both creation and enhancement difficulty are High for this habitat
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Lowland calcareous grassland",
+        condition: "Good",
+        habitatCreationInAdvance: 5,
+        habitatCreationDelay: 0
+    }))
+    expect(result.standardDifficultyOfCreation).toEqual("High")
+    expect(result.appliedDifficultyMultiplier).toEqual("Enhancement difficulty applied")
+    expect(result.finalDifficultyOfCreation).toEqual("High")
+    expect(result.difficultyMultiplierApplied).toEqual(0.33)
+})
+
+test("difficulty - enhancement difficulty not applied to excluded habitats", () => {
+    // Traditional orchards should not use enhancement difficulty even when Poor threshold reached
+    const result = v.parse(onSiteHabitatCreationSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Traditional orchards",
+        condition: "Moderate",
+        habitatCreationInAdvance: 5,
+        habitatCreationDelay: 0
+    }))
+    expect(result.appliedDifficultyMultiplier).toEqual("Standard difficulty applied")
+    expect(result.finalDifficultyOfCreation).toEqual(result.standardDifficultyOfCreation)
+})
