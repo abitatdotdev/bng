@@ -117,19 +117,19 @@ test("final time to target condition - advance >= standard time returns 0", () =
 })
 
 test("final time to target condition - result > 30 gets capped to 30+", () => {
-    // Lowland mixed deciduous woodland in Good condition: 30 years standard + 5 years delay = 35, should cap to "30+"
+    // Upland calcareous grassland in Good condition: 25 years + 10 years delay = 35, caps to "30+"
     const result = v.parse(onSiteHabitatCreationSchema, fixture({
-        broadHabitat: "Woodland and forest",
-        habitatType: "Lowland mixed deciduous woodland",
+        broadHabitat: "Grassland",
+        habitatType: "Upland calcareous grassland",
         condition: "Good",
         habitatCreationInAdvance: 0,
-        habitatCreationDelay: 5
+        habitatCreationDelay: 10
     }))
     expect(result.finalTimeToTargetCondition).toEqual("30+")
 })
 
-test("final time to target condition - no overflow with max standard time", () => {
-    // Lowland mixed deciduous woodland in Good condition: 30 years standard, no advance or delay
+test("final time to target condition - 30+ standard time stays as 30+", () => {
+    // Lowland mixed deciduous woodland in Good condition: "30+" standard time
     const result = v.parse(onSiteHabitatCreationSchema, fixture({
         broadHabitat: "Woodland and forest",
         habitatType: "Lowland mixed deciduous woodland",
@@ -137,11 +137,11 @@ test("final time to target condition - no overflow with max standard time", () =
         habitatCreationInAdvance: 0,
         habitatCreationDelay: 0
     }))
-    expect(result.finalTimeToTargetCondition).toEqual(30)
+    expect(result.finalTimeToTargetCondition).toEqual("30+")
 })
 
-test("final time to target condition - advance reduces high standard time", () => {
-    // Lowland mixed deciduous woodland in Good condition: 30 years - 5 years advance = 25 years
+test("final time to target condition - advance reduces 30+ standard time", () => {
+    // Lowland mixed deciduous woodland in Good condition: "30+" - 5 years advance = 25 years
     const result = v.parse(onSiteHabitatCreationSchema, fixture({
         broadHabitat: "Woodland and forest",
         habitatType: "Lowland mixed deciduous woodland",

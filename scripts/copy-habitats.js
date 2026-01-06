@@ -191,15 +191,32 @@ function readTemporalMultipliersData() {
 
     const temporalMultipliersMap = {};
 
+    // Special string values that should be preserved
+    const specialValues = ['30+', 'Not Possible ▲'];
+
     data.forEach(row => {
         const name = row["Habitat Description"]
         temporalMultipliersMap[name] = {}
 
         for (const key of conditionKeys) {
             const value = row[key]
+
+            // Skip empty/undefined values
+            if (value === null || value === undefined || value === '') continue;
+
+            const stringValue = String(value).trim();
+
+            // Check if it's a special string value
+            if (specialValues.includes(stringValue)) {
+                temporalMultipliersMap[name][key] = stringValue;
+                continue;
+            }
+
+            // Try to parse as number
             const parsed = parseFloat(value);
-            if (isNaN(parsed)) continue
-            temporalMultipliersMap[name][key] = parsed
+            if (isNaN(parsed)) continue;
+
+            temporalMultipliersMap[name][key] = parsed;
         }
     });
 
@@ -355,7 +372,9 @@ export const allHabitats = {
         if (habitat.temporalMultipliers) {
             code += `        temporalMultipliers: {\n`;
             Object.entries(habitat.temporalMultipliers).forEach(([condition, value]) => {
-                code += `            '${condition}': ${value},\n`;
+                // Handle string values like "30+" and "Not Possible ▲"
+                const formattedValue = typeof value === 'string' ? `'${escapeString(value)}'` : value;
+                code += `            '${condition}': ${formattedValue},\n`;
             });
             code += `        },\n`;
         } else {

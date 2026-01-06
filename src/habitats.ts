@@ -31,7 +31,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Arable field margins game bird mix': {
@@ -60,7 +66,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Arable field margins pollen and nectar': {
@@ -89,7 +101,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Arable field margins tussocky': {
@@ -118,7 +136,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Cereal crops': {
@@ -147,7 +171,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Winter stubble': {
@@ -176,7 +206,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Horticulture': {
@@ -205,7 +241,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Intensive orchards': {
@@ -234,7 +276,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Non-cereal crops': {
@@ -263,7 +311,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Cropland - Temporary grass and clover leys': {
@@ -292,7 +346,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Traditional orchards': {
@@ -330,6 +390,8 @@ export const allHabitats = {
             'Moderate': 20,
             'Fairly Poor': 10,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Bracken': {
@@ -358,7 +420,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Floodplain wetland mosaic and CFGM': {
@@ -396,6 +464,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 8,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Lowland calcareous grassland': {
@@ -433,6 +503,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 8,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Lowland dry acid grassland': {
@@ -465,11 +537,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 25,
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Lowland meadows': {
@@ -507,6 +581,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 8,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Modified grassland': {
@@ -544,6 +620,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Other lowland acid grassland': {
@@ -581,6 +659,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 5,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Other neutral grassland': {
@@ -618,6 +698,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 2,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Tall herb communities (H6430)': {
@@ -655,6 +737,8 @@ export const allHabitats = {
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Upland acid grassland': {
@@ -692,6 +776,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 5,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Upland calcareous grassland': {
@@ -729,6 +815,8 @@ export const allHabitats = {
             'Moderate': 15,
             'Fairly Poor': 12,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Grassland - Upland hay meadows': {
@@ -766,6 +854,8 @@ export const allHabitats = {
             'Moderate': 15,
             'Fairly Poor': 12,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Blackthorn scrub': {
@@ -803,6 +893,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Bramble scrub': {
@@ -831,7 +923,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Gorse scrub': {
@@ -869,6 +967,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Hawthorn scrub': {
@@ -906,6 +1006,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Hazel scrub': {
@@ -943,6 +1045,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Lowland heathland': {
@@ -975,11 +1079,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 25,
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Mixed scrub': {
@@ -1017,6 +1123,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Mountain heaths and willow scrub': {
@@ -1049,11 +1157,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 25,
             'Fairly Poor': 23,
             'Poor': 15,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Rhododendron scrub': {
@@ -1082,7 +1192,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Dunes with sea buckthorn (H2160)': {
@@ -1120,6 +1236,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Other sea buckthorn scrub': {
@@ -1148,7 +1266,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Willow scrub': {
@@ -1186,6 +1310,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Heathland and shrub - Upland heathland': {
@@ -1223,6 +1349,8 @@ export const allHabitats = {
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Aquifer fed naturally fluctuating water bodies': {
@@ -1260,6 +1388,8 @@ export const allHabitats = {
             'Moderate': 15,
             'Fairly Poor': 10,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Ornamental lake or pond': {
@@ -1297,6 +1427,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - High alkalinity lakes': {
@@ -1334,6 +1466,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Low alkalinity lakes': {
@@ -1371,6 +1505,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Marl lakes': {
@@ -1408,6 +1544,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Moderate alkalinity lakes': {
@@ -1445,6 +1583,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Peat lakes': {
@@ -1482,6 +1622,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Ponds (priority habitat)': {
@@ -1519,6 +1661,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Ponds (non-priority habitat)': {
@@ -1556,6 +1700,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Reservoirs': {
@@ -1593,6 +1739,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Lakes - Temporary lakes ponds and pools (H3170)': {
@@ -1630,6 +1778,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Calaminarian grasslands': {
@@ -1667,6 +1817,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 2,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Coastal sand dunes': {
@@ -1704,6 +1856,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Coastal vegetated shingle': {
@@ -1741,6 +1895,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Ruderal/Ephemeral': {
@@ -1778,6 +1934,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Tall forbs': {
@@ -1815,6 +1973,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Inland rock outcrop and scree habitats': {
@@ -1847,11 +2007,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 25,
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Limestone pavement': {
@@ -1884,11 +2046,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Maritime cliff and slopes': {
@@ -1926,6 +2090,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Sparsely vegetated land - Other inland rock and scree': {
@@ -1963,6 +2129,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Allotments': {
@@ -2000,6 +2168,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Artificial unvegetated, unsealed surface': {
@@ -2028,6 +2198,12 @@ export const allHabitats = {
             'N/A - Other': 0,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
             'N/A - Other': 0,
         },
     },
@@ -2066,6 +2242,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Intensive green roof': {
@@ -2103,6 +2281,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Built linear features': {
@@ -2131,6 +2311,12 @@ export const allHabitats = {
             'N/A - Other': 0,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
             'N/A - Other': 0,
         },
     },
@@ -2169,6 +2355,8 @@ export const allHabitats = {
             'Moderate': 15,
             'Fairly Poor': 12,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Developed land; sealed surface': {
@@ -2197,6 +2385,12 @@ export const allHabitats = {
             'N/A - Other': 0,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
             'N/A - Other': 0,
         },
     },
@@ -2226,7 +2420,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Facade-bound green wall': {
@@ -2264,6 +2464,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Ground based green wall': {
@@ -2301,6 +2503,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Ground level planters': {
@@ -2329,7 +2533,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Biodiverse green roof': {
@@ -2367,6 +2577,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Introduced shrub': {
@@ -2395,7 +2607,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Open mosaic habitats on previously developed land': {
@@ -2433,6 +2651,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 0,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Rain garden': {
@@ -2470,6 +2690,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Actively worked sand pit quarry or open cast mine': {
@@ -2498,7 +2720,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Sustainable drainage system': {
@@ -2536,6 +2764,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Unvegetated garden': {
@@ -2564,6 +2794,12 @@ export const allHabitats = {
             'N/A - Other': 0,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
             'N/A - Other': 0,
         },
     },
@@ -2602,6 +2838,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Bare ground': {
@@ -2639,6 +2877,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Urban - Vegetated garden': {
@@ -2667,7 +2907,13 @@ export const allHabitats = {
             'Condition Assessment N/A': 1,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
             'Condition Assessment N/A': 1,
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Individual trees - Urban tree': {
@@ -2700,11 +2946,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 27,
             'Fairly Poor': 19,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Individual trees - Rural tree': {
@@ -2737,11 +2985,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 27,
             'Fairly Poor': 19,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Blanket bog': {
@@ -2774,11 +3024,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Depressions on peat substrates (H7150)': {
@@ -2811,11 +3063,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 25,
             'Poor': 15,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Fens (upland and lowland)': {
@@ -2853,6 +3107,8 @@ export const allHabitats = {
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Lowland raised bog': {
@@ -2885,11 +3141,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 20,
             'Poor': 15,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Oceanic valley mire[1] (D2.1)': {
@@ -2922,11 +3180,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 20,
             'Poor': 15,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Purple moor grass and rush pastures': {
@@ -2964,6 +3224,8 @@ export const allHabitats = {
             'Moderate': 20,
             'Fairly Poor': 15,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Reedbeds': {
@@ -3001,6 +3263,8 @@ export const allHabitats = {
             'Moderate': 7,
             'Fairly Poor': 5,
             'Poor': 3,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Wetland - Transition mires and quaking bogs (H7140)': {
@@ -3033,11 +3297,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 25,
             'Poor': 15,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Felled': {
@@ -3066,7 +3332,13 @@ export const allHabitats = {
             'Good': 3,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Lowland beech and yew woodland': {
@@ -3099,11 +3371,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Lowland mixed deciduous woodland': {
@@ -3136,11 +3410,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Native pine woodlands': {
@@ -3173,11 +3449,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Other coniferous woodland': {
@@ -3210,11 +3488,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 10,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Other Scot\'s pine woodland': {
@@ -3247,11 +3527,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Other woodland; broadleaved': {
@@ -3284,11 +3566,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 25,
             'Moderate': 15,
             'Fairly Poor': 7,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Other woodland; mixed': {
@@ -3321,11 +3605,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
             'Moderate': 30,
             'Fairly Poor': 10,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Upland birchwoods': {
@@ -3358,11 +3644,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 30,
             'Moderate': 25,
             'Fairly Poor': 20,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Upland mixed ashwoods': {
@@ -3395,11 +3683,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Upland oakwood': {
@@ -3432,11 +3722,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Wet woodland': {
@@ -3469,11 +3761,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
             'Fairly Good': 30,
             'Moderate': 15,
             'Fairly Poor': 10,
             'Poor': 5,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Wood-pasture and parkland': {
@@ -3506,11 +3800,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
             'Fairly Poor': 25,
             'Poor': 10,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Woodland and forest - Replacement for felled woodland': {
@@ -3539,7 +3835,13 @@ export const allHabitats = {
             'Good': 3,
         },
         temporalMultipliers: {
-            'Good': 30,
+            'Good': '30+',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Coastal lagoons - Coastal lagoons': {
@@ -3577,6 +3879,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - High energy littoral rock': {
@@ -3614,6 +3918,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - High energy littoral rock - on peat, clay or chalk': {
@@ -3646,11 +3952,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Moderate energy littoral rock': {
@@ -3688,6 +3996,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Moderate energy littoral rock - on peat, clay or chalk': {
@@ -3720,11 +4030,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Low energy littoral rock': {
@@ -3762,6 +4074,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Low energy littoral rock - on peat, clay or chalk': {
@@ -3794,11 +4108,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Features of littoral rock': {
@@ -3836,6 +4152,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Rocky shore - Features of littoral rock - on peat, clay or chalk': {
@@ -3868,11 +4186,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Coastal saltmarsh - Saltmarshes and saline reedbeds': {
@@ -3910,6 +4230,8 @@ export const allHabitats = {
             'Moderate': 7,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Coastal saltmarsh - Artificial saltmarshes and saline reedbeds': {
@@ -3947,6 +4269,8 @@ export const allHabitats = {
             'Moderate': 7,
             'Fairly Poor': 3,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral coarse sediment': {
@@ -3984,6 +4308,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral mud': {
@@ -4021,6 +4347,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral mixed sediments': {
@@ -4058,6 +4386,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral seagrass': {
@@ -4095,6 +4425,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 5,
             'Poor': 2,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral seagrass on peat, clay or chalk': {
@@ -4127,11 +4459,13 @@ export const allHabitats = {
             'Poor': 1,
         },
         temporalMultipliers: {
-            'Good': 30,
-            'Fairly Good': 30,
-            'Moderate': 30,
-            'Fairly Poor': 30,
-            'Poor': 30,
+            'Good': '30+',
+            'Fairly Good': '30+',
+            'Moderate': '30+',
+            'Fairly Poor': '30+',
+            'Poor': '30+',
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral biogenic reefs - Mussels': {
@@ -4169,6 +4503,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 3,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral biogenic reefs - Sabellaria': {
@@ -4206,6 +4542,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 3,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Features of littoral sediment': {
@@ -4243,6 +4581,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 3,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral coarse sediment': {
@@ -4280,6 +4620,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral mud': {
@@ -4317,6 +4659,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral sand': {
@@ -4354,6 +4698,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral muddy sand': {
@@ -4391,6 +4737,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral mixed sediments': {
@@ -4428,6 +4776,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral seagrass': {
@@ -4465,6 +4815,8 @@ export const allHabitats = {
             'Moderate': 10,
             'Fairly Poor': 5,
             'Poor': 2,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Artificial littoral biogenic reefs': {
@@ -4502,6 +4854,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 3,
             'Poor': 3,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral sand': {
@@ -4539,6 +4893,8 @@ export const allHabitats = {
             'Moderate': 1,
             'Fairly Poor': 1,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal sediment - Littoral muddy sand': {
@@ -4576,6 +4932,8 @@ export const allHabitats = {
             'Moderate': 3,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal hard structures - Artificial hard structures': {
@@ -4613,6 +4971,8 @@ export const allHabitats = {
             'Moderate': 5,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal hard structures - Artificial features of hard structures': {
@@ -4650,6 +5010,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)': {
@@ -4687,6 +5049,8 @@ export const allHabitats = {
             'Moderate': 4,
             'Fairly Poor': 2,
             'Poor': 1,
+            'Condition Assessment N/A': 'Not Possible ▲',
+            'N/A - Other': 'Not Possible ▲',
         },
     },
     'Watercourse footprint - Watercourse footprint': {
@@ -4715,6 +5079,12 @@ export const allHabitats = {
             'N/A - Other': 0,
         },
         temporalMultipliers: {
+            'Good': 'Not Possible ▲',
+            'Fairly Good': 'Not Possible ▲',
+            'Moderate': 'Not Possible ▲',
+            'Fairly Poor': 'Not Possible ▲',
+            'Poor': 'Not Possible ▲',
+            'Condition Assessment N/A': 'Not Possible ▲',
             'N/A - Other': 0,
         },
     }
