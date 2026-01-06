@@ -40,12 +40,14 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
  */
 const calculateFinalTimeToTargetValues = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatCreationInAdvance: number,
-    habitatCreationDelay: number
+    habitatCreationInAdvance: number | "30+",
+    habitatCreationDelay: number | "30+"
 }>(data: Data) => {
     const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay } = data;
 
     let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
+    const normalisedHabitatCreationInAdvance = typeof habitatCreationInAdvance === "string" ? 30 : habitatCreationInAdvance;
+    const normalisedHabitatCreationDelay = typeof habitatCreationDelay === "string" ? 30 : habitatCreationDelay;
 
     // If standard time is "Not Possible", final time is also "Not Possible"
     if (timeToTargetCondition === "Not Possible ▲") {
@@ -57,16 +59,16 @@ const calculateFinalTimeToTargetValues = <Data extends {
             finalTimeToTargetCondition = "30+";
         } else {
             // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - habitatCreationInAdvance);
+            finalTimeToTargetCondition = Math.max(0, 30 - normalisedHabitatCreationInAdvance);
         }
     }
     // If advance >= standard time, final time is 0
-    else if (habitatCreationInAdvance >= timeToTargetCondition) {
+    else if (normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
     }
     // Calculate: standardTime - advance + delay
     else {
-        const result = timeToTargetCondition - habitatCreationInAdvance + habitatCreationDelay;
+        const result = timeToTargetCondition - normalisedHabitatCreationInAdvance + normalisedHabitatCreationDelay;
 
         // Cap at "30+" if result > 30
         if (result > 30) {
@@ -79,7 +81,10 @@ const calculateFinalTimeToTargetValues = <Data extends {
 
     // Look up the temporal multiplier for the final time
     const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
-    const finalTimeToTargetMultiplier = getTemporalMultiplier(multiplierKey);
+    const multiplierResult = getTemporalMultiplier(multiplierKey);
+
+    // Convert 'N/A' to undefined for calculations, keep numeric values
+    const finalTimeToTargetMultiplier = multiplierResult === 'N/A' ? undefined : multiplierResult;
 
     return {
         ...data,
@@ -103,10 +108,13 @@ const enrichWithDifficultyData = <Data extends {
     broadHabitat: string,
     habitatType: string,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatCreationInAdvance: number,
+    habitatCreationInAdvance: number | "30+",
     finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
 }>(data: Data) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    // Normalize habitatCreationInAdvance for comparisons
+    const normalisedHabitatCreationInAdvance = typeof data.habitatCreationInAdvance === "string" ? 30 : data.habitatCreationInAdvance;
 
     // Standard difficulty of creation (column U)
     const standardDifficultyOfCreation = habitat.technicalDifficultyCreation;
@@ -126,15 +134,15 @@ const enrichWithDifficultyData = <Data extends {
 
     // Determine if habitat has reached target condition (advance >= standard time)
     const hasReachedTargetCondition =
-        data.habitatCreationInAdvance > 0 &&
+        normalisedHabitatCreationInAdvance > 0 &&
         data.finalTimeToTargetCondition === 0;
 
     // Determine if habitat creation started and Poor threshold reached
     const hasReachedPoorThreshold =
-        data.habitatCreationInAdvance > 0 &&
+        normalisedHabitatCreationInAdvance > 0 &&
         timeToPoorCondition !== "Not Possible ▲" &&
         (timeToPoorCondition === 0 ||
-         (typeof timeToPoorCondition === 'number' && data.habitatCreationInAdvance >= timeToPoorCondition)) &&
+            (typeof timeToPoorCondition === 'number' && normalisedHabitatCreationInAdvance >= timeToPoorCondition)) &&
         !hasReachedTargetCondition;
 
     // Applied difficulty multiplier (column V)
@@ -175,6 +183,8 @@ const enrichWithDifficultyData = <Data extends {
  * Formula: Area × Distinctiveness Score × Condition Score × Strategic Significance Multiplier
  *          × Final Time to Target Multiplier × Difficulty Multiplier
  *
+ * If finalTimeToTargetMultiplier is undefined (e.g., "Not Possible ▲"), returns 0 units.
+ *
  * Corresponds to column Y in Excel sheet A-2
  */
 const calculateHabitatUnitsDelivered = <Data extends {
@@ -182,7 +192,7 @@ const calculateHabitatUnitsDelivered = <Data extends {
     distinctivenessScore: number,
     conditionScore: number,
     strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
     const habitatUnitsDelivered =
@@ -190,7 +200,7 @@ const calculateHabitatUnitsDelivered = <Data extends {
         data.distinctivenessScore *
         data.conditionScore *
         data.strategicSignificanceMultiplier *
-        data.finalTimeToTargetMultiplier *
+        (data.finalTimeToTargetMultiplier ?? 0) *
         data.difficultyMultiplierApplied;
 
     return {
@@ -204,7 +214,10 @@ export const onSiteHabitatCreationSchema = v.pipe(
     v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
     v.check(
-        s => !(s.habitatCreationInAdvance > 0 && s.habitatCreationDelay > 0),
+        s => !(
+            (typeof s.habitatCreationInAdvance === "string" || s.habitatCreationInAdvance > 0)
+            && (typeof s.habitatCreationDelay === "string" || s.habitatCreationDelay > 0)
+        ),
         "Cannot have both habitat creation in advance and delay in starting habitat creation"
     ),
     v.transform(enrichWithHabitatData),

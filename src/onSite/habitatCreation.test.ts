@@ -267,6 +267,6 @@ test("habitat units delivered - with delay", () => {
     expect(result.finalTimeToTargetCondition).toEqual(25)
 
     // Area × distinctiveness × condition × strategic sig × temporal multiplier for 25 × difficulty
-    const expected = 1.5 * 6 * 3 * 1.15 * result.finalTimeToTargetMultiplier * 0.33
+    const expected = 1.5 * 6 * 3 * 1.15 * (result.finalTimeToTargetMultiplier ?? 0) * 0.33
     expect(result.habitatUnitsDelivered).toBeCloseTo(expected, 5)
 })

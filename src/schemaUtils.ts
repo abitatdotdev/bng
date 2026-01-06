@@ -14,12 +14,16 @@ export const areaSchema = v.pipe(
 
 export const freeTextSchema = v.optional(v.string());
 
-export const yearsSchema = v.pipe(
-    v.number(),
-    v.integer(),
-    v.toMinValue(0),
-    v.toMaxValue(30),
-)
+export const yearsSchema =
+    v.union([
+        v.pipe(
+            v.number(),
+            v.integer(),
+            v.toMinValue(0),
+            v.toMaxValue(30),
+        ),
+        v.literal("30+")
+    ])
 
 export function isValidHabitat(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): boolean {
     return !!habitatByBroadAndType(broadHabitat, habitatType);
