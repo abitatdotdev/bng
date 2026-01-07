@@ -3,9 +3,8 @@ import * as v from 'valibot';
 import XLSX from 'xlsx';
 import { onSiteHabitatBaselineSchema } from "./habitatBaseline";
 import { onSiteHabitatCreationSchema } from "./habitatCreation";
-import { onSiteHabitatEnhancementSchema } from "./habitatEnhancement";
 
-const EXCEL_FILE = './examples/simple-unlocked.xlsm';
+const EXCEL_FILE = './examples/less-simple.xlsm';
 
 /**
  * Helper function to get cell value from worksheet
@@ -51,11 +50,11 @@ function expectCloseTo(actual: number, expected: number, tolerance: number = 0.0
 /**
  * Find all data rows in a sheet
  */
-function findAllDataRows(sheet: XLSX.WorkSheet, broadHabitatCol: number, startRow: number = 11, maxRows: number = 250): number[] {
+function findAllDataRows(sheet: XLSX.WorkSheet, broadHabitatCol: number, startRow: number = 10, maxRows: number = 250): number[] {
     const dataRows: number[] = [];
     for (let row = startRow; row < startRow + maxRows; row++) {
         const value = getCellValue(sheet, row, broadHabitatCol);
-        if (value && typeof value === "string" && value.trim() !== "") {
+        if (value && typeof value === "string" && value.trim() !== "" && value.trim() !== "Broad Habitat") {
             dataRows.push(row);
         }
     }
