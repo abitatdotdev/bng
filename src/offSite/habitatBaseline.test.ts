@@ -1,44 +1,65 @@
 import { expect, test } from "bun:test";
-import * as v from 'valibot';
 import { offSiteHabitatBaselineSchema, type OffSiteHabitatBaselineSchema } from "./habitatBaseline";
+import * as v from 'valibot';
+
+expect.extend({
+    toBeParseableBy:
+        function <TSchema extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(
+            input: unknown,
+            schema: TSchema,
+        ) {
+            const result = v.safeParse(schema, input);
+            return {
+                pass: !!result.success,
+                // @ts-expect-error TS2339
+                message: () => `Expected ${this.utils.printReceived(input)} to be parseable. \nIssues: ${this.utils.printReceived(result.issues)}`,
+            }
+        },
+})
 
 export function fixture(overrides: Partial<OffSiteHabitatBaselineSchema> = {}): OffSiteHabitatBaselineSchema {
     return {
         broadHabitat: "Woodland and forest",
-        habitatType: "Lowland mixed deciduous woodland",
+        habitatType: "Other coniferous woodland",
         area: 1,
-        distinctiveness: "Medium",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        condition: "Good",
+        condition: "Poor",
         irreplaceableHabitat: false,
         spatialRiskCategory: "This metric is being used by an off-site provider",
         areaRetained: 1,
+        offSiteReferenceNumber: "OFF-001",
         ...overrides,
     }
 }
 
 test("valid combinations of broad habitat and habitat type", () => {
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree" })).success).toBeTrue()
+    expect(fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree" })).toBeParseableBy(offSiteHabitatBaselineSchema)
 
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Lowland" })).success).toBeFalse()
+    expect(fixture({ broadHabitat: "Individual trees", habitatType: "Lowland" })).not.toBeParseableBy(offSiteHabitatBaselineSchema)
 })
 
 test("irreplaceable habitat validation", () => {
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ irreplaceableHabitat: false })).success).toBeTrue()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: true })).success).toBeTrue()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: false })).success).toBeFalse()
+    expect(fixture({ irreplaceableHabitat: false })).toBeParseableBy(offSiteHabitatBaselineSchema)
 
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: undefined })).success).toBeFalse()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: true })).success).toBeTrue()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: false })).success).toBeTrue()
+    expect(fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: true, bespokeCompensationAgreed: "Yes" })).toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ broadHabitat: "Sparsely vegetated land", habitatType: "Coastal sand dunes", irreplaceableHabitat: false })).not.toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: undefined })).not.toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: true, bespokeCompensationAgreed: "Yes" })).toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ broadHabitat: "Individual trees", habitatType: "Urban tree", irreplaceableHabitat: false })).toBeParseableBy(offSiteHabitatBaselineSchema)
 })
 
 test("condition validation", () => {
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ condition: "Good" })).success).toBeTrue()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ condition: "Moderate" })).success).toBeTrue()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ condition: "Poor" })).success).toBeTrue()
+    expect(fixture({ condition: "Good", bespokeCompensationAgreed: "Yes" })).toBeParseableBy(offSiteHabitatBaselineSchema)
 
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ condition: "Condition Assessment N/A" })).success).toBeFalse()
-    expect(v.safeParse(offSiteHabitatBaselineSchema, fixture({ condition: "N/A - Other" })).success).toBeFalse()
+    expect(fixture({ condition: "Moderate" })).toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ condition: "Poor" })).toBeParseableBy(offSiteHabitatBaselineSchema)
+
+    expect(fixture({ condition: "Condition Assessment N/A" })).not.toBeParseableBy(offSiteHabitatBaselineSchema)
+    expect(fixture({ condition: "N/A - Other" })).not.toBeParseableBy(offSiteHabitatBaselineSchema)
 })
 
