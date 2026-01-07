@@ -10,7 +10,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@std/assert": "npm:@jsr/std__assert",
     "xlsx": "^0.18.5"
   }
 }
