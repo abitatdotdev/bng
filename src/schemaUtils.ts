@@ -12,6 +12,12 @@ export const areaSchema = v.pipe(
     v.toMinValue(0),
 )
 
+// Length schema for hedgerows (in kilometers)
+export const lengthSchema = v.pipe(
+    v.number(),
+    v.toMinValue(0),
+);
+
 export const freeTextSchema = v.optional(v.string());
 
 export const yearsSchema =
