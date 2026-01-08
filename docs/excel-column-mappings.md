@@ -222,6 +222,52 @@ Populated automatically.
 
 ---
 
+## Hedgerow Sheets
+
+### B-1 On-Site Hedge Baseline
+**Header row:** Row 9 (0-indexed as row 8)
+**Data row start:** Row 10 (0-indexed as row 9)
+
+**Input Columns:**
+- `B` (1): Ref - Reference/sequence number
+- `C` (2): Hedge Number - User-entered hedge identifier
+- `D` (3): Habitat Type - Hedge habitat type (links to G-6 Hedgerow Data)
+- `E` (4): Length (km) - Hedgerow length in kilometers
+- `H` (7): Condition - Uses INDIRECT validation to AL column
+- `J` (9): Strategic Significance
+- `P` (15): Length Retained (km)
+- `Q` (16): Length Enhanced (km)
+- `V` (21): User Comments
+- `W` (22): Planning Authority Comments
+- `X` (23): Habitat Reference Number
+
+**Calculated/Output Columns:**
+- `F` (5): Distinctiveness - VLOOKUP from G-6 Hedgerow Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-6 Hedgerow Data
+- `I` (8): Condition Score - Lookup from G-1 All Habitats
+- `K` (10): Strategic Significance Category - Lookup from G-3 Multipliers
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-3 Multipliers
+- `N` (13): Total Hedgerow Units - Length × G × I × L
+- `R` (17): Units Retained - Length Retained × G × I × L
+- `S` (18): Units Enhanced - Length Enhanced × G × I × L
+- `T` (19): Length Lost - E - P - Q (with error checking)
+- `U` (20): Units Lost - N - R - S (with error checking)
+- `AE` (30): Retained Flag - TRUE if P > 0
+- `AF` (31): Enhanced Flag - TRUE if Q > 0
+- `AH` (33): Line Number - Auto-populated row identifier
+- `AJ` (35): Retained - Array formula
+- `AK` (36): Enhanced - Array formula
+- `AL` (37): Condition Group - INDEX/MATCH from G-6 Hedgerow Data
+
+**Special Features:**
+- Uses Length (km) instead of Area (hectares)
+- Condition column (H) uses INDIRECT validation based on AL (Condition Group)
+- Error checking in columns I, T, and U ("Check data", "Error in lengths")
+- Array formulas in columns AJ and AK
+- More compact than habitat sheets (38 columns vs 50 for A-1)
+
+---
+
 ## Key Differences: On-Site vs Off-Site
 
 ### Off-Site Specific Fields
