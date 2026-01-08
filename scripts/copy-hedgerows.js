@@ -13,8 +13,10 @@ const COLUMNS = {
     creationGood: 8,                 // I
     enhancementPoorModerate: 10,     // K
     enhancementPoorGood: 12,         // M
+    enhancementModerateGood: 16,     // Q
     technicalDifficultyCreation: 31, // AF
     technicalDifficultyEnhancement: 32, // AG
+    tradingRules: 33,                // AH
     conditionCategory: 35,           // AJ
     conditionScore: 36,              // AK
 };
@@ -107,6 +109,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
             label: habitatDescStr,
             distinctivenessCategory: null,
             distinctivenessScore: 0,
+            tradingRules: null,
             creationTemporal: {},
             enhancementTemporal: {},
             enhancementPathways: {},
@@ -126,6 +129,12 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
         const distinctivenessScore = getCellValue(sheet, row, COLUMNS.distinctivenessScore);
         if (distinctivenessScore !== null) {
             hedgerow.distinctivenessScore = parseFloat(distinctivenessScore) || 0;
+        }
+
+        // Read trading rules from column AH
+        const tradingRules = getCellValue(sheet, row, COLUMNS.tradingRules);
+        if (tradingRules) {
+            hedgerow.tradingRules = String(tradingRules).trim();
         }
 
         // Read technical difficulty directly from G-6 (columns AF and AG)
@@ -172,6 +181,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
         // Read enhancement temporal data (through condition)
         const enhPoorModerate = getCellValue(sheet, row, COLUMNS.enhancementPoorModerate);
         const enhPoorGood = getCellValue(sheet, row, COLUMNS.enhancementPoorGood);
+        const enhModerateGood = getCellValue(sheet, row, COLUMNS.enhancementModerateGood);
 
         if (enhPoorModerate !== null && enhPoorModerate !== undefined && enhPoorModerate !== '') {
             const parsed = parseFloat(enhPoorModerate);
@@ -180,6 +190,16 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
         if (enhPoorGood !== null && enhPoorGood !== undefined && enhPoorGood !== '') {
             const parsed = parseFloat(enhPoorGood);
             if (!isNaN(parsed)) hedgerow.enhancementTemporal['Poor to Good'] = parsed;
+        }
+        if (enhModerateGood !== null && enhModerateGood !== undefined && enhModerateGood !== '') {
+            // Handle both numeric values and special strings like "Not possible ▲"
+            const stringValue = String(enhModerateGood).trim();
+            if (stringValue.toLowerCase().includes('not possible')) {
+                hedgerow.enhancementTemporal['Moderate to Good'] = stringValue;
+            } else {
+                const parsed = parseFloat(enhModerateGood);
+                if (!isNaN(parsed)) hedgerow.enhancementTemporal['Moderate to Good'] = parsed;
+            }
         }
 
         // Read enhancement pathways (through distinctiveness)
@@ -218,6 +238,7 @@ export const allHedgerows = {
         code += `        label: '${escapeString(hedgerow.label)}',\n`;
         code += `        distinctivenessCategory: ${hedgerow.distinctivenessCategory ? `'${hedgerow.distinctivenessCategory}'` : 'null'},\n`;
         code += `        distinctivenessScore: ${hedgerow.distinctivenessCategory ? `distinctivenessCategories["${hedgerow.distinctivenessCategory}"].score` : hedgerow.distinctivenessScore},\n`;
+        code += `        tradingRules: ${hedgerow.tradingRules ? `'${escapeString(hedgerow.tradingRules)}'` : 'null'},\n`;
         code += `        technicalDifficultyCreation: ${hedgerow.technicalDifficultyCreation ? `'${escapeString(hedgerow.technicalDifficultyCreation)}'` : 'null'},\n`;
         code += `        technicalDifficultyCreationMultiplier: ${hedgerow.technicalDifficultyCreation ? `difficulty['${escapeString(hedgerow.technicalDifficultyCreation)}']` : '1'},\n`;
         code += `        technicalDifficultyEnhancement: ${hedgerow.technicalDifficultyEnhancement ? `'${escapeString(hedgerow.technicalDifficultyEnhancement)}'` : 'null'},\n`;
@@ -238,7 +259,9 @@ export const allHedgerows = {
         if (Object.keys(hedgerow.enhancementTemporal).length > 0) {
             code += `        enhancementTemporal: {\n`;
             Object.entries(hedgerow.enhancementTemporal).forEach(([pathway, value]) => {
-                code += `            '${escapeString(pathway)}': ${value},\n`;
+                // Handle string values like "Not possible ▲"
+                const formattedValue = typeof value === 'string' ? `'${escapeString(value)}'` : value;
+                code += `            '${escapeString(pathway)}': ${formattedValue},\n`;
             });
             code += `        },\n`;
         } else {
