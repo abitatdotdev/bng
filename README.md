@@ -20,3 +20,8 @@ By doing so, we wish to facilitate better tooling for BNG.
 We encourage community contributions, but it's too early to be directly involved.
 If you would like to contribute to this project, please get in touch at
 [hello@abitat.dev](mailto:hello@abitat.dev).
+
+## Documentation
+
+- [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
+
