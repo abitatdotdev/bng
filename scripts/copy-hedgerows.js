@@ -17,8 +17,6 @@ const COLUMNS = {
     technicalDifficultyCreation: 31, // AF
     technicalDifficultyEnhancement: 32, // AG
     tradingRules: 33,                // AH
-    conditionCategory: 35,           // AJ
-    conditionScore: 36,              // AK
 };
 
 // Enhancement pathway columns (S-AB: indices 18-27)
@@ -110,14 +108,13 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
             distinctivenessCategory: null,
             distinctivenessScore: 0,
             tradingRules: null,
-            creationTemporal: {},
-            enhancementTemporal: {},
-            enhancementPathways: {},
+            yearsToTargetConditionViaCreation: {},
+            yearsToTargetConditionViaEnhancement: {},
+            yearsToTargetConditionViaDistinctiveness: {},
             technicalDifficultyCreation: null,
             technicalDifficultyCreationMultiplier: 1,
             technicalDifficultyEnhancement: null,
             technicalDifficultyEnhancementMultiplier: 1,
-            conditions: null,
         };
 
         // Process distinctiveness
@@ -148,18 +145,6 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
             hedgerow.technicalDifficultyEnhancement = String(techDiffEnhancement).trim();
         }
 
-        // Read condition data directly from G-6 (columns AJ and AK)
-        const conditionCategory = getCellValue(sheet, row, COLUMNS.conditionCategory);
-        const conditionScore = getCellValue(sheet, row, COLUMNS.conditionScore);
-        if (conditionCategory && conditionScore) {
-            hedgerow.conditions = {};
-            const category = String(conditionCategory).trim();
-            const score = parseFloat(conditionScore);
-            if (!isNaN(score)) {
-                hedgerow.conditions[category] = score;
-            }
-        }
-
         // Read creation temporal data
         const creationPoor = getCellValue(sheet, row, COLUMNS.creationPoor);
         const creationModerate = getCellValue(sheet, row, COLUMNS.creationModerate);
@@ -167,15 +152,15 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
 
         if (creationPoor !== null && creationPoor !== undefined && creationPoor !== '') {
             const parsed = parseFloat(creationPoor);
-            if (!isNaN(parsed)) hedgerow.creationTemporal.Poor = parsed;
+            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Poor = parsed;
         }
         if (creationModerate !== null && creationModerate !== undefined && creationModerate !== '') {
             const parsed = parseFloat(creationModerate);
-            if (!isNaN(parsed)) hedgerow.creationTemporal.Moderate = parsed;
+            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Moderate = parsed;
         }
         if (creationGood !== null && creationGood !== undefined && creationGood !== '') {
             const parsed = parseFloat(creationGood);
-            if (!isNaN(parsed)) hedgerow.creationTemporal.Good = parsed;
+            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Good = parsed;
         }
 
         // Read enhancement temporal data (through condition)
@@ -185,20 +170,20 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
 
         if (enhPoorModerate !== null && enhPoorModerate !== undefined && enhPoorModerate !== '') {
             const parsed = parseFloat(enhPoorModerate);
-            if (!isNaN(parsed)) hedgerow.enhancementTemporal['Poor to Moderate'] = parsed;
+            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaEnhancement['Poor to Moderate'] = parsed;
         }
         if (enhPoorGood !== null && enhPoorGood !== undefined && enhPoorGood !== '') {
             const parsed = parseFloat(enhPoorGood);
-            if (!isNaN(parsed)) hedgerow.enhancementTemporal['Poor to Good'] = parsed;
+            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaEnhancement['Poor to Good'] = parsed;
         }
         if (enhModerateGood !== null && enhModerateGood !== undefined && enhModerateGood !== '') {
             // Handle both numeric values and special strings like "Not possible ▲"
             const stringValue = String(enhModerateGood).trim();
             if (stringValue.toLowerCase().includes('not possible')) {
-                hedgerow.enhancementTemporal['Moderate to Good'] = stringValue;
+                hedgerow.yearsToTargetConditionViaEnhancement['Moderate to Good'] = stringValue;
             } else {
                 const parsed = parseFloat(enhModerateGood);
-                if (!isNaN(parsed)) hedgerow.enhancementTemporal['Moderate to Good'] = parsed;
+                if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaEnhancement['Moderate to Good'] = parsed;
             }
         }
 
@@ -210,7 +195,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
             if (value !== null && value !== undefined && value !== '') {
                 const parsed = parseFloat(value);
                 if (!isNaN(parsed)) {
-                    hedgerow.enhancementPathways[pathwayName] = parsed;
+                    hedgerow.yearsToTargetConditionViaDistinctiveness[pathwayName] = parsed;
                 }
             }
         });
@@ -245,49 +230,38 @@ export const allHedgerows = {
         code += `        technicalDifficultyEnhancementMultiplier: ${hedgerow.technicalDifficultyEnhancement ? `difficulty['${escapeString(hedgerow.technicalDifficultyEnhancement)}']` : '1'},\n`;
 
         // Creation temporal data
-        if (Object.keys(hedgerow.creationTemporal).length > 0) {
-            code += `        creationTemporal: {\n`;
-            Object.entries(hedgerow.creationTemporal).forEach(([condition, value]) => {
+        if (Object.keys(hedgerow.yearsToTargetConditionViaCreation).length > 0) {
+            code += `        yearsToTargetConditionViaCreation: {\n`;
+            Object.entries(hedgerow.yearsToTargetConditionViaCreation).forEach(([condition, value]) => {
                 code += `            '${condition}': ${value},\n`;
             });
             code += `        },\n`;
         } else {
-            code += `        creationTemporal: null,\n`;
+            code += `        yearsToTargetConditionViaCreation: null,\n`;
         }
 
         // Enhancement temporal data
-        if (Object.keys(hedgerow.enhancementTemporal).length > 0) {
-            code += `        enhancementTemporal: {\n`;
-            Object.entries(hedgerow.enhancementTemporal).forEach(([pathway, value]) => {
+        if (Object.keys(hedgerow.yearsToTargetConditionViaEnhancement).length > 0) {
+            code += `        yearsToTargetConditionViaEnhancement: {\n`;
+            Object.entries(hedgerow.yearsToTargetConditionViaEnhancement).forEach(([pathway, value]) => {
                 // Handle string values like "Not possible ▲"
                 const formattedValue = typeof value === 'string' ? `'${escapeString(value)}'` : value;
                 code += `            '${escapeString(pathway)}': ${formattedValue},\n`;
             });
             code += `        },\n`;
         } else {
-            code += `        enhancementTemporal: null,\n`;
+            code += `        yearsToTargetConditionViaEnhancement: null,\n`;
         }
 
         // Enhancement pathways
-        if (Object.keys(hedgerow.enhancementPathways).length > 0) {
-            code += `        enhancementPathways: {\n`;
-            Object.entries(hedgerow.enhancementPathways).forEach(([pathway, value]) => {
+        if (Object.keys(hedgerow.yearsToTargetConditionViaDistinctiveness).length > 0) {
+            code += `        yearsToTargetConditionViaDistinctiveness: {\n`;
+            Object.entries(hedgerow.yearsToTargetConditionViaDistinctiveness).forEach(([pathway, value]) => {
                 code += `            '${escapeString(pathway)}': ${value},\n`;
             });
             code += `        },\n`;
         } else {
-            code += `        enhancementPathways: null,\n`;
-        }
-
-        // Conditions
-        if (hedgerow.conditions) {
-            code += `        conditions: {\n`;
-            Object.entries(hedgerow.conditions).forEach(([condition, value]) => {
-                code += `            '${condition}': ${value},\n`;
-            });
-            code += `        },\n`;
-        } else {
-            code += `        conditions: null,\n`;
+            code += `        yearsToTargetConditionViaDistinctiveness: null,\n`;
         }
 
         code += '    }';

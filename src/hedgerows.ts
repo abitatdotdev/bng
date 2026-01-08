@@ -12,20 +12,17 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
             'Good': 20,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 6,
             'Poor to Good': 10,
             'Moderate to Good': 4,
         },
-        enhancementPathways: null,
-        conditions: {
-            'Good': 3,
-        },
+        yearsToTargetConditionViaDistinctiveness: null,
     },
     'Species-rich native hedgerow with trees': {
         label: 'Species-rich native hedgerow with trees',
@@ -36,21 +33,18 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
             'Good': 20,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 6,
             'Poor to Good': 10,
             'Moderate to Good': 4,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 5,
-        },
-        conditions: {
-            'Moderate': 2,
         },
     },
     'Species-rich native hedgerow - associated with bank or ditch': {
@@ -62,21 +56,18 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
             'Good': 12,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 3,
             'Poor to Good': 5,
             'Moderate to Good': 2,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 10,
-        },
-        conditions: {
-            'Poor': 1,
         },
     },
     'Native hedgerow with trees - associated with bank or ditch': {
@@ -88,20 +79,19 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
             'Good': 20,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 6,
             'Poor to Good': 10,
             'Moderate to Good': 4,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 5,
         },
-        conditions: null,
     },
     'Species-rich native hedgerow': {
         label: 'Species-rich native hedgerow',
@@ -112,22 +102,21 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
             'Good': 12,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 3,
             'Poor to Good': 5,
             'Moderate to Good': 2,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 10,
             'Species-rich native hedgerow with trees': 10,
             'Species-rich native hedgerow - associated with bank or ditch': 5,
         },
-        conditions: null,
     },
     'Native hedgerow - associated with bank or ditch': {
         label: 'Native hedgerow - associated with bank or ditch',
@@ -138,22 +127,21 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
             'Good': 12,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 3,
             'Poor to Good': 5,
             'Moderate to Good': 2,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 10,
             'Species-rich native hedgerow - associated with bank or ditch': 5,
             'Native hedgerow with trees - associated with bank or ditch': 10,
         },
-        conditions: null,
     },
     'Native hedgerow with trees': {
         label: 'Native hedgerow with trees',
@@ -164,23 +152,22 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
             'Good': 20,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 6,
             'Poor to Good': 10,
             'Moderate to Good': 4,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 5,
             'Species-rich native hedgerow with trees': 5,
             'Species-rich native hedgerow - associated with bank or ditch': 5,
             'Native hedgerow with trees - associated with bank or ditch': 5,
         },
-        conditions: null,
     },
     'Ecologically valuable line of trees': {
         label: 'Ecologically valuable line of trees',
@@ -191,22 +178,21 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
             'Good': 30,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
             'Poor to Good': 30,
             'Moderate to Good': 10,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 12,
             'Species-rich native hedgerow with trees': 12,
             'Native hedgerow with trees - associated with bank or ditch': 12,
         },
-        conditions: null,
     },
     'Ecologically valuable line of trees - associated with bank or ditch': {
         label: 'Ecologically valuable line of trees - associated with bank or ditch',
@@ -217,21 +203,20 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
             'Good': 30,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
             'Poor to Good': 30,
             'Moderate to Good': 10,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 12,
             'Native hedgerow with trees - associated with bank or ditch': 12,
         },
-        conditions: null,
     },
     'Native hedgerow': {
         label: 'Native hedgerow',
@@ -242,17 +227,17 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
             'Good': 12,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 3,
             'Poor to Good': 5,
             'Moderate to Good': 2,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 10,
             'Species-rich native hedgerow with trees': 10,
             'Species-rich native hedgerow - associated with bank or ditch': 5,
@@ -261,7 +246,6 @@ export const allHedgerows = {
             'Native hedgerow - associated with bank or ditch': 6,
             'Native hedgerow with trees': 10,
         },
-        conditions: null,
     },
     'Line of trees': {
         label: 'Line of trees',
@@ -272,23 +256,22 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
             'Good': 30,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
             'Poor to Good': 30,
             'Moderate to Good': 10,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 12,
             'Species-rich native hedgerow with trees': 12,
             'Native hedgerow with trees - associated with bank or ditch': 12,
             'Native hedgerow with trees': 12,
         },
-        conditions: null,
     },
     'Line of trees - associated with bank or ditch': {
         label: 'Line of trees - associated with bank or ditch',
@@ -299,22 +282,21 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
             'Good': 30,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
             'Poor to Good': 30,
             'Moderate to Good': 10,
         },
-        enhancementPathways: {
+        yearsToTargetConditionViaDistinctiveness: {
             'Species-rich native hedgerow with trees - associated with bank or ditch': 12,
             'Native hedgerow with trees - associated with bank or ditch': 12,
             'Native hedgerow with trees': 12,
         },
-        conditions: null,
     },
     'Non-native and ornamental hedgerow': {
         label: 'Non-native and ornamental hedgerow',
@@ -325,14 +307,13 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
-        creationTemporal: {
+        yearsToTargetConditionViaCreation: {
             'Poor': 1,
         },
-        enhancementTemporal: {
+        yearsToTargetConditionViaEnhancement: {
             'Moderate to Good': 'Not possible ▲',
         },
-        enhancementPathways: null,
-        conditions: null,
+        yearsToTargetConditionViaDistinctiveness: null,
     }
 } as const;
 
