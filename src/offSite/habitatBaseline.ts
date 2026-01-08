@@ -4,8 +4,9 @@ import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
-import { getSpatialRiskMultiplier, spatialRiskCategorySchema } from '../spatialRisk';
+import { spatialRiskCategorySchema } from '../spatialRisk';
 import { bespokeCompensationSchema } from '../bespokeCompensation';
+import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './common';
 
 const inputSchema =
     v.object({
@@ -53,17 +54,6 @@ export const offSiteHabitatBaselineSchema = v.pipe(
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>
 export type OffSiteHabitatBaseline = v.InferOutput<typeof offSiteHabitatBaselineSchema>
-
-// Enrich with spatial risk multiplier
-export function enrichWithSpatialRiskMultiplier<Data extends {
-    spatialRiskCategory: string;
-}>(data: Data) {
-    const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
-    return {
-        ...data,
-        spatialRiskMultiplier,
-    };
-}
 
 // Enrich with baseline units data (X, Y, Z columns)
 export function enrichWithBaselineUnitsData<Data extends {

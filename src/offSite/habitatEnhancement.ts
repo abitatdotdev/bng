@@ -6,9 +6,8 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
 import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 import { habitatByBroadAndType } from '../habitats';
-import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
-import { getSpatialRiskMultiplier } from '../spatialRisk';
+import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
 
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
@@ -96,62 +95,17 @@ const lookupEnhancementTimeToTarget = <Data extends {
  * - Standard enhancement time (from enhancement temporal multipliers)
  * - Years of habitat enhanced in advance
  * - Years of delay in starting enhancement
- *
- * Reuses the same logic as habitat creation
  */
 const calculateFinalTimeToTargetValues = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatEnhancedInAdvance: number | "30+",
     habitatEnhancedDelay: number | "30+"
 }>(data: Data) => {
-    const { timeToTargetCondition, habitatEnhancedInAdvance, habitatEnhancedDelay } = data;
-
-    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
-    const normalisedHabitatEnhancedInAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
-    const normalisedHabitatEnhancedDelay = typeof habitatEnhancedDelay === "string" ? 30 : habitatEnhancedDelay;
-
-    // If standard time is "Not Possible", final time is also "Not Possible"
-    if (timeToTargetCondition === "Not Possible ▲") {
-        finalTimeToTargetCondition = "Not Possible ▲";
-    }
-    // Handle "30+" standard time
-    else if (timeToTargetCondition === "30+") {
-        if (habitatEnhancedInAdvance === 0) {
-            finalTimeToTargetCondition = "30+";
-        } else {
-            // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - normalisedHabitatEnhancedInAdvance);
-        }
-    }
-    // If advance >= standard time, final time is 0
-    else if (normalisedHabitatEnhancedInAdvance >= timeToTargetCondition) {
-        finalTimeToTargetCondition = 0;
-    }
-    // Calculate: standardTime - advance + delay
-    else {
-        const result = timeToTargetCondition - normalisedHabitatEnhancedInAdvance + normalisedHabitatEnhancedDelay;
-
-        // Cap at "30+" if result > 30
-        if (result > 30) {
-            finalTimeToTargetCondition = "30+";
-        } else {
-            // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
-        }
-    }
-
-    // Look up the temporal multiplier for the final time
-    const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
-    const multiplierResult = getTemporalMultiplier(multiplierKey);
-
-    // Convert 'N/A' to undefined for calculations, keep numeric values
-    const finalTimeToTargetMultiplier = multiplierResult === 'N/A' ? undefined : multiplierResult;
-
-    return {
+    return calculateFinalTimeToTargetValuesCommon({
         ...data,
-        finalTimeToTargetCondition,
-        finalTimeToTargetMultiplier
-    };
+        advance: data.habitatEnhancedInAdvance,
+        delay: data.habitatEnhancedDelay,
+    });
 }
 
 /**
@@ -207,19 +161,15 @@ const determineEnhancementDifficulty = <Data extends {
 }
 
 /**
- * Enriches data with spatial risk multiplier.
- *
- * Looks up the multiplier value based on the spatial risk category from baseline.
+ * Enriches data with spatial risk multiplier from baseline.
  */
 const enrichWithSpatialRiskData = <Data extends {
     baseline: any
 }>(data: Data) => {
-    const spatialRiskMultiplier = getSpatialRiskMultiplier(data.baseline.spatialRiskCategory as any);
-
-    return {
+    return enrichWithSpatialRisk({
         ...data,
-        spatialRiskMultiplier
-    };
+        spatialRiskCategory: data.baseline.spatialRiskCategory
+    });
 }
 
 /**

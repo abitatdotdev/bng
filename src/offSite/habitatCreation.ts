@@ -4,10 +4,10 @@ import { creationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
-import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
-import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
+import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
+import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
 
 const inputSchema =
     v.object({
@@ -33,13 +33,6 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
  * - Years of habitat creation in advance
  * - Years of delay in starting habitat creation
  *
- * Formula: finalTime = standardTime - advance + delay
- * - Capped at "30+" if result > 30
- * - Returns 0 if advance >= standardTime
- * - Returns "Not Possible" if standardTime is "Not Possible ▲"
- *
- * Also looks up the temporal multiplier for the calculated final time.
- *
  * Corresponds to formula in Excel cell S11 of sheet D-2
  */
 const calculateFinalTimeToTargetValues = <Data extends {
@@ -47,54 +40,11 @@ const calculateFinalTimeToTargetValues = <Data extends {
     habitatCreationInAdvance: number | "30+",
     habitatCreationDelay: number | "30+"
 }>(data: Data) => {
-    const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay } = data;
-
-    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
-    const normalisedHabitatCreationInAdvance = typeof habitatCreationInAdvance === "string" ? 30 : habitatCreationInAdvance;
-    const normalisedHabitatCreationDelay = typeof habitatCreationDelay === "string" ? 30 : habitatCreationDelay;
-
-    // If standard time is "Not Possible", final time is also "Not Possible"
-    if (timeToTargetCondition === "Not Possible ▲") {
-        finalTimeToTargetCondition = "Not Possible ▲";
-    }
-    // Handle "30+" standard time
-    else if (timeToTargetCondition === "30+") {
-        if (habitatCreationInAdvance === 0) {
-            finalTimeToTargetCondition = "30+";
-        } else {
-            // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - normalisedHabitatCreationInAdvance);
-        }
-    }
-    // If advance >= standard time, final time is 0
-    else if (normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
-        finalTimeToTargetCondition = 0;
-    }
-    // Calculate: standardTime - advance + delay
-    else {
-        const result = timeToTargetCondition - normalisedHabitatCreationInAdvance + normalisedHabitatCreationDelay;
-
-        // Cap at "30+" if result > 30
-        if (result > 30) {
-            finalTimeToTargetCondition = "30+";
-        } else {
-            // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
-        }
-    }
-
-    // Look up the temporal multiplier for the final time
-    const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
-    const multiplierResult = getTemporalMultiplier(multiplierKey);
-
-    // Convert 'N/A' to undefined for calculations, keep numeric values
-    const finalTimeToTargetMultiplier = multiplierResult === 'N/A' ? undefined : multiplierResult;
-
-    return {
+    return calculateFinalTimeToTargetValuesCommon({
         ...data,
-        finalTimeToTargetCondition,
-        finalTimeToTargetMultiplier
-    };
+        advance: data.habitatCreationInAdvance,
+        delay: data.habitatCreationDelay,
+    });
 }
 
 /**
@@ -184,20 +134,9 @@ const enrichWithDifficultyData = <Data extends {
 /**
  * Enriches data with spatial risk multiplier.
  *
- * Looks up the multiplier value based on the spatial risk category.
- *
  * Corresponds to column Z in Excel sheet D-2
  */
-const enrichWithSpatialRiskData = <Data extends {
-    spatialRiskCategory: string
-}>(data: Data) => {
-    const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
-
-    return {
-        ...data,
-        spatialRiskMultiplier
-    };
-}
+const enrichWithSpatialRiskData = enrichWithSpatialRisk;
 
 /**
  * Calculates habitat units delivered for off-site habitat creation.
