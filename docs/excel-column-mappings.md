@@ -307,6 +307,61 @@ Populated automatically.
 - Error checking with warning symbols: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠"
 - Main calculation (W) multiplies length by all applicable multipliers
 
+### B-3 On-Site Hedge Enhancement
+**Header row:** Row 11 (0-indexed as row 10)
+**Data row start:** Row 12 (0-indexed as row 11)
+
+**Baseline Reference Columns:**
+Populated automatically from B-1 via VLOOKUP.
+- `B` (1): Baseline ref - Reference to baseline record (links to B-1 AK column)
+- `C` (2): Baseline habitat - Habitat type from baseline (VLOOKUP from B-1)
+- `D` (3): Length (km) - Hedgerow length from baseline
+- `E` (4): Baseline distinctiveness band
+- `F` (5): Baseline distinctiveness score
+- `G` (6): Baseline condition category
+- `H` (7): Baseline condition score
+- `I` (8): Baseline strategic significance category
+- `J` (9): Baseline strategic significance score
+- `K` (10): Baseline habitat units
+- `L` (11): Required Action to Meet Trading Rules
+
+**Input Columns:**
+- `M` (12): Proposed habitat - User input for enhanced habitat type
+- `S` (18): Condition - User input for proposed condition (uses INDIRECT validation)
+- `U` (20): Strategic significance - User input for strategic significance
+- `W` (22): Hedgerow enhanced in advance (years)
+- `X` (23): Delay in starting hedgerow enhancement (years)
+- `AB` (27): User Comments
+- `AC` (28): Planning Authority Comments
+- `AD` (29): Habitat Reference Number
+
+**Calculated/Output Columns:**
+- `N` (13): Distinctiveness movement - INDEX/MATCH matrix lookup showing baseline→proposed
+- `O` (14): Condition movement - Validation output showing baseline→proposed pathway
+- `P` (15): Length (km) - Hedgerow length (visible column, duplicates D)
+- `Q` (16): Distinctiveness - Proposed habitat distinctiveness category
+- `R` (17): Score - Proposed habitat distinctiveness score
+- `T` (19): Score - Proposed condition score
+- `V` (21): Strategic significance - Strategic significance score lookup
+- `Y` (24): Time to target condition (years) - Standard time from enhancement matrix
+- `Z` (25): Final time to target condition (years) - Adjusted for advance/delay
+- `AA` (26): Temporal multiplier - Temporal multiplier from G-4
+- `AE` (30): Difficulty multiplier applied - Numeric multiplier from G-3
+- `AF` (31): Net Unit Change - Enhancement units delivered
+
+**Special Features:**
+- References baseline data from B-1 using baseline ref (column B)
+- Enhancement pathway logic: baseline condition → proposed condition
+- Trading rules validation in column L
+- Distinctiveness movement matrix in column N (baseline habitat × proposed habitat)
+- Condition movement validation in column O (prevents condition reduction)
+- Cannot enhance without improvement (condition or distinctiveness must increase)
+- Temporal adjustment logic for hedgerow enhanced in advance or delayed
+- Difficulty multiplier depends on whether hedgerow is enhanced before losses
+- Condition column (S) uses INDIRECT validation based on hidden reference column
+- Error checking: "Not possible ▲", "Error - Not like for like ▲", "Error - Can not reduce condition ▲", "Error - No enhancement ▲"
+- Net unit calculation uses delta method: (Proposed - Baseline) × Multipliers + Baseline
+
 ---
 
 ## Key Differences: On-Site vs Off-Site
