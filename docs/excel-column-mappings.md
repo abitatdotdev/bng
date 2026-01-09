@@ -266,6 +266,47 @@ Populated automatically.
 - Array formulas in columns AJ and AK
 - More compact than habitat sheets (38 columns vs 50 for A-1)
 
+### B-2 On-Site Hedge Creation
+**Header row:** Row 11 (0-indexed as row 10)
+**Data row start:** Row 12 (0-indexed as row 11)
+
+**Input Columns:**
+- `B` (1): Ref - Reference/sequence number
+- `C` (2): New hedge number - User-entered hedge identifier
+- `D` (3): Habitat type - Hedge habitat type (links to G-6 Hedgerow Data)
+- `E` (4): Length (km) - Hedgerow length in kilometers
+- `H` (7): Condition - Uses INDIRECT validation to AG column
+- `J` (9): Strategic Significance
+- `N` (13): Habitat created in advance (years)
+- `O` (14): Delay in starting habitat creation (years)
+- `X` (23): User Comments
+- `Y` (24): Planning Authority Comments
+- `Z` (25): Habitat Reference Number
+
+**Calculated/Output Columns:**
+- `F` (5): Distinctiveness - VLOOKUP from G-6 Hedgerow Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-6 Hedgerow Data
+- `I` (8): Condition Score - Lookup from G-1 All Habitats (with validation for Non-native)
+- `K` (10): Strategic Significance Value - Lookup from G-3 Multipliers
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-3 Multipliers
+- `M` (12): Standard Time to Target Condition (years) - Matrix lookup: habitat type × condition
+- `P` (15): Standard or adjusted time to target condition - Status message
+- `Q` (16): Final time to target condition (years) - Adjusted for advance/delay
+- `R` (17): Final time to target multiplier - Temporal multiplier from G-4
+- `S` (18): Standard difficulty of creation - VLOOKUP from G-6 Hedgerow Data
+- `T` (19): Applied difficulty multiplier - Status message for difficulty adjustment
+- `U` (20): Final difficulty of creation - Conditional difficulty selection
+- `V` (21): Difficulty multiplier applied - Numeric multiplier from G-3
+- `W` (22): Net Unit Change - Length × G × I × L × R × V
+- `AG` (32): Condition Group - INDEX/MATCH from G-6 Hedgerow Data
+
+**Special Features:**
+- Temporal adjustment logic for habitat created in advance or delayed
+- Difficulty multiplier depends on whether habitat is created before losses
+- Condition column (H) uses INDIRECT validation based on AG (Condition Group)
+- Error checking with warning symbols: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠"
+- Main calculation (W) multiplies length by all applicable multipliers
+
 ---
 
 ## Key Differences: On-Site vs Off-Site

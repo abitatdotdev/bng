@@ -151,16 +151,31 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
         const creationGood = getCellValue(sheet, row, COLUMNS.creationGood);
 
         if (creationPoor !== null && creationPoor !== undefined && creationPoor !== '') {
-            const parsed = parseFloat(creationPoor);
-            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Poor = parsed;
+            const stringValue = String(creationPoor).trim();
+            if (stringValue === '30+') {
+                hedgerow.yearsToTargetConditionViaCreation.Poor = '30+';
+            } else {
+                const parsed = parseFloat(creationPoor);
+                if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Poor = parsed;
+            }
         }
         if (creationModerate !== null && creationModerate !== undefined && creationModerate !== '') {
-            const parsed = parseFloat(creationModerate);
-            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Moderate = parsed;
+            const stringValue = String(creationModerate).trim();
+            if (stringValue === '30+') {
+                hedgerow.yearsToTargetConditionViaCreation.Moderate = '30+';
+            } else {
+                const parsed = parseFloat(creationModerate);
+                if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Moderate = parsed;
+            }
         }
         if (creationGood !== null && creationGood !== undefined && creationGood !== '') {
-            const parsed = parseFloat(creationGood);
-            if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Good = parsed;
+            const stringValue = String(creationGood).trim();
+            if (stringValue === '30+') {
+                hedgerow.yearsToTargetConditionViaCreation.Good = '30+';
+            } else {
+                const parsed = parseFloat(creationGood);
+                if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Good = parsed;
+            }
         }
 
         // Read enhancement temporal data (through condition)
@@ -233,7 +248,9 @@ export const allHedgerows = {
         if (Object.keys(hedgerow.yearsToTargetConditionViaCreation).length > 0) {
             code += `        yearsToTargetConditionViaCreation: {\n`;
             Object.entries(hedgerow.yearsToTargetConditionViaCreation).forEach(([condition, value]) => {
-                code += `            '${condition}': ${value},\n`;
+                // Handle string values like "30+"
+                const formattedValue = typeof value === 'string' ? `'${escapeString(value)}'` : value;
+                code += `            '${condition}': ${formattedValue},\n`;
             });
             code += `        },\n`;
         } else {

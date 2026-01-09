@@ -181,7 +181,7 @@ export const allHedgerows = {
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
-            'Good': 30,
+            'Good': '30+',
         },
         yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
@@ -206,7 +206,7 @@ export const allHedgerows = {
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
-            'Good': 30,
+            'Good': '30+',
         },
         yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
@@ -259,7 +259,7 @@ export const allHedgerows = {
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
-            'Good': 30,
+            'Good': '30+',
         },
         yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
@@ -285,7 +285,7 @@ export const allHedgerows = {
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
-            'Good': 30,
+            'Good': '30+',
         },
         yearsToTargetConditionViaEnhancement: {
             'Poor to Moderate': 20,
