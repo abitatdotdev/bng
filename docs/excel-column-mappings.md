@@ -362,6 +362,97 @@ Populated automatically from B-1 via VLOOKUP.
 - Error checking: "Not possible ▲", "Error - Not like for like ▲", "Error - Can not reduce condition ▲", "Error - No enhancement ▲"
 - Net unit calculation uses delta method: (Proposed - Baseline) × Multipliers + Baseline
 
+### E-1 Off-Site Hedge Baseline
+**Header row:** Row 9 (0-indexed as row 8)
+**Data row start:** Row 10 (0-indexed as row 9)
+
+**Input Columns:**
+- `B` (1): Ref - Reference/sequence number
+- `C` (2): Hedge Number - User-entered hedge identifier
+- `D` (3): Habitat Type - Hedge habitat type (links to G-6 Hedgerow Data)
+- `E` (4): Length (km) - Hedgerow length in kilometers
+- `H` (7): Condition - Uses INDIRECT validation to AE column
+- `J` (9): Strategic Significance
+- `O` (14): Spatial Risk Category - **Off-site only feature**
+- `S` (18): Length Retained (km)
+- `T` (19): Length Enhanced (km)
+- `Y` (24): User Comments
+- `Z` (25): Planning Authority Comments
+- `AA` (26): Habitat Reference Number
+- `AB` (27): Off-site Reference Number - **Required when spatial risk is set**
+
+**Calculated/Output Columns:**
+- `F` (5): Distinctiveness - VLOOKUP from G-6 Hedgerow Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-6 Hedgerow Data
+- `I` (8): Condition Score - Lookup from G-1 All Habitats
+- `K` (10): Strategic Significance Category - Lookup from G-3 Multipliers
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-3 Multipliers
+- `M` (12): Required Action - Trading rules lookup
+- `N` (13): Total Hedgerow Units SRM - E × G × I × L × P (with spatial risk)
+- `P` (15): Spatial Risk Multiplier - VLOOKUP from spatial risk table, default 1.0
+- `Q` (16): Total Hedgerow Units - E × G × I × L (baseline, without spatial risk)
+- `U` (20): Units Retained - S × G × I × L
+- `V` (21): Units Enhanced - T × G × I × L
+- `W` (22): Length Lost - E - S - T (with error checking)
+- `X` (23): Units Lost - Q - U - V (based on baseline units, not SRM)
+- `AE` (30): Condition Group - INDEX/MATCH from G-6 Hedgerow Data
+- `AH` (33): Retained Flag - TRUE if S > 0
+
+**Special Features:**
+- **Spatial risk multiplier** (Column O input, Column P calculated) - unique to off-site
+- Two unit calculations: with SRM (Column N) and baseline (Column Q)
+- Units lost based on baseline units (Q), not SRM units (N)
+- Off-site reference required when spatial risk category is set
+- Error checking: "Off-site reference required ▲", "Check data ⚠", "Error in Lengths △"
+
+### E-2 Off-Site Hedge Creation
+**Header row:** Row 11 (0-indexed as row 10)
+**Data row start:** Row 12 (0-indexed as row 11)
+
+**Input Columns:**
+- `B` (1): Ref - Reference/sequence number
+- `C` (2): New hedge number - User-entered hedge identifier
+- `D` (3): Habitat type - Hedge habitat type (links to G-6 Hedgerow Data)
+- `E` (4): Length (km) - Hedgerow length in kilometers
+- `H` (7): Condition - Uses INDIRECT validation to AH column
+- `J` (9): Strategic Significance
+- `N` (13): Habitat created in advance (years)
+- `O` (14): Delay in starting habitat creation (years)
+- `AA` (26): Spatial Risk Category - **Off-site only feature**
+- `AF` (31): Habitat Reference
+- `AG` (32): Off-site Reference
+- `AH` (33): Baseline Reference
+
+**Calculated/Output Columns:**
+- `F` (5): Distinctiveness - VLOOKUP from G-6 Hedgerow Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-6 Hedgerow Data
+- `I` (8): Condition Score - Lookup from G-1 All Habitats (with validation for Non-native)
+- `K` (10): Strategic Significance Value - Lookup from G-3 Multipliers
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-3 Multipliers
+- `M` (12): Standard Time to Target Condition (years) - Matrix lookup: habitat type × condition
+- `P` (15): Standard or adjusted time to target condition - Status message
+- `Q` (16): Final time to target condition (years) - Adjusted for advance/delay
+- `R` (17): Final time to target multiplier - Temporal multiplier from G-4
+- `S` (18): Standard difficulty of creation - VLOOKUP from G-6 Hedgerow Data
+- `T` (19): Applied difficulty multiplier - Status message for difficulty adjustment
+- `U` (20): Final difficulty of creation - Conditional difficulty selection
+- `V` (21): Difficulty multiplier applied - Numeric multiplier from G-3
+- `W` (22): Habitat created before losses? - Boolean check for advance creation
+- `X` (23): Net Unit Change (interim) - Length × G × I × L × R
+- `Y` (24): Adjustment for spatial risk - Status message
+- `AB` (27): Spatial Risk Multiplier - VLOOKUP from spatial risk table
+- `AC` (28): Habitat Units Delivered (inc SRM) - W × V × AB (with spatial risk)
+- `AD` (29): Habitat Units Delivered - W × V (without spatial risk)
+- `AH` (33): Condition Group - INDEX/MATCH from G-6 Hedgerow Data
+
+**Special Features:**
+- Similar structure to B-2 but adds spatial risk columns (AA, AB, AC)
+- Two unit calculations: with SRM (Column AC) and without (Column AD)
+- Temporal adjustment logic for habitat created in advance or delayed
+- Difficulty multiplier depends on whether habitat is created before losses
+- Spatial risk applied to final unit delivery
+- Error checking with warning symbols: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠"
+
 ---
 
 ## Key Differences: On-Site vs Off-Site
