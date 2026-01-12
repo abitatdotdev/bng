@@ -495,3 +495,152 @@ describe("B-3 On-Site Hedge Enhancement - Excel Comparison", () => {
         });
     });
 });
+
+describe("E-1 Off-Site Hedge Baseline - Excel Comparison", () => {
+    const workbook = XLSX.readFile(EXCEL_FILE);
+    const sheetName = 'E-1 Off-Site Hedge Baseline';
+    const sheet = workbook.Sheets[sheetName];
+
+    if (!sheet) {
+        throw new Error(`Sheet "${sheetName}" not found`);
+    }
+
+    // Import the off-site schema
+    const { offSiteHedgerowBaselineSchema } = require("../offSite/hedgerowBaseline");
+
+    // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 9)
+    const dataRows = findAllDataRows(sheet, 3, 9);
+
+    if (dataRows.length === 0) {
+        test.skip("no off-site hedgerow baseline data in test file", () => {});
+        return;
+    }
+
+    dataRows.forEach((dataRow) => {
+        test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+            // Extract input values from Excel
+            // Column mapping (0-indexed) for E-1:
+            // D (3): Habitat Type
+            // E (4): Length (km)
+            // H (7): Condition
+            // J (9): Strategic Significance
+            // O (14): Spatial Risk Category
+            // S (18): Length Retained (km)
+            // T (19): Length Enhanced (km)
+            // Y (24): User Comments
+            // Z (25): Planning Authority Comments
+            // AA (26): Habitat Reference Number
+            // AB (27): Off-site Reference Number
+
+            const inputData = {
+                habitatType: getCellValue(sheet, dataRow, 3), // D
+                length: normalizeNumber(getCellValue(sheet, dataRow, 4)), // E
+                condition: getCellValue(sheet, dataRow, 7), // H
+                strategicSignificance: getCellValue(sheet, dataRow, 9), // J
+                spatialRiskCategory: getCellValue(sheet, dataRow, 14) || undefined, // O
+                lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, 18)) || 0, // S
+                lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 19)) || 0, // T
+                userComments: String(getCellValue(sheet, dataRow, 24) || ""), // Y
+                planningAuthorityComments: String(getCellValue(sheet, dataRow, 25) || ""), // Z
+                habitatReferenceNumber: String(getCellValue(sheet, dataRow, 26) || ""), // AA
+                offSiteReferenceNumber: String(getCellValue(sheet, dataRow, 27) || ""), // AB
+            };
+
+            // Parse through the pipeline
+            const result = v.safeParse(offSiteHedgerowBaselineSchema, inputData);
+
+            if (!result.success) {
+                console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                console.error(`Row ${dataRow + 1} - Validation errors:`, result.issues);
+                throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+            }
+
+            const parsed = result.output;
+
+            // Get calculated values from Excel
+            // Calculated column indices (0-indexed) for E-1:
+            // F (5): Distinctiveness
+            // G (6): Distinctiveness Score
+            // I (8): Condition Score
+            // L (11): Strategic Significance Multiplier
+            // P (15): Spatial Risk Multiplier
+            // N (13): Total Hedgerow Units SRM (with spatial risk)
+            // Q (16): Total Hedgerow Units (without spatial risk)
+            // U (20): Units Retained
+            // V (21): Units Enhanced
+            // W (22): Length Lost
+            // X (23): Units Lost
+
+            const excelDistinctivenessScore = getCellValue(sheet, dataRow, 6); // G
+            const excelConditionScore = getCellValue(sheet, dataRow, 8); // I
+            const excelStrategicMultiplier = getCellValue(sheet, dataRow, 11); // L
+            const excelSpatialRiskMultiplier = getCellValue(sheet, dataRow, 15); // P
+            const excelTotalHedgerowUnitsSRM = getCellValue(sheet, dataRow, 13); // N
+            const excelTotalHedgerowUnits = getCellValue(sheet, dataRow, 16); // Q
+            const excelUnitsRetained = getCellValue(sheet, dataRow, 20); // U
+            const excelUnitsEnhanced = getCellValue(sheet, dataRow, 21); // V
+            const excelLengthLost = getCellValue(sheet, dataRow, 22); // W
+            const excelUnitsLost = getCellValue(sheet, dataRow, 23); // X
+
+            // Compare values - only log on failure
+            try {
+                if (excelDistinctivenessScore !== null && typeof excelDistinctivenessScore === "number") {
+                    expectCloseTo(parsed.distinctivenessScore, excelDistinctivenessScore, 0.0001, "Distinctiveness Score");
+                }
+                if (excelConditionScore !== null && typeof excelConditionScore === "number") {
+                    expectCloseTo(parsed.conditionScore, excelConditionScore, 0.0001, "Condition Score");
+                }
+                if (excelStrategicMultiplier !== null && typeof excelStrategicMultiplier === "number") {
+                    expectCloseTo(parsed.strategicSignificanceMultiplier, excelStrategicMultiplier, 0.0001, "Strategic Multiplier");
+                }
+                if (excelSpatialRiskMultiplier !== null && typeof excelSpatialRiskMultiplier === "number") {
+                    expectCloseTo(parsed.spatialRiskMultiplier, excelSpatialRiskMultiplier, 0.0001, "Spatial Risk Multiplier");
+                }
+                if (excelTotalHedgerowUnitsSRM !== null && typeof excelTotalHedgerowUnitsSRM === "number") {
+                    expectCloseTo(parsed.totalHedgerowUnitsSRM, excelTotalHedgerowUnitsSRM, 0.0001, "Total Hedgerow Units SRM");
+                }
+                if (excelTotalHedgerowUnits !== null && typeof excelTotalHedgerowUnits === "number") {
+                    expectCloseTo(parsed.totalHedgerowUnits, excelTotalHedgerowUnits, 0.0001, "Total Hedgerow Units");
+                }
+                if (excelUnitsRetained !== null && typeof excelUnitsRetained === "number") {
+                    expectCloseTo(parsed.unitsRetained, excelUnitsRetained, 0.0001, "Units Retained");
+                }
+                if (excelUnitsEnhanced !== null && typeof excelUnitsEnhanced === "number") {
+                    expectCloseTo(parsed.unitsEnhanced, excelUnitsEnhanced, 0.0001, "Units Enhanced");
+                }
+                if (excelLengthLost !== null && typeof excelLengthLost === "number") {
+                    expectCloseTo(parsed.lengthLost, excelLengthLost, 0.0001, "Length Lost");
+                }
+                if (excelUnitsLost !== null && typeof excelUnitsLost === "number") {
+                    expectCloseTo(parsed.unitsLost, excelUnitsLost, 0.0001, "Units Lost");
+                }
+            } catch (error) {
+                console.error(`\nRow ${dataRow + 1} - FAILED`);
+                console.error("Input data:", inputData);
+                console.error("\nExcel values:");
+                console.error("  Distinctiveness Score:", excelDistinctivenessScore);
+                console.error("  Condition Score:", excelConditionScore);
+                console.error("  Strategic Multiplier:", excelStrategicMultiplier);
+                console.error("  Spatial Risk Multiplier:", excelSpatialRiskMultiplier);
+                console.error("  Total Hedgerow Units SRM:", excelTotalHedgerowUnitsSRM);
+                console.error("  Total Hedgerow Units:", excelTotalHedgerowUnits);
+                console.error("  Units Retained:", excelUnitsRetained);
+                console.error("  Units Enhanced:", excelUnitsEnhanced);
+                console.error("  Length Lost:", excelLengthLost);
+                console.error("  Units Lost:", excelUnitsLost);
+                console.error("\nParsed values:");
+                console.error("  Distinctiveness Score:", parsed.distinctivenessScore);
+                console.error("  Condition Score:", parsed.conditionScore);
+                console.error("  Strategic Multiplier:", parsed.strategicSignificanceMultiplier);
+                console.error("  Spatial Risk Multiplier:", parsed.spatialRiskMultiplier);
+                console.error("  Total Hedgerow Units SRM:", parsed.totalHedgerowUnitsSRM);
+                console.error("  Total Hedgerow Units:", parsed.totalHedgerowUnits);
+                console.error("  Units Retained:", parsed.unitsRetained);
+                console.error("  Units Enhanced:", parsed.unitsEnhanced);
+                console.error("  Length Lost:", parsed.lengthLost);
+                console.error("  Units Lost:", parsed.unitsLost);
+                throw error;
+            }
+        });
+    });
+});
