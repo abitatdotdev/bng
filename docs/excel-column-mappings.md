@@ -453,6 +453,74 @@ Populated automatically from B-1 via VLOOKUP.
 - Spatial risk applied to final unit delivery
 - Error checking with warning symbols: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠"
 
+### E-3 Off-Site Hedge Enhancement
+**Header rows:** Multiple rows (10-11, 0-indexed as 9-10)
+**Data row start:** Row 12 (0-indexed as row 11)
+
+**Baseline Reference Columns:**
+Populated automatically from E-1 via VLOOKUP.
+- `B` (1): Baseline ref - Reference to baseline record (links to E-1 AN column)
+- `C` (2): Baseline habitat - Habitat type from baseline (VLOOKUP from E-1)
+- `D` (3): Length (km) - Hedgerow length from baseline
+- `E` (4): Baseline distinctiveness band
+- `F` (5): Baseline distinctiveness score
+- `G` (6): Baseline condition category
+- `H` (7): Baseline condition score
+- `I` (8): Baseline strategic significance category
+- `J` (9): Baseline strategic significance score
+- `K` (10): Baseline habitat units
+- `L` (11): Required Action to Meet Trading Rules
+
+**Input Columns:**
+- `M` (12): Proposed habitat - User input for enhanced habitat type
+- `S` (18): Condition - User input for proposed condition (uses INDIRECT validation)
+- `U` (20): Strategic significance - User input for strategic significance
+- `Y` (24): Hedgerow enhanced in advance (years)
+- `Z` (25): Delay in starting hedgerow enhancement (years)
+- `AL` (37): User Comments
+- `AM` (38): Planning Authority Comments
+- `AN` (39): Habitat Reference Number
+- `AO` (40): Off-site Reference Number
+
+**Calculated/Output Columns:**
+- `N` (13): Distinctiveness movement - INDEX/MATCH matrix lookup showing baseline→proposed
+- `O` (14): Condition movement - Validation output showing baseline→proposed pathway
+- `P` (15): Length (km) - Hedgerow length (visible column, duplicates D)
+- `Q` (16): Distinctiveness - Proposed habitat distinctiveness category
+- `R` (17): Score - Proposed habitat distinctiveness score
+- `T` (19): Score - Proposed condition score
+- `V` (21): Strategic significance value - Strategic significance score lookup
+- `W` (22): Strategic significance multiplier - Multiplier value
+- `X` (23): Standard time to target condition (years) - Standard time from enhancement matrix
+- `AB` (27): Final time to target condition (years) - Adjusted for advance/delay
+- `AC` (28): Final time to target multiplier - Temporal multiplier from G-4
+- `AD` (29): Standard difficulty of enhancement - Standard difficulty from G-6 Hedgerow Data
+- `AE` (30): Applied difficulty multiplier - Status message for difficulty adjustment
+- `AF` (31): Final difficulty of enhancement - Conditional difficulty selection
+- `AG` (32): Difficulty multiplier applied - Numeric multiplier from G-3
+- `AH` (33): Spatial risk category - From baseline E-1 record
+- `AI` (34): Spatial risk multiplier - VLOOKUP from spatial risk table
+- `AJ` (35): Hedgerow units delivered (inc SRM) - Net units with spatial risk multiplier
+- `AK` (36): Hedgerow units delivered - Net units without spatial risk multiplier
+- `AQ` (42): Condition Group - INDEX/MATCH from G-6 Hedgerow Data
+
+**Special Features:**
+- References baseline data from E-1 using baseline ref (column B)
+- Enhancement pathway logic: baseline condition → proposed condition
+- Trading rules validation in column L
+- Distinctiveness movement matrix in column N (baseline habitat × proposed habitat)
+- Condition movement validation in column O (prevents condition reduction)
+- Cannot enhance without improvement (condition or distinctiveness must increase)
+- Temporal adjustment logic for hedgerow enhanced in advance or delayed
+- Difficulty multiplier depends on whether hedgerow is enhanced before losses
+- **Spatial risk multiplier** (Column AH input from E-1, Column AI calculated) - unique to off-site
+- Two unit calculations: with SRM (Column AJ) and without (Column AK)
+- Off-site reference required when spatial risk category is set
+- Condition column (S) uses INDIRECT validation based on AQ (Condition Group)
+- Error checking: "Not possible ▲", "Error - Not like for like ▲", "Error - Can not reduce condition ▲", "Error - No enhancement ▲", "Off-site reference required ▲"
+- Net unit calculation uses delta method: (Proposed - Baseline) × Difficulty × Temporal + Baseline, then applies strategic significance and spatial risk
+- Similar to B-3 but with added spatial risk columns and dual unit calculations
+
 ---
 
 ## Key Differences: On-Site vs Off-Site
