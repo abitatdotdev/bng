@@ -1,13 +1,13 @@
 import * as v from 'valibot';
 import { allHedgerows, type HedgerowLabel } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, yearsSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, yearsSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
-import { lengthSchema, hedgerowTypeSchema } from '../onSite/hedgerowBaseline';
+import { hedgerowTypeSchema } from '../hedgerowType';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,

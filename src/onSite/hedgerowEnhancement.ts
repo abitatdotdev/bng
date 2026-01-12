@@ -6,8 +6,8 @@ import { getStrategicSignificance, type StrategicSignificanceDescription } from 
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
-import { hedgerowTypeSchema } from './hedgerowBaseline';
 import type { OnSiteHedgerowBaseline } from './hedgerowBaseline';
+import { hedgerowTypeSchema } from '../hedgerowType';
 
 const inputSchema = v.object({
     baseline: v.custom<OnSiteHedgerowBaseline>((input) => {

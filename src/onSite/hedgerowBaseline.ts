@@ -1,19 +1,10 @@
 import * as v from 'valibot';
 import { allHedgerows, type HedgerowLabel } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
-
-// Length schema for hedgerows (in kilometers)
-export const lengthSchema = v.pipe(
-    v.number(),
-    v.toMinValue(0),
-);
-
-// Hedgerow type schema
-export const hedgerowTypeSchema = v.picklist(Object.keys(allHedgerows) as [HedgerowLabel, ...HedgerowLabel[]]);
-export type HedgerowType = v.InferOutput<typeof hedgerowTypeSchema>;
+import { hedgerowTypeSchema } from '../hedgerowType';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
