@@ -18,9 +18,14 @@ The input sheets are replicated 1-1 into relevant files. Example:
 A-1 On-Site Habitat Baseline = src/onSite/habitatBaseline.ts
 E-2 Off-Site Hedge Creation = src/offSite/hedgerowCreation.ts
 
+
 ## Tests
 Tests can be found next to the relevant files under test. Example:
 src/onSite/habitatBaseline.ts -> src/onSite/habitatBaseline.test.ts
+
+Run the tests in the usual way with `bun test`.
+
+Remember to check Typescript compilation issues with `tsc --noEmit`.
 
 # Agent Instructions
 * ALWAYS use the simplest possible approach.
