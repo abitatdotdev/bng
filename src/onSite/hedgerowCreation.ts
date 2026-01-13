@@ -104,11 +104,11 @@ export function enrichWithTemporalData<Data extends {
 
     // Get standard time to target condition from the matrix lookup
     const yearsMap = hedgerow.yearsToTargetConditionViaCreation;
-    const standardTimeToTarget = yearsMap[data.condition as keyof typeof yearsMap];
+    const standardTimeToTarget = yearsMap[data.condition];
 
     // Calculate final time to target condition
     // Formula: standard time - advance + delay
-    let finalTimeToTarget: number | string = 0;
+    let finalTimeToTarget: number | string | undefined = undefined;
 
     if (typeof standardTimeToTarget === 'string') {
         // Handle "30+" or "Not possible ▲" or other string values
@@ -128,18 +128,22 @@ export function enrichWithTemporalData<Data extends {
             finalTimeToTarget = standardTimeToTarget;
         }
     } else {
-        // Numeric standard time
-        // Convert "30+" to 31 for arithmetic
-        const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
-        const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
+        if (!standardTimeToTarget) {
+            finalTimeToTarget = undefined;
+        } else {
+            // Numeric standard time
+            // Convert "30+" to 31 for arithmetic
+            const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
+            const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
 
-        finalTimeToTarget = standardTimeToTarget - advanceYears + delayYears;
+            finalTimeToTarget = standardTimeToTarget - advanceYears + delayYears;
 
-        // Handle the "30+" case for output
-        if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
-            finalTimeToTarget = '30+';
-        } else if (finalTimeToTarget >= 30) {
-            finalTimeToTarget = '30+';
+            // Handle the "30+" case for output
+            if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
+                finalTimeToTarget = '30+';
+            } else if (finalTimeToTarget >= 30) {
+                finalTimeToTarget = '30+';
+            }
         }
     }
 
@@ -162,8 +166,8 @@ export function enrichWithTemporalData<Data extends {
 export function enrichWithDifficultyData<Data extends {
     habitatType: HedgerowLabel;
     habitatCreatedInAdvance: number | "30+";
-    standardTimeToTargetCondition: number | string;
-    finalTimeToTargetCondition: number | string;
+    standardTimeToTargetCondition: number | string | undefined;
+    finalTimeToTargetCondition: number | string | undefined;
     technicalDifficultyCreation: string;
     technicalDifficultyCreationMultiplier: number;
 }>(data: Data) {
@@ -203,7 +207,7 @@ export function enrichWithHedgerowUnitsDelivered<Data extends {
     distinctivenessScore: number;
     conditionScore: number;
     strategicSignificanceMultiplier: number;
-    temporalMultiplier: number | string;
+    temporalMultiplier: number | string | undefined;
     difficultyMultiplier: number;
 }>(data: Data) {
     // If temporal multiplier is not a number (e.g., "Check Data ⚠" or "N/A"), return 0

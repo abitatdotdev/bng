@@ -109,6 +109,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
             distinctivenessScore: 0,
             tradingRules: null,
             yearsToTargetConditionViaCreation: {},
+            standardTimeToTargetConditionViaCreation: {},
             yearsToTargetConditionViaEnhancement: {},
             yearsToTargetConditionViaDistinctiveness: {},
             technicalDifficultyCreation: null,
@@ -156,6 +157,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
                 hedgerow.yearsToTargetConditionViaCreation.Poor = '30+';
             } else {
                 const parsed = parseFloat(creationPoor);
+                if (isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Poor = undefined;
                 if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Poor = parsed;
             }
         }
@@ -165,6 +167,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
                 hedgerow.yearsToTargetConditionViaCreation.Moderate = '30+';
             } else {
                 const parsed = parseFloat(creationModerate);
+                if (isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Moderate = undefined;
                 if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Moderate = parsed;
             }
         }
@@ -174,6 +177,7 @@ function readHedgerowData(filePath, enhancementPathwayNames) {
                 hedgerow.yearsToTargetConditionViaCreation.Good = '30+';
             } else {
                 const parsed = parseFloat(creationGood);
+                if (isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Good = undefined;
                 if (!isNaN(parsed)) hedgerow.yearsToTargetConditionViaCreation.Good = parsed;
             }
         }

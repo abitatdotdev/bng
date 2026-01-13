@@ -309,6 +309,8 @@ export const allHedgerows = {
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
+            'Moderate': undefined,
+            'Good': undefined,
         },
         yearsToTargetConditionViaEnhancement: {
             'Moderate to Good': 'Not possible ▲',
