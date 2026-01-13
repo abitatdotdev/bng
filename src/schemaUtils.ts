@@ -12,7 +12,7 @@ export const areaSchema = v.pipe(
     v.toMinValue(0),
 )
 
-// Length schema for hedgerows (in kilometers)
+// Length schema for hedgerows and watercourses (in kilometers)
 export const lengthSchema = v.pipe(
     v.number(),
     v.toMinValue(0),
