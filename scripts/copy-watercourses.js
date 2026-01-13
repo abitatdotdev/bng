@@ -21,6 +21,10 @@ const COLUMNS = {
 // Temporal multipliers start at column M
 const TEMPORAL_CREATION_START = 12;  // Column M
 
+// Enhancement temporal matrix starts at column T
+const ENHANCEMENT_TEMPORAL_START = 19;  // Column T (baseline condition labels)
+const ENHANCEMENT_TEMPORAL_DATA_START = 20;  // Column U (first data column)
+
 /**
  * Get cell value from worksheet
  */
@@ -213,6 +217,102 @@ function readWatercourseData(filePath) {
 }
 
 /**
+ * Read watercourse enhancement temporal matrix from G-7 WaterC' Data sheet
+ * Source: columns T through Y, rows 4-9
+ * Maps baseline condition -> proposed condition to years to reach target
+ */
+function readEnhancementTemporalMatrix(filePath) {
+    console.log(`Reading enhancement temporal matrix from: ${filePath}`);
+
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = "G-7 WaterC' Data";
+
+    if (!workbook.SheetNames.includes(sheetName)) {
+        throw new Error(`Sheet "${sheetName}" not found in workbook`);
+    }
+
+    const sheet = workbook.Sheets[sheetName];
+
+    // Data rows: 4-9 (0-indexed: 3-8) for baseline conditions
+    const startRow = 3;
+    const endRow = 8;
+
+    // Target conditions in order (columns U-Y)
+    const conditions = ['Poor', 'Fairly Poor', 'Moderate', 'Fairly Good', 'Good'];
+
+    const matrix = {};
+
+    for (let row = startRow; row <= endRow; row++) {
+        // Get baseline condition label from column T
+        const baselineCondition = getCellValue(sheet, row, ENHANCEMENT_TEMPORAL_START);
+        if (!baselineCondition) continue;
+
+        const baselineLabel = String(baselineCondition).trim();
+
+        // Read the 5 target condition values (columns U-Y)
+        for (let i = 0; i < conditions.length; i++) {
+            const targetCondition = conditions[i];
+            const value = getCellValue(sheet, row, ENHANCEMENT_TEMPORAL_DATA_START + i);
+
+            const key = `${baselineLabel} to ${targetCondition}`;
+
+            if (value !== null && value !== undefined && value !== '') {
+                const stringValue = String(value).trim().toLowerCase();
+                if (stringValue === 'n/a' || stringValue.includes('not possible')) {
+                    matrix[key] = 'N/A';
+                } else {
+                    const parsed = parseFloat(value);
+                    if (!isNaN(parsed)) {
+                        matrix[key] = parsed;
+                    }
+                }
+            }
+        }
+    }
+
+    console.log(`Read ${Object.keys(matrix).length} enhancement pathway entries from Excel`);
+    return matrix;
+}
+
+/**
+ * Generate TypeScript code for enhancement temporal matrix
+ */
+function generateEnhancementTemporalMatrixCode(matrix) {
+    let code = `// THIS FILE IS GENERATED AUTOMATICALLY\n`;
+    code += `// Source: G-7 WaterC' Data sheet, columns T through Y\n\n`;
+    code += `/**\n`;
+    code += ` * Watercourse enhancement temporal matrix\n`;
+    code += ` * Maps baseline condition -> proposed condition to years to reach target\n`;
+    code += ` */\n`;
+    code += `export const watercourseEnhancementTemporalMatrix: Record<string, number | "N/A"> = {\n`;
+
+    // Group by baseline condition for cleaner output
+    const conditions = ['Poor', 'Fairly Poor', 'Moderate', 'Fairly Good', 'Good'];
+
+    conditions.forEach((baselineCondition, baselineIndex) => {
+        code += `    // From ${baselineCondition} baseline\n`;
+
+        conditions.forEach((targetCondition) => {
+            const key = `${baselineCondition} to ${targetCondition}`;
+            const value = matrix[key];
+
+            if (value !== undefined) {
+                const formattedValue = typeof value === 'string' ? `"${value}"` : value;
+                code += `    "${key}": ${formattedValue},\n`;
+            }
+        });
+
+        if (baselineIndex < conditions.length - 1) {
+            code += '\n';
+        }
+    });
+
+    code += '};\n';
+
+    return code;
+}
+
+/**
  * Generate TypeScript code for watercourse objects
  */
 function generateTypeScriptCode(watercourses) {
@@ -291,14 +391,26 @@ async function main() {
         // Read watercourse data from G-7 sheet
         const watercourses = readWatercourseData(filePath);
 
-        // Generate TypeScript code
+        // Generate TypeScript code for watercourses
         const typeScriptCode = generateTypeScriptCode(watercourses);
 
-        // Save to file
-        const outputPath = './src/watercourses.ts';
-        fs.writeFileSync(outputPath, typeScriptCode);
-        console.log(`\nCode saved to: ${outputPath}`);
+        // Save watercourses to file
+        const watercoursesOutputPath = './src/watercourses.ts';
+        fs.writeFileSync(watercoursesOutputPath, typeScriptCode);
+        console.log(`\nWatercourses code saved to: ${watercoursesOutputPath}`);
         console.log(`Generated ${watercourses.length} watercourse types`);
+
+        // Read enhancement temporal matrix from G-7 sheet
+        const enhancementMatrix = readEnhancementTemporalMatrix(filePath);
+
+        // Generate TypeScript code for enhancement temporal matrix
+        const enhancementMatrixCode = generateEnhancementTemporalMatrixCode(enhancementMatrix);
+
+        // Save enhancement temporal matrix to file
+        const matrixOutputPath = './src/watercourseEnhancementTemporalMatrix.ts';
+        fs.writeFileSync(matrixOutputPath, enhancementMatrixCode);
+        console.log(`\nEnhancement temporal matrix saved to: ${matrixOutputPath}`);
+        console.log(`Generated ${Object.keys(enhancementMatrix).length} enhancement pathway entries`);
 
     } catch (error) {
         console.error('Error:', error.message);
