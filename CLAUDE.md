@@ -23,7 +23,7 @@ E-2 Off-Site Hedge Creation = src/offSite/hedgerowCreation.ts
 Tests can be found next to the relevant files under test. Example:
 src/onSite/habitatBaseline.ts -> src/onSite/habitatBaseline.test.ts
 
-Run the tests in the usual way with `bun test`.
+For the first run of tests, always use `bun test:fast`. Then switch to individual files.
 
 Remember to check Typescript compilation issues with `tsc --noEmit`.
 

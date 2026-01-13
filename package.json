@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "mcp:habitat": "bun run mcp-server/habitat-server.ts"
+    "mcp:habitat": "bun run mcp-server/habitat-server.ts",
+    "test:fast": "bun test --concurrent"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
