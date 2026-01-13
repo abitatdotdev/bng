@@ -96,10 +96,11 @@ export type TemporalMultiplierKey = keyof typeof temporalMultipliers;
  * Corresponds to VLOOKUP formula in Excel: VLOOKUP(years,'G-4 Temporal multipliers'!$A$4:$C$37,3,FALSE)
  *
  * @param years - Number of years to reach target condition, or special keys like "30+" or "Not Possible ▲"
- * @returns The temporal multiplier value, or undefined if not found
+ * @returns The temporal multiplier value, 'N/A' for impossible scenarios, or undefined if not found
  */
-export function getTemporalMultiplier(years: TemporalMultiplierKey): number | undefined {
-    return temporalMultipliers[years];
+export function getTemporalMultiplier(years: TemporalMultiplierKey): number | 'N/A' | undefined {
+    const result = temporalMultipliers[years];
+    return result as number | 'N/A' | undefined;
 }
 
 /**
@@ -138,7 +139,7 @@ export function lookupTemporalMultiplier(value: string | number): number | strin
 async function main() {
     try {
         // Get file path from command line or use default
-        const filePath = process.argv[2] || './examples/simple-unlocked.xlsm';
+        const filePath = process.argv[2] || '../examples/simple-unlocked.xlsm';
 
         if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
@@ -156,7 +157,7 @@ async function main() {
         console.log('='.repeat(80));
 
         // Save to file
-        const outputPath = './src/temporalMultipliers.ts';
+        const outputPath = '../src/temporalMultipliers.ts';
         fs.writeFileSync(outputPath, typeScriptCode);
         console.log(`\nCode saved to: ${outputPath}`);
 

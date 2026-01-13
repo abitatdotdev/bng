@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "mcp:habitat": "bun run mcp-server/habitat-server.ts",
-    "test:fast": "bun test --concurrent"
+    "test:fast": "bun test --concurrent",
+    "gencode": "bun scripts/generateCodeFromSheet.ts"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",

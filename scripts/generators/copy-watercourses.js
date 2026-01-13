@@ -382,7 +382,7 @@ export const allWatercourses = {
  */
 async function main() {
     try {
-        const filePath = process.argv[2] || './examples/simple.xlsm';
+        const filePath = process.argv[2] || '../examples/simple.xlsm';
 
         if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
@@ -395,7 +395,7 @@ async function main() {
         const typeScriptCode = generateTypeScriptCode(watercourses);
 
         // Save watercourses to file
-        const watercoursesOutputPath = './src/watercourses.ts';
+        const watercoursesOutputPath = '../src/watercourses.ts';
         fs.writeFileSync(watercoursesOutputPath, typeScriptCode);
         console.log(`\nWatercourses code saved to: ${watercoursesOutputPath}`);
         console.log(`Generated ${watercourses.length} watercourse types`);
@@ -407,7 +407,7 @@ async function main() {
         const enhancementMatrixCode = generateEnhancementTemporalMatrixCode(enhancementMatrix);
 
         // Save enhancement temporal matrix to file
-        const matrixOutputPath = './src/watercourseEnhancementTemporalMatrix.ts';
+        const matrixOutputPath = '../src/watercourseEnhancementTemporalMatrix.ts';
         fs.writeFileSync(matrixOutputPath, enhancementMatrixCode);
         console.log(`\nEnhancement temporal matrix saved to: ${matrixOutputPath}`);
         console.log(`Generated ${Object.keys(enhancementMatrix).length} enhancement pathway entries`);

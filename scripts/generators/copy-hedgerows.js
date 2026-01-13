@@ -59,7 +59,7 @@ function convertDistinctivenessCategory(rawValue) {
  * Read enhancement pathway names from G-6 header row
  */
 function readEnhancementPathwayNames() {
-    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const workbook = XLSX.readFile('../examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-6 Hedgerow Data'];
 
     const pathwayNames = [];
@@ -311,7 +311,7 @@ export const allHedgerows = {
  */
 async function main() {
     try {
-        const filePath = process.argv[2] || './examples/simple.xlsm';
+        const filePath = process.argv[2] || '../examples/simple.xlsm';
 
         if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
@@ -327,7 +327,7 @@ async function main() {
         const typeScriptCode = generateTypeScriptCode(hedgerows);
 
         // Save to file
-        const outputPath = './src/hedgerows.ts';
+        const outputPath = '../src/hedgerows.ts';
         fs.writeFileSync(outputPath, typeScriptCode);
         console.log(`\nCode saved to: ${outputPath}`);
 

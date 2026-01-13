@@ -159,7 +159,7 @@ const conditionKeys = [
  * Read conditions sheet
  */
 function readConditionsData() {
-    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const workbook = XLSX.readFile('../examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-8 Condition Look up'];
     const data = XLSX.utils.sheet_to_json(worksheet, { range: 'A3:H135' });
 
@@ -185,7 +185,7 @@ function readConditionsData() {
  * Read temporal multipliers sheet
  */
 function readTemporalMultipliersData() {
-    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const workbook = XLSX.readFile('../examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-4 Temporal multipliers'];
     const data = XLSX.utils.sheet_to_json(worksheet, { range: 'F3:M135' });
 
@@ -229,7 +229,7 @@ function readTemporalMultipliersData() {
  * This sheet contains years to target for enhancement pathways (baseline condition → target condition)
  */
 function readEnhancementTemporalData() {
-    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const workbook = XLSX.readFile('../examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-5 Enhancement Temporal'];
 
     const enhancementTemporalMap = {};
@@ -299,7 +299,7 @@ function readEnhancementTemporalData() {
  * Returns both the habitat-specific data and the unique difficulty levels
  */
 function readDifficultyMultipliersData() {
-    const workbook = XLSX.readFile('./examples/simple.xlsm');
+    const workbook = XLSX.readFile('../examples/simple.xlsm');
     const worksheet = workbook.Sheets['G-3 Multipliers'];
 
     const difficultyMultipliersMap = {};
@@ -575,7 +575,7 @@ export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: B
 async function main() {
     try {
         // Get file path from command line or use default
-        const filePath = process.argv[2] || './examples/simple.xlsm';
+        const filePath = process.argv[2] || '../examples/simple.xlsm';
 
         if (!fs.existsSync(filePath)) {
             throw new Error(`File not found: ${filePath}`);
@@ -595,7 +595,7 @@ async function main() {
 
         // Generate difficulty.ts code
         const difficultyCode = generateDifficultyCode(difficultyLevels);
-        const difficultyOutputPath = './src/difficulty.ts';
+        const difficultyOutputPath = '../src/difficulty.ts';
         fs.writeFileSync(difficultyOutputPath, difficultyCode);
         console.log(`Difficulty code saved to: ${difficultyOutputPath}`);
 
@@ -610,7 +610,7 @@ async function main() {
         console.log('Generated TypeScript Code:');
 
         // Optionally save to file
-        const outputPath = './src/habitats.ts';
+        const outputPath = '../src/habitats.ts';
         fs.writeFileSync(outputPath, typeScriptCode);
         console.log(`\nCode saved to: ${outputPath}`);
 
