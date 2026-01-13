@@ -523,6 +523,59 @@ Populated automatically from E-1 via VLOOKUP.
 
 ---
 
+## Watercourse Sheets
+
+### C-2 On-Site Watercourse Creation
+**Header rows:** Multiple rows (10-11, 0-indexed as 9-10)
+**Data row start:** Row 12 (0-indexed as row 11)
+
+**Input Columns:**
+- `B` (1): Ref - Reference/sequence number
+- `C` (2): Watercourse type - Type of watercourse (links to G-7 Watercourse Data)
+- `D` (3): Length (km) - Watercourse length in kilometers
+- `G` (6): Condition - Condition of watercourse (uses INDIRECT validation to AH column)
+- `I` (8): Strategic Significance - Strategic significance category
+- `M` (12): Habitat created in advance (years)
+- `N` (13): Delay in starting habitat creation (years)
+- `V` (21): Watercourse encroachment - Extent of encroachment on watercourse
+- `X` (23): Riparian encroachment - Extent of encroachment on riparian area
+- `AA` (26): User Comments
+- `AB` (27): Planning Authority Comments
+- `AC` (28): Habitat Reference Number
+
+**Calculated/Output Columns:**
+- `E` (4): Distinctiveness - VLOOKUP from G-7 Watercourse Data
+- `F` (5): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
+- `H` (7): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
+- `J` (9): Strategic Significance Value - VLOOKUP from G-7 Watercourse Data
+- `K` (10): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
+- `L` (11): Standard Time to Target Condition (years) - INDEX/MATCH from G-7 Watercourse Data
+- `O` (14): Standard or adjusted time to target condition - Status message
+- `P` (15): Final time to target condition (years) - Adjusted for advance/delay
+- `Q` (16): Final time to target multiplier - Temporal multiplier from G-4
+- `R` (17): Standard difficulty of creation - VLOOKUP from G-7 Watercourse Data
+- `S` (18): Applied difficulty multiplier - Status message for difficulty adjustment
+- `T` (19): Final difficulty of creation - Conditional difficulty selection
+- `U` (20): Difficulty multiplier applied - Numeric multiplier from G-3
+- `W` (22): Watercourse encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `Y` (24): Riparian encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `Z` (25): Watercourse units delivered - Final net unit change
+- `AH` (33): Condition Group - INDEX/MATCH from G-7 Watercourse Data
+
+**Special Features:**
+- Uses Length (km) instead of Area (hectares) like hedgerow sheets
+- Encroachment logic: different multipliers for different levels of watercourse and riparian encroachment
+- Culvert watercourses must use "N/A - Culvert" for both encroachment types
+- Temporal adjustment logic for habitat created in advance or delayed (0-30+ years)
+- Difficulty multiplier logic: special case for ditch in "Fairly Poor" or "Fairly Good" condition created in advance (uses "Low" difficulty)
+- Standard difficulty categories: Low (1.0), Medium (1.1), High (1.5), Very High (2.0)
+- Encroachment multipliers vary: watercourse range from 0.25-1, riparian range from 0.67-1
+- Condition column (G) uses INDIRECT validation based on AH (Condition Group)
+- Error checking with status messages: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠", "Check details" messages
+- Main calculation (Z) multiplies all factors: Length × Distinctiveness Score × Condition Score × Strategic Significance Multiplier × Temporal Multiplier × Difficulty Multiplier × Watercourse Encroachment Multiplier × Riparian Encroachment Multiplier
+
+---
+
 ## Key Differences: On-Site vs Off-Site
 
 ### Off-Site Specific Fields
