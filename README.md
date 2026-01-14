@@ -25,3 +25,27 @@ If you would like to contribute to this project, please get in touch at
 
 - [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
 
+## Testing
+
+There is a pretty comprehensive test suite that is split into two sections:
+1. Unit tests
+1. Comparison tests
+
+### Unit tests
+The unit tests make sure the each pipeline is solid and reflects the rules implicit in the original spreadsheet formulas.
+They come with the benefit of providing documentation for how each calculation is performed.
+
+These are run quickly and easily using `bun test:fast`.
+This will run all tests concurrently and it's fast enough to watch for any changes you might make with no issues (try running `bun test:fast --watch` and making changes).
+
+
+### Comparison tests
+To make sure that the tool is compatible with the metric spreadsheets, we compare the output that the tool would calculate against real, submitted metric spreadsheets.
+
+A few simple spreadsheets are included in the `examples/` directory, but changes are tested against a currently private but much larger (in the hundreds) set of sheets as well.
+
+#### Setup
+To test against this larger set, you must first add them to a directory: `test/metrics`, either by copying there or by symlinking an existing directory.
+
+#### Testing
+`bun test:compare`
