@@ -1,13 +1,17 @@
 import * as v from 'valibot';
 
-export const distinctivenessSchema = v.picklist([
-    'V.High',
-    'High',
-    'Medium',
-    'Low',
-    'V.Low',
-    'Irreplaceable',
-])
+export const distinctivenessSchema = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist([
+        'V.High',
+        'High',
+        'Medium',
+        'Low',
+        'V.Low',
+        'Irreplaceable',
+    ])
+);
 export type DistinctivenessCategory = v.InferOutput<typeof distinctivenessSchema>;
 
 export const distinctivenessCategories = {

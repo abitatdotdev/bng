@@ -16,9 +16,12 @@ const strategicSignificance = [
 ] as const;
 export type StrategicSignificance = typeof strategicSignificance[number];
 
-export const strategicSignificanceSchema = v.picklist(
-    strategicSignificance.map(s => s.description),
-);
+export const strategicSignificanceSchema = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist(
+        strategicSignificance.map(s => s.description),
+    ));
 export type StrategicSignificanceDescription = v.InferOutput<typeof strategicSignificanceSchema>
 
 export const getStrategicSignificance = (desc: v.InferInput<typeof strategicSignificanceSchema>) => {

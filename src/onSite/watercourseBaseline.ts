@@ -13,21 +13,27 @@ import {
 } from '../watercourses/shared';
 
 // Watercourse encroachment levels
-const watercourseEncroachmentSchema = v.picklist([
-    "Full",
-    "75%",
-    "50%",
-    "25%",
-    "10%",
-    "None",
-]);
+const watercourseEncroachmentSchema = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist([
+        "Full",
+        "75%",
+        "50%",
+        "25%",
+        "10%",
+        "None",
+    ]));
 
 // Riparian encroachment levels
-const riparianEncroachmentSchema = v.picklist([
-    "None",
-    "Within 10m",
-    "Within 50m",
-]);
+const riparianEncroachmentSchema = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist([
+        "None",
+        "Within 10m",
+        "Within 50m",
+    ]));
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -38,7 +44,12 @@ const inputSchema = v.object({
     riparianEncroachment: riparianEncroachmentSchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    bespokeCompensation: v.optional(v.picklist(["Yes", "No", "Pending"]), "No"),
+    bespokeCompensation: v.optional(
+        v.pipe(
+            v.string(),
+            v.trim(),
+            v.picklist(["Yes", "No", "Pending"])
+        ), "No"),
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,

@@ -7,4 +7,8 @@ export const bespokeCompensation = [
 ] as const
 export type BespokeCompensation = typeof bespokeCompensation[number];
 
-export const bespokeCompensationSchema = v.picklist(bespokeCompensation);
+export const bespokeCompensationSchema = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist(bespokeCompensation),
+)

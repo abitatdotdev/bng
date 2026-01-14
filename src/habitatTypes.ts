@@ -134,17 +134,29 @@ const sharedHabitatTypes = [
     "Watercourse footprint",
 ]
 
-export const baselineHabitatType = v.picklist([
-    ...sharedHabitatTypes,
-    "Felled",
-])
+export const baselineHabitatType = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist([
+        ...sharedHabitatTypes,
+        "Felled",
+    ])
+)
 export type BaselineHabitatType = v.InferOutput<typeof baselineHabitatType>;
 
-export const creationHabitatType = v.picklist(sharedHabitatTypes);
+export const creationHabitatType = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist(sharedHabitatTypes)
+);
 export type CreationHabitatType = v.InferOutput<typeof creationHabitatType>;
 
-export const enhancedHabitatType = v.picklist([
-    ...sharedHabitatTypes,
-    "Replacement for felled woodland",
-]);
+export const enhancedHabitatType = v.pipe(
+    v.string(),
+    v.trim(),
+    v.picklist([
+        ...sharedHabitatTypes,
+        "Replacement for felled woodland",
+    ])
+);
 export type EnhancedHabitatType = v.InferOutput<typeof enhancedHabitatType>;
