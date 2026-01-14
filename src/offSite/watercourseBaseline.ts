@@ -1,12 +1,17 @@
 import * as v from 'valibot';
-import { allWatercourses, type WatercourseLabel } from '../watercourses';
+import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema } from '../schemaUtils';
-import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
-import { watercourseConditionSchema, type WatercourseCondition } from '../watercourseCondition';
+import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { enrichWithSpatialRisk } from './common';
+import {
+    enrichWithBaselineWatercourseData,
+    enrichWithBaselineUnitsData,
+    enrichWithTotalWatercourseUnits,
+    enrichWithUnitsLost
+} from '../watercourses/shared';
 
 // Watercourse encroachment levels
 const watercourseEncroachmentSchema = v.picklist([
@@ -52,7 +57,7 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
         "Retained and enhanced lengths cannot exceed total length"
     ),
     // Enrich with watercourse data
-    v.transform(enrichWithWatercourseData),
+    v.transform(enrichWithBaselineWatercourseData),
     // Validate that the condition is possible for this watercourse type
     v.check(
         s => typeof s.conditionScore === 'number',
@@ -77,98 +82,6 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
 
 export type OffSiteWatercourseBaselineSchema = v.InferInput<typeof offSiteWatercourseBaselineSchema>;
 export type OffSiteWatercourseBaseline = v.InferOutput<typeof offSiteWatercourseBaselineSchema>;
-
-/**
- * Enrich data with watercourse properties from the watercourses lookup
- */
-export function enrichWithWatercourseData<Data extends {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    watercourseType: WatercourseLabel;
-    condition: WatercourseCondition;
-    strategicSignificance: StrategicSignificanceDescription;
-    watercourseEncroachment: string;
-    riparianEncroachment: string;
-}>(data: Data) {
-    const watercourse = allWatercourses[data.watercourseType];
-
-    // Get condition score from watercourse lookup
-    // Note: conditionScore can be 'Not possible' string or a number
-    const conditionScore = watercourse.conditions[data.condition] as number | 'Not possible';
-
-    // Watercourse encroachment multipliers
-    const watercourseEncroachmentMap = {
-        "Full": 1,
-        "75%": 0.85,
-        "50%": 0.7,
-        "25%": 0.55,
-        "10%": 0.4,
-        "None": 0.25,
-    } as const;
-
-    // Riparian encroachment multipliers
-    const riparianEncroachmentMap = {
-        "None": 1,
-        "Within 10m": 0.9,
-        "Within 50m": 0.67,
-    } as const;
-
-    const strategicSignificance = getStrategicSignificance(data.strategicSignificance);
-
-    // Type-safe lookups with assertion since values are from picklist
-    const watercourseEncroachmentMultiplier = watercourseEncroachmentMap[data.watercourseEncroachment as keyof typeof watercourseEncroachmentMap];
-    const riparianEncroachmentMultiplier = riparianEncroachmentMap[data.riparianEncroachment as keyof typeof riparianEncroachmentMap];
-
-    return {
-        ...data,
-        distinctiveness: watercourse.distinctivenessCategory,
-        distinctivenessScore: watercourse.distinctivenessScore,
-        conditionScore,
-        strategicSignificanceCategory: strategicSignificance.significance,
-        strategicSignificanceMultiplier: strategicSignificance.multiplier,
-        watercourseEncroachmentMultiplier,
-        riparianEncroachmentMultiplier,
-        tradingRules: watercourse.tradingRules,
-        irreplaceable: watercourse.irreplaceable,
-    };
-}
-
-/**
- * Calculate baseline units for retained and enhanced portions
- */
-export function enrichWithBaselineUnitsData<Data extends {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number | 'Not possible';
-    strategicSignificanceMultiplier: number;
-    watercourseEncroachmentMultiplier: number;
-    riparianEncroachmentMultiplier: number;
-}>(data: Data) {
-    // At this point, validation has ensured conditionScore is a number
-    const conditionScore = data.conditionScore as number;
-    const unitsRetained = data.lengthRetained
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
-
-    const unitsEnhanced = data.lengthEnhanced
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
-
-    return {
-        ...data,
-        unitsRetained,
-        unitsEnhanced,
-    };
-}
 
 /**
  * Calculate total watercourse units (SRM) - includes spatial risk multiplier
@@ -202,54 +115,3 @@ export function enrichWithTotalWatercourseUnitsSRM<Data extends {
     };
 }
 
-/**
- * Calculate total watercourse units (without spatial risk multiplier)
- * This is the "Total watercourse units" column in the Excel sheet
- */
-export function enrichWithTotalWatercourseUnits<Data extends {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number | 'Not possible';
-    strategicSignificanceMultiplier: number;
-    watercourseEncroachmentMultiplier: number;
-    riparianEncroachmentMultiplier: number;
-}>(data: Data) {
-    // At this point, validation has ensured conditionScore is a number
-    const conditionScore = data.conditionScore as number;
-
-    const totalWatercourseUnits = data.length
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
-
-    return {
-        ...data,
-        totalWatercourseUnits,
-    };
-}
-
-/**
- * Calculate length lost and units lost
- */
-export function enrichWithUnitsLost<Data extends {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    totalWatercourseUnits: number;
-    unitsRetained: number;
-    unitsEnhanced: number;
-}>(data: Data) {
-    const lengthLost = data.length - data.lengthRetained - data.lengthEnhanced;
-    const unitsLost = lengthLost === 0 ? 0 :
-        data.totalWatercourseUnits - data.unitsRetained - data.unitsEnhanced;
-
-    return {
-        ...data,
-        lengthLost,
-        unitsLost,
-    };
-}
