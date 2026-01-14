@@ -38,7 +38,6 @@ test("valid hedgerow type", () => {
 })
 
 test("invalid hedgerow type", () => {
-    // @ts-expect-error - testing invalid type
     expect(fixture({ habitatType: "Invalid hedgerow" })).not.toBeParseableBy(offSiteHedgerowBaselineSchema)
 })
 

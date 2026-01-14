@@ -16,7 +16,7 @@ export const watercourseEncroachmentCreationSchema = v.pipe(
     v.string(),
     v.trim(),
     v.picklist(Object.keys(watercourseEncroachmentMultipliers) as (keyof typeof watercourseEncroachmentMultipliers)[]));
-export type WatercourseEncroachment = v.InferInput<typeof watercourseEncroachmentCreationSchema>
+export type WatercourseEncroachment = v.InferOutput<typeof watercourseEncroachmentCreationSchema>
 
 // Riparian encroachment multipliers
 export const riparianEncroachmentMultipliers = {
@@ -31,5 +31,5 @@ export const riparianEncroachmentCreationSchema = v.pipe(
     v.string(),
     v.trim(),
     v.picklist(Object.keys(riparianEncroachmentMultipliers) as (keyof typeof riparianEncroachmentMultipliers)[]));
-export type RiparianEncroachment = v.InferInput<typeof riparianEncroachmentCreationSchema>
+export type RiparianEncroachment = v.InferOutput<typeof riparianEncroachmentCreationSchema>
 

@@ -4,7 +4,7 @@ import { EXCEL_FILES, expectCloseTo, findAllDataRows, getCellValue, getSheet, no
 import { offSiteHabitatBaselineSchema } from "../src/offSite/habitatBaseline";
 import { offSiteHabitatCreationSchema } from "../src/offSite/habitatCreation";
 
-testExcelFiles(EXCEL_FILES.slice(0, 10), (workbook) => {
+testExcelFiles(EXCEL_FILES.slice(0, 20), (workbook) => {
     describe("D-1 Off-Site Habitat Baseline - Excel Comparison", () => {
         const sheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline');
 

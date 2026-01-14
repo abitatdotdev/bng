@@ -8,11 +8,11 @@ import { offSiteHedgerowBaselineSchema } from "../src/offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema } from "../src/offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../src/offSite/hedgerowEnhancement";
 
-testExcelFiles(EXCEL_FILES.slice(0, 10), (workbook) => {
+testExcelFiles(EXCEL_FILES.slice(0, 20), (workbook) => {
     describe("B-1 On-Site Hedge Baseline", () => {
         const sheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline');
 
-        // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 9)
+        // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 10)
         const dataRows = findAllDataRows(sheet, 3, 9);
 
         if (dataRows.length === 0) {

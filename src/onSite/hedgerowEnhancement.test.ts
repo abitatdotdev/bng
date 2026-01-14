@@ -117,7 +117,7 @@ test("Non-native and ornamental hedgerow can only have Poor condition", () => {
         habitatType: "Non-native and ornamental hedgerow",
         condition: "Poor",
         conditionScore: 1,
-        distinctivenessScore: 0,
+        distinctivenessScore: 1,
         distinctiveness: "V.Low",
         lengthEnhanced: 0.5,
     });

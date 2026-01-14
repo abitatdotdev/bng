@@ -34,7 +34,6 @@ test("condition validation for hedgerows", () => {
     expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ condition: "Poor" })).success).toBeTrue();
 
     // Hedgerows don't use "Fairly Good" or other habitat conditions
-    // @ts-expect-error - invalid condition
     expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ condition: "Fairly Good" })).success).toBeFalse();
 });
 
