@@ -1,11 +1,11 @@
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
-import { creationHabitatType } from '../habitatTypes';
+import { creationHabitatType, type CreationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
-import { habitatByBroadAndType } from '../habitats';
+import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 
 const inputSchema =
@@ -21,7 +21,7 @@ const inputSchema =
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
     })
-type OutputSchema = v.InferOutput<typeof inputSchema>
+export type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
  * Calculates the final time to target condition and its corresponding multiplier based on:
@@ -60,53 +60,15 @@ const calculateFinalTimeToTargetValues = <Data extends {
 
     // Calculate standardOrAdjustedTimeToTarget (column R)
     // This provides validation messages based on habitat creation parameters
-    let standardOrAdjustedTimeToTarget: string;
-
-    // Check for conflict: both advance and delay specified
-    if ((normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") &&
-        (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+")) {
-        standardOrAdjustedTimeToTarget = "Error -both advance and delayed habitat creation ▲";
-    }
-    // If distinctiveness score is 0, use standard time
-    else if (distinctivenessScore === 0) {
-        standardOrAdjustedTimeToTarget = "Standard time to target condition applied";
-    }
-    // Check if habitat has reached target condition (advance >= standard time)
-    else if (timeToTargetCondition !== "Not Possible ▲" &&
-             timeToTargetCondition !== "30+" &&
-             normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
-        standardOrAdjustedTimeToTarget = "Check details - Is there evidence that habitat has reached target condition? ⚠";
-    }
-    // Check if standard time is empty (this shouldn't happen with our types, but for completeness)
-    else if (timeToTargetCondition === "Not Possible ▲" && normalisedHabitatCreationInAdvance > 0) {
-        standardOrAdjustedTimeToTarget = "";
-    }
-    // Check if Poor condition threshold reached
-    else if (timeToPoorCondition !== "Not Possible ▲" &&
-             typeof timeToPoorCondition === 'number' &&
-             normalisedHabitatCreationInAdvance >= timeToPoorCondition &&
-             normalisedHabitatCreationInAdvance > 0) {
-        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠";
-    }
-    // Check if habitat creation is in advance but hasn't reached target
-    else if (timeToTargetCondition !== "Not Possible ▲" &&
-             timeToTargetCondition !== "30+" &&
-             normalisedHabitatCreationInAdvance < timeToTargetCondition &&
-             normalisedHabitatCreationInAdvance > 0) {
-        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation in place? ⚠";
-    }
-    // Check if there's a delay in starting
-    else if (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+") {
-        standardOrAdjustedTimeToTarget = "Check details- Delay in starting habitat in required condition? ⚠";
-    }
-    // Check if habitat creation started (but not in advance enough to trigger other conditions)
-    else if (normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") {
-        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation started/in place? ⚠";
-    }
-    // Default: standard time applied
-    else {
-        standardOrAdjustedTimeToTarget = "Standard time to target condition applied";
-    }
+    let standardOrAdjustedTimeToTarget = calculateStandardOrAdjustedTimeToTarget(
+        normalisedHabitatCreationInAdvance,
+        habitatCreationInAdvance,
+        normalisedHabitatCreationDelay,
+        habitatCreationDelay,
+        distinctivenessScore,
+        timeToTargetCondition,
+        timeToPoorCondition
+    );
 
     let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
 
@@ -169,66 +131,28 @@ const calculateFinalTimeToTargetValues = <Data extends {
 export const enrichWithDifficultyData = <Data extends {
     broadHabitat: string,
     habitatType: string,
+    standardOrAdjustedTimeToTarget: ReturnType<typeof calculateStandardOrAdjustedTimeToTarget>,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",
     finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
 }>(data: Data) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-    // Normalize habitatCreationInAdvance for comparisons
-    const normalisedHabitatCreationInAdvance = typeof data.habitatCreationInAdvance === "string" ? 30 : data.habitatCreationInAdvance;
-
-    // Standard difficulty of creation (column U)
     const standardDifficultyOfCreation = habitat.technicalDifficultyCreation;
-
-    // Get the time to Poor condition to check if the threshold has been reached
-    const timeToPoorCondition = habitat.temporalMultipliers['Poor'];
-
-    // List of habitats that should not use enhancement difficulty
-    const excludedHabitats = [
-        "Traditional orchards",
-        "Ornamental lake or pond",
-        "Ponds (non-priority habitat)",
-        "Ruderal/Ephemeral",
-        "Tall forbs",
-        "Developed land; sealed surface"
-    ];
-
-    // Determine if habitat has reached target condition (advance >= standard time)
-    const hasReachedTargetCondition =
-        normalisedHabitatCreationInAdvance > 0 &&
-        data.finalTimeToTargetCondition === 0;
-
-    // Determine if habitat creation started and Poor threshold reached
-    const hasReachedPoorThreshold =
-        normalisedHabitatCreationInAdvance > 0 &&
-        timeToPoorCondition !== "Not Possible ▲" &&
-        (timeToPoorCondition === 0 ||
-            (typeof timeToPoorCondition === 'number' && normalisedHabitatCreationInAdvance >= timeToPoorCondition)) &&
-        !hasReachedTargetCondition;
-
-    // Applied difficulty multiplier (column V)
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
-    } else if (hasReachedPoorThreshold && !excludedHabitats.includes(data.habitatType)) {
-        appliedDifficultyMultiplier = "Enhancement difficulty applied";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-    }
-
-    // Final difficulty of creation (column W)
-    let finalDifficultyOfCreation: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
-        finalDifficultyOfCreation = "Low";
-    } else if (appliedDifficultyMultiplier === "Enhancement difficulty applied") {
-        finalDifficultyOfCreation = habitat.technicalDifficultyEnhancement;
-    } else {
-        finalDifficultyOfCreation = standardDifficultyOfCreation;
-    }
-
-    // Difficulty multiplier applied (column X)
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfCreation];
+    const appliedDifficultyMultiplier = calculateAppliedDifficultyMultiplier(
+        data.standardOrAdjustedTimeToTarget,
+        data.habitatType,
+    );
+    const finalDifficultyOfCreation = calculateFinalDifficultyOfCreation(
+        appliedDifficultyMultiplier,
+        data.timeToTargetCondition,
+        data.habitatCreationInAdvance,
+        standardDifficultyOfCreation,
+        habitat.technicalDifficultyEnhancement,
+    );
+    const difficultyMultiplierApplied = calculateDifficultyMultiplierApplied(
+        finalDifficultyOfCreation
+    );
 
     return {
         ...data,
@@ -237,6 +161,116 @@ export const enrichWithDifficultyData = <Data extends {
         finalDifficultyOfCreation,
         difficultyMultiplierApplied
     };
+}
+
+export function calculateStandardOrAdjustedTimeToTarget(
+    normalisedHabitatCreationInAdvance: number,
+    habitatCreationInAdvance: "30+" | number,
+    normalisedHabitatCreationDelay: number,
+    habitatCreationDelay: "30+" | number,
+    distinctivenessScore: number,
+    timeToTargetCondition: number | "30+" | "Not Possible ▲",
+    timeToPoorCondition: Habitat['temporalMultipliers']['Poor'],
+) {
+    // Check for conflict: both advance and delay specified
+    if ((normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") &&
+        (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+")) {
+        return "Error -both advance and delayed habitat creation ▲" as const;
+    }
+
+    // If distinctiveness score is 0, use standard time
+    if (distinctivenessScore === 0) {
+        return "Standard time to target condition applied" as const;
+    }
+
+    // Check if habitat has reached target condition (advance >= standard time)
+    if (timeToTargetCondition !== "Not Possible ▲" &&
+        timeToTargetCondition !== "30+" &&
+        normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
+        return "Check details - Is there evidence that habitat has reached target condition? ⚠" as const;
+    }
+
+    // Check if standard time is empty (this shouldn't happen with our types, but for completeness)
+    if (timeToTargetCondition === "Not Possible ▲" && normalisedHabitatCreationInAdvance > 0) {
+        return "" as const;
+    }
+
+    // Check if Poor condition threshold reached
+    if (timeToPoorCondition !== "Not Possible ▲" &&
+        typeof timeToPoorCondition === 'number' &&
+        normalisedHabitatCreationInAdvance >= timeToPoorCondition &&
+        normalisedHabitatCreationInAdvance > 0) {
+        return "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠" as const;
+    }
+
+    // Check if habitat creation is in advance but hasn't reached target
+    if (timeToTargetCondition !== "Not Possible ▲" &&
+        timeToTargetCondition !== "30+" &&
+        normalisedHabitatCreationInAdvance < timeToTargetCondition &&
+        normalisedHabitatCreationInAdvance > 0) {
+        return "Check details - Is there evidence habitat creation in place? ⚠" as const;
+    }
+
+    // Check if there's a delay in starting
+    if (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+") {
+        return "Check details- Delay in starting habitat in required condition? ⚠" as const;
+    }
+
+    // Check if habitat creation started (but not in advance enough to trigger other conditions)
+    if (normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") {
+        return "Check details - Is there evidence habitat creation started/in place? ⚠" as const;
+    }
+
+    // Default: standard time applied
+    return "Standard time to target condition applied" as const;
+}
+
+/*
+    * Column W - Final difficulty of creation
+*/
+export function calculateFinalDifficultyOfCreation(
+    appliedDifficultyMultiplier: ReturnType<typeof calculateAppliedDifficultyMultiplier>,
+    timeToTargetCondition: number | "30+" | "Not Possible ▲",
+    habitatCreationInAdvance: v.InferOutput<typeof yearsSchema>,
+    standardDifficultyOfCreation: Habitat['technicalDifficultyCreation'],
+    technicalDifficultyEnhancement: Habitat['technicalDifficultyEnhancement'],
+) {
+    if ((appliedDifficultyMultiplier === "Standard difficulty applied" && timeToTargetCondition > habitatCreationInAdvance)) {
+        return standardDifficultyOfCreation;
+    }
+    if ((appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠" && habitatCreationInAdvance >= timeToTargetCondition)) {
+        return "Low"
+    }
+
+    return technicalDifficultyEnhancement;
+}
+
+/* Column V - applied difficulty multiplier
+*/
+export function calculateAppliedDifficultyMultiplier(
+    standardOrAdjustedTimeToTarget: ReturnType<typeof calculateStandardOrAdjustedTimeToTarget>,
+    type: CreationHabitatType,
+) {
+    if (standardOrAdjustedTimeToTarget === "Check details - Is there evidence that habitat has reached target condition? ⚠") {
+        return "Low Difficulty - only applicable if all habitat created before losses ⚠"
+    }
+
+    if (
+        standardOrAdjustedTimeToTarget === "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠"
+        && ![
+            "Traditional orchards", "Ornamental lake or pond", "Ponds (non-priority habitat)", "Ruderal/Ephemeral", "Tall forbs", "Developed land; sealed surface"
+        ].includes(type)
+
+    ) {
+        return "Enhancement difficulty applied"
+    }
+
+    return "Standard difficulty applied"
+}
+
+/* Column X - Difficulty multiplier applied */
+export function calculateDifficultyMultiplierApplied(finalDifficultyOfCreation: ReturnType<typeof calculateFinalDifficultyOfCreation>) {
+    return difficulty[finalDifficultyOfCreation];
 }
 
 /**
