@@ -34,20 +34,81 @@ type OutputSchema = v.InferOutput<typeof inputSchema>
  * - Returns 0 if advance >= standardTime
  * - Returns "Not Possible" if standardTime is "Not Possible ▲"
  *
+ * Also calculates standardOrAdjustedTimeToTarget (column R) which provides validation messages
+ * based on the habitat creation parameters.
+ *
  * Also looks up the temporal multiplier for the calculated final time.
  *
- * Corresponds to formula in Excel cell S12 of sheet A-2
+ * Corresponds to formulas in Excel cells R12, S12, and T12 of sheet A-2
  */
 const calculateFinalTimeToTargetValues = <Data extends {
+    broadHabitat: string,
+    habitatType: string,
+    distinctivenessScore: number,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",
     habitatCreationDelay: number | "30+"
 }>(data: Data) => {
-    const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay } = data;
+    const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay, distinctivenessScore } = data;
 
-    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
+    // Get habitat data to access Poor condition threshold
+    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+    const timeToPoorCondition = habitat.temporalMultipliers['Poor'];
+
     const normalisedHabitatCreationInAdvance = typeof habitatCreationInAdvance === "string" ? 30 : habitatCreationInAdvance;
     const normalisedHabitatCreationDelay = typeof habitatCreationDelay === "string" ? 30 : habitatCreationDelay;
+
+    // Calculate standardOrAdjustedTimeToTarget (column R)
+    // This provides validation messages based on habitat creation parameters
+    let standardOrAdjustedTimeToTarget: string;
+
+    // Check for conflict: both advance and delay specified
+    if ((normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") &&
+        (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+")) {
+        standardOrAdjustedTimeToTarget = "Error -both advance and delayed habitat creation ▲";
+    }
+    // If distinctiveness score is 0, use standard time
+    else if (distinctivenessScore === 0) {
+        standardOrAdjustedTimeToTarget = "Standard time to target condition applied";
+    }
+    // Check if habitat has reached target condition (advance >= standard time)
+    else if (timeToTargetCondition !== "Not Possible ▲" &&
+             timeToTargetCondition !== "30+" &&
+             normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
+        standardOrAdjustedTimeToTarget = "Check details - Is there evidence that habitat has reached target condition? ⚠";
+    }
+    // Check if standard time is empty (this shouldn't happen with our types, but for completeness)
+    else if (timeToTargetCondition === "Not Possible ▲" && normalisedHabitatCreationInAdvance > 0) {
+        standardOrAdjustedTimeToTarget = "";
+    }
+    // Check if Poor condition threshold reached
+    else if (timeToPoorCondition !== "Not Possible ▲" &&
+             typeof timeToPoorCondition === 'number' &&
+             normalisedHabitatCreationInAdvance >= timeToPoorCondition &&
+             normalisedHabitatCreationInAdvance > 0) {
+        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠";
+    }
+    // Check if habitat creation is in advance but hasn't reached target
+    else if (timeToTargetCondition !== "Not Possible ▲" &&
+             timeToTargetCondition !== "30+" &&
+             normalisedHabitatCreationInAdvance < timeToTargetCondition &&
+             normalisedHabitatCreationInAdvance > 0) {
+        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation in place? ⚠";
+    }
+    // Check if there's a delay in starting
+    else if (normalisedHabitatCreationDelay > 0 || habitatCreationDelay === "30+") {
+        standardOrAdjustedTimeToTarget = "Check details- Delay in starting habitat in required condition? ⚠";
+    }
+    // Check if habitat creation started (but not in advance enough to trigger other conditions)
+    else if (normalisedHabitatCreationInAdvance > 0 || habitatCreationInAdvance === "30+") {
+        standardOrAdjustedTimeToTarget = "Check details - Is there evidence habitat creation started/in place? ⚠";
+    }
+    // Default: standard time applied
+    else {
+        standardOrAdjustedTimeToTarget = "Standard time to target condition applied";
+    }
+
+    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
 
     // If standard time is "Not Possible", final time is also "Not Possible"
     if (timeToTargetCondition === "Not Possible ▲") {
@@ -88,6 +149,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
 
     return {
         ...data,
+        standardOrAdjustedTimeToTarget,
         finalTimeToTargetCondition,
         finalTimeToTargetMultiplier
     };
@@ -104,7 +166,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
  *
  * Corresponds to columns U-X in Excel sheet A-2
  */
-const enrichWithDifficultyData = <Data extends {
+export const enrichWithDifficultyData = <Data extends {
     broadHabitat: string,
     habitatType: string,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
