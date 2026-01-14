@@ -130,8 +130,9 @@ testExcelFiles(EXCEL_FILES.slice(0, 10), (workbook) => {
     describe("A-2 On-Site Habitat Creation", () => {
         const sheet = getSheet(workbook, 'A-2 On-Site Habitat Creation');
 
-        // Find all data rows (D column = broad habitat, 0-indexed as 3)
-        const dataRows = findAllDataRows(sheet, 3);
+        // Find all data rows (Y column = habitat units delivered, 0-indexed as 24)
+        // This is the most likely to show a full row since it only calculates after loads is filled in already
+        const dataRows = findAllDataRows(sheet, 24);
 
         if (dataRows.length === 0) {
             test.skip("no on-site creation data in test file", () => { });

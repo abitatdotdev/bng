@@ -20,32 +20,35 @@ testExcelFiles(EXCEL_FILES.slice(0, 10), (workbook) => {
             test(`row ${dataRow + 1} matches pipeline calculations`, () => {
                 // Extract input values from Excel
                 // Column mapping (0-indexed):
-                // E (4): Broad Habitat
-                // F (5): Habitat Type
-                // G (6): Irreplaceable Habitat (Yes/No)
-                // H (7): Area (hectares)
-                // K (10): Condition
-                // M (12): Strategic Significance
-                // R (17): Spatial Risk Category
-                // V (21): Area Retained (hectares)
-                // W (22): Area Enhanced (hectares)
-                // AA (26): Bespoke Compensation Agreed (Yes/No/Pending) - if present
-
                 const inputData = {
-                    broadHabitat: getCellValue(sheet, dataRow, 4), // E
-                    habitatType: getCellValue(sheet, dataRow, 5), // F
-                    irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, 6)), // G
-                    area: normalizeNumber(getCellValue(sheet, dataRow, 7)), // H
-                    condition: getCellValue(sheet, dataRow, 10), // K
-                    strategicSignificance: getCellValue(sheet, dataRow, 12), // M
-                    spatialRiskCategory: getCellValue(sheet, dataRow, 17) || "Low", // R
-                    areaRetained: normalizeNumber(getCellValue(sheet, dataRow, 21)) || 0, // V
-                    areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 22)) || 0, // W
-                    bespokeCompensationAgreed: getCellValue(sheet, dataRow, 26) || "No", // AA
-                    userComments: "",
-                    planningAuthorityComments: "",
-                    habitatReferenceNumber: String(getCellValue(sheet, dataRow, 3) || ""), // D
-                    offSiteReferenceNumber: String(getCellValue(sheet, dataRow, 31) || ""), // AF
+                    // E (4): Broad Habitat
+                    broadHabitat: getCellValue(sheet, dataRow, 4),
+                    // F (5): Habitat Type
+                    habitatType: getCellValue(sheet, dataRow, 5),
+                    // G (6): Irreplaceable Habitat (Yes/No)
+                    irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, 6)),
+                    // H (7): Area (hectares)
+                    area: normalizeNumber(getCellValue(sheet, dataRow, 7)),
+                    // K (10): Condition
+                    condition: getCellValue(sheet, dataRow, 10),
+                    // M (12): Strategic Significance
+                    strategicSignificance: getCellValue(sheet, dataRow, 12),
+                    // R (17): Spatial Risk Category
+                    spatialRiskCategory: getCellValue(sheet, dataRow, 17) || "Low",
+                    // V (21): Area Retained (hectares)
+                    areaRetained: normalizeNumber(getCellValue(sheet, dataRow, 21)) || 0,
+                    // W (22): Area Enhanced (hectares)
+                    areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 22)) || 0,
+                    // AB (27): Bespoke Compensation Agreed (Yes/No/Pending)
+                    bespokeCompensationAgreed: getCellValue(sheet, dataRow, 27) || "No",
+                    // AC (28): User comments
+                    userComments: getCellValue(sheet, dataRow, 28) || undefined,
+                    // AD (29): Planning authority comments
+                    planningAuthorityComments: getCellValue(sheet, dataRow, 29) || undefined,
+                    // AE (30): Planning authority comments
+                    habitatReferenceNumber: String(getCellValue(sheet, dataRow, 30) || ""),
+                    // AF (31): Planning authority comments
+                    offSiteReferenceNumber: String(getCellValue(sheet, dataRow, 31) || ""),
                 };
 
                 // Parse through the pipeline
@@ -64,11 +67,11 @@ testExcelFiles(EXCEL_FILES.slice(0, 10), (workbook) => {
                 // J (9): Distinctiveness Score
                 // L (11): Condition Score
                 // O (14): Strategic Significance Multiplier
+                // Q (16): Total Habitat Units (SRM)
                 // S (18): Spatial Risk Multiplier
+                // T (19): Total Habitat Units
                 // X (23): Baseline Units (Retained)
                 // Y (24): Baseline Units (Enhanced)
-                // Q (16): Total Habitat Units (SRM)
-                // T (19): Total Habitat Units
                 // Z (25): Area Habitat Lost
                 // AA (26): Units Lost
 

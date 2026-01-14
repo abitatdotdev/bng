@@ -91,10 +91,10 @@ export function expectCloseTo(actual: number, expected: number, tolerance: numbe
 /**
  * Find all data rows in a sheet
  */
-export function findAllDataRows(sheet: XLSX.WorkSheet, broadHabitatCol: number, startRow: number = 10, maxRows: number = 250): number[] {
+export function findAllDataRows(sheet: XLSX.WorkSheet, columnToCheckPresence: number, startRow: number = 10, maxRows: number = 250): number[] {
     const dataRows: number[] = [];
     for (let row = startRow; row < startRow + maxRows; row++) {
-        const value = getCellValue(sheet, row, broadHabitatCol);
+        const value = getCellValue(sheet, row, columnToCheckPresence);
         if (value && typeof value === "string" && value.trim() !== "" && value.trim() !== "Broad Habitat") {
             dataRows.push(row);
         }
