@@ -6,7 +6,7 @@ export const allHedgerows = {
     'Species-rich native hedgerow with trees - associated with bank or ditch': {
         label: 'Species-rich native hedgerow with trees - associated with bank or ditch',
         distinctivenessCategory: 'V.High',
-        distinctivenessScore: distinctivenessCategories["V.High"].score,
+        distinctivenessScore: 8,
         tradingRules: 'Like for like',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -27,7 +27,7 @@ export const allHedgerows = {
     'Species-rich native hedgerow with trees': {
         label: 'Species-rich native hedgerow with trees',
         distinctivenessCategory: 'High',
-        distinctivenessScore: distinctivenessCategories["High"].score,
+        distinctivenessScore: 6,
         tradingRules: 'Like for like or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -50,7 +50,7 @@ export const allHedgerows = {
     'Species-rich native hedgerow - associated with bank or ditch': {
         label: 'Species-rich native hedgerow - associated with bank or ditch',
         distinctivenessCategory: 'High',
-        distinctivenessScore: distinctivenessCategories["High"].score,
+        distinctivenessScore: 6,
         tradingRules: 'Like for like or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -73,7 +73,7 @@ export const allHedgerows = {
     'Native hedgerow with trees - associated with bank or ditch': {
         label: 'Native hedgerow with trees - associated with bank or ditch',
         distinctivenessCategory: 'High',
-        distinctivenessScore: distinctivenessCategories["High"].score,
+        distinctivenessScore: 6,
         tradingRules: 'Like for like or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -96,7 +96,7 @@ export const allHedgerows = {
     'Species-rich native hedgerow': {
         label: 'Species-rich native hedgerow',
         distinctivenessCategory: 'Medium',
-        distinctivenessScore: distinctivenessCategories["Medium"].score,
+        distinctivenessScore: 4,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -121,7 +121,7 @@ export const allHedgerows = {
     'Native hedgerow - associated with bank or ditch': {
         label: 'Native hedgerow - associated with bank or ditch',
         distinctivenessCategory: 'Medium',
-        distinctivenessScore: distinctivenessCategories["Medium"].score,
+        distinctivenessScore: 4,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -146,7 +146,7 @@ export const allHedgerows = {
     'Native hedgerow with trees': {
         label: 'Native hedgerow with trees',
         distinctivenessCategory: 'Medium',
-        distinctivenessScore: distinctivenessCategories["Medium"].score,
+        distinctivenessScore: 4,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -172,7 +172,7 @@ export const allHedgerows = {
     'Ecologically valuable line of trees': {
         label: 'Ecologically valuable line of trees',
         distinctivenessCategory: 'Medium',
-        distinctivenessScore: distinctivenessCategories["Medium"].score,
+        distinctivenessScore: 4,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -197,7 +197,7 @@ export const allHedgerows = {
     'Ecologically valuable line of trees - associated with bank or ditch': {
         label: 'Ecologically valuable line of trees - associated with bank or ditch',
         distinctivenessCategory: 'Medium',
-        distinctivenessScore: distinctivenessCategories["Medium"].score,
+        distinctivenessScore: 4,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -221,7 +221,7 @@ export const allHedgerows = {
     'Native hedgerow': {
         label: 'Native hedgerow',
         distinctivenessCategory: 'Low',
-        distinctivenessScore: distinctivenessCategories["Low"].score,
+        distinctivenessScore: 2,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -250,7 +250,7 @@ export const allHedgerows = {
     'Line of trees': {
         label: 'Line of trees',
         distinctivenessCategory: 'Low',
-        distinctivenessScore: distinctivenessCategories["Low"].score,
+        distinctivenessScore: 2,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -276,7 +276,7 @@ export const allHedgerows = {
     'Line of trees - associated with bank or ditch': {
         label: 'Line of trees - associated with bank or ditch',
         distinctivenessCategory: 'Low',
-        distinctivenessScore: distinctivenessCategories["Low"].score,
+        distinctivenessScore: 2,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
@@ -301,7 +301,7 @@ export const allHedgerows = {
     'Non-native and ornamental hedgerow': {
         label: 'Non-native and ornamental hedgerow',
         distinctivenessCategory: 'V.Low',
-        distinctivenessScore: distinctivenessCategories["V.Low"].score,
+        distinctivenessScore: 1,
         tradingRules: 'Same distinctiveness band or better',
         technicalDifficultyCreation: 'Low',
         technicalDifficultyCreationMultiplier: difficulty['Low'],
