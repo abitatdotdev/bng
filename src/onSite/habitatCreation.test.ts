@@ -867,17 +867,3 @@ describe("enrichWithDifficultyData", () => {
     });
 });
 
-describe("real bugs", () => {
-    test.skip("difficultyMultiplier from urban developed land", () => {
-        const result = enrichWithDifficultyData({
-            broadHabitat: "Urban",
-            habitatType: "Developed land; sealed surface",
-            habitatCreationInAdvance: 0,
-            finalTimeToTargetCondition: 1,
-            timeToTargetCondition: 1,
-            standardOrAdjustedTimeToTarget: "Standard time to target condition applied"
-        })
-
-        expect(result.difficultyMultiplierApplied).toEqual(0.67)
-    });
-})

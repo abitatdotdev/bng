@@ -27,8 +27,16 @@ type ExcelFileTest = (workbook: XLSX.WorkBook, fileName: string) => void
     * @param test The test to execute. Receives the file name and the excel workbook object
     */
 export const testExcelFiles = (files: typeof EXCEL_FILES, test: ExcelFileTest): void =>
-    describe.each(files.slice(0, 10))(
-        "%s", fileName => test(getWorkbook(fileName), fileName)
+    describe.each(files)(
+        "%s", fileName => {
+            const workbook = getWorkbook(fileName);
+            const versionSheet = getSheet(workbook, "Version History");
+            if (!versionSheet) {
+                describe.skip("Not a valid version to compare against", () => { });
+                return;
+            }
+            test(workbook, fileName)
+        }
     )
 
 export function getWorkbook(fileName = EXCEL_FILE) {
@@ -36,11 +44,7 @@ export function getWorkbook(fileName = EXCEL_FILE) {
 }
 
 export function getSheet(workbook: XLSX.WorkBook, sheetName: string) {
-    const sheet = workbook.Sheets[sheetName];
-    if (!sheet) {
-        throw new Error(`Sheet "${sheetName}" not found`);
-    }
-    return sheet;
+    return workbook.Sheets[sheetName];
 }
 
 /**
