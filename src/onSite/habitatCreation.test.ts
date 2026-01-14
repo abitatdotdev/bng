@@ -1,6 +1,6 @@
-import { expect, test } from "bun:test";
+import { expect, test, describe } from "bun:test";
 import * as v from 'valibot';
-import { onSiteHabitatCreationSchema, type OnSiteHabitatCreationSchema } from "./habitatCreation";
+import { enrichWithDifficultyData, onSiteHabitatCreationSchema, type OnSiteHabitatCreationSchema } from "./habitatCreation";
 
 export function fixture(overrides: Partial<OnSiteHabitatCreationSchema> = {}): OnSiteHabitatCreationSchema {
     return {
@@ -269,4 +269,18 @@ test("habitat units delivered - with delay", () => {
     // Area × distinctiveness × condition × strategic sig × temporal multiplier for 25 × difficulty
     const expected = 1.5 * 6 * 3 * 1.15 * (result.finalTimeToTargetMultiplier ?? 0) * 0.33
     expect(result.habitatUnitsDelivered).toBeCloseTo(expected, 5)
+})
+
+describe("real bugs", () => {
+    test("difficultyMultiplier from urban developed lans", () => {
+        const result = enrichWithDifficultyData({
+            broadHabitat: "Urban",
+            habitatType: "Developed land; sealed surface",
+            habitatCreationInAdvance: 0,
+            finalTimeToTargetCondition: 0,
+            timeToTargetCondition: 1,
+        })
+
+        expect(result.difficultyMultiplierApplied).toEqual(0.67)
+    });
 })
