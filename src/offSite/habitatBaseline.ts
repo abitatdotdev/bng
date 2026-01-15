@@ -37,19 +37,22 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     v.transform(enrichWithBaselineUnitsData),
     v.transform(enrichWithTotalHabitatUnitsSRM),
     // Initial validation checks
+    v.check(s => !(
+        s.irreplaceableHabitat
+        && (s.areaRetained + s.areaEnhanced) < s.area
+        && s.bespokeCompensationAgreed === "No"
+    ), "Any loss unacceptable"),
+    v.check(s => !(
+        s.requiredAction === "Bespoke compensation likely to be required"
+        && !(s.areaRetained > 0 || s.areaEnhanced > 0)
+        && s.bespokeCompensationAgreed === "No"
+    ), "Any loss unacceptable"),
     v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "Error - you cannot enhance irreplaceable individual trees ▲"),
     v.check(s => !!s.habitatType || !s.irreplaceableHabitat, "Confirm irreplaceable habitat status ▲"),
     v.check(s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber), "Off-site reference required ▲"),
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (AA)
     v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Error in Areas ▲"),
-    v.check(s =>
-        ["Same habitat required – bespoke compensation option ⚠",
-            "Bespoke compensation likely to be required",
-        ].includes(s.requiredAction)
-            ? s.bespokeCompensationAgreed === "Yes"
-            : true
-        , "Bespoke compensation must be agreed ▲"),
     v.transform(enrichWithUnitsLost),
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>

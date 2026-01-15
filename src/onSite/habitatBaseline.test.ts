@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test, describe } from "bun:test";
 import * as v from 'valibot';
 import { onSiteHabitatBaselineSchema, enrichWithBaselineUnitsData, enrichWithUnitsLost, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
 
@@ -126,4 +126,27 @@ test("enrichWithUnitsLost calculations", () => {
         baselineUnitsRetained: 40,
         baselineUnitsEnhanced: 8
     }).unitsLost).toEqual(2)
+})
+
+test("irreplaceable habitats cannot lose any area", () => {
+    const okay = fixture({
+        broadHabitat: "Individual trees",
+        habitatType: "Rural tree",
+        area: 0.0765,
+        condition: "Good",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        areaRetained: 0.0765,
+        irreplaceableHabitat: true,
+    })
+    expect(v.safeParse(onSiteHabitatBaselineSchema, okay).success).toBeTrue()
+    const notOkay = fixture({
+        broadHabitat: "Individual trees",
+        habitatType: "Rural tree",
+        area: 0.0765,
+        condition: "Good",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        areaRetained: 0.0765 - 0.001,
+        irreplaceableHabitat: true,
+    })
+    expect(v.safeParse(onSiteHabitatBaselineSchema, notOkay).success).toBeFalse()
 })
