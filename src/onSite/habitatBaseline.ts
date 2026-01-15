@@ -47,16 +47,14 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     // Checks from within the units lost cell (X)
     // See https://opncd.ai/share/4Z0sTzAw for translation
     v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Area sums do not add up"),
-    v.check(s => !(
-        s.bespokeCompensationAgreed === "Pending"
-        && (
-            s.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            || s.requiredAction === "Bespoke compensation likely to be required"
-        )), "Bespoke compensation must be agreed"),
     v.check(s =>
-    (["Bespoke compensation likely to be required", "Same habitat required – bespoke compensation option ⚠"].includes(s.requiredAction)
-        ? s.bespokeCompensationAgreed === "Yes"
-        : true)
+    (
+        [
+            "Bespoke compensation likely to be required",
+            "Same habitat required – bespoke compensation option ⚠"
+        ].includes(s.requiredAction)
+            ? s.bespokeCompensationAgreed === "Yes"
+            : true)
         , "Bespoke compensation must be agreed"),
     v.transform(enrichWithUnitsLost),
 )
