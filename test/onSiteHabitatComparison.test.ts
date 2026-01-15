@@ -4,7 +4,7 @@ import { EXCEL_FILES, expectCloseTo, findAllDataRows, getCellValue, getSheet, no
 import { onSiteHabitatBaselineSchema } from "../src/onSite/habitatBaseline";
 import { onSiteHabitatCreationSchema } from "../src/onSite/habitatCreation";
 
-testExcelFiles(EXCEL_FILES.slice(0, 100), (workbook) => {
+testExcelFiles(EXCEL_FILES.slice(0, 200), (workbook) => {
     describe("A-1 On-Site Habitat Baseline", () => {
         const sheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline');
 
@@ -16,7 +16,7 @@ testExcelFiles(EXCEL_FILES.slice(0, 100), (workbook) => {
             return;
         }
 
-        test.each(dataRows)("row %d matches pipeline calculations", (dataRow) => {
+        test.concurrent.each(dataRows)("row %d matches pipeline calculations", (dataRow) => {
             // Extract input values from Excel
             // Column mapping (0-indexed):
             // E (4): Broad Habitat
@@ -139,7 +139,7 @@ testExcelFiles(EXCEL_FILES.slice(0, 100), (workbook) => {
             return;
         }
 
-        test.each(dataRows)("row %d matches pipeline calculations", (dataRow) => {
+        test.concurrent.each(dataRows)("row %d matches pipeline calculations", (dataRow) => {
             // Extract input values from Excel
             // Column mapping (0-indexed):
             // D (3): Broad Habitat
