@@ -60,3 +60,48 @@ test("validates baseline schema as well", () => {
     fix.baseline.broadHabitat = "Urban"
     expect(v.safeParse(onSiteHabitatEnhancementSchema, fix).success).toBeFalse()
 })
+
+test("adds distinctivenessChange and conditionChange properties", () => {
+    const result = v.safeParse(onSiteHabitatEnhancementSchema, fixture())
+    expect(result.success).toBeTrue()
+
+    if (result.success) {
+        // Verify distinctivenessChange property exists
+        expect(result.output.distinctivenessChange).toBeDefined()
+        expect(result.output.distinctivenessChange).toBe("High - High")
+
+        // Verify conditionChange property exists
+        expect(result.output.conditionChange).toBeDefined()
+        expect(result.output.conditionChange).toBe("Poor - Good")
+    }
+})
+
+test("conditionChange shows 'Lower Distinctiveness Habitat' when habitat changes with distinctiveness upgrade", () => {
+    // Enhancement from Low distinctiveness to Medium distinctiveness with habitat change
+    const result = v.safeParse(onSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Modified grassland",  // Low distinctiveness (2)
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other lowland acid grassland",  // Medium distinctiveness (4)
+        condition: "Moderate",
+    }))
+
+    expect(result.success).toBeTrue()
+
+    if (result.success) {
+        // Should show "Low - Medium" for distinctiveness change
+        expect(result.output.distinctivenessChange).toBe("Low - Medium")
+
+        // Should show "Lower Distinctiveness Habitat - Moderate" for condition change
+        expect(result.output.conditionChange).toBe("Lower Distinctiveness Habitat - Moderate")
+    }
+})
+

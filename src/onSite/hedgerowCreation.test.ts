@@ -338,6 +338,182 @@ test("enrichWithHedgerowUnitsDelivered - with string temporal multiplier", () =>
     expect(result.hedgerowUnitsDelivered).toEqual(0);
 });
 
+test("enrichWithHedgerowUnitsDelivered - with N/A temporal multiplier", () => {
+    const inputData = {
+        length: 0.5,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: "N/A" as string,
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // When temporal multiplier is "N/A", result should be 0
+    expect(result.hedgerowUnitsDelivered).toEqual(0);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with undefined temporal multiplier", () => {
+    const inputData = {
+        length: 0.5,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: undefined,
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // When temporal multiplier is undefined, result should be 0
+    expect(result.hedgerowUnitsDelivered).toEqual(0);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with zero length", () => {
+    const inputData = {
+        length: 0,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 0.7002822741999999,
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // When length is 0, result should be 0
+    expect(result.hedgerowUnitsDelivered).toEqual(0);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with maximum temporal multiplier", () => {
+    const inputData = {
+        length: 1.0,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 1.0, // Maximum multiplier (0 years)
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 1.0 * 2 * 3 * 1.15 * 1.0 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(6.9, 2);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with high difficulty multiplier", () => {
+    const inputData = {
+        length: 0.5,
+        distinctivenessScore: 4, // Species-rich hedgerow
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 0.7002822741999999,
+        difficultyMultiplier: 1.5, // Very High difficulty
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 0.5 * 4 * 3 * 1.15 * 0.7002822741999999 * 1.5
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(7.247847, 3);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with poor condition", () => {
+    const inputData = {
+        length: 1.0,
+        distinctivenessScore: 2,
+        conditionScore: 1, // Poor condition
+        strategicSignificanceMultiplier: 1.0,
+        temporalMultiplier: 0.898632125, // 3 years
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 1.0 * 2 * 1 * 1.0 * 0.898632125 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(1.79726425, 5);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with low temporal multiplier (30+ years)", () => {
+    const inputData = {
+        length: 0.5,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 0.3197967361, // 30+ years
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 0.5 * 2 * 3 * 1.15 * 0.3197967361 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(1.1033595, 3);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with high distinctiveness score", () => {
+    const inputData = {
+        length: 0.3,
+        distinctivenessScore: 6, // High distinctiveness
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 0.7002822741999999,
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 0.3 * 6 * 3 * 1.15 * 0.7002822741999999 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(4.348753, 3);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with very large length", () => {
+    const inputData = {
+        length: 100.0,
+        distinctivenessScore: 2,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1.15,
+        temporalMultiplier: 0.7002822741999999,
+        difficultyMultiplier: 1,
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 100.0 * 2 * 3 * 1.15 * 0.7002822741999999 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(483.19476, 2);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with all minimum non-zero values", () => {
+    const inputData = {
+        length: 0.01,
+        distinctivenessScore: 2, // Minimum distinctiveness
+        conditionScore: 1, // Minimum condition
+        strategicSignificanceMultiplier: 1.0, // Minimum strategic significance
+        temporalMultiplier: 0.3197967361, // Minimum temporal multiplier (30+)
+        difficultyMultiplier: 1, // Minimum difficulty
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 0.01 * 2 * 1 * 1.0 * 0.3197967361 * 1
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(0.006395935, 6);
+});
+
+test("enrichWithHedgerowUnitsDelivered - with all maximum values", () => {
+    const inputData = {
+        length: 10.0,
+        distinctivenessScore: 6, // Maximum distinctiveness
+        conditionScore: 3, // Maximum condition
+        strategicSignificanceMultiplier: 1.15, // Maximum strategic significance
+        temporalMultiplier: 1.0, // Maximum temporal multiplier (0 years)
+        difficultyMultiplier: 1.5, // Maximum difficulty
+    };
+
+    const result = enrichWithHedgerowUnitsDelivered(inputData);
+
+    // 10.0 * 6 * 3 * 1.15 * 1.0 * 1.5
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(310.5, 1);
+});
+
 test("full schema validation - Native hedgerow to Good", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Native hedgerow",
@@ -498,3 +674,4 @@ test("full schema validation - with '30+' advance", () => {
         expect(result.output.hedgerowUnitsDelivered).toBeCloseTo(2.64, 2);
     }
 });
+

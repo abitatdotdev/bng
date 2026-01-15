@@ -7,7 +7,8 @@
     "mcp:habitat": "bun run mcp-server/habitat-server.ts",
     "gencode": "bun scripts/generateCodeFromSheet.ts",
     "test:fast": "bun test --concurrent ./src",
-    "test:compare": "bun test --concurrent ./test"
+    "test:compare": "bun test test/comparison.test.ts",
+    "test:debug": "bun test --inspect-wait"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",

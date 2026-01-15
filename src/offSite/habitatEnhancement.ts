@@ -22,7 +22,6 @@ const inputSchema = v.object({
     habitatReferenceNumber: freeTextSchema,
     offSiteReferenceNumber: freeTextSchema,
 })
-type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
  * Extract baseline habitat data including area
@@ -42,42 +41,98 @@ const enrichBaselineHabitatData = <Data extends {
 }
 
 /**
- * Add enhancement pathway label
- * Format: "baseline condition - proposed condition"
+ * Calculate distinctiveness change label (Column T in Excel)
+ * Format: "<baseline distinctiveness band> - <proposed distinctiveness band>"
+ * Example: "Low - Medium", "High - High"
  */
-const addEnhancementPathway = <Data extends {
-    baseline: any,
-    condition: string
+const addDistinctivenessChange = <Data extends {
+    _baselineHabitat: any,
+    broadHabitat: string,
+    habitatType: string
 }>(data: Data) => {
-    const baselineCondition = data.baseline.condition;
-    const proposedCondition = data.condition;
-    const enhancementPathway = `${baselineCondition} - ${proposedCondition}`;
+    const baselineHabitat = data._baselineHabitat;
+    const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    const baselineDistinctivenessCategory = baselineHabitat.distinctivenessCategory;
+    const proposedDistinctivenessCategory = proposedHabitat.distinctivenessCategory;
+
+    const distinctivenessChange = `${baselineDistinctivenessCategory} - ${proposedDistinctivenessCategory}`;
 
     return {
         ...data,
-        enhancementPathway
+        distinctivenessChange
     };
 }
 
 /**
- * Lookup enhancement time to target from habitat enhancement temporal multipliers
- * Uses the enhancement pathway (baseline→proposed condition) to find years to target
+ * Calculate enhancement pathway label (Column U in Excel)
+ * This determines the correct pathway for temporal multiplier lookup
+ *
+ * Format depends on distinctiveness change:
+ * - If upgrading distinctiveness (baseline < proposed): "Lower Distinctiveness Habitat - <proposed condition>"
+ * - Otherwise: "<baseline condition> - <proposed condition>"
  */
-const lookupEnhancementTimeToTarget = <Data extends {
+const addEnhancementPathway = <Data extends {
+    baseline: any,
     broadHabitat: string,
     habitatType: string,
-    enhancementPathway: string
+    condition: string,
+    _baselineHabitat: any
+}>(data: Data) => {
+    const baselineCondition = data.baseline.condition;
+    const proposedCondition = data.condition;
+
+    // Get baseline and proposed habitat labels to check if they're different
+    const baselineHabitat = data._baselineHabitat;
+    const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    const habitatChanged = baselineHabitat.label !== proposedHabitat.label;
+    const baselineDistinctiveness = baselineHabitat.distinctivenessScore;
+    const proposedDistinctiveness = proposedHabitat.distinctivenessScore;
+
+    // If upgrading from lower distinctiveness habitat to higher, use special pathway
+    let conditionChange: string;
+    if (habitatChanged && baselineDistinctiveness < proposedDistinctiveness) {
+        conditionChange = `Lower Distinctiveness Habitat - ${proposedCondition}`;
+    } else {
+        conditionChange = `${baselineCondition} - ${proposedCondition}`;
+    }
+
+    return {
+        ...data,
+        enhancementPathway: conditionChange,
+        conditionChange
+    };
+}
+
+/**
+ * Lookup enhancement time to target from habitat enhancement temporal multipliers (Column AD in Excel)
+ *
+ * Excel formula (AD12):
+ * INDEX(EnhanceTemporal, MATCH(S12, EnhanceHabitat, 0), MATCH(U12, EnhanceCondition, 0))
+ *
+ * Where:
+ * - S12 is the proposed habitat type (broadHabitat + habitatType)
+ * - U12 is conditionChange (Column U) - the enhancement pathway
+ *
+ * This uses conditionChange to lookup the temporal multiplier from the habitat's enhancement temporal table.
+ */
+const enrichWithTimeToTargetCondition = <Data extends {
+    broadHabitat: string,
+    habitatType: string,
+    conditionChange: string
 }>(data: Data) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-    // Get enhancement temporal multipliers for this habitat
+    // Get enhancement temporal multipliers for this habitat (EnhanceTemporal table in Excel)
     const enhancementTemporal = habitat.enhancementTemporalMultipliers;
 
-    // Lookup time to target for this enhancement pathway
+    // Lookup time to target using conditionChange (Column U) as the key
+    // This matches: INDEX(EnhanceTemporal, MATCH(habitat), MATCH(conditionChange))
     let timeToTargetCondition: number | "30+" | "Not Possible ▲" = "Not Possible ▲";
 
     if (enhancementTemporal) {
-        const pathway = data.enhancementPathway as keyof typeof enhancementTemporal;
+        const pathway = data.conditionChange as keyof typeof enhancementTemporal;
         if (pathway in enhancementTemporal) {
             const value = enhancementTemporal[pathway];
             timeToTargetCondition = value as any;
@@ -347,11 +402,12 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
         "Enhancement not possible for this habitat type from the selected baseline"
     ),
 
-    // Calculate enhancement pathway label
+    // Calculate distinctiveness and condition change labels
+    v.transform(addDistinctivenessChange),
     v.transform(addEnhancementPathway),
 
     // Temporal calculation
-    v.transform(lookupEnhancementTimeToTarget),
+    v.transform(enrichWithTimeToTargetCondition),
     v.transform(calculateFinalTimeToTargetValues),
 
     // Difficulty logic

@@ -4,8 +4,8 @@ import { enhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
-import { onSiteHabitatBaselineSchema } from './habitatBaseline';
-import { habitatByBroadAndType } from '../habitats';
+import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaseline } from './habitatBaseline';
+import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 
@@ -21,40 +21,22 @@ const inputSchema = v.object({
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
 })
-type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
  * Extract baseline habitat data including area
  * The baseline contains the area that is being enhanced
  */
 const enrichBaselineHabitatData = <Data extends {
-    baseline: any
+    baseline: OnSiteHabitatBaseline
 }>(data: Data) => {
     const { baseline } = data;
+    const baselineHabitat = habitatByBroadAndType(baseline.broadHabitat, baseline.habitatType)!
 
     return {
         ...data,
         area: baseline.areaEnhanced,
-        _baselineHabitat: baseline._habitat,
+        _baselineHabitat: baselineHabitat,
         _baselineCondition: baseline.conditionScore,
-    };
-}
-
-/**
- * Add enhancement pathway label
- * Format: "baseline condition - proposed condition"
- */
-const addEnhancementPathway = <Data extends {
-    baseline: any,
-    condition: string
-}>(data: Data) => {
-    const baselineCondition = data.baseline.condition;
-    const proposedCondition = data.condition;
-    const enhancementPathway = `${baselineCondition} - ${proposedCondition}`;
-
-    return {
-        ...data,
-        enhancementPathway
     };
 }
 
@@ -63,25 +45,15 @@ const addEnhancementPathway = <Data extends {
  * Uses the enhancement pathway (baseline→proposed condition) to find years to target
  */
 const lookupEnhancementTimeToTarget = <Data extends {
-    broadHabitat: string,
-    habitatType: string,
-    enhancementPathway: string
+    _habitat: Habitat,
+    conditionChange: ReturnType<typeof addDistinctivenessAndConditionChange>['conditionChange'],
 }>(data: Data) => {
-    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
-
     // Get enhancement temporal multipliers for this habitat
-    const enhancementTemporal = habitat.enhancementTemporalMultipliers;
+    const enhancementTemporal = data._habitat.enhancementTemporalMultipliers;
+    const conditionChange = data.conditionChange;
 
-    // Lookup time to target for this enhancement pathway
-    let timeToTargetCondition: number | "30+" | "Not Possible ▲" = "Not Possible ▲";
-
-    if (enhancementTemporal) {
-        const pathway = data.enhancementPathway as keyof typeof enhancementTemporal;
-        if (pathway in enhancementTemporal) {
-            const value = enhancementTemporal[pathway];
-            timeToTargetCondition = value as any;
-        }
-    }
+    const timeToTargetCondition = enhancementTemporal[conditionChange as keyof typeof enhancementTemporal];
+    if (!timeToTargetCondition) return { ...data, timeToTargetCondition: "Not Possible ▲" as const }
 
     return {
         ...data,
@@ -91,11 +63,14 @@ const lookupEnhancementTimeToTarget = <Data extends {
 
 /**
  * Calculate final time to target condition based on:
- * - Standard enhancement time (from enhancement temporal multipliers)
- * - Years of habitat enhanced in advance
- * - Years of delay in starting enhancement
+ * - Column AD: Standard enhancement time (from enhancement temporal multipliers)
+ * - Column AE: Years of habitat enhanced in advance (input)
+ * - Column AF: Years of delay in starting enhancement (input)
+ * - Column AG: Standard or adjusted time to target condition
+ * - Column AH: Final time to target condition (years)
+ * - Column AI: Final time to target multiplier
  *
- * Reuses the same logic as habitat creation
+ * Matches Excel columns AD-AI in sheet A-3
  */
 const calculateFinalTimeToTargetValues = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
@@ -104,6 +79,37 @@ const calculateFinalTimeToTargetValues = <Data extends {
 }>(data: Data) => {
     const { timeToTargetCondition, habitatEnhancedInAdvance, habitatEnhancedDelay } = data;
 
+    // Column AD: Standard time to target condition (years)
+    // Already calculated in lookupEnhancementTimeToTarget as timeToTargetCondition
+    const standardTimeToTargetCondition = timeToTargetCondition;
+
+    // Column AE: Habitat enhanced in advance (years) - input data
+    // Column AF: Delay in starting habitat enhancement (years) - input data
+
+    // Column AG: Standard or adjusted time to target condition
+    // Determine which adjustment applies
+    let standardOrAdjustedTimeToTargetCondition: string;
+    const hasAdvance = typeof habitatEnhancedInAdvance === "string" || habitatEnhancedInAdvance > 0;
+    const hasDelay = typeof habitatEnhancedDelay === "string" || habitatEnhancedDelay > 0;
+
+    if (hasAdvance) {
+        const normalisedAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
+        const normalisedStandardTime = typeof timeToTargetCondition === "string" ?
+            (timeToTargetCondition === "30+" ? 30 : Infinity) : timeToTargetCondition;
+
+        if (normalisedAdvance >= normalisedStandardTime) {
+            standardOrAdjustedTimeToTargetCondition = "Check details - Is there evidence that habitat has reached target condition? ⚠";
+        } else {
+            standardOrAdjustedTimeToTargetCondition = "Check details - Is there evidence habitat creation started/in place? ⚠";
+        }
+    } else if (hasDelay) {
+        standardOrAdjustedTimeToTargetCondition = "Check details- Delay in starting habitat in required condition? ⚠";
+    } else {
+        standardOrAdjustedTimeToTargetCondition = "Standard time to target condition applied";
+    }
+
+    // Column AH: Final time to target condition (years)
+    // Calculate based on standard time, advance, and delay
     let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
     const normalisedHabitatEnhancedInAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
     const normalisedHabitatEnhancedDelay = typeof habitatEnhancedDelay === "string" ? 30 : habitatEnhancedDelay;
@@ -116,18 +122,25 @@ const calculateFinalTimeToTargetValues = <Data extends {
     else if (timeToTargetCondition === "30+") {
         if (habitatEnhancedInAdvance === 0) {
             finalTimeToTargetCondition = "30+";
+        } else if (habitatEnhancedInAdvance === "30+") {
+            finalTimeToTargetCondition = 0;
+        } else if (normalisedHabitatEnhancedInAdvance < 30) {
+            finalTimeToTargetCondition = 30 - normalisedHabitatEnhancedInAdvance;
         } else {
-            // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - normalisedHabitatEnhancedInAdvance);
+            finalTimeToTargetCondition = 30 - normalisedHabitatEnhancedInAdvance;
         }
     }
-    // If advance >= standard time, final time is 0
-    else if (normalisedHabitatEnhancedInAdvance >= timeToTargetCondition) {
+    // If advance > standard time, final time is 0
+    else if (normalisedHabitatEnhancedInAdvance > timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
     }
-    // Calculate: standardTime - advance + delay
+    // If delay is "30+", result is "30+"
+    else if (habitatEnhancedDelay === "30+") {
+        finalTimeToTargetCondition = "30+";
+    }
+    // Calculate: standardTime + delay - advance
     else {
-        const result = timeToTargetCondition - normalisedHabitatEnhancedInAdvance + normalisedHabitatEnhancedDelay;
+        const result = timeToTargetCondition + normalisedHabitatEnhancedDelay - normalisedHabitatEnhancedInAdvance;
 
         // Cap at "30+" if result > 30
         if (result > 30) {
@@ -138,6 +151,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
         }
     }
 
+    // Column AI: Final time to target multiplier
     // Look up the temporal multiplier for the final time
     const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
     const multiplierResult = getTemporalMultiplier(multiplierKey);
@@ -147,6 +161,8 @@ const calculateFinalTimeToTargetValues = <Data extends {
 
     return {
         ...data,
+        standardTimeToTargetCondition,
+        standardOrAdjustedTimeToTargetCondition,
         finalTimeToTargetCondition,
         finalTimeToTargetMultiplier
     };
@@ -201,6 +217,46 @@ const determineEnhancementDifficulty = <Data extends {
         appliedDifficultyMultiplier,
         finalDifficultyOfEnhancement,
         difficultyMultiplierApplied
+    };
+}
+
+/**
+ * Add distinctiveness and condition change labels
+ * Matches Excel columns T and U
+ */
+const addDistinctivenessAndConditionChange = <Data extends {
+    baseline: any,
+    _baselineHabitat: any,
+    broadHabitat: string,
+    habitatType: string,
+    condition: string,
+    distinctiveness: string,
+    distinctivenessScore: number
+}>(data: Data) => {
+    const baselineHabitat = data._baselineHabitat;
+    const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    // Column T: Distinctiveness Change
+    // Format: "baseline distinctiveness - proposed distinctiveness"
+    const distinctivenessChange = `${baselineHabitat.distinctivenessCategory} - ${data.distinctiveness}`;
+
+    // Column U: Condition Change
+    // If habitat changes AND distinctiveness improves, prefix with "Lower Distinctiveness Habitat"
+    // Otherwise, show baseline condition - proposed condition
+    let conditionChange: string;
+    const isHabitatChange = baselineHabitat.label !== proposedHabitat.label;
+    const isDistinctivenessUpgrade = data.distinctivenessScore > baselineHabitat.distinctivenessScore;
+
+    if (isHabitatChange && isDistinctivenessUpgrade) {
+        conditionChange = `Lower Distinctiveness Habitat - ${data.condition}`;
+    } else {
+        conditionChange = `${data.baseline.condition} - ${data.condition}`;
+    }
+
+    return {
+        ...data,
+        distinctivenessChange,
+        conditionChange
     };
 }
 
@@ -277,6 +333,9 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
 
     // Enrich proposed habitat data
     v.transform(enrichWithHabitatData),
+
+    // Add distinctiveness and condition change labels
+    v.transform(addDistinctivenessAndConditionChange),
 
     // Validation checks for enhancement
     v.check(
@@ -367,9 +426,6 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
         },
         "Enhancement not possible for this habitat type from the selected baseline"
     ),
-
-    // Calculate enhancement pathway label
-    v.transform(addEnhancementPathway),
 
     // Temporal calculation
     v.transform(lookupEnhancementTimeToTarget),

@@ -4,13 +4,13 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
-import { riparianEncroachmentCreationSchema, watercourseEncroachmentCreationSchema } from '../watercourseEncroachment';
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import {
     enrichWithCreationWatercourseData,
     enrichWithTemporalData,
     enrichWithDifficultyData,
     enrichCreationWithEncroachmentData,
-    enrichWithNetUnitChange
+    enrichWithUnitsDelivered,
 } from '../watercourses/shared';
 
 const inputSchema = v.object({
@@ -20,8 +20,8 @@ const inputSchema = v.object({
     strategicSignificance: strategicSignificanceSchema,
     habitatCreatedInAdvance: v.optional(v.number(), 0),
     delayInStarting: v.optional(v.number(), 0),
-    watercourseEncroachment: watercourseEncroachmentCreationSchema,
-    riparianEncroachment: riparianEncroachmentCreationSchema,
+    watercourseEncroachment: watercourseEncroachmentSchema,
+    riparianEncroachment: riparianEncroachmentSchema,
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -59,7 +59,7 @@ export const onSiteWatercourseCreationSchema = v.pipe(
     // Calculate encroachment multipliers
     v.transform(enrichCreationWithEncroachmentData),
     // Calculate final net unit change
-    v.transform(enrichWithNetUnitChange),
+    v.transform(enrichWithUnitsDelivered),
 );
 
 export type OnSiteWatercourseCreationSchema = v.InferInput<typeof onSiteWatercourseCreationSchema>;

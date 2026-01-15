@@ -31,11 +31,10 @@ export const onSiteHedgerowCreationSchema = v.pipe(
     ),
     // Check that both advance and delay are not both > 0 (invalid scenario)
     v.check(
-        s => {
-            const hasAdvance = s.habitatCreatedInAdvance === "30+" || (typeof s.habitatCreatedInAdvance === "number" && s.habitatCreatedInAdvance > 0);
-            const hasDelay = s.delayInStartingHabitatCreation === "30+" || (typeof s.delayInStartingHabitatCreation === "number" && s.delayInStartingHabitatCreation > 0);
-            return !(hasAdvance && hasDelay);
-        },
+        s => !(
+            (s.habitatCreatedInAdvance === "30+" || (typeof s.habitatCreatedInAdvance === "number" && s.habitatCreatedInAdvance > 0))
+            && (s.delayInStartingHabitatCreation === "30+" || (typeof s.delayInStartingHabitatCreation === "number" && s.delayInStartingHabitatCreation > 0))
+        ),
         "Cannot have both habitat created in advance and delay in starting creation"
     ),
     // Enrich with hedgerow data

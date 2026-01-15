@@ -5,17 +5,17 @@ import fs from 'fs';
 
 // Column indices (0-based) for G-7 WaterC' Data sheet
 const COLUMNS = {
-    habitatDescription: 1,           // B
-    distinctivenessCategory: 2,      // C
-    distinctivenessScore: 3,         // D
-    irreplaceable: 4,                // E
-    technicalDifficulty: 5,          // F
-    tradingRules: 6,                 // G
-    conditionGood: 7,                // H
-    conditionFairlyGood: 8,          // I
-    conditionModerate: 9,            // J
-    conditionFairlyPoor: 10,         // K
-    conditionPoor: 11,               // L
+    habitatDescription: 1,            // B
+    distinctivenessCategory: 2,       // C
+    distinctivenessScore: 3,          // D
+    technicalDifficultyCreation: 4,   // E
+    technicalDifficultyEnhancement: 5,// F
+    tradingRules: 6,                  // G
+    conditionGood: 7,                 // H
+    conditionFairlyGood: 8,           // I
+    conditionModerate: 9,             // J
+    conditionFairlyPoor: 10,          // K
+    conditionPoor: 11,                // L
 };
 
 // Temporal multipliers start at column M
@@ -89,8 +89,8 @@ function readWatercourseData(filePath) {
             label: habitatDescStr,
             distinctivenessCategory: null,
             distinctivenessScore: 0,
-            irreplaceable: false,
-            technicalDifficulty: null,
+            technicalDifficultyCreation: null,
+            technicalDifficultyEnhancement: null,
             tradingRules: null,
             conditions: {},
             yearsToTargetConditionViaCreation: {},
@@ -107,18 +107,16 @@ function readWatercourseData(filePath) {
             watercourse.distinctivenessScore = parseFloat(distinctivenessScore) || 0;
         }
 
-        // Process irreplaceable flag
-        const irreplaceable = getCellValue(sheet, row, COLUMNS.irreplaceable);
-        if (irreplaceable) {
-            const irreplaceableStr = String(irreplaceable).trim().toLowerCase();
-            watercourse.irreplaceable = irreplaceableStr === 'yes' || irreplaceableStr === 'true';
+        // Read technical difficulties
+        const techDiffC = getCellValue(sheet, row, COLUMNS.technicalDifficultyCreation);
+        if (techDiffC) {
+            watercourse.technicalDifficultyCreation = String(techDiffC).trim();
+        }
+        const techDiffE = getCellValue(sheet, row, COLUMNS.technicalDifficultyEnhancement);
+        if (techDiffE) {
+            watercourse.technicalDifficultyEnhancement = String(techDiffE).trim();
         }
 
-        // Read technical difficulty
-        const techDiff = getCellValue(sheet, row, COLUMNS.technicalDifficulty);
-        if (techDiff) {
-            watercourse.technicalDifficulty = String(techDiff).trim();
-        }
 
         // Read trading rules from column G
         const tradingRules = getCellValue(sheet, row, COLUMNS.tradingRules);
@@ -330,7 +328,8 @@ export const allWatercourses = {
         code += `        distinctivenessScore: ${watercourse.distinctivenessCategory ? `distinctivenessCategories["${watercourse.distinctivenessCategory}"].score` : watercourse.distinctivenessScore},\n`;
         code += `        irreplaceable: ${watercourse.irreplaceable},\n`;
         code += `        tradingRules: ${watercourse.tradingRules ? `'${escapeString(watercourse.tradingRules)}'` : 'null'},\n`;
-        code += `        technicalDifficulty: ${watercourse.technicalDifficulty ? `'${escapeString(watercourse.technicalDifficulty)}'` : 'null'},\n`;
+        code += `        technicalDifficultyOfCreation: ${watercourse.technicalDifficultyCreation ? `'${escapeString(watercourse.technicalDifficultyCreation)}'` : 'null'},\n`;
+        code += `        technicalDifficultyOfEnhancement: ${watercourse.technicalDifficultyEnhancement ? `'${escapeString(watercourse.technicalDifficultyEnhancement)}'` : 'null'},\n`;
 
         // Conditions
         if (Object.keys(watercourse.conditions).length > 0) {

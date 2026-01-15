@@ -14,8 +14,8 @@ describe('onSiteWatercourseCreationSchema', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 0,
             delayInStarting: 0,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-001',
@@ -26,7 +26,7 @@ describe('onSiteWatercourseCreationSchema', () => {
         expect(result.distinctiveness).toBe('Medium');
         expect(result.distinctivenessScore).toBe(4);
         expect(result.conditionScore).toBe(2);
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should reject both advance and delay being set', () => {
@@ -37,8 +37,8 @@ describe('onSiteWatercourseCreationSchema', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 2,
             delayInStarting: 3,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-001',
@@ -82,7 +82,7 @@ describe('onSiteWatercourseCreationSchema', () => {
 
         const result = v.parse(onSiteWatercourseCreationSchema, input);
         expect(result.watercourseType).toBe('Culvert');
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should reject invalid condition for watercourse type', () => {
@@ -113,8 +113,8 @@ describe('Integration tests', () => {
             strategicSignificance: 'Formally identified in local strategy',
             habitatCreatedInAdvance: 0,
             delayInStarting: 2,
-            watercourseEncroachment: '75%',
-            riparianEncroachment: 'Within 10m',
+            watercourseEncroachment: 'Minor',
+            riparianEncroachment: 'Moderate/ Minor',
             userComments: 'New river creation project',
             planningAuthorityComments: 'Approved with conditions',
             habitatReferenceNumber: 'WC-100',
@@ -129,11 +129,11 @@ describe('Integration tests', () => {
         expect(result.strategicSignificanceMultiplier).toBe(1.15);
         expect(result.finalTimeToTarget).toBe(7); // 5 + 2 delay
         expect(result.temporalMultiplier).toBe(0.7792758067);
-        expect(result.appliedDifficulty).toBe('Medium');
-        expect(result.difficultyMultiplier).toBe(1.1);
-        expect(result.watercourseEncroachmentMultiplier).toBe(0.85);
+        expect(result.finalDifficultyOfCreation).toBe('High');
+        expect(result.difficultyMultiplier).toBe(0.33);
+        expect(result.watercourseEncroachmentMultiplier).toBe(0.8);
         expect(result.riparianEncroachmentMultiplier).toBe(0.9);
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should handle canal creation with advance', () => {
@@ -144,8 +144,8 @@ describe('Integration tests', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 1,
             delayInStarting: 0,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-200',
@@ -155,9 +155,31 @@ describe('Integration tests', () => {
 
         expect(result.watercourseType).toBe('Canals');
         expect(result.distinctiveness).toBe('Medium');
-        expect(result.standardTimeToTarget).toBe(1);
-        expect(result.finalTimeToTarget).toBe(0); // 1 - 1 advance
-        expect(result.temporalMultiplier).toBe(1); // 0 years = multiplier 1
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.standardTimeToTarget).toBe(5);
+        expect(result.finalTimeToTarget).toBe(4); // 5 - 1 advance
+        expect(result.temporalMultiplier).toBe(0.8671800005999999);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 });
+
+describe("bugs", () => {
+    test("temporal and difficulty multipliers", () => {
+        const input: OnSiteWatercourseCreationSchema = {
+            watercourseType: 'Ditches',
+            length: 0.02,
+            condition: 'Poor',
+            strategicSignificance: 'Formally identified in local strategy',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment'
+        }
+
+        const parsed = v.parse(onSiteWatercourseCreationSchema, input);
+        expect(parsed.standardTimeToTarget).toEqual(1);
+        expect(parsed.temporalMultiplier).toBeCloseTo(0.965);
+        expect(parsed.appliedDifficulty).toEqual("Standard difficulty applied");
+        expect(parsed.standardDifficulty).toEqual("Medium");
+        expect(parsed.finalDifficultyOfCreation).toEqual("Medium");
+        expect(parsed.difficultyMultiplier).toEqual(0.67);
+        expect(parsed.unitsDelivered).toBeCloseTo(0.06);
+    })
+})

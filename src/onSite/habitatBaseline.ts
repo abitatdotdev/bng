@@ -4,7 +4,8 @@ import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { addTotalHabitatUnits as enrichWithTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
-import { bespokeCompensationSchema } from '../bespokeCompensation';
+import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
+import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
 const inputSchema =
     v.object({
@@ -48,6 +49,7 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     // See https://opncd.ai/share/4Z0sTzAw for translation
     v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Area sums do not add up"),
     v.transform(enrichWithUnitsLost),
+    v.transform(enrichWithVhdhBespokeCompensationUnits),
 )
 
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
@@ -87,4 +89,28 @@ export function enrichWithUnitsLost<Data extends {
         ...data,
         unitsLost,
     };
+}
+
+/*
+ * Calculates hidden cell AT, which is used later in the headline results
+ */
+export function enrichWithVhdhBespokeCompensationUnits<Data extends {
+    bespokeCompensationAgreed: BespokeCompensation,
+    requiredAction: SuggestedTradingActions,
+    totalHabitatUnits: number,
+    baselineUnitsRetained: number,
+    baselineUnitsEnhanced: number,
+}>(data: Data) {
+    const vhdhBespokeCompensationUnits =
+        (
+            data.bespokeCompensationAgreed === "Yes"
+            || data.bespokeCompensationAgreed === "Pending"
+        ) && data.requiredAction === "Same habitat required – bespoke compensation option ⚠"
+            ? data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced
+            : 0;
+
+    return {
+        ...data,
+        vhdhBespokeCompensationUnits,
+    }
 }

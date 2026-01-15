@@ -10,7 +10,7 @@ import {
     enrichWithTemporalData,
     enrichWithDifficultyData,
     enrichCreationWithEncroachmentData,
-    enrichWithNetUnitChange,
+    enrichWithUnitsDelivered,
     // Enhancement functions
     DISTINCTIVENESS_UPGRADE_YEARS,
     yearsToNumber,
@@ -38,8 +38,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "No Encroachment",
+                riparianEncroachment: "No Encroachment/ No Encroachment",
             });
 
             expect(result.distinctiveness).toEqual("V.High");
@@ -59,15 +59,15 @@ describe("Baseline Functions", () => {
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
-                watercourseEncroachment: "50%",
-                riparianEncroachment: "Within 10m",
+                watercourseEncroachment: "Minor",
+                riparianEncroachment: "Moderate/ Minor",
             });
 
             expect(result.distinctiveness).toEqual("High");
             expect(result.distinctivenessScore).toEqual(6);
             expect(result.conditionScore).toEqual(2);
             expect(result.strategicSignificanceMultiplier).toEqual(1.1);
-            expect(result.watercourseEncroachmentMultiplier).toEqual(0.7);
+            expect(result.watercourseEncroachmentMultiplier).toEqual(0.8);
             expect(result.riparianEncroachmentMultiplier).toEqual(0.9);
         });
 
@@ -79,16 +79,16 @@ describe("Baseline Functions", () => {
                 watercourseType: "Ditches",
                 condition: "Poor",
                 strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
-                watercourseEncroachment: "None",
-                riparianEncroachment: "Within 50m",
+                watercourseEncroachment: "Major",
+                riparianEncroachment: "Major/Major",
             });
 
             expect(result.distinctiveness).toEqual("Medium");
             expect(result.distinctivenessScore).toEqual(4);
             expect(result.conditionScore).toEqual(1);
             expect(result.strategicSignificanceMultiplier).toEqual(1);
-            expect(result.watercourseEncroachmentMultiplier).toEqual(0.25);
-            expect(result.riparianEncroachmentMultiplier).toEqual(0.67);
+            expect(result.watercourseEncroachmentMultiplier).toEqual(0.5);
+            expect(result.riparianEncroachmentMultiplier).toEqual(0.75);
         });
 
         test("various encroachment multipliers", () => {
@@ -99,12 +99,12 @@ describe("Baseline Functions", () => {
                 watercourseType: "Canals" as const,
                 condition: "Fairly Good" as const,
                 strategicSignificance: "Location ecologically desirable but not in local strategy" as const,
-                riparianEncroachment: "None" as const,
+                riparianEncroachment: "No Encroachment/ No Encroachment" as const,
             };
 
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "75%" }).watercourseEncroachmentMultiplier).toEqual(0.85);
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "25%" }).watercourseEncroachmentMultiplier).toEqual(0.55);
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "10%" }).watercourseEncroachmentMultiplier).toEqual(0.4);
+            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "No Encroachment" }).watercourseEncroachmentMultiplier).toEqual(1);
+            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Minor" }).watercourseEncroachmentMultiplier).toEqual(0.8);
+            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Major" }).watercourseEncroachmentMultiplier).toEqual(0.5);
         });
     });
 
@@ -117,16 +117,16 @@ describe("Baseline Functions", () => {
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
-                watercourseEncroachment: "50%",
-                riparianEncroachment: "Within 10m",
+                watercourseEncroachment: "Minor",
+                riparianEncroachment: "Moderate/ Minor",
             });
 
             const result = enrichWithBaselineUnitsData(enriched);
 
-            // Expected: 0.5 * 8 * 3 * 1.15 * 0.7 * 0.9
-            expect(result.unitsRetained).toBeCloseTo(0.5 * 8 * 3 * 1.15 * 0.7 * 0.9, 5);
-            // Expected: 0.3 * 8 * 3 * 1.15 * 0.7 * 0.9
-            expect(result.unitsEnhanced).toBeCloseTo(0.3 * 8 * 3 * 1.15 * 0.7 * 0.9, 5);
+            // Expected: 0.5 * 8 * 3 * 1.15 * 0.8 * 0.9
+            expect(result.unitsRetained).toBeCloseTo(0.5 * 8 * 3 * 1.15 * 0.8 * 0.9, 5);
+            // Expected: 0.3 * 8 * 3 * 1.15 * 0.8 * 0.9
+            expect(result.unitsEnhanced).toBeCloseTo(0.3 * 8 * 3 * 1.15 * 0.8 * 0.9, 5);
         });
 
         test("handles zero lengths", () => {
@@ -137,8 +137,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "No Encroachment",
+                riparianEncroachment: "No Encroachment/ No Encroachment",
             });
 
             const result = enrichWithBaselineUnitsData(enriched);
@@ -157,15 +157,15 @@ describe("Baseline Functions", () => {
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
-                watercourseEncroachment: "75%",
-                riparianEncroachment: "Within 50m",
+                watercourseEncroachment: "Minor",
+                riparianEncroachment: "Major/Major",
             });
 
             const withUnits = enrichWithBaselineUnitsData(enriched);
             const result = enrichWithTotalWatercourseUnits(withUnits);
 
-            // Expected: 1.2 * 6 * 2 * 1.1 * 0.85 * 0.67
-            expect(result.totalWatercourseUnits).toBeCloseTo(1.2 * 6 * 2 * 1.1 * 0.85 * 0.67, 5);
+            // Expected: 1.2 * 6 * 2 * 1.1 * 0.8 * 0.75
+            expect(result.totalWatercourseUnits).toBeCloseTo(1.2 * 6 * 2 * 1.1 * 0.8 * 0.75, 5);
         });
 
         test("Priority habitat calculation", () => {
@@ -176,8 +176,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "No Encroachment",
+                riparianEncroachment: "No Encroachment/ No Encroachment",
             });
 
             const withUnits = enrichWithBaselineUnitsData(enriched);
@@ -197,8 +197,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Ditches",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "No Encroachment",
+                riparianEncroachment: "No Encroachment/ No Encroachment",
             });
 
             const withUnits = enrichWithBaselineUnitsData(enriched);
@@ -217,8 +217,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Canals",
                 condition: "Fairly Good",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "No Encroachment",
+                riparianEncroachment: "No Encroachment/ No Encroachment",
             });
 
             const withUnits = enrichWithBaselineUnitsData(enriched);
@@ -237,8 +237,8 @@ describe("Baseline Functions", () => {
                 watercourseType: "Culvert",
                 condition: "Poor",
                 strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
-                watercourseEncroachment: "Full",
-                riparianEncroachment: "None",
+                watercourseEncroachment: "N/A - Culvert",
+                riparianEncroachment: "N/A - Culvert",
             });
 
             const withUnits = enrichWithBaselineUnitsData(enriched);
@@ -269,8 +269,8 @@ describe("Creation Functions", () => {
             expect(result.distinctiveness).toBe('Medium');
             expect(result.distinctivenessScore).toBe(4);
             expect(result.conditionScore).toBe(2);
-            expect(result.standardTimeToTarget).toBe(2);
-            expect(result.standardDifficulty).toBe('Low');
+            expect(result.standardTimeToTarget).toBe(5);
+            expect(result.standardDifficulty).toBe('Medium');
 
             const result2 = enrichWithCreationWatercourseData({
                 watercourseType: "Priority habitat",
@@ -310,8 +310,8 @@ describe("Creation Functions", () => {
             expect(result.distinctiveness).toBe('V.High');
             expect(result.distinctivenessScore).toBe(8);
             expect(result.conditionScore).toBe(2);
-            expect(result.standardTimeToTarget).toBe(8);
-            expect(result.standardDifficulty).toBe('Medium');
+            expect(result.standardTimeToTarget).toBe(5);
+            expect(result.standardDifficulty).toBe('High');
         });
     });
 
@@ -503,29 +503,35 @@ describe("Creation Functions", () => {
             const input = {
                 watercourseType: 'Priority habitat' as const,
                 condition: 'Moderate' as const,
-                standardDifficulty: 'Medium',
+                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                standardTimeToTarget: 5 as const,
+                standardDifficulty: 'Medium' as const,
                 isDitchFairlyCategory: false,
                 habitatCreatedInAdvance: 0,
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Medium');
-            expect(result.difficultyMultiplier).toBe(1.1);
+            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
+            expect(result.finalDifficultyOfCreation).toBe('Medium');
+            expect(result.difficultyMultiplier).toBe(0.67);
         });
 
         test('should use low difficulty for ditch fairly category with advance creation', () => {
             const input = {
                 watercourseType: 'Ditches' as const,
                 condition: 'Fairly Poor' as const,
-                standardDifficulty: 'Low',
+                standardOrAdjustedTimeToTargetCondition: 'Check details - Is there evidence that habitat has reached target condition? ⚠' as const,
+                standardTimeToTarget: 2 as const,
+                standardDifficulty: 'Medium' as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 2,
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Low');
+            expect(result.appliedDifficulty).toBe('Low Difficulty - only applicable if all habitat created before losses ⚠');
+            expect(result.finalDifficultyOfCreation).toBe('Low');
             expect(result.difficultyMultiplier).toBe(1);
         });
 
@@ -533,45 +539,54 @@ describe("Creation Functions", () => {
             const input = {
                 watercourseType: 'Ditches' as const,
                 condition: 'Fairly Poor' as const,
-                standardDifficulty: 'Low',
+                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                standardTimeToTarget: 2 as const,
+                standardDifficulty: 'Medium' as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 0,
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Low');
-            expect(result.difficultyMultiplier).toBe(1);
+            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
+            expect(result.finalDifficultyOfCreation).toBe('Medium');
+            expect(result.difficultyMultiplier).toBe(0.67);
         });
 
         test('should handle high difficulty', () => {
             const input = {
                 watercourseType: 'Other rivers and streams' as const,
                 condition: 'Good' as const,
-                standardDifficulty: 'High',
+                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                standardTimeToTarget: 10 as const,
+                standardDifficulty: 'High' as const,
                 isDitchFairlyCategory: false,
                 habitatCreatedInAdvance: 0,
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('High');
-            expect(result.difficultyMultiplier).toBe(1.5);
+            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
+            expect(result.finalDifficultyOfCreation).toBe('High');
+            expect(result.difficultyMultiplier).toBe(0.33);
         });
 
         test("does not apply low difficulty without advance", () => {
             const data = {
                 watercourseType: "Ditches" as const,
                 condition: "Fairly Poor" as const,
-                standardDifficulty: "Medium",
+                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                standardTimeToTarget: 2 as const,
+                standardDifficulty: "Medium" as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 0,
             };
 
             const result = enrichWithDifficultyData(data);
 
-            expect(result.appliedDifficulty).toEqual("Medium");
-            expect(result.difficultyMultiplier).toEqual(1.1);
+            expect(result.appliedDifficulty).toEqual("Standard difficulty applied");
+            expect(result.finalDifficultyOfCreation).toEqual("Medium");
+            expect(result.difficultyMultiplier).toEqual(0.67);
         });
     });
 
@@ -579,8 +594,8 @@ describe("Creation Functions", () => {
         test('should calculate encroachment multipliers', () => {
             const input = {
                 watercourseType: 'Ditches' as const,
-                watercourseEncroachment: 'Full' as const,
-                riparianEncroachment: 'None' as const,
+                watercourseEncroachment: 'No Encroachment' as const,
+                riparianEncroachment: 'No Encroachment/ No Encroachment' as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
@@ -592,13 +607,13 @@ describe("Creation Functions", () => {
         test('should handle partial encroachment', () => {
             const input = {
                 watercourseType: 'Other rivers and streams' as const,
-                watercourseEncroachment: '50%' as const,
-                riparianEncroachment: 'Within 10m' as const,
+                watercourseEncroachment: 'Minor' as const,
+                riparianEncroachment: 'Moderate/ Minor' as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
 
-            expect(result.watercourseEncroachmentMultiplier).toBe(0.7);
+            expect(result.watercourseEncroachmentMultiplier).toBe(0.8);
             expect(result.riparianEncroachmentMultiplier).toBe(0.9);
         });
 
@@ -611,21 +626,21 @@ describe("Creation Functions", () => {
 
             const result = enrichCreationWithEncroachmentData(input);
 
-            expect(result.watercourseEncroachmentMultiplier).toBe(1);
+            expect(result.watercourseEncroachmentMultiplier).toBe(0.68);
             expect(result.riparianEncroachmentMultiplier).toBe(1);
         });
 
-        test('should handle no encroachment', () => {
+        test('should handle major encroachment', () => {
             const input = {
                 watercourseType: 'Ditches' as const,
-                watercourseEncroachment: 'None' as const,
-                riparianEncroachment: 'Within 50m' as const,
+                watercourseEncroachment: 'Major' as const,
+                riparianEncroachment: 'Major/Major' as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
 
-            expect(result.watercourseEncroachmentMultiplier).toBe(0.25);
-            expect(result.riparianEncroachmentMultiplier).toBe(0.67);
+            expect(result.watercourseEncroachmentMultiplier).toBe(0.5);
+            expect(result.riparianEncroachmentMultiplier).toBe(0.75);
         });
     });
 
@@ -642,10 +657,10 @@ describe("Creation Functions", () => {
                 riparianEncroachmentMultiplier: 1,
             };
 
-            const result = enrichWithNetUnitChange(input);
+            const result = enrichWithUnitsDelivered(input);
 
             // 1.5 * 4 * 2 * 1.1 * 0.98 * 1 * 1 * 1 = 12.936
-            expect(result.netUnitChange).toBeCloseTo(12.936, 2);
+            expect(result.unitsDelivered).toBeCloseTo(12.936, 2);
         });
 
         test('should calculate net unit change with multiple multipliers', () => {
@@ -660,10 +675,10 @@ describe("Creation Functions", () => {
                 riparianEncroachmentMultiplier: 0.9,
             };
 
-            const result = enrichWithNetUnitChange(input);
+            const result = enrichWithUnitsDelivered(input);
 
             // 2 * 8 * 2.5 * 1.15 * 0.95 * 1.1 * 0.7 * 0.9 = 30.2841
-            expect(result.netUnitChange).toBeCloseTo(30.2841, 2);
+            expect(result.unitsDelivered).toBeCloseTo(30.2841, 2);
         });
     });
 });
@@ -832,11 +847,11 @@ describe("Enhancement Functions", () => {
     describe("enrichEnhancementWithEncroachmentData", () => {
         test("applies encroachment multipliers", () => {
             const result = enrichEnhancementWithEncroachmentData({
-                watercourseEncroachment: "75%",
-                riparianEncroachment: "Within 10m",
+                watercourseEncroachment: "Minor",
+                riparianEncroachment: "Moderate/ Minor",
             });
 
-            expect(result.watercourseEncroachmentMultiplier).toEqual(0.85);
+            expect(result.watercourseEncroachmentMultiplier).toEqual(0.8);
             expect(result.riparianEncroachmentMultiplier).toEqual(0.9);
         });
     });

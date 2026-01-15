@@ -1,13 +1,25 @@
 import XLSX from 'xlsx';
-import { describe } from "bun:test";
+import { describe, expect } from "bun:test";
 import { readFileSync, existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
+import * as v from 'valibot';
 
 // All example sheets from the default location
 const exampleMetricsFileNames =
     existsSync('./test/metrics') ?
         (await readdir('./test/metrics'))
             .filter(f => f.includes('.xlsx') || f.includes('.xlsm'))
+            // Blacklist some files
+            .filter(name =>
+                ![
+                    // seems to have uncompleted tree rows - they don't look valid to me
+                    'BCP_APP_24_00318_F.xlsx',
+                    // has random zeros in D-2
+                    'Lake District_7_2024_2105.xlsm',
+                    // has incompatible broad habitat/habitat type in A-2 row 13
+                    'Rother_RR_2024_1825_P.xlsx',
+                ].includes(name)
+            )
             .map(f => [`./test/metrics/${f}`])
         : []
 
@@ -16,8 +28,10 @@ const EXCEL_FILE = './examples/simple-unlocked.xlsm';
 
 export const EXCEL_FILES = [
     ["./examples/simple-unlocked.xlsm"],
-    ...exampleMetricsFileNames,
+    ...exampleMetricsFileNames.slice(0, 200),
 ]
+// Whitelist to help with test isolation when debugging
+// .filter(([name]) => name === './test/metrics/Solihull_PL_2024_01948_PPFL.xlsm')
 
 type ExcelFileTest = (workbook: XLSX.WorkBook, fileName: string) => void
 /**
@@ -35,7 +49,7 @@ export const testExcelFiles = (files: typeof EXCEL_FILES, test: ExcelFileTest): 
                 // 'Main Menu',
                 // 'Unit shortfall summary',
                 // 'Results',
-                // 'Headline Results',
+                'Headline Results',
                 // 'Detailed Results',
                 // 'Trading Summary Area Habitats',
                 // 'Trading Summary Hedgerows',
@@ -80,6 +94,7 @@ export const testExcelFiles = (files: typeof EXCEL_FILES, test: ExcelFileTest): 
                 describe.skip("Not a valid version to compare against", () => { });
                 return;
             }
+            console.info(`Testing ${fileName}...`)
             test(workbook, fileName)
         }
     )
@@ -114,7 +129,15 @@ export function getCellValue(sheet: XLSX.WorkSheet, row: number, col: number): a
 
     if (!data) {
         // Convert sheet to array of arrays and cache it
-        data = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true }) as any[][];
+        data = XLSX.utils.sheet_to_json(
+            sheet,
+            {
+                header: 1,
+                raw: true,
+                // Always use the whole sheet
+                range: `A1:ZZ${MAX_DATA_ROWS}`
+            }
+        ) as any[][];
         sheetDataCache.set(sheet, data);
     }
 
@@ -159,6 +182,10 @@ export function expectCloseTo(actual: number, expected: number, tolerance: numbe
     }
 }
 
+const dataValueSchema = v.union([
+    v.pipe(v.string(), v.trim(), v.minLength(1)),
+    v.pipe(v.number()),
+])
 const MAX_DATA_ROWS = 100;
 /**
  * Find all data rows in a sheet
@@ -168,7 +195,8 @@ export function findAllDataRows(sheet: XLSX.WorkSheet, columnToCheckPresence: nu
     let consecutiveEmpty = 0;
     for (let row = startRow; row < startRow + maxRows; row++) {
         const value = getCellValue(sheet, row, columnToCheckPresence);
-        if (value && typeof value === "string" && value.trim() !== "" && value.trim() !== "Broad Habitat") {
+        const parsed = v.safeParse(dataValueSchema, value);
+        if (parsed.success && parsed.output !== "Broad Habitat") {
             dataRows.push(row);
             consecutiveEmpty = 0;
         } else {
@@ -177,4 +205,12 @@ export function findAllDataRows(sheet: XLSX.WorkSheet, columnToCheckPresence: nu
         }
     }
     return dataRows;
+}
+
+export function findRow(sheet: XLSX.WorkSheet, columnToCheckPresence: number, value: unknown, maxRows: number = MAX_DATA_ROWS): number | null {
+    for (let row = 0; row < maxRows; row++) {
+        const cellValue = getCellValue(sheet, row, columnToCheckPresence);
+        if (value === cellValue) return row;
+    }
+    return null;
 }

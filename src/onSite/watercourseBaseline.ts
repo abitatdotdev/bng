@@ -1,9 +1,8 @@
 import * as v from 'valibot';
-import { allWatercourses, type WatercourseLabel } from '../watercourses';
+import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema } from '../schemaUtils';
-import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
-import { watercourseConditionSchema, type WatercourseCondition } from '../watercourseCondition';
+import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import {
     enrichWithBaselineWatercourseData,
@@ -11,29 +10,9 @@ import {
     enrichWithTotalWatercourseUnits,
     enrichWithUnitsLost
 } from '../watercourses/shared';
-
-// Watercourse encroachment levels
-const watercourseEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        "Full",
-        "75%",
-        "50%",
-        "25%",
-        "10%",
-        "None",
-    ]));
-
-// Riparian encroachment levels
-const riparianEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        "None",
-        "Within 10m",
-        "Within 50m",
-    ]));
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
+import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
+import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -44,12 +23,7 @@ const inputSchema = v.object({
     riparianEncroachment: riparianEncroachmentSchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    bespokeCompensation: v.optional(
-        v.pipe(
-            v.string(),
-            v.trim(),
-            v.picklist(["Yes", "No", "Pending"])
-        ), "No"),
+    bespokeCompensation: v.optional(bespokeCompensationSchema, "No"),
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -64,6 +38,15 @@ export const onSiteWatercourseBaselineSchema = v.pipe(
         s => s.lengthRetained + s.lengthEnhanced <= s.length,
         "Retained and enhanced lengths cannot exceed total length"
     ),
+    // Validate encroachment consistency with watercourse type
+    v.check(
+        s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
+        "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
+    ),
+    v.check(
+        s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
+        "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
+    ),
     // Enrich with watercourse data
     v.transform(enrichWithBaselineWatercourseData),
     // Validate that the condition is possible for this watercourse type
@@ -77,8 +60,31 @@ export const onSiteWatercourseBaselineSchema = v.pipe(
     v.transform(enrichWithTotalWatercourseUnits),
     // Calculate units lost
     v.transform(enrichWithUnitsLost),
+    v.transform(enrichWithVhdhBespokeCompensationUnits),
 );
 
 export type OnSiteWatercourseBaselineSchema = v.InferInput<typeof onSiteWatercourseBaselineSchema>;
 export type OnSiteWatercourseBaseline = v.InferOutput<typeof onSiteWatercourseBaselineSchema>;
+/*
+ * Calculates hidden cell AT, which is used later in the headline results
+ */
+export function enrichWithVhdhBespokeCompensationUnits<Data extends {
+    bespokeCompensation: BespokeCompensation,
+    tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
+    totalWatercourseUnits: number,
+    lengthRetained: number,
+    lengthEnhanced: number,
+}>(data: Data) {
+    const vhdhBespokeCompensationUnits =
+        (
+            data.bespokeCompensation === "Yes"
+            || data.bespokeCompensation === "Pending"
+        ) && data.tradingRules === "Same habitat required – bespoke compensation option ⚠"
+            ? data.totalWatercourseUnits - data.lengthRetained - data.lengthEnhanced
+            : 0;
 
+    return {
+        ...data,
+        vhdhBespokeCompensationUnits,
+    }
+}

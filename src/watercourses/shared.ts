@@ -9,7 +9,7 @@
 
 import { allWatercourses, type Watercourse, type WatercourseLabel } from '../watercourses';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
-import { type WatercourseCondition } from '../watercourseCondition';
+import { yearsToTargetCondition, type WatercourseCondition } from '../watercourseCondition';
 import {
     watercourseEncroachmentMultipliers,
     riparianEncroachmentMultipliers,
@@ -171,14 +171,8 @@ export function enrichWithCreationWatercourseData<Data extends {
 
     // Get condition score from watercourse lookup
     const conditionScore = watercourse.conditions[data.condition] as number | 'Not possible';
-
     const strategicSignificance = getStrategicSignificance(data.strategicSignificance);
-
-    // Get time to target condition for creation
-    // This looks up the years required to reach the target condition
-    // If the condition is not in the map or the map is null, default to 0
-    const yearsMap = watercourse.yearsToTargetConditionViaCreation as Record<string, number> | null;
-    const standardTimeToTarget = yearsMap?.[data.condition] ?? 0;
+    const standardTimeToTarget = yearsToTargetCondition[data.condition];
 
     return {
         ...data,
@@ -188,7 +182,7 @@ export function enrichWithCreationWatercourseData<Data extends {
         strategicSignificanceCategory: strategicSignificance.significance,
         strategicSignificanceMultiplier: strategicSignificance.multiplier,
         standardTimeToTarget,
-        standardDifficulty: watercourse.technicalDifficulty,
+        standardDifficulty: watercourse.technicalDifficultyOfCreation,
         tradingRules: watercourse.tradingRules,
         irreplaceable: watercourse.irreplaceable,
     };
@@ -205,6 +199,17 @@ export function enrichWithTemporalData<Data extends {
     delayInStarting: number;
     standardTimeToTarget: number;
 }>(data: Data) {
+
+    // Cell 012
+    const standardOrAdjustedTimeToTargetCondition =
+        (data.standardTimeToTarget <= data.habitatCreatedInAdvance && data.delayInStarting === 0)
+            ? "Check details - Is there evidence that habitat has reached target condition? ⚠" as const
+            : data.habitatCreatedInAdvance > 0
+                ? "Check details - Is there evidence habitat creation started/in place? ⚠" as const
+                : data.delayInStarting > 0
+                    ? "Check details- Delay in starting habitat in required condition? ⚠" as const
+                    : "Standard time to target condition applied" as const;
+
     // Calculate adjusted time to target
     let finalTimeToTarget = data.standardTimeToTarget + data.delayInStarting - data.habitatCreatedInAdvance;
 
@@ -226,6 +231,7 @@ export function enrichWithTemporalData<Data extends {
 
     return {
         ...data,
+        standardOrAdjustedTimeToTargetCondition,
         finalTimeToTarget,
         temporalMultiplier,
         isDitchFairlyCategory,
@@ -237,33 +243,35 @@ export function enrichWithTemporalData<Data extends {
  * Used by both on-site and off-site creation calculations.
  */
 export function enrichWithDifficultyData<Data extends {
-    watercourseType: WatercourseLabel;
-    condition: WatercourseCondition;
-    standardDifficulty: string;
+    standardOrAdjustedTimeToTargetCondition: ReturnType<typeof enrichWithTemporalData>['standardOrAdjustedTimeToTargetCondition'],
+    standardTimeToTarget: ReturnType<typeof enrichWithCreationWatercourseData>['standardTimeToTarget'],
+    standardDifficulty: ReturnType<typeof enrichWithCreationWatercourseData>['standardDifficulty'],
     isDitchFairlyCategory: boolean;
     habitatCreatedInAdvance: number;
 }>(data: Data) {
-    // Determine if low difficulty applies
-    // Low difficulty applies when:
-    // - It's a ditch in fairly category AND habitat created in advance > 0
-    const appliedDifficulty = (data.isDitchFairlyCategory && data.habitatCreatedInAdvance > 0)
-        ? 'Low'
-        : data.standardDifficulty;
 
-    // Get difficulty multiplier from lookup
-    // These values come from the G-3 Multipliers table
-    const difficultyMultipliers: Record<string, number> = {
-        'Low': 1,
-        'Medium': 1.1,
-        'High': 1.5,
-        'Very High': 2,
-    };
+    const standardDifficultyOfCreation = data.standardDifficulty;
+    const appliedDifficulty =
+        data.standardOrAdjustedTimeToTargetCondition === "Check details - Is there evidence that habitat has reached target condition? ⚠"
+            ? "Low Difficulty - only applicable if all habitat created before losses ⚠" as const
+            : "Standard difficulty applied" as const;
 
-    const difficultyMultiplier = difficultyMultipliers[appliedDifficulty] ?? 1;
+    const finalDifficultyOfCreation =
+        (appliedDifficulty === "Standard difficulty applied"
+            && (typeof data.standardTimeToTarget === "number" && data.standardTimeToTarget > data.habitatCreatedInAdvance))
+            ? standardDifficultyOfCreation
+            : (appliedDifficulty === "Low Difficulty - only applicable if all habitat created before losses ⚠"
+                && (typeof data.standardTimeToTarget === "number"
+                    && data.habitatCreatedInAdvance >= data.standardTimeToTarget))
+                ? "Low"
+                : standardDifficultyOfCreation;
+
+    const difficultyMultiplier = difficulty[finalDifficultyOfCreation];
 
     return {
         ...data,
         appliedDifficulty,
+        finalDifficultyOfCreation,
         difficultyMultiplier,
     };
 }
@@ -291,7 +299,7 @@ export function enrichCreationWithEncroachmentData<Data extends {
  * Calculate final net unit change for creation.
  * Used by both on-site and off-site creation calculations.
  */
-export function enrichWithNetUnitChange<Data extends {
+export function enrichWithUnitsDelivered<Data extends {
     length: number;
     distinctivenessScore: number;
     conditionScore: number | 'Not possible';
@@ -304,7 +312,7 @@ export function enrichWithNetUnitChange<Data extends {
     // At this point, validation has ensured conditionScore is a number
     const conditionScore = data.conditionScore as number;
 
-    const netUnitChange = data.length
+    const unitsDelivered = data.length
         * data.distinctivenessScore
         * conditionScore
         * data.strategicSignificanceMultiplier
@@ -315,7 +323,7 @@ export function enrichWithNetUnitChange<Data extends {
 
     return {
         ...data,
-        netUnitChange,
+        unitsDelivered,
     };
 }
 
@@ -392,7 +400,7 @@ export function enrichProposedWatercourseData<Data extends {
         strategicSignificanceCategory: strategicSignificance.significance,
         strategicSignificanceMultiplier: strategicSignificance.multiplier,
         tradingRules: watercourse.tradingRules,
-        technicalDifficulty: watercourse.technicalDifficulty,
+        technicalDifficulty: watercourse.technicalDifficultyOfEnhancement,
         irreplaceable: watercourse.irreplaceable,
     };
 }
@@ -499,7 +507,7 @@ export function calculateFinalTimeToTargetValues<Data extends {
 export function determineEnhancementDifficulty<Data extends {
     watercourseEnhancedInAdvance: number | "30+";
     finalTimeToTargetCondition: number | "30+" | "N/A";
-    technicalDifficulty: Watercourse['technicalDifficulty'];
+    technicalDifficulty: Watercourse['technicalDifficultyOfEnhancement'];
 }>(data: Data) {
     // Normalize watercourseEnhancedInAdvance for comparisons
     const normalisedEnhancedInAdvance = yearsToNumber(data.watercourseEnhancedInAdvance);
@@ -523,8 +531,6 @@ export function determineEnhancementDifficulty<Data extends {
 
     // Difficulty multiplier applied
     const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
-    console.debug({ hasReachedTargetCondition, appliedDifficultyMultiplier, standardDifficultyOfEnhancement, finalDifficultyOfEnhancement, difficultyMultiplierApplied })
 
     return {
         ...data,

@@ -1,15 +1,11 @@
 import * as v from 'valibot';
-import { allWatercourses, type WatercourseLabel } from '../watercourses';
+import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, yearsSchema } from '../schemaUtils';
-import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
-import { watercourseConditionSchema, type WatercourseCondition } from '../watercourseCondition';
-import { lookupTemporalMultiplier } from '../temporalMultipliers';
-import { difficulty } from '../difficulty';
-import type { OffSiteWatercourseBaseline } from './watercourseBaseline';
+import { watercourseConditionSchema } from '../watercourseCondition';
+import { offSiteWatercourseBaselineSchema } from './watercourseBaseline';
 import { watercourseTypeSchema } from '../watercourseType';
-import { riparianEncroachmentCreationSchema, watercourseEncroachmentCreationSchema, type RiparianEncroachment, type WatercourseEncroachment, riparianEncroachmentMultipliers, watercourseEncroachmentMultipliers } from '../watercourseEncroachment';
-import { watercourseEnhancementTemporalMatrix } from '../watercourseEnhancementTemporalMatrix';
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 
 import {
     enrichBaselineWatercourseData,
@@ -21,18 +17,18 @@ import {
     enrichEnhancementWithEncroachmentData,
     calculateEnhancementUnitsDelivered
 } from '../watercourses/shared';
+import { enrichWithSpatialRisk } from './common';
+
 
 const inputSchema = v.object({
-    baseline: v.custom<OffSiteWatercourseBaseline>((input) => {
-        return typeof input === 'object' && input !== null && 'watercourseType' in input;
-    }),
+    baseline: offSiteWatercourseBaselineSchema,
     watercourseType: watercourseTypeSchema,
     condition: watercourseConditionSchema,
     strategicSignificance: strategicSignificanceSchema,
     watercourseEnhancedInAdvance: v.optional(yearsSchema, 0),
     watercourseEnhancedDelay: v.optional(yearsSchema, 0),
-    watercourseEncroachment: watercourseEncroachmentCreationSchema,
-    riparianEncroachment: riparianEncroachmentCreationSchema,
+    watercourseEncroachment: watercourseEncroachmentSchema,
+    riparianEncroachment: riparianEncroachmentSchema,
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -119,9 +115,29 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     // Encroachment multipliers
     v.transform(enrichEnhancementWithEncroachmentData),
 
-    // Final calculation
+    // Final calculations
     v.transform(calculateEnhancementUnitsDelivered),
+    v.transform(d => enrichWithSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory })),
+    v.transform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
 )
 
 export type OffSiteWatercourseEnhancementSchema = v.InferInput<typeof offSiteWatercourseEnhancementSchema>
 export type OffSiteWatercourseEnhancement = v.InferOutput<typeof offSiteWatercourseEnhancementSchema>
+
+/**
+ * Calculates SRM-adjusted watercourse units delivered for off-site watercourse enhancement
+ * watercourseUnitsDeliveredWithSpatialRisk = watercourseUnitsDelivered * spatialRiskMultiplier
+ */
+export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends {
+    watercourseUnitsDelivered: number;
+    spatialRiskMultiplier: number;
+}>(data: Data) {
+    const watercourseUnitsDeliveredWithSpatialRisk = data.watercourseUnitsDelivered * data.spatialRiskMultiplier;
+
+    return {
+        ...data,
+        watercourseUnitsDeliveredWithSpatialRisk,
+    };
+}
+
+

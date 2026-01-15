@@ -12,30 +12,7 @@ import {
     enrichWithTotalWatercourseUnits,
     enrichWithUnitsLost
 } from '../watercourses/shared';
-
-// Watercourse encroachment levels
-const watercourseEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        "Full",
-        "75%",
-        "50%",
-        "25%",
-        "10%",
-        "None",
-    ])
-);
-
-// Riparian encroachment levels
-const riparianEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        "None",
-        "Within 10m",
-        "Within 50m",
-    ]));
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -67,6 +44,15 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
     v.check(
         s => s.lengthRetained + s.lengthEnhanced <= s.length,
         "Retained and enhanced lengths cannot exceed total length"
+    ),
+    // Validate encroachment consistency with watercourse type
+    v.check(
+        s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
+        "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
+    ),
+    v.check(
+        s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
+        "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
     ),
     // Enrich with watercourse data
     v.transform(enrichWithBaselineWatercourseData),

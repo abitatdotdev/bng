@@ -86,7 +86,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
         }
     }
     // If advance >= standard time, final time is 0
-    else if (normalisedHabitatCreationInAdvance >= timeToTargetCondition) {
+    else if (normalisedHabitatCreationInAdvance >= timeToTargetCondition && normalisedHabitatCreationInAdvance !== 0 && timeToTargetCondition !== 0) {
         finalTimeToTargetCondition = 0;
     }
     // Calculate: standardTime - advance + delay

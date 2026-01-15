@@ -12,8 +12,8 @@ function createBaseline(overrides: Partial<OffSiteWatercourseBaseline> = {}): Of
         length: 1,
         condition: "Poor",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
         lengthRetained: 0,
         lengthEnhanced: 0.5,
@@ -31,7 +31,6 @@ function createBaseline(overrides: Partial<OffSiteWatercourseBaseline> = {}): Of
         riparianEncroachmentMultiplier: 1,
         spatialRiskMultiplier: 1,
         tradingRules: "Same habitat required =",
-        irreplaceable: false,
         unitsRetained: 0,
         unitsEnhanced: 2.2, // 0.5 * 4 * 1 * 1.1 * 1 * 1
         totalWatercourseUnitsSRM: 4.4,
@@ -50,8 +49,8 @@ export function fixture(overrides: Partial<OffSiteWatercourseEnhancementSchema> 
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEnhancedInAdvance: 0,
         watercourseEnhancedDelay: 0,
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -195,8 +194,8 @@ test("culvert must use N/A - Culvert for watercourse encroachment", () => {
         watercourseType: "Culvert",
         condition: "Poor",
         conditionScore: 1,
-        watercourseEncroachment: "Full", // Baseline uses different schema
-        riparianEncroachment: "None",
+        watercourseEncroachment: "N/A - Culvert",
+        riparianEncroachment: "N/A - Culvert",
         distinctivenessScore: 2,
         distinctiveness: "Low",
     });
@@ -204,7 +203,7 @@ test("culvert must use N/A - Culvert for watercourse encroachment", () => {
         baseline,
         watercourseType: "Culvert",
         condition: "Poor",
-        watercourseEncroachment: "Full", // Invalid for Culvert
+        watercourseEncroachment: "No Encroachment", // Invalid for Culvert
         riparianEncroachment: "N/A - Culvert"
     }));
     expect(result.success).toBeFalse();
@@ -218,8 +217,8 @@ test("culvert must use N/A - Culvert for riparian encroachment", () => {
         watercourseType: "Culvert",
         condition: "Poor",
         conditionScore: 1,
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None", // Baseline uses different schema
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment", // Baseline uses different schema
         distinctivenessScore: 2,
         distinctiveness: "Low",
     });
@@ -251,12 +250,12 @@ test("enhancement with encroachment multipliers", () => {
         baseline,
         watercourseType: "Other rivers and streams",
         condition: "Moderate",
-        watercourseEncroachment: "50%",
-        riparianEncroachment: "Within 10m",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
     }));
     expect(result.success).toBeTrue();
     if (result.success) {
-        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.7);
+        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.8);
         expect(result.output.riparianEncroachmentMultiplier).toBe(0.9);
         expect(result.output.watercourseUnitsDelivered).toBeGreaterThan(0);
     }
@@ -328,8 +327,8 @@ test("watercourse units delivered calculation - basic case", () => {
         baseline,
         watercourseType: "Ditches",
         condition: "Moderate",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
     }));
 
     expect(result.success).toBeTrue();
@@ -376,16 +375,60 @@ test("enhancement calculates units with all multipliers", () => {
         watercourseType: "Priority habitat",
         condition: "Good",
         strategicSignificance: "Formally identified in local strategy",
-        watercourseEncroachment: "75%",
-        riparianEncroachment: "Within 10m",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
         watercourseEnhancedInAdvance: 2,
     }));
 
     expect(result.success).toBeTrue();
     if (result.success) {
         expect(result.output.watercourseUnitsDelivered).toBeGreaterThan(0);
-        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.85);
+        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.8);
         expect(result.output.riparianEncroachmentMultiplier).toBe(0.9);
         expect(result.output.strategicSignificanceMultiplier).toBe(1.15);
     }
 });
+
+test("calculation of units with spatial risk multiplier", () => {
+    const baseline = createBaseline({
+        watercourseType: "Priority habitat",
+        condition: "Moderate",
+        conditionScore: 2,
+        distinctivenessScore: 8,
+        distinctiveness: "V.High",
+        lengthEnhanced: 0.5,
+        unitsEnhanced: 9.2, // 0.5 * 8 * 2 * 1.15 * 1 * 1
+    });
+    const insideBoundary = v.parse(offSiteWatercourseEnhancementSchema, fixture({
+        baseline,
+        watercourseType: "Priority habitat",
+        condition: "Good",
+        strategicSignificance: "Formally identified in local strategy",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
+        watercourseEnhancedInAdvance: 2,
+    }));
+
+    expect(insideBoundary.spatialRiskMultiplier).toEqual(1)
+    expect(insideBoundary.watercourseUnitsDelivered).toBeGreaterThan(0);
+    expect(insideBoundary.watercourseUnitsDeliveredWithSpatialRisk).toBeGreaterThan(0);
+
+    const outsideBoundary = v.parse(offSiteWatercourseEnhancementSchema, fixture({
+        baseline: {
+            ...baseline,
+            spatialRiskCategory: "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA",
+
+        },
+        watercourseType: "Priority habitat",
+        condition: "Good",
+        strategicSignificance: "Formally identified in local strategy",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
+        watercourseEnhancedInAdvance: 2,
+    }));
+
+    expect(outsideBoundary.spatialRiskMultiplier).toEqual(0.75)
+    expect(outsideBoundary.watercourseUnitsDelivered).toBeGreaterThan(0);
+    expect(outsideBoundary.watercourseUnitsDeliveredWithSpatialRisk).toBeGreaterThan(0);
+    expect(outsideBoundary.watercourseUnitsDeliveredWithSpatialRisk).toBeCloseTo(outsideBoundary.watercourseUnitsDelivered * 0.75, 2);
+})

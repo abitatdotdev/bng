@@ -867,3 +867,21 @@ describe("enrichWithDifficultyData", () => {
     });
 });
 
+describe("real bugs", () => {
+    test("final time to multiplier doesn't get stuck at zero when time to condition and advance values are both zero", () => {
+        const input = {
+            broadHabitat: "Urban",
+            habitatType: "Developed land; sealed surface",
+            area: 0.006,
+            condition: "N/A - Other",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            habitatCreationInAdvance: 0,
+            habitatCreationDelay: 1,
+            userComments: "",
+            planningAuthorityComments: "",
+            habitatReferenceNumber: "1",
+        }
+        const parsed = v.parse(onSiteHabitatCreationSchema, input);
+        expect(parsed.finalTimeToTargetCondition).toEqual(1)
+    })
+})

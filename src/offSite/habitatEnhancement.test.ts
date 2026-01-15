@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { offSiteHabitatEnhancementSchema, type OffSiteHabitatEnhancementSchema } from "./habitatEnhancement";
 import * as v from 'valibot';
+import { describe } from "bun:test";
 
 expect.extend({
     toBeParseableBy:
@@ -304,3 +305,305 @@ test("calculates units correctly - basic enhancement", () => {
     expect(result.habitatUnitsDelivered).toBeCloseTo(expectedUnits, 2)
     expect(result.habitatUnitsDeliveredWithSpatialRisk).toBeCloseTo(expectedUnits, 2)
 })
+
+// ============================================================================
+// DISTINCTIVENESS CHANGE TESTS (Column T)
+// ============================================================================
+
+test("distinctiveness change - same distinctiveness Low - Low", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Modified grassland",  // Low distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Modified grassland",  // Low distinctiveness
+        condition: "Moderate"
+    }))
+
+    expect(result.distinctivenessChange).toBe("Low - Low")
+})
+
+test("distinctiveness change - upgrade Low - Medium", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Modified grassland",  // Low distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Moderate",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",  // Medium distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.distinctivenessChange).toBe("Low - Medium")
+})
+
+test("distinctiveness change - same distinctiveness Medium - Medium", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",  // Medium distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",  // Medium distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.distinctivenessChange).toBe("Medium - Medium")
+})
+
+test("distinctiveness change - upgrade Medium - High", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",  // Medium distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Moderate",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Upland calcareous grassland",  // High distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.distinctivenessChange).toBe("Medium - High")
+})
+
+test("distinctiveness change - same distinctiveness High - High", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Woodland and forest",
+            habitatType: "Lowland mixed deciduous woodland",  // High distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Woodland and forest",
+        habitatType: "Lowland mixed deciduous woodland",  // High distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.distinctivenessChange).toBe("High - High")
+})
+
+// ============================================================================
+// CONDITION CHANGE TESTS (Column U)
+// ============================================================================
+
+test("condition change - same habitat, condition upgrade", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Woodland and forest",
+            habitatType: "Lowland mixed deciduous woodland",
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Woodland and forest",
+        habitatType: "Lowland mixed deciduous woodland",
+        condition: "Good"
+    }))
+
+    expect(result.conditionChange).toBe("Poor - Good")
+    expect(result.enhancementPathway).toBe("Poor - Good")
+})
+
+test("condition change - same habitat, multiple condition steps", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Fairly Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",
+        condition: "Fairly Good"
+    }))
+
+    expect(result.conditionChange).toBe("Fairly Poor - Fairly Good")
+    expect(result.enhancementPathway).toBe("Fairly Poor - Fairly Good")
+})
+
+test("condition change - lower distinctiveness habitat upgrade", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Modified grassland",  // Low distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Moderate",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",  // Medium distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.conditionChange).toBe("Lower Distinctiveness Habitat - Good")
+    expect(result.enhancementPathway).toBe("Lower Distinctiveness Habitat - Good")
+    expect(result.distinctivenessChange).toBe("Low - Medium")
+})
+
+test("condition change - lower distinctiveness habitat upgrade from Poor", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Modified grassland",  // Low distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",  // Medium distinctiveness
+        condition: "Moderate"
+    }))
+
+    expect(result.conditionChange).toBe("Lower Distinctiveness Habitat - Moderate")
+    expect(result.enhancementPathway).toBe("Lower Distinctiveness Habitat - Moderate")
+    expect(result.distinctivenessChange).toBe("Low - Medium")
+})
+
+test("condition change - same distinctiveness, different habitat within broad habitat", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",  // Medium distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Poor",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Other lowland acid grassland",  // Medium distinctiveness (same as baseline)
+        condition: "Good"
+    }))
+
+    // Different habitat but same distinctiveness -> standard pathway
+    expect(result.conditionChange).toBe("Poor - Good")
+    expect(result.enhancementPathway).toBe("Poor - Good")
+    expect(result.distinctivenessChange).toBe("Medium - Medium")
+})
+
+test("condition change - Medium to High distinctiveness upgrade", () => {
+    const result = v.parse(offSiteHabitatEnhancementSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",  // Medium distinctiveness
+            area: 1,
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            condition: "Moderate",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Upland calcareous grassland",  // High distinctiveness
+        condition: "Good"
+    }))
+
+    expect(result.conditionChange).toBe("Lower Distinctiveness Habitat - Good")
+    expect(result.enhancementPathway).toBe("Lower Distinctiveness Habitat - Good")
+    expect(result.distinctivenessChange).toBe("Medium - High")
+})
+
+
+describe("fixed bugs", () => {
+    test("time to target condition is calculated correctly", () => {
+        const input = {
+            baseline: {
+                broadHabitat: "Grassland",
+                habitatType: "Modified grassland",
+                irreplaceableHabitat: false,
+                area: 0.1907,
+                condition: "Moderate",
+                strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+                spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site ",
+                areaRetained: 0.1244,
+                areaEnhanced: 0.0662,
+                bespokeCompensationAgreed: "No",
+                userComments: undefined,
+                planningAuthorityComments: undefined,
+                habitatReferenceNumber: "",
+                offSiteReferenceNumber: "2",
+            },
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",
+            condition: "Good",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+            hedgerowEnhancedInAdvance: 0,
+            hedgerowEnhancedDelay: 0,
+            userComments: "",
+            planningAuthorityComments: "",
+            habitatReferenceNumber: "",
+            offSiteReferenceNumber: "2",
+        }
+
+        const parsed = v.parse(offSiteHabitatEnhancementSchema, input);
+        expect(parsed.conditionChange).toEqual("Lower Distinctiveness Habitat - Good")
+        expect(parsed.timeToTargetCondition).toEqual(15)
+        expect(parsed.finalTimeToTargetMultiplier).toBeCloseTo(0.586)
+        expect(parsed.habitatUnitsDelivered).toBeCloseTo(0.63)
+    });
+})
+

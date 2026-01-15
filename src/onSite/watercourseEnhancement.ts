@@ -3,9 +3,9 @@ import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, yearsSchema } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
-import type { OnSiteWatercourseBaseline } from './watercourseBaseline';
+import { onSiteWatercourseBaselineSchema } from './watercourseBaseline';
 import { watercourseTypeSchema } from '../watercourseType';
-import { riparianEncroachmentCreationSchema, watercourseEncroachmentCreationSchema } from '../watercourseEncroachment';
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import {
     enrichBaselineWatercourseData,
     enrichProposedWatercourseData,
@@ -18,16 +18,14 @@ import {
 } from '../watercourses/shared';
 
 const inputSchema = v.object({
-    baseline: v.custom<OnSiteWatercourseBaseline>((input) => {
-        return typeof input === 'object' && input !== null && 'watercourseType' in input;
-    }),
+    baseline: onSiteWatercourseBaselineSchema,
     watercourseType: watercourseTypeSchema,
     condition: watercourseConditionSchema,
     strategicSignificance: strategicSignificanceSchema,
     watercourseEnhancedInAdvance: v.optional(yearsSchema, 0),
     watercourseEnhancedDelay: v.optional(yearsSchema, 0),
-    watercourseEncroachment: watercourseEncroachmentCreationSchema,
-    riparianEncroachment: riparianEncroachmentCreationSchema,
+    watercourseEncroachment: watercourseEncroachmentSchema,
+    riparianEncroachment: riparianEncroachmentSchema,
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -73,22 +71,15 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
         data => {
             const baselineCondition = data._baselineCondition as number;
             const proposedCondition = data.conditionScore as number;
-            const baselineD = data._baselineWatercourse.distinctivenessScore;
-            const proposedD = data.distinctivenessScore;
 
             // Cannot reduce condition
             if (proposedCondition < baselineCondition) {
                 return false;
             }
 
-            // If same condition, must have distinctiveness upgrade
-            if (proposedCondition === baselineCondition) {
-                return proposedD > baselineD;
-            }
-
             return true;
         },
-        "Enhancement must improve condition or distinctiveness"
+        "Enhancement cannot reduce condition"
     ),
 
     // Validate encroachment consistency with watercourse type

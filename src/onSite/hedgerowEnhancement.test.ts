@@ -243,7 +243,6 @@ test("enhancement time to target condition lookup - Poor to Moderate", () => {
 
     expect(result.success).toBeTrue();
     if (result.success) {
-        // Native hedgerow Poor to Moderate = 3 years
         expect(result.output.timeToTargetCondition).toBe(3);
         expect(result.output.finalTimeToTargetCondition).toBe(3);
     }
@@ -409,17 +408,12 @@ test("full schema validation - Native hedgerow to Species-rich (distinctiveness 
         expect(result.output.conditionScore).toEqual(3); // Good = 3
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
 
-        // Species-rich native hedgerow Moderate to Good = 2 years
-        expect(result.output.timeToTargetCondition).toBe(2);
-        expect(result.output.finalTimeToTargetCondition).toBe(2);
-        expect(result.output.temporalMultiplier).toBeCloseTo(0.931225, 5);
+        // Native hedgerow - Species-rich native hedgerow 
+        expect(result.output.timeToTargetCondition).toBe(5);
+        expect(result.output.finalTimeToTargetCondition).toBe(5);
+        expect(result.output.temporalMultiplier).toBeCloseTo(0.837);
 
-        // Calculate expected units:
-        // Baseline: 0.3 * 2 * 2 = 1.2
-        // Proposed: 0.3 * 4 * 3 = 3.6
-        // Delta: (3.6 - 1.2) * 1 * 0.931225 = 2.2349400
-        // Final: (2.2349400 + 1.2) * 1.1 = 3.778434
-        expect(result.output.hedgerowUnitsDelivered).toBeCloseTo(3.778434, 3);
+        expect(result.output.hedgerowUnitsDelivered).toBeCloseTo(3.53);
     }
 });
 

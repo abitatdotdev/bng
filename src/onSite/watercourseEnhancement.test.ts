@@ -12,8 +12,8 @@ function createBaseline(overrides: Partial<OnSiteWatercourseBaseline> = {}): OnS
         length: 1,
         condition: "Poor",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         lengthRetained: 0,
         lengthEnhanced: 0.5,
         bespokeCompensation: "No",
@@ -28,7 +28,6 @@ function createBaseline(overrides: Partial<OnSiteWatercourseBaseline> = {}): OnS
         watercourseEncroachmentMultiplier: 1,
         riparianEncroachmentMultiplier: 1,
         tradingRules: "Same habitat required =",
-        irreplaceable: false,
         unitsRetained: 0,
         unitsEnhanced: 2.2, // 0.5 * 4 * 1 * 1.1 * 1 * 1
         totalWatercourseUnits: 4.4,
@@ -46,8 +45,8 @@ export function fixture(overrides: Partial<OnSiteWatercourseEnhancementSchema> =
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEnhancedInAdvance: 0,
         watercourseEnhancedDelay: 0,
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -102,7 +101,7 @@ test("cannot reduce condition", () => {
     }));
     expect(result.success).toBeFalse();
     if (!result.success) {
-        expect(result.issues[0].message).toContain("Enhancement must improve");
+        expect(result.issues[0].message).toContain("Enhancement cannot reduce condition");
     }
 });
 
@@ -189,15 +188,15 @@ test("delay increases time to target", () => {
 test("culvert must use N/A - Culvert for watercourse encroachment", () => {
     const baseline = createBaseline({
         watercourseType: "Culvert",
-        watercourseEncroachment: "Full", // Baseline uses different schema
-        riparianEncroachment: "None",
+        watercourseEncroachment: "N/A - Culvert",
+        riparianEncroachment: "N/A - Culvert",
         distinctivenessScore: 2,
         distinctiveness: "Low",
     });
     const result = v.safeParse(onSiteWatercourseEnhancementSchema, fixture({
         baseline,
         watercourseType: "Culvert",
-        watercourseEncroachment: "Full", // Invalid for Culvert
+        watercourseEncroachment: "No Encroachment", // Invalid for Culvert
         riparianEncroachment: "N/A - Culvert"
     }));
     expect(result.success).toBeFalse();
@@ -209,8 +208,8 @@ test("culvert must use N/A - Culvert for watercourse encroachment", () => {
 test("culvert must use N/A - Culvert for riparian encroachment", () => {
     const baseline = createBaseline({
         watercourseType: "Culvert",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         distinctivenessScore: 2,
         distinctiveness: "Low",
     });
@@ -218,7 +217,7 @@ test("culvert must use N/A - Culvert for riparian encroachment", () => {
         baseline,
         watercourseType: "Culvert",
         watercourseEncroachment: "N/A - Culvert",
-        riparianEncroachment: "None" // Invalid for Culvert
+        riparianEncroachment: "No Encroachment/ No Encroachment" // Invalid for Culvert
     }));
     expect(result.success).toBeFalse();
     if (!result.success) {
@@ -247,12 +246,12 @@ test("N/A enhancement pathway should fail", () => {
 
 test("enhancement with encroachment multipliers", () => {
     const result = v.safeParse(onSiteWatercourseEnhancementSchema, fixture({
-        watercourseEncroachment: "50%",
-        riparianEncroachment: "Within 10m"
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor"
     }));
     expect(result.success).toBeTrue();
     if (result.success) {
-        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.7);
+        expect(result.output.watercourseEncroachmentMultiplier).toBe(0.8);
         expect(result.output.riparianEncroachmentMultiplier).toBe(0.9);
     }
 });
@@ -280,15 +279,3 @@ test("calculates units correctly with delta method - proposed length > baseline"
     }
 });
 
-test("maintains same condition for 1 year", () => {
-    const baseline = createBaseline({
-        condition: "Moderate",
-        conditionScore: 2,
-    });
-    const result = v.safeParse(onSiteWatercourseEnhancementSchema, fixture({
-        baseline,
-        condition: "Moderate" // Same condition
-    }));
-    // This should fail because it doesn't improve condition or distinctiveness
-    expect(result.success).toBeFalse();
-});

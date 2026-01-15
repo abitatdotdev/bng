@@ -11,8 +11,8 @@ export function fixture(overrides: Partial<OnSiteWatercourseBaselineSchema> = {}
         length: 1,
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         lengthRetained: 1,
         lengthEnhanced: 0,
         bespokeCompensation: "No",
@@ -43,7 +43,7 @@ test("valid watercourse types", () => {
 
     // Culvert only supports "Poor" condition
     expect(v.safeParse(onSiteWatercourseBaselineSchema,
-        fixture({ watercourseType: "Culvert", condition: "Poor" })
+        fixture({ watercourseType: "Culvert", condition: "Poor", watercourseEncroachment: "N/A - Culvert", riparianEncroachment: "N/A - Culvert" })
     ).success).toBeTrue();
 });
 
@@ -56,11 +56,11 @@ test("invalid watercourse type", () => {
 test("invalid condition for watercourse type", () => {
     // Culvert does not support "Moderate" condition (only "Poor")
     const result = v.safeParse(onSiteWatercourseBaselineSchema,
-        fixture({ watercourseType: "Culvert", condition: "Moderate" })
+        fixture({ watercourseType: "Culvert", condition: "Moderate", watercourseEncroachment: "N/A - Culvert", riparianEncroachment: "N/A - Culvert" })
     );
     expect(result.success).toBeFalse();
     if (!result.success) {
-        expect(result.issues[0].message).toContain("not possible");
+        expect(result.issues.some(issue => issue.message.includes("not possible"))).toBeTrue();
     }
 });
 
@@ -103,8 +103,8 @@ test("length arithmetic validation - invalid", () => {
 });
 
 test("valid encroachment combinations", () => {
-    const watercourseEncroachments = ["Full", "75%", "50%", "25%", "10%", "None"] as const;
-    const riparianEncroachments = ["None", "Within 10m", "Within 50m"] as const;
+    const watercourseEncroachments = ["No Encroachment", "Minor", "Major"] as const;
+    const riparianEncroachments = ["No Encroachment/ No Encroachment", "Minor/ No Encroachment", "Moderate/ Minor", "Major/Major"] as const;
 
     watercourseEncroachments.forEach(wEnc => {
         riparianEncroachments.forEach(rEnc => {
@@ -122,8 +122,8 @@ test("full schema validation and calculation - Priority habitat", () => {
         length: 1,
         condition: "Good",
         strategicSignificance: "Formally identified in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         lengthRetained: 0.7,
         lengthEnhanced: 0.3,
     }));
@@ -151,8 +151,8 @@ test("full schema validation and calculation - Ditches with encroachment", () =>
         length: 2,
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "50%",
-        riparianEncroachment: "Within 10m",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
         lengthRetained: 1.5,
         lengthEnhanced: 0,
     }));
@@ -160,19 +160,19 @@ test("full schema validation and calculation - Ditches with encroachment", () =>
     expect(result.distinctivenessScore).toEqual(4);
     expect(result.conditionScore).toEqual(2);
     expect(result.strategicSignificanceMultiplier).toEqual(1.1);
-    expect(result.watercourseEncroachmentMultiplier).toEqual(0.7);
+    expect(result.watercourseEncroachmentMultiplier).toEqual(0.8);
     expect(result.riparianEncroachmentMultiplier).toEqual(0.9);
 
-    // Total units: 2 * 4 * 2 * 1.1 * 0.7 * 0.9 = 11.0880
-    expect(result.totalWatercourseUnits).toBeCloseTo(11.0880, 5);
-    // Units retained: 1.5 * 4 * 2 * 1.1 * 0.7 * 0.9 = 8.316
-    expect(result.unitsRetained).toBeCloseTo(8.316, 5);
+    // Total units: 2 * 4 * 2 * 1.1 * 0.8 * 0.9 = 12.672
+    expect(result.totalWatercourseUnits).toBeCloseTo(12.672, 5);
+    // Units retained: 1.5 * 4 * 2 * 1.1 * 0.8 * 0.9 = 9.504
+    expect(result.unitsRetained).toBeCloseTo(9.504, 5);
     // Units enhanced: 0
     expect(result.unitsEnhanced).toEqual(0);
     // Length lost: 0.5
     expect(result.lengthLost).toBeCloseTo(0.5, 5);
-    // Units lost: 11.0880 - 8.316 = 2.772
-    expect(result.unitsLost).toBeCloseTo(2.772, 5);
+    // Units lost: 12.672 - 9.504 = 3.168
+    expect(result.unitsLost).toBeCloseTo(3.168, 5);
 });
 
 test("full schema validation and calculation - Culvert with minimal encroachment", () => {
@@ -181,8 +181,8 @@ test("full schema validation and calculation - Culvert with minimal encroachment
         length: 0.5,
         condition: "Poor",
         strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
-        watercourseEncroachment: "None",
-        riparianEncroachment: "Within 50m",
+        watercourseEncroachment: "N/A - Culvert",
+        riparianEncroachment: "N/A - Culvert",
         lengthRetained: 0.5,
         lengthEnhanced: 0,
     }));
@@ -190,13 +190,13 @@ test("full schema validation and calculation - Culvert with minimal encroachment
     expect(result.distinctivenessScore).toEqual(2);
     expect(result.conditionScore).toEqual(1);
     expect(result.strategicSignificanceMultiplier).toEqual(1);
-    expect(result.watercourseEncroachmentMultiplier).toEqual(0.25);
-    expect(result.riparianEncroachmentMultiplier).toEqual(0.67);
+    expect(result.watercourseEncroachmentMultiplier).toEqual(0.68);
+    expect(result.riparianEncroachmentMultiplier).toEqual(1);
 
-    // Total units: 0.5 * 2 * 1 * 1 * 0.25 * 0.67 = 0.1675
-    expect(result.totalWatercourseUnits).toBeCloseTo(0.1675, 5);
-    // Units retained: 0.5 * 2 * 1 * 1 * 0.25 * 0.67 = 0.1675
-    expect(result.unitsRetained).toBeCloseTo(0.1675, 5);
+    // Total units: 0.5 * 2 * 1 * 1 * 0.68 * 1 = 0.68
+    expect(result.totalWatercourseUnits).toBeCloseTo(0.68, 5);
+    // Units retained: 0.5 * 2 * 1 * 1 * 0.68 * 1 = 0.68
+    expect(result.unitsRetained).toBeCloseTo(0.68, 5);
     // No loss
     expect(result.lengthLost).toEqual(0);
     expect(result.unitsLost).toEqual(0);

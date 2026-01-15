@@ -5,8 +5,9 @@ import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
-import { bespokeCompensationSchema } from '../bespokeCompensation';
+import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './common';
+import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
 const inputSchema =
     v.object({
@@ -25,7 +26,6 @@ const inputSchema =
         habitatReferenceNumber: freeTextSchema,
         offSiteReferenceNumber: freeTextSchema,
     })
-type OutputSchema = v.InferOutput<typeof inputSchema>
 
 export const offSiteHabitatBaselineSchema = v.pipe(
     inputSchema,
@@ -54,6 +54,8 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     // Checks from within the units lost cell (AA)
     v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Error in Areas ▲"),
     v.transform(enrichWithUnitsLost),
+    v.transform(enrichWithVhdhBespokeCompensationUnits),
+    v.transform(enrichWithBaselineUnitsRetainedSRM),
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>
 export type OffSiteHabitatBaseline = v.InferOutput<typeof offSiteHabitatBaselineSchema>
@@ -188,3 +190,55 @@ export function enrichWithUnitsLost<Data extends {
     };
 }
 
+/*
+ * Calculates hidden cell AS, which is used later in the headline results
+ */
+export function enrichWithVhdhBespokeCompensationUnits<Data extends {
+    bespokeCompensationAgreed: BespokeCompensation,
+    requiredAction: SuggestedTradingActions,
+    totalHabitatUnits: number,
+    baselineUnitsRetained: number,
+    baselineUnitsEnhanced: number,
+}>(data: Data) {
+    const vhdhBespokeCompensationUnits =
+        (
+            data.bespokeCompensationAgreed === "Yes"
+            || data.bespokeCompensationAgreed === "Pending"
+        ) && data.requiredAction === "Same habitat required – bespoke compensation option ⚠"
+            ? data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced
+            : 0;
+
+    return {
+        ...data,
+        vhdhBespokeCompensationUnits,
+    }
+}
+
+/*
+ * Calculates hidden cell AY, which is used later in headline SRM results
+ */
+export function enrichWithBaselineUnitsRetainedSRM<Data extends {
+    irreplaceableHabitat: boolean,
+    areaRetained: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    vhdhBespokeCompensationUnits: number,
+    strategicSignificanceMultiplier: number,
+    spatialRiskMultiplier: number,
+}>(data: Data) {
+    if (data.irreplaceableHabitat) return { ...data, baselineUnitsRetainedWithSRM: 0 };
+
+    const baselineUnitsRetainedWithSRM =
+        (data.areaRetained
+            * data.distinctivenessScore
+            * data.conditionScore
+            * data.strategicSignificanceMultiplier
+            * data.spatialRiskMultiplier
+        )
+        + (data.vhdhBespokeCompensationUnits * data.spatialRiskMultiplier)
+
+    return {
+        ...data,
+        baselineUnitsRetainedWithSRM,
+    }
+}

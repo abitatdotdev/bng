@@ -14,8 +14,8 @@ describe('offSiteWatercourseCreationSchema', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 0,
             delayInStarting: 0,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
             userComments: '',
             planningAuthorityComments: '',
@@ -27,7 +27,7 @@ describe('offSiteWatercourseCreationSchema', () => {
         expect(result.distinctiveness).toBe('Medium');
         expect(result.distinctivenessScore).toBe(4);
         expect(result.conditionScore).toBe(2);
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should reject both advance and delay being set', () => {
@@ -38,8 +38,8 @@ describe('offSiteWatercourseCreationSchema', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 2,
             delayInStarting: 3,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
             userComments: '',
             planningAuthorityComments: '',
@@ -86,7 +86,7 @@ describe('offSiteWatercourseCreationSchema', () => {
 
         const result = v.parse(offSiteWatercourseCreationSchema, input);
         expect(result.watercourseType).toBe('Culvert');
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should reject invalid condition for watercourse type', () => {
@@ -123,8 +123,8 @@ describe('offSiteWatercourseCreationSchema', () => {
                 strategicSignificance: 'Location ecologically desirable but not in local strategy',
                 habitatCreatedInAdvance: 0,
                 delayInStarting: 0,
-                watercourseEncroachment: 'Full',
-                riparianEncroachment: 'None',
+                watercourseEncroachment: 'No Encroachment',
+                riparianEncroachment: 'No Encroachment/ No Encroachment',
                 spatialRiskCategory,
                 userComments: '',
                 planningAuthorityComments: '',
@@ -146,8 +146,8 @@ describe('full schema integration tests', () => {
             strategicSignificance: 'Location ecologically desirable but not in local strategy',
             habitatCreatedInAdvance: 2,
             delayInStarting: 0,
-            watercourseEncroachment: '75%',
-            riparianEncroachment: 'Within 10m',
+            watercourseEncroachment: 'Minor',
+            riparianEncroachment: 'Moderate/ Minor',
             spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
             userComments: '',
             planningAuthorityComments: '',
@@ -159,10 +159,10 @@ describe('full schema integration tests', () => {
         expect(result.distinctivenessScore).toBe(6);
         expect(result.conditionScore).toBe(2);
         expect(result.strategicSignificanceMultiplier).toBe(1.1);
-        expect(result.watercourseEncroachmentMultiplier).toBe(0.85);
+        expect(result.watercourseEncroachmentMultiplier).toBe(0.8);
         expect(result.riparianEncroachmentMultiplier).toBe(0.9);
         expect(result.finalTimeToTarget).toBeGreaterThanOrEqual(0);
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 
     test('should calculate units with maximum temporal discount', () => {
@@ -173,8 +173,8 @@ describe('full schema integration tests', () => {
             strategicSignificance: 'Formally identified in local strategy',
             habitatCreatedInAdvance: 0,
             delayInStarting: 30,
-            watercourseEncroachment: 'Full',
-            riparianEncroachment: 'None',
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
             userComments: '',
             planningAuthorityComments: '',
@@ -186,6 +186,6 @@ describe('full schema integration tests', () => {
         // With 30 year delay, temporal multiplier should be 0.3434151104
         expect(result.finalTimeToTarget).toBe(30);
         expect(result.temporalMultiplier).toBeCloseTo(0.3434151104, 5);
-        expect(result.netUnitChange).toBeGreaterThan(0);
+        expect(result.unitsDelivered).toBeGreaterThan(0);
     });
 });

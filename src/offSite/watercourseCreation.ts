@@ -4,14 +4,14 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
-import { riparianEncroachmentCreationSchema, watercourseEncroachmentCreationSchema } from '../watercourseEncroachment';
-import { spatialRiskCategorySchema } from '../spatialRisk';
+import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
+import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
 import {
     enrichWithCreationWatercourseData,
     enrichWithTemporalData,
     enrichWithDifficultyData,
     enrichCreationWithEncroachmentData,
-    enrichWithNetUnitChange
+    enrichWithUnitsDelivered
 } from '../watercourses/shared';
 
 const inputSchema = v.object({
@@ -21,13 +21,44 @@ const inputSchema = v.object({
     strategicSignificance: strategicSignificanceSchema,
     habitatCreatedInAdvance: v.optional(v.number(), 0),
     delayInStarting: v.optional(v.number(), 0),
-    watercourseEncroachment: watercourseEncroachmentCreationSchema,
-    riparianEncroachment: riparianEncroachmentCreationSchema,
+    watercourseEncroachment: watercourseEncroachmentSchema,
+    riparianEncroachment: riparianEncroachmentSchema,
     spatialRiskCategory: spatialRiskCategorySchema,
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
 });
+
+/**
+ * Enriches watercourse creation data with spatial risk multiplier
+ * Looks up the multiplier based on the spatial risk category
+ */
+export function enrichWithSpatialRiskMultiplier<Data extends {
+    spatialRiskCategory: string;
+}>(data: Data) {
+    const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
+
+    return {
+        ...data,
+        spatialRiskMultiplier,
+    };
+}
+
+/**
+ * Calculates SRM-adjusted net unit change for off-site watercourse creation
+ * netUnitChangeWithSpatialRisk = netUnitChange * spatialRiskMultiplier
+ */
+export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends {
+    unitsDelivered: number;
+    spatialRiskMultiplier: number;
+}>(data: Data) {
+    const netUnitChangeWithSpatialRisk = data.unitsDelivered * data.spatialRiskMultiplier;
+
+    return {
+        ...data,
+        netUnitChangeWithSpatialRisk,
+    };
+}
 
 export const offSiteWatercourseCreationSchema = v.pipe(
     inputSchema,
@@ -54,6 +85,8 @@ export const offSiteWatercourseCreationSchema = v.pipe(
         s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
     ),
+    // Enrich with spatial risk multiplier
+    v.transform(enrichWithSpatialRiskMultiplier),
     // Calculate temporal adjustments
     v.transform(enrichWithTemporalData),
     // Calculate difficulty multiplier
@@ -61,7 +94,9 @@ export const offSiteWatercourseCreationSchema = v.pipe(
     // Calculate encroachment multipliers
     v.transform(enrichCreationWithEncroachmentData),
     // Calculate final net unit change
-    v.transform(enrichWithNetUnitChange),
+    v.transform(enrichWithUnitsDelivered),
+    // Calculate SRM-adjusted net unit change
+    v.transform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
 );
 
 export type OffSiteWatercourseCreationSchema = v.InferInput<typeof offSiteWatercourseCreationSchema>;

@@ -12,8 +12,8 @@ export function fixture(overrides: Partial<OffSiteWatercourseBaselineSchema> = {
         length: 1,
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
         lengthRetained: 1,
         lengthEnhanced: 0,
@@ -46,7 +46,7 @@ test("valid watercourse types", () => {
 
     // Culvert only supports "Poor" condition
     expect(v.safeParse(offSiteWatercourseBaselineSchema,
-        fixture({ watercourseType: "Culvert", condition: "Poor" })
+        fixture({ watercourseType: "Culvert", condition: "Poor", watercourseEncroachment: "N/A - Culvert", riparianEncroachment: "N/A - Culvert" })
     ).success).toBeTrue();
 });
 
@@ -59,11 +59,11 @@ test("invalid watercourse type", () => {
 test("invalid condition for watercourse type", () => {
     // Culvert does not support "Moderate" condition (only "Poor")
     const result = v.safeParse(offSiteWatercourseBaselineSchema,
-        fixture({ watercourseType: "Culvert", condition: "Moderate" })
+        fixture({ watercourseType: "Culvert", condition: "Moderate", watercourseEncroachment: "N/A - Culvert", riparianEncroachment: "N/A - Culvert" })
     );
     expect(result.success).toBeFalse();
     if (!result.success) {
-        expect(result.issues[0].message).toContain("not possible");
+        expect(result.issues.some(issue => issue.message.includes("not possible"))).toBeTrue();
     }
 });
 
@@ -106,8 +106,8 @@ test("length arithmetic validation - invalid", () => {
 });
 
 test("valid encroachment combinations", () => {
-    const watercourseEncroachments = ["Full", "75%", "50%", "25%", "10%", "None"] as const;
-    const riparianEncroachments = ["None", "Within 10m", "Within 50m"] as const;
+    const watercourseEncroachments = ["No Encroachment", "Minor", "Major"] as const;
+    const riparianEncroachments = ["No Encroachment/ No Encroachment", "Minor/ No Encroachment", "Moderate/ Minor", "Major/Major"] as const;
 
     watercourseEncroachments.forEach(wEnc => {
         riparianEncroachments.forEach(rEnc => {
@@ -149,8 +149,8 @@ test("full schema validation and calculation - Priority habitat with spatial ris
         length: 1,
         condition: "Good",
         strategicSignificance: "Formally identified in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
         lengthRetained: 0.7,
         lengthEnhanced: 0.3,
@@ -181,8 +181,8 @@ test("full schema validation and calculation - with reduced spatial risk multipl
         length: 2,
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "50%",
-        riparianEncroachment: "Within 10m",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
         spatialRiskCategory: "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA",
         lengthRetained: 1.5,
         lengthEnhanced: 0,
@@ -191,21 +191,21 @@ test("full schema validation and calculation - with reduced spatial risk multipl
     expect(result.distinctivenessScore).toEqual(6);
     expect(result.conditionScore).toEqual(2);
     expect(result.strategicSignificanceMultiplier).toEqual(1.1);
-    expect(result.watercourseEncroachmentMultiplier).toEqual(0.7);
+    expect(result.watercourseEncroachmentMultiplier).toEqual(0.8);
     expect(result.riparianEncroachmentMultiplier).toEqual(0.9);
     expect(result.spatialRiskMultiplier).toEqual(0.75);
 
-    // Total units SRM: 2 * 6 * 2 * 1.1 * 0.7 * 0.9 * 0.75 = 12.474
-    expect(result.totalWatercourseUnitsSRM).toBeCloseTo(12.474, 5);
-    // Total units (no spatial risk): 2 * 6 * 2 * 1.1 * 0.7 * 0.9 = 16.632
-    expect(result.totalWatercourseUnits).toBeCloseTo(16.632, 5);
-    // Units retained: 1.5 * 6 * 2 * 1.1 * 0.7 * 0.9 = 12.474
-    expect(result.unitsRetained).toBeCloseTo(12.474, 5);
+    // Total units SRM: 2 * 6 * 2 * 1.1 * 0.8 * 0.9 * 0.75 = 14.256
+    expect(result.totalWatercourseUnitsSRM).toBeCloseTo(14.256, 5);
+    // Total units (no spatial risk): 2 * 6 * 2 * 1.1 * 0.8 * 0.9 = 19.008
+    expect(result.totalWatercourseUnits).toBeCloseTo(19.008, 5);
+    // Units retained: 1.5 * 6 * 2 * 1.1 * 0.8 * 0.9 = 14.256
+    expect(result.unitsRetained).toBeCloseTo(14.256, 5);
     expect(result.unitsEnhanced).toEqual(0);
     // Length lost: 0.5
     expect(result.lengthLost).toBeCloseTo(0.5, 5);
-    // Units lost: 16.632 - 12.474 = 4.158
-    expect(result.unitsLost).toBeCloseTo(4.158, 5);
+    // Units lost: 19.008 - 14.256 = 4.752
+    expect(result.unitsLost).toBeCloseTo(4.752, 5);
 });
 
 test("full schema validation and calculation - lowest spatial risk multiplier", () => {
@@ -214,8 +214,8 @@ test("full schema validation and calculation - lowest spatial risk multiplier", 
         length: 1,
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
-        watercourseEncroachment: "Full",
-        riparianEncroachment: "None",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
         spatialRiskCategory: "Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA",
         lengthRetained: 0,
         lengthEnhanced: 0,
