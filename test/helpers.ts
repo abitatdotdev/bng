@@ -14,16 +14,18 @@ const exampleMetricsFileNames =
                 ![
                     // seems to have uncompleted tree rows - they don't look valid to me
                     'BCP_APP_24_00318_F.xlsx',
-                    // has random zeros in D-2
+                    // random zeros in D-2
                     'Lake District_7_2024_2105.xlsm',
-                    // has incompatible broad habitat/habitat type in A-2 row 13
+                    // incompatible broad habitat/habitat type in A-2 row 13
                     'Rother_RR_2024_1825_P.xlsx',
-                    // has invalid entries in A-3 Bespoke Compensation field
+                    // invalid entries in A-3 Bespoke Compensation field
                     'Bath and North East Somerset_240_1231_FUL.xlsm',
-                    // has missing condition in A-1 row 20
+                    // missing condition in A-1 row 20
                     'BCP_APP_24_00939_F.xlsx',
                     // invalid combination of broad habitat and habitat type in A-3 row 12
                     'EAST_HAMPSHIRE_60033.xlsm',
+                    // invalid row in C-3 (looks incomplete)
+                    'Warrington_2024_012222_FUL.xlsm',
                 ].includes(name)
             )
             .map(f => [`./test/metrics/${f}`])
@@ -34,10 +36,10 @@ const EXCEL_FILE = './examples/simple-unlocked.xlsm';
 
 export const EXCEL_FILES = [
     ["./examples/simple-unlocked.xlsm"],
-    ...exampleMetricsFileNames.slice(0, 200),
+    ...exampleMetricsFileNames.slice(0, 250),
 ]
 // Whitelist to help with test isolation when debugging
-// .filter(([name]) => name === './test/metrics/Solihull_PL_2024_01948_PPFL.xlsm')
+// .filter(([name]) => name === './test/metrics/Warrington_2024_012222_FUL.xlsm')
 
 type ExcelFileTest = (workbook: XLSX.WorkBook, fileName: string) => void
 /**
