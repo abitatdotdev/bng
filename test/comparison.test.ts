@@ -644,8 +644,116 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
         });
     });
 
-    // TODO: enhancement test
-    describe.todo("A-3 On-Site Habitat Enhancement", () => {
+    describe("A-3 On-Site Habitat Enhancement", () => {
+        const sheet = getSheet(workbook, 'A-3 On-Site Habitat Enhancement');
+        const baselineSheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline');
+
+        // Find all data rows (AQ column = habitat reference number, 0-indexed as 42, starting from row 12)
+        // However, let's use column B (1) which has the baseline reference as it's more reliable
+        const dataRows = findAllDataRows(sheet, 1, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no on-site habitat enhancement data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOnSiteHabitatEnhancementRow(baselineSheet, sheet, dataRow);
+                const result = v.safeParse(onSiteHabitatEnhancementSchema, inputData);
+
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, result.issues);
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+
+                const parsed = result.output;
+
+                // Get calculated values from Excel
+                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // U (20): Area (hectares)
+                // X (23): Distinctiveness Score
+                // Z (25): Condition Score
+                // AC (28): Strategic Significance Multiplier
+                // AD (29): Standard Time to Target Condition (years)
+                // AH (33): Final Time to Target Condition (years)
+                // AI (34): Final Time to Target Multiplier
+                // AM (38): Difficulty Multiplier Applied
+                // AN (39): Habitat Units Delivered
+
+                const excelArea = getCellValue(sheet, dataRow, 20); // U
+                const excelDistinctivenessScore = getCellValue(sheet, dataRow, 23); // X
+                const excelConditionScore = getCellValue(sheet, dataRow, 25); // Z
+                const excelStrategicMultiplier = getCellValue(sheet, dataRow, 28); // AC
+                const excelTimeToTarget = getCellValue(sheet, dataRow, 29); // AD
+                const excelFinalTimeToTarget = getCellValue(sheet, dataRow, 33); // AH
+                const excelFinalTimeMultiplier = getCellValue(sheet, dataRow, 34); // AI
+                const excelDifficultyMultiplier = getCellValue(sheet, dataRow, 38); // AM
+                const excelHabitatUnitsDelivered = getCellValue(sheet, dataRow, 39); // AN
+
+                // Compare values - only log on failure
+                try {
+                    if (excelArea !== null && typeof excelArea === "number") {
+                        expectCloseTo(parsed.area, excelArea, 0.0001, "Area");
+                    }
+                    if (excelDistinctivenessScore !== null && typeof excelDistinctivenessScore === "number") {
+                        expectCloseTo(parsed.distinctivenessScore, excelDistinctivenessScore, 0.0001, "Distinctiveness Score");
+                    }
+                    if (excelConditionScore !== null && typeof excelConditionScore === "number") {
+                        expectCloseTo(parsed.conditionScore, excelConditionScore, 0.0001, "Condition Score");
+                    }
+                    if (excelStrategicMultiplier !== null && typeof excelStrategicMultiplier === "number") {
+                        expectCloseTo(parsed.strategicSignificanceMultiplier, excelStrategicMultiplier, 0.0001, "Strategic Multiplier");
+                    }
+                    if (excelTimeToTarget !== null && typeof excelTimeToTarget === "number") {
+                        expectCloseTo(parsed.timeToTargetCondition as number, excelTimeToTarget, 0.0001, "Time to Target");
+                    }
+                    if (excelFinalTimeToTarget !== null) {
+                        if (typeof excelFinalTimeToTarget === "number") {
+                            expectCloseTo(parsed.finalTimeToTargetCondition as number, excelFinalTimeToTarget, 0.0001, "Final Time to Target");
+                        } else if (typeof excelFinalTimeToTarget === "string") {
+                            if (parsed.finalTimeToTargetCondition !== excelFinalTimeToTarget) {
+                                throw new Error(`Final Time to Target mismatch: expected ${excelFinalTimeToTarget}, got ${parsed.finalTimeToTargetCondition}`);
+                            }
+                        }
+                    }
+                    if (excelFinalTimeMultiplier !== null && typeof excelFinalTimeMultiplier === "number") {
+                        expectCloseTo(parsed.finalTimeToTargetMultiplier as number, excelFinalTimeMultiplier, 0.0001, "Final Time to Target Multiplier");
+                    }
+                    if (excelDifficultyMultiplier !== null && typeof excelDifficultyMultiplier === "number") {
+                        expectCloseTo(parsed.difficultyMultiplierApplied, excelDifficultyMultiplier, 0.0001, "Difficulty Multiplier");
+                    }
+                    if (excelHabitatUnitsDelivered !== null && typeof excelHabitatUnitsDelivered === "number") {
+                        expectCloseTo(parsed.habitatUnitsDelivered, excelHabitatUnitsDelivered, 0.0001, "Habitat Units Delivered");
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    console.error("\nExcel values:");
+                    console.error("  Area:", excelArea);
+                    console.error("  Distinctiveness Score:", excelDistinctivenessScore);
+                    console.error("  Condition Score:", excelConditionScore);
+                    console.error("  Strategic Multiplier:", excelStrategicMultiplier);
+                    console.error("  Time to Target:", excelTimeToTarget);
+                    console.error("  Final Time to Target:", excelFinalTimeToTarget);
+                    console.error("  Temporal Multiplier:", excelFinalTimeMultiplier);
+                    console.error("  Difficulty Multiplier:", excelDifficultyMultiplier);
+                    console.error("  Habitat Units Delivered:", excelHabitatUnitsDelivered);
+                    console.error("\nParsed values:");
+                    console.error("  Area:", parsed.area);
+                    console.error("  Distinctiveness Score:", parsed.distinctivenessScore);
+                    console.error("  Condition Score:", parsed.conditionScore);
+                    console.error("  Strategic Multiplier:", parsed.strategicSignificanceMultiplier);
+                    console.error("  Time to Target:", parsed.timeToTargetCondition);
+                    console.error("  Final Time to Target:", parsed.finalTimeToTargetCondition);
+                    console.error("  Temporal Multiplier:", parsed.temporalMultiplier);
+                    console.error("  Difficulty Multiplier:", parsed.difficultyMultiplierApplied);
+                    console.error("  Habitat Units Delivered:", parsed.habitatUnitsDelivered);
+                    throw error;
+                }
+            });
+        });
     });
 
     describe("B-1 On-Site Hedge Baseline", () => {
@@ -1183,8 +1291,129 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
         });
     });
 
-    // TODO: enhancement test
-    describe.todo("D-3 Off-Site Habitat Enhancement", () => {
+    describe("D-3 Off-Site Habitat Enhancement", () => {
+        const sheet = getSheet(workbook, 'D-3 Off-Site Habitat Enhancment'); // Note: typo in actual Excel sheet name
+        const baselineSheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline');
+
+        // Find all data rows (E column = baseline reference, 0-indexed as 4, starting from row 12)
+        const dataRows = findAllDataRows(sheet, 4, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no off-site habitat enhancement data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOffSiteHabitatEnhancementRow(baselineSheet, sheet, dataRow);
+                const result = v.safeParse(offSiteHabitatEnhancementSchema, inputData);
+
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, result.issues);
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+
+                const parsed = result.output;
+
+                // Get calculated values from Excel
+                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // V (21): Area (hectares)
+                // X (23): Distinctiveness Score (proposed)
+                // Z (25): Condition Score (proposed)
+                // AC (28): Strategic Significance Multiplier
+                // AD (29): Standard Time to Target Condition (years)
+                // AH (33): Final Time to Target Condition (years)
+                // AI (34): Final Time to Target Multiplier
+                // AM (38): Difficulty Multiplier Applied
+                // AO (40): Spatial Risk Multiplier
+                // AP (41): Habitat Units Delivered (inc SRM)
+                // AQ (42): Habitat Units Delivered (without SRM)
+
+                const excelArea = getCellValue(sheet, dataRow, 21); // V
+                const excelDistinctivenessScore = getCellValue(sheet, dataRow, 23); // X
+                const excelConditionScore = getCellValue(sheet, dataRow, 25); // Z
+                const excelStrategicMultiplier = getCellValue(sheet, dataRow, 28); // AC
+                const excelTimeToTarget = getCellValue(sheet, dataRow, 29); // AD
+                const excelFinalTimeToTarget = getCellValue(sheet, dataRow, 33); // AH
+                const excelFinalTimeMultiplier = getCellValue(sheet, dataRow, 34); // AI
+                const excelDifficultyMultiplier = getCellValue(sheet, dataRow, 38); // AM
+                const excelSpatialRiskMultiplier = getCellValue(sheet, dataRow, 40); // AO
+                const excelHabitatUnitsDeliveredWithSpatialRisk = getCellValue(sheet, dataRow, 41); // AP
+                const excelHabitatUnitsDelivered = getCellValue(sheet, dataRow, 42); // AQ
+
+                // Compare values - only log on failure
+                try {
+                    if (excelArea !== null && typeof excelArea === "number") {
+                        expectCloseTo(parsed.area, excelArea, 0.0001, "Area");
+                    }
+                    if (excelDistinctivenessScore !== null && typeof excelDistinctivenessScore === "number") {
+                        expectCloseTo(parsed.distinctivenessScore, excelDistinctivenessScore, 0.0001, "Distinctiveness Score");
+                    }
+                    if (excelConditionScore !== null && typeof excelConditionScore === "number") {
+                        expectCloseTo(parsed.conditionScore, excelConditionScore, 0.0001, "Condition Score");
+                    }
+                    if (excelStrategicMultiplier !== null && typeof excelStrategicMultiplier === "number") {
+                        expectCloseTo(parsed.strategicSignificanceMultiplier, excelStrategicMultiplier, 0.0001, "Strategic Multiplier");
+                    }
+                    if (excelTimeToTarget !== null && typeof excelTimeToTarget === "number") {
+                        expectCloseTo(parsed.timeToTargetCondition as number, excelTimeToTarget, 0.0001, "Time to Target");
+                    }
+                    if (excelFinalTimeToTarget !== null) {
+                        if (typeof excelFinalTimeToTarget === "number") {
+                            expectCloseTo(parsed.finalTimeToTargetCondition as number, excelFinalTimeToTarget, 0.0001, "Final Time to Target");
+                        } else if (typeof excelFinalTimeToTarget === "string") {
+                            if (parsed.finalTimeToTargetCondition !== excelFinalTimeToTarget) {
+                                throw new Error(`Final Time to Target mismatch: expected ${excelFinalTimeToTarget}, got ${parsed.finalTimeToTargetCondition}`);
+                            }
+                        }
+                    }
+                    if (excelFinalTimeMultiplier !== null && typeof excelFinalTimeMultiplier === "number") {
+                        expectCloseTo(parsed.finalTimeToTargetMultiplier as number, excelFinalTimeMultiplier, 0.0001, "Final Time to Target Multiplier");
+                    }
+                    if (excelDifficultyMultiplier !== null && typeof excelDifficultyMultiplier === "number") {
+                        expectCloseTo(parsed.difficultyMultiplierApplied, excelDifficultyMultiplier, 0.0001, "Difficulty Multiplier");
+                    }
+                    if (excelSpatialRiskMultiplier !== null && typeof excelSpatialRiskMultiplier === "number") {
+                        expectCloseTo(parsed.spatialRiskMultiplier, excelSpatialRiskMultiplier, 0.0001, "Spatial Risk Multiplier");
+                    }
+                    if (excelHabitatUnitsDeliveredWithSpatialRisk !== null && typeof excelHabitatUnitsDeliveredWithSpatialRisk === "number") {
+                        expectCloseTo(parsed.habitatUnitsDeliveredWithSpatialRisk, excelHabitatUnitsDeliveredWithSpatialRisk, 0.0001, "Habitat Units Delivered (with SRM)");
+                    }
+                    if (excelHabitatUnitsDelivered !== null && typeof excelHabitatUnitsDelivered === "number") {
+                        expectCloseTo(parsed.habitatUnitsDelivered, excelHabitatUnitsDelivered, 0.0001, "Habitat Units Delivered");
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    console.error("\nExcel values:");
+                    console.error("  Area:", excelArea);
+                    console.error("  Distinctiveness Score:", excelDistinctivenessScore);
+                    console.error("  Condition Score:", excelConditionScore);
+                    console.error("  Strategic Multiplier:", excelStrategicMultiplier);
+                    console.error("  Time to Target:", excelTimeToTarget);
+                    console.error("  Final Time to Target:", excelFinalTimeToTarget);
+                    console.error("  Final Time to Target Multiplier:", excelFinalTimeMultiplier);
+                    console.error("  Difficulty Multiplier:", excelDifficultyMultiplier);
+                    console.error("  Spatial Risk Multiplier:", excelSpatialRiskMultiplier);
+                    console.error("  Habitat Units Delivered (with SRM):", excelHabitatUnitsDeliveredWithSpatialRisk);
+                    console.error("  Habitat Units Delivered:", excelHabitatUnitsDelivered);
+                    console.error("\nParsed values:");
+                    console.error("  Area:", parsed.area);
+                    console.error("  Distinctiveness Score:", parsed.distinctivenessScore);
+                    console.error("  Condition Score:", parsed.conditionScore);
+                    console.error("  Strategic Multiplier:", parsed.strategicSignificanceMultiplier);
+                    console.error("  Time to Target:", parsed.timeToTargetCondition);
+                    console.error("  Final Time to Target:", parsed.finalTimeToTargetCondition);
+                    console.error("  Final Time to Target Multiplier:", parsed.finalTimeToTargetMultiplier);
+                    console.error("  Difficulty Multiplier:", parsed.difficultyMultiplierApplied);
+                    console.error("  Spatial Risk Multiplier:", parsed.spatialRiskMultiplier);
+                    console.error("  Habitat Units Delivered (with SRM):", parsed.habitatUnitsDeliveredWithSpatialRisk);
+                    console.error("  Habitat Units Delivered:", parsed.habitatUnitsDelivered);
+                    throw error;
+                }
+            });
+        });
     });
 
     describe("E-1 Off-Site Hedge Baseline", () => {
