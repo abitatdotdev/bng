@@ -51,6 +51,7 @@ export function isValidCondition(broadHabitat: BroadHabitat, habitatType: Baseli
 }
 
 type EnrichedHabitatData = {
+    _habitat: Habitat,
     distinctiveness: Habitat['distinctivenessCategory'],
     distinctivenessScore: Habitat['distinctivenessScore'],
     // @ts-ignore-line
