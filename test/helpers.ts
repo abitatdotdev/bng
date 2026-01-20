@@ -18,6 +18,12 @@ const exampleMetricsFileNames =
                     'Lake District_7_2024_2105.xlsm',
                     // has incompatible broad habitat/habitat type in A-2 row 13
                     'Rother_RR_2024_1825_P.xlsx',
+                    // has invalid entries in A-3 Bespoke Compensation field
+                    'Bath and North East Somerset_240_1231_FUL.xlsm',
+                    // has missing condition in A-1 row 20
+                    'BCP_APP_24_00939_F.xlsx',
+                    // invalid combination of broad habitat and habitat type in A-3 row 12
+                    'EAST_HAMPSHIRE_60033.xlsm',
                 ].includes(name)
             )
             .map(f => [`./test/metrics/${f}`])

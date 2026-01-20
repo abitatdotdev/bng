@@ -877,7 +877,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
 
                 // Get calculated values from Excel
                 // Calculated column indices (0-indexed):
-                // D (3): Length (km)
+                // P (15): Length
                 // R (17): Distinctiveness Score
                 // T (19): Condition Score
                 // W (22): Strategic Significance Multiplier
@@ -887,7 +887,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
                 // AG (32): Difficulty multiplier applied
                 // AH (33): Units delivered
 
-                const excelLength = getCellValue(sheet, dataRow, 3); // D
+                const excelLength = getCellValue(sheet, dataRow, 15); // P
                 const excelDistinctivenessScore = getCellValue(sheet, dataRow, 17); // R
                 const excelConditionScore = getCellValue(sheet, dataRow, 19); // T
                 const excelStrategicMultiplier = getCellValue(sheet, dataRow, 22); // W
