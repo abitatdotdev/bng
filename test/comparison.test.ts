@@ -14,7 +14,7 @@ import { onSiteHedgerowEnhancementSchema } from "../src/onSite/hedgerowEnhanceme
 import { offSiteHedgerowBaselineSchema } from "../src/offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema } from "../src/offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../src/offSite/hedgerowEnhancement";
-import { headlineResults, HeadlineResultsInput } from "../src/headlineResults";
+import { headlineResults, type HeadlineResultsInput } from "../src/headlineResults";
 import { onSiteHabitatEnhancementSchema } from "../src/onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../src/offSite/habitatEnhancement";
 import { onSiteWatercourseBaselineSchema } from "../src/onSite/watercourseBaseline";
@@ -34,7 +34,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
             parseRow: (sheet: XLSX.Sheet, row: number) => Input,
             startRow: number = 10 // Most sheets have data starting at row 11 (0-indexed row 10)
         ): Output[] {
-            const sheet = getSheet(workbook, sheetName);
+            const sheet = getSheet(workbook, sheetName)!;
 
             const dataRows = findAllDataRows(sheet, columnToCheck, startRow);
             const results: Output[] = [];
@@ -62,8 +62,8 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
             parseRow: (baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, row: number) => Input,
             startRow: number = 10 // Most sheets have data starting at row 11 (0-indexed row 10)
         ): Output[] {
-            const sheet = getSheet(workbook, sheetName);
-            const baselineSheet = getSheet(workbook, baselineSheetName);
+            const sheet = getSheet(workbook, sheetName)!;
+            const baselineSheet = getSheet(workbook, baselineSheetName)!;
 
             const dataRows = findAllDataRows(sheet, columnToCheck, startRow);
             const results: Output[] = [];
@@ -268,7 +268,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
         const result = headlineResults(input);
 
         // Get the Headline Results sheet
-        const headlineSheet = getSheet(workbook, 'Headline Results');
+        const headlineSheet = getSheet(workbook, 'Headline Results')!;
 
         test("calculates on-site habitat baseline", () => {
             const excelValue = getCellValue(headlineSheet, 7, 7); // H8 (0-indexed row 7)
@@ -453,7 +453,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("A-1 On-Site Habitat Baseline", () => {
-        const sheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline');
+        const sheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline')!;
 
         // Find all data rows (E column = broad habitat, 0-indexed as 4)
         const dataRows = findAllDataRows(sheet, 4);
@@ -548,7 +548,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("A-2 On-Site Habitat Creation", () => {
-        const sheet = getSheet(workbook, 'A-2 On-Site Habitat Creation');
+        const sheet = getSheet(workbook, 'A-2 On-Site Habitat Creation')!;
 
         // Find all data rows (Y column = habitat units delivered, 0-indexed as 24)
         // This is the most likely to show a full row since it only calculates after loads is filled in already
@@ -646,8 +646,8 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("A-3 On-Site Habitat Enhancement", () => {
-        const sheet = getSheet(workbook, 'A-3 On-Site Habitat Enhancement');
-        const baselineSheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline');
+        const sheet = getSheet(workbook, 'A-3 On-Site Habitat Enhancement')!;
+        const baselineSheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline')!;
 
         // Find all data rows (AQ column = habitat reference number, 0-indexed as 42, starting from row 12)
         // However, let's use column B (1) which has the baseline reference as it's more reliable
@@ -748,7 +748,6 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
                     console.error("  Strategic Multiplier:", parsed.strategicSignificanceMultiplier);
                     console.error("  Time to Target:", parsed.timeToTargetCondition);
                     console.error("  Final Time to Target:", parsed.finalTimeToTargetCondition);
-                    console.error("  Temporal Multiplier:", parsed.temporalMultiplier);
                     console.error("  Difficulty Multiplier:", parsed.difficultyMultiplierApplied);
                     console.error("  Habitat Units Delivered:", parsed.habitatUnitsDelivered);
                     throw error;
@@ -758,7 +757,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("B-1 On-Site Hedge Baseline", () => {
-        const sheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline');
+        const sheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 10)
         const dataRows = findAllDataRows(sheet, 3, 9);
@@ -856,7 +855,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("B-2 On-Site Hedge Creation", () => {
-        const sheet = getSheet(workbook, 'B-2 On-Site Hedge Creation');
+        const sheet = getSheet(workbook, 'B-2 On-Site Hedge Creation')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 11)
         const dataRows = findAllDataRows(sheet, 3, 11);
@@ -959,8 +958,8 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("B-3 On-Site Hedge Enhancement", () => {
-        const sheet = getSheet(workbook, 'B-3 On-Site Hedge Enhancement');
-        const baselineSheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline');
+        const sheet = getSheet(workbook, 'B-3 On-Site Hedge Enhancement')!;
+        const baselineSheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline')!;
 
         // Find all data rows in enhancement sheet (B column = baseline ref, 0-indexed as 1, starting from row 11)
         // Column B has the baseline reference
@@ -1071,7 +1070,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("D-1 Off-Site Habitat Baseline - Excel Comparison", () => {
-        const sheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline');
+        const sheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline')!;
 
         // Find all data rows (E column = broad habitat, 0-indexed as 4)
         const dataRows = findAllDataRows(sheet, 4);
@@ -1182,7 +1181,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("D-2 Off-Site Habitat Creation - Excel Comparison", () => {
-        const sheet = getSheet(workbook, 'D-2 Off-Site Habitat Creation');
+        const sheet = getSheet(workbook, 'D-2 Off-Site Habitat Creation')!;
 
         // Find all data rows (D column = broad habitat, 0-indexed as 3)
         const dataRows = findAllDataRows(sheet, 3);
@@ -1293,8 +1292,8 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("D-3 Off-Site Habitat Enhancement", () => {
-        const sheet = getSheet(workbook, 'D-3 Off-Site Habitat Enhancment'); // Note: typo in actual Excel sheet name
-        const baselineSheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline');
+        const sheet = getSheet(workbook, 'D-3 Off-Site Habitat Enhancment')!; // Note: typo in actual Excel sheet name
+        const baselineSheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline')!;
 
         // Find all data rows (E column = baseline reference, 0-indexed as 4, starting from row 12)
         const dataRows = findAllDataRows(sheet, 4, 11);
@@ -1418,7 +1417,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("E-1 Off-Site Hedge Baseline", () => {
-        const sheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline');
+        const sheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 9)
         const dataRows = findAllDataRows(sheet, 3, 9);
@@ -1530,7 +1529,7 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
     });
 
     describe("E-2 Off-Site Hedge Creation", () => {
-        const sheet = getSheet(workbook, 'E-2 Off-Site Hedge Creation');
+        const sheet = getSheet(workbook, 'E-2 Off-Site Hedge Creation')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 12)
         const dataRows = findAllDataRows(sheet, 3, 11);
@@ -1650,8 +1649,8 @@ testExcelFiles(EXCEL_FILES, (workbook) => {
 
     // NOTE: this doesn't seem to process any rows in any sheets (not a massive surprise)
     describe("E-3 Off-Site Hedge Enhancement", () => {
-        const sheet = getSheet(workbook, 'E-3 Off-Site Hedge Enhancement');
-        const baselineSheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline');
+        const sheet = getSheet(workbook, 'E-3 Off-Site Hedge Enhancement')!;
+        const baselineSheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline')!;
 
         // Column B has the baseline reference
         const dataRows = findAllDataRows(sheet, 1, 11);
