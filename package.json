@@ -13,13 +13,13 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
-    "@types/bun": "latest",
-    "zod": "^4.3.5"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "valibot": "^1.2.0",
     "xlsx": "^0.18.5"
   }
 }
