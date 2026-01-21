@@ -19,6 +19,8 @@ import { offSiteWatercourseEnhancementSchema } from './src/offSite/watercourseEn
 
 import { headlineResults } from './src/headlineResults';
 
+import * as parsers from './src/parsers';
+
 export {
     onSiteHabitatBaselineSchema,
     onSiteHedgerowBaselineSchema,
@@ -40,4 +42,6 @@ export {
     offSiteWatercourseEnhancementSchema,
 
     headlineResults,
+
+    parsers,
 }
