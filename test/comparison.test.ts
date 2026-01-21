@@ -1,10 +1,11 @@
 import { describe, test, expect } from "bun:test"
 import * as v from 'valibot';
 import XLSX from 'xlsx';
-import { EXCEL_FILES, expectCloseTo, findAllDataRows, getCellValue, getSheet, testExcelFiles } from './helpers';
+import { EXCEL_FILES, expectCloseTo, findAllDataRows, getSheet, testExcelFiles } from './helpers';
+import { getCellValue } from '../src/parsers/excelHelpers';
 import { onSiteHabitatBaselineSchema } from "../src/onSite/habitatBaseline";
 import { onSiteHabitatCreationSchema } from "../src/onSite/habitatCreation";
-import { parseOffSiteHabitatBaselineRow, parseOffSiteHabitatCreationRow, parseOffSiteHabitatEnhancementRow, parseOffSiteHedgerowBaselineRow, parseOffSiteHedgerowCreationRow, parseOffSiteHedgerowEnhancementRow, parseOffSiteWatercourseBaselineRow, parseOffSiteWatercourseCreationRow, parseOffSiteWatercourseEnhancementRow, parseOnSiteHabitatBaselineRow, parseOnSiteHabitatCreationRow, parseOnSiteHabitatEnhancementRow, parseOnSiteHedgerowBaselineRow, parseOnSiteHedgerowCreationRow, parseOnSiteHedgerowEnhancementRow, parseOnSiteWatercourseBaselineRow, parseOnSiteWatercourseCreationRow, parseOnSiteWatercourseEnhancementRow } from "./rowParsers";
+import { parseOffSiteHabitatBaselineRow, parseOffSiteHabitatCreationRow, parseOffSiteHabitatEnhancementRow, parseOffSiteHedgerowBaselineRow, parseOffSiteHedgerowCreationRow, parseOffSiteHedgerowEnhancementRow, parseOffSiteWatercourseBaselineRow, parseOffSiteWatercourseCreationRow, parseOffSiteWatercourseEnhancementRow, parseOnSiteHabitatBaselineRow, parseOnSiteHabitatCreationRow, parseOnSiteHabitatEnhancementRow, parseOnSiteHedgerowBaselineRow, parseOnSiteHedgerowCreationRow, parseOnSiteHedgerowEnhancementRow, parseOnSiteWatercourseBaselineRow, parseOnSiteWatercourseCreationRow, parseOnSiteWatercourseEnhancementRow } from "../src/parsers/rowParsers";
 import { offSiteHabitatBaselineSchema } from "../src/offSite/habitatBaseline";
 import { offSiteHabitatCreationSchema } from "../src/offSite/habitatCreation";
 import { onSiteHedgerowBaselineSchema } from "../src/onSite/hedgerowBaseline";
