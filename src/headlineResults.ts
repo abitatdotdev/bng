@@ -702,3 +702,5 @@ export function headlineResults(data: HeadlineResultsInput) {
         totalNetPercentageChange,
     };
 }
+
+export type HeadlineResults = ReturnType<typeof headlineResults>

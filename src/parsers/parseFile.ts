@@ -31,7 +31,7 @@ import { onSiteHedgerowEnhancementSchema } from "../onSite/hedgerowEnhancement";
 import { offSiteHedgerowBaselineSchema } from "../offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema } from "../offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../offSite/hedgerowEnhancement";
-import { headlineResults, type HeadlineResultsInput } from "../headlineResults";
+import { headlineResults, type HeadlineResults, type HeadlineResultsInput } from "../headlineResults";
 import { onSiteHabitatEnhancementSchema } from "../onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../offSite/habitatEnhancement";
 import { onSiteWatercourseBaselineSchema } from "../onSite/watercourseBaseline";
@@ -124,6 +124,11 @@ export function parseWorkbook(file: string | ArrayBuffer) {
     return workbook
 }
 
+interface ParsedMetric {
+    parsedRows: HeadlineResultsInput,
+    headlineResults: HeadlineResults,
+}
+
 /**
  * Parse a statutory metric file and to get all rows and calculated results
  *
@@ -135,7 +140,7 @@ const results = parseFile(await file.arrayBuffer());
 ```
  * Throws an error when the metric version is unsupported.
  */
-export function parseFile(file: string | ArrayBuffer) {
+export function parseFile(file: string | ArrayBuffer): ParsedMetric {
     const workbook = parseWorkbook(file);
 
     // Parse all input sheets using shared parsers
