@@ -11,6 +11,11 @@ export const MAX_DATA_ROWS = 100;
  */
 const sheetDataCache = new WeakMap<XLSX.WorkSheet, any[][]>();
 
+
+export function getSheet(workbook: XLSX.WorkBook, sheetName: string) {
+    return workbook.Sheets[sheetName];
+}
+
 /**
  * Helper function to get cell value from worksheet
  * Uses cached array of arrays for faster access
