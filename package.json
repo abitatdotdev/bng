@@ -1,15 +1,38 @@
 {
-  "name": "bng",
-  "version": "0.3.0",
-  "module": "index.ts",
+  "name": "@abitat/bng",
+  "version": "0.3.1",
+  "private": false,
+  "description": "Open Source Statutory Biodiversity Metric",
+  "homepage": "https://github.com/abitatdotdev/bng",
+  "bugs": {
+    "url": "https://github.com/abitatdotdev/bng/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abitatdotdev/bng.git"
+  },
+  "license": "LGPL-3.0",
+  "author": "Matt Williams <matt@abitat.dev>",
   "type": "module",
-  "private": true,
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "files": [
+    "src/**/*"
+  ],
   "scripts": {
     "mcp:habitat": "bun run mcp-server/habitat-server.ts",
     "gencode": "bun scripts/generateCodeFromSheet.ts",
     "test:fast": "bun test --concurrent ./src",
     "test:compare": "bun test test/comparison.test.ts",
     "test:debug": "bun test --inspect-wait"
+  },
+  "dependencies": {
+    "valibot": "^1.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
@@ -18,9 +41,5 @@
   "peerDependencies": {
     "typescript": "^5"
   },
-  "dependencies": {
-    "valibot": "^1.2.0",
-    "xlsx": "^0.18.5"
-  },
-  "files": ["src/**/*"]
+  "module": "index.ts"
 }

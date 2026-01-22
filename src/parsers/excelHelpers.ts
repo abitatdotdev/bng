@@ -1,4 +1,4 @@
-import XLSX from 'xlsx';
+import XLSX, { utils } from 'xlsx';
 
 /**
  * Maximum number of rows to process in Excel sheets
@@ -26,7 +26,7 @@ export function getCellValue(sheet: XLSX.WorkSheet, row: number, col: number): a
 
     if (!data) {
         // Convert sheet to array of arrays and cache it
-        data = XLSX.utils.sheet_to_json(
+        data = utils.sheet_to_json(
             sheet,
             {
                 header: 1,
