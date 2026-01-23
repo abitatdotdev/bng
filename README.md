@@ -21,6 +21,30 @@ We encourage community contributions, but it's too early to be directly involved
 If you would like to contribute to this project, please get in touch at
 [hello@abitat.dev](mailto:hello@abitat.dev).
 
+## Using this tool
+
+You can use this tool in any environment: web, server, serverless etc. by installing the package and using the `parseFile` function.
+
+```sh 
+npm add @abitat/bng
+```
+
+In your code, there are two options for parsing a file.
+
+```ts
+import { parseFile } from '@abitat/bng';
+
+// in server environments, where you have access to the local filesystem
+// you can pass a string representing the path to the file
+const parsedSheet = parseFile('./my_metric.xlsm');
+
+// in browser environments, or when you have file information in-memory
+// you can pass the data directly to the function as an array buffer.
+// For example, from an input field on a page...
+const data = await inputElement.files?.[0].arrayBuffer()
+const parsedSheet = parseFile(data);
+```
+
 ## Documentation
 
 - [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
