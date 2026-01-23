@@ -1,6 +1,6 @@
 {
   "name": "@abitat/bng",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "description": "Open Source Statutory Biodiversity Metric",
   "homepage": "https://github.com/abitatdotdev/bng",
@@ -21,6 +21,8 @@
     "test": "test"
   },
   "files": [
+    "index.ts",
+    "index.js",
     "src/**/*"
   ],
   "scripts": {
