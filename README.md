@@ -66,10 +66,10 @@ This will run all tests concurrently and it's fast enough to watch for any chang
 ### Comparison tests
 To make sure that the tool is compatible with the metric spreadsheets, we compare the output that the tool would calculate against real, submitted metric spreadsheets.
 
-A few simple spreadsheets are included in the `examples/` directory, but changes are tested against a currently private but much larger (in the hundreds) set of sheets as well.
+A few simple spreadsheets are included in the `examples/` directory, but changes are tested against the more thorough set of metrics available in the [metrics repository](https://github.com/abitatdotdev/bng-metrics).
 
 #### Setup
-To test against this larger set, you must first add them to a directory: `test/metrics`, either by copying there or by symlinking an existing directory.
+To test against this larger set, you must first add them to a directory: `test/metrics`, either by copying there or by (preferably) symlinking to the other repository.
 
 #### Testing
 `bun test:compare`
