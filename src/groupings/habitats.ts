@@ -31,6 +31,11 @@ type ValuesByHabitat = {
         offSiteNetUnitChange: number,
         overallAreaChange: number,
         overallUnitChange: number,
+        // from distinctiveness groupings
+        // column BE
+        unitChangeIncludingOffSite: number,
+        // column BF
+        unitsRequiredOffSite: number,
     }
 }
 
@@ -71,6 +76,8 @@ export const valuesByHabitat = (inputData: HeadlineResultsInput): ValuesByHabita
                     offSiteNetUnitChange: calculateOffSiteNetUnitChange(inputData, habitat),
                     overallAreaChange: calculateOverallAreaChange(inputData, habitat),
                     overallUnitChange: calculateOverallUnitChange(inputData, habitat),
+                    unitChangeIncludingOffSite: calculateUnitChangeIncludingOffSite(inputData, habitat),
+                    unitsRequiredOffSite: calculateUnitsRequiredOffSite(inputData, habitat),
                 },
             ]
         }))
@@ -246,6 +253,20 @@ function calculateOverallUnitChange(inputData: HeadlineResultsInput, habitat: Ha
         + calculateOffSiteNetUnitChange(inputData, habitat)
     )
 }
+
+/** This seems the same as calculateOverallUnitChange in calculation, but we follow the sheet for now */
+function calculateUnitChangeIncludingOffSite(inputData: HeadlineResultsInput, habitat: Habitat): any {
+    return (
+        calculateNetUnitChangeOnSite(inputData, habitat)
+        + calculateOffSiteNetUnitChange(inputData, habitat)
+    )
+}
+
+function calculateUnitsRequiredOffSite(inputData: HeadlineResultsInput, habitat: Habitat): any {
+    const unitChange = calculateUnitChangeIncludingOffSite(inputData, habitat)
+    return unitChange < 0 ? unitChange : 0;
+}
+
 
 // from https://stackoverflow.com/questions/69019873/how-can-i-get-typed-object-entries-and-object-fromentries-in-typescript
 const typeSafeObjectFromEntries = <
