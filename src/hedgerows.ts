@@ -327,3 +327,7 @@ export type HedgerowLabel = Hedgerow['label'];
 export function hedgerowByLabel(label: HedgerowLabel): Hedgerow | undefined {
     return allHedgerows[label];
 }
+
+export function isHedgerow(row: { habitatType: HedgerowLabel }, hedgerow: Hedgerow) {
+    return row.habitatType === hedgerow.label;
+}

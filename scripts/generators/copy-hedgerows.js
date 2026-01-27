@@ -294,15 +294,20 @@ export const allHedgerows = {
         }
     });
 
-    code += '} as const;\n\n';
-    code += `export type HedgerowMap = typeof allHedgerows;\n`;
-    code += `type HedgerowMapLabel = keyof HedgerowMap;\n`;
-    code += `export type Hedgerow = HedgerowMap[HedgerowMapLabel];\n`;
-    code += `export type HedgerowLabel = Hedgerow['label'];\n\n`;
-    code += `export function hedgerowByLabel(label: HedgerowLabel): Hedgerow | undefined {\n`;
-    code += `    return allHedgerows[label];\n`;
-    code += `}\n`;
+    code += `
+export type HedgerowMap = typeof allHedgerows;
+type HedgerowMapLabel = keyof HedgerowMap;
+export type Hedgerow = HedgerowMap[HedgerowMapLabel];
+export type HedgerowLabel = Hedgerow['label'];
 
+export function hedgerowByLabel(label: HedgerowLabel): Hedgerow | undefined {
+    return allHedgerows[label];
+}
+
+export function isHedgerow(row: { habitatType: HedgerowLabel }, hedgerow: Hedgerow) {
+    return row.habitatType === hedgerow.label;
+}
+`
     return code;
 }
 
