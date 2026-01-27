@@ -364,15 +364,20 @@ export const allWatercourses = {
         }
     });
 
-    code += '} as const;\n\n';
-    code += `export type WatercourseMap = typeof allWatercourses;\n`;
-    code += `type WatercourseMapLabel = keyof WatercourseMap;\n`;
-    code += `export type Watercourse = WatercourseMap[WatercourseMapLabel];\n`;
-    code += `export type WatercourseLabel = Watercourse['label'];\n\n`;
-    code += `export function watercourseByLabel(label: WatercourseLabel): Watercourse | undefined {\n`;
-    code += `    return allWatercourses[label];\n`;
-    code += `}\n`;
+    code += `
+export type WatercourseMap = typeof allWatercourses;
+type WatercourseMapLabel = keyof WatercourseMap;
+export type Watercourse = WatercourseMap[WatercourseMapLabel];
+export type WatercourseLabel = Watercourse['label'];
 
+export function watercourseByLabel(label: WatercourseLabel): Watercourse | undefined {
+    return allWatercourses[label];
+}
+
+export function isWatercourse(row: { watercourseType: WatercourseLabel }, watercourse: Watercourse) {
+    return row.watercourseType === watercourse.label;
+}
+`
     return code;
 }
 

@@ -106,3 +106,7 @@ export type WatercourseLabel = Watercourse['label'];
 export function watercourseByLabel(label: WatercourseLabel): Watercourse | undefined {
     return allWatercourses[label];
 }
+
+export function isWatercourse(row: { watercourseType: WatercourseLabel }, watercourse: Watercourse) {
+    return row.watercourseType === watercourse.label;
+}
