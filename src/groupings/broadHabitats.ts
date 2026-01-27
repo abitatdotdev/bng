@@ -1,4 +1,4 @@
-import type { HeadlineResultsInput } from "../headlineResults"
+import type { AllFeatures } from '../features';
 import { habitatByLabel, type HabitatLabel } from "../habitats"
 import type { BroadHabitat } from "../broadHabitats";
 import { valuesByHabitat } from "./habitats";
@@ -20,7 +20,7 @@ type ValuesByBroadHabitat = {
     }
 }
 
-export const valuesByBroadHabitat = (inputData: HeadlineResultsInput): ValuesByBroadHabitat => {
+export const valuesByBroadHabitat = (inputData: AllFeatures): ValuesByBroadHabitat => {
     const byHabitat = valuesByHabitat(inputData);
 
     return Object.entries(byHabitat).reduce((results, [habitatLabel, values]) => {

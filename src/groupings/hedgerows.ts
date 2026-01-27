@@ -1,4 +1,4 @@
-import type { HeadlineResultsInput } from "../headlineResults"
+import type { AllFeatures } from '../features';
 import { allHedgerows, hedgerowByLabel, isHedgerow, type Hedgerow, type HedgerowLabel } from "../hedgerows";
 
 type ValuesByHedgerow = {
@@ -34,7 +34,7 @@ type ValuesByHedgerow = {
     }
 }
 
-export const valuesByHedgerow = (inputData: HeadlineResultsInput): ValuesByHedgerow => {
+export const valuesByHedgerow = (inputData: AllFeatures): ValuesByHedgerow => {
     const hedgerowLabels = Object.keys(allHedgerows) as HedgerowLabel[];
     return typeSafeObjectFromEntries(
         hedgerowLabels.map(label => {
@@ -76,171 +76,171 @@ export const valuesByHedgerow = (inputData: HeadlineResultsInput): ValuesByHedge
         }))
 }
 
-function calculateExistingLengthBaselineOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.length, 0);
 }
-function calculateExistingUnitsBaselineOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
 }
-function calculateExistingLengthRetainedOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingLengthRetainedOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
 }
-function calculateExistingUnitsRetainedOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
 }
-function calculateExistingLengthLostOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingLengthLostOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
 }
-function calculateExistingUnitsLostBaselineOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedLengthCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedLengthCreationOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.length, 0);
 }
-function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.hedgerowUnitsDelivered, 0);
 }
-function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.length, 0);
 }
-function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered, 0);
 }
-function calculateTotalProposedLengthOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateTotalProposedLengthOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateExistingLengthRetainedOnSite(inputData, hedgerow)
         + calculateProposedLengthCreationOnSitePostDevelopment(inputData, hedgerow)
         + calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, hedgerow)
     );
 }
-function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateExistingUnitsRetainedOnSite(inputData, hedgerow)
         + calculateProposedUnitsCreationOnSitePostDevelopment(inputData, hedgerow)
         + calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, hedgerow)
     );
 }
-function calculateNetLengthChangeOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateNetLengthChangeOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateTotalProposedLengthOnSitePostDevelopment(inputData, hedgerow)
         - calculateExistingLengthBaselineOnSite(inputData, hedgerow)
     )
 }
-function calculateNetUnitChangeOnSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateNetUnitChangeOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateTotalProposedUnitsOnSitePostDevelopment(inputData, hedgerow)
         - calculateExistingUnitsBaselineOnSite(inputData, hedgerow)
     )
 }
-function calculateExistingLengthOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.length, 0);
 }
-function calculateExistingUnitsOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateExistingUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
 }
-function calculateRetainedLengthOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateRetainedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
 }
-function calculateRetainedUnitsOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateRetainedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
 }
-function calculateProposedLengthCreationOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedLengthCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
 }
-function calculateProposedUnitsCreationOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedLengthEnhancementOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.length, 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.hedgerowUnitsDelivered, 0);
 }
-function calculateTotalProposedLengthOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateTotalProposedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.length, 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered, 0);
 }
-function calculateOffSiteNetLengthChange(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateOffSiteNetLengthChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateTotalProposedLengthOffSite(inputData, hedgerow)
         - calculateExistingLengthOffSite(inputData, hedgerow)
     );
 }
-function calculateOffSiteNetUnitChange(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateOffSiteNetUnitChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateTotalProposedUnitsOffSite(inputData, hedgerow)
         - calculateExistingUnitsOffSite(inputData, hedgerow)
     )
 }
-function calculateOverallLengthChange(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateOverallLengthChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateNetLengthChangeOnSite(inputData, hedgerow)
         + calculateOffSiteNetLengthChange(inputData, hedgerow)
     )
 }
-function calculateOverallUnitChange(inputData: HeadlineResultsInput, hedgerow: Hedgerow): number {
+function calculateOverallUnitChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (
         calculateNetUnitChangeOnSite(inputData, hedgerow)
         + calculateOffSiteNetUnitChange(inputData, hedgerow)

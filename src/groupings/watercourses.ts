@@ -1,4 +1,4 @@
-import type { HeadlineResultsInput } from "../headlineResults"
+import type { AllFeatures } from '../features';
 import { allWatercourses, watercourseByLabel, isWatercourse, type Watercourse, type WatercourseLabel } from "../watercourses";
 
 type ValuesByWatercourse = {
@@ -34,7 +34,7 @@ type ValuesByWatercourse = {
     }
 }
 
-export const valuesByWatercourse = (inputData: HeadlineResultsInput): ValuesByWatercourse => {
+export const valuesByWatercourse = (inputData: AllFeatures): ValuesByWatercourse => {
     const watercourseLabels = Object.keys(allWatercourses) as WatercourseLabel[];
     return typeSafeObjectFromEntries(
         watercourseLabels.map(label => {
@@ -76,171 +76,171 @@ export const valuesByWatercourse = (inputData: HeadlineResultsInput): ValuesByWa
         }))
 }
 
-function calculateExistingLengthBaselineOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.length, 0);
 }
-function calculateExistingUnitsBaselineOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
 }
-function calculateExistingLengthRetainedOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingLengthRetainedOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
 }
-function calculateExistingUnitsRetainedOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
 }
-function calculateExistingLengthLostOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingLengthLostOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
 }
-function calculateExistingUnitsLostBaselineOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedLengthCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedLengthCreationOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => sum + creation.length, 0);
 }
-function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => sum + creation.unitsDelivered, 0);
 }
-function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => sum + enhancement.length, 0);
 }
-function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => sum + enhancement.watercourseUnitsDelivered, 0);
 }
-function calculateTotalProposedLengthOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateTotalProposedLengthOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateExistingLengthRetainedOnSite(inputData, watercourse)
         + calculateProposedLengthCreationOnSitePostDevelopment(inputData, watercourse)
         + calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, watercourse)
     );
 }
-function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateExistingUnitsRetainedOnSite(inputData, watercourse)
         + calculateProposedUnitsCreationOnSitePostDevelopment(inputData, watercourse)
         + calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, watercourse)
     );
 }
-function calculateNetLengthChangeOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateNetLengthChangeOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateTotalProposedLengthOnSitePostDevelopment(inputData, watercourse)
         - calculateExistingLengthBaselineOnSite(inputData, watercourse)
     )
 }
-function calculateNetUnitChangeOnSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateNetUnitChangeOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateTotalProposedUnitsOnSitePostDevelopment(inputData, watercourse)
         - calculateExistingUnitsBaselineOnSite(inputData, watercourse)
     )
 }
-function calculateExistingLengthOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.length, 0);
 }
-function calculateExistingUnitsOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateExistingUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
 }
-function calculateRetainedLengthOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateRetainedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
 }
-function calculateRetainedUnitsOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateRetainedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
 }
-function calculateProposedLengthCreationOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedLengthCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
 }
-function calculateProposedUnitsCreationOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedLengthEnhancementOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => sum + creation.length, 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => sum + creation.unitsDelivered, 0);
 }
-function calculateTotalProposedLengthOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateTotalProposedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => sum + enhancement.length, 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => sum + enhancement.watercourseUnitsDelivered, 0);
 }
-function calculateOffSiteNetLengthChange(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateOffSiteNetLengthChange(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateTotalProposedLengthOffSite(inputData, watercourse)
         - calculateExistingLengthOffSite(inputData, watercourse)
     );
 }
-function calculateOffSiteNetUnitChange(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateOffSiteNetUnitChange(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateTotalProposedUnitsOffSite(inputData, watercourse)
         - calculateExistingUnitsOffSite(inputData, watercourse)
     )
 }
-function calculateOverallLengthChange(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateOverallLengthChange(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateNetLengthChangeOnSite(inputData, watercourse)
         + calculateOffSiteNetLengthChange(inputData, watercourse)
     )
 }
-function calculateOverallUnitChange(inputData: HeadlineResultsInput, watercourse: Watercourse): number {
+function calculateOverallUnitChange(inputData: AllFeatures, watercourse: Watercourse): number {
     return (
         calculateNetUnitChangeOnSite(inputData, watercourse)
         + calculateOffSiteNetUnitChange(inputData, watercourse)

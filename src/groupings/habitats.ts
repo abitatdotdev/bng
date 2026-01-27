@@ -1,4 +1,4 @@
-import type { HeadlineResultsInput } from "../headlineResults"
+import type { AllFeatures } from '../features';
 import { allHabitats, habitatByLabel, isHabitat, type Habitat, type HabitatLabel } from "../habitats"
 
 type ValuesByHabitat = {
@@ -39,7 +39,7 @@ type ValuesByHabitat = {
     }
 }
 
-export const valuesByHabitat = (inputData: HeadlineResultsInput): ValuesByHabitat => {
+export const valuesByHabitat = (inputData: AllFeatures): ValuesByHabitat => {
     const habitatLabels = Object.keys(allHabitats) as HabitatLabel[];
     return typeSafeObjectFromEntries(
         habitatLabels.map(label => {
@@ -83,171 +83,171 @@ export const valuesByHabitat = (inputData: HeadlineResultsInput): ValuesByHabita
         }))
 }
 
-function calculateExistingAreaBaselineOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingAreaBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.area, 0);
 }
-function calculateExistingUnitsBaselineOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.totalHabitatUnits, 0);
 }
-function calculateExistingAreaRetainedOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingAreaRetainedOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.areaRetained, 0);
 }
-function calculateExistingUnitsRetainedOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.baselineUnitsRetained + baseline.vhdhBespokeCompensationUnits, 0);
 }
-function calculateExistingAreaLostOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingAreaLostOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.areaHabitatLost, 0);
 }
-function calculateExistingUnitsLostBaselineOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedAreaCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedAreaCreationOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.area, 0);
 }
-function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.habitatUnitsDelivered, 0);
 }
-function calculateProposedAreaEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedAreaEnhancementOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.area, 0);
 }
-function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.habitatUnitsDelivered, 0);
 }
-function calculateTotalProposedAreaOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateTotalProposedAreaOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateExistingAreaRetainedOnSite(inputData, habitat)
         + calculateProposedAreaCreationOnSitePostDevelopment(inputData, habitat)
         + calculateProposedAreaEnhancementOnSitePostDevelopment(inputData, habitat)
     );
 }
-function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateExistingUnitsRetainedOnSite(inputData, habitat)
         + calculateProposedUnitsCreationOnSitePostDevelopment(inputData, habitat)
         + calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, habitat)
     );
 }
-function calculateNetAreaChangeOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateNetAreaChangeOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateTotalProposedAreaOnSitePostDevelopment(inputData, habitat)
         - calculateExistingAreaBaselineOnSite(inputData, habitat)
     )
 }
-function calculateNetUnitChangeOnSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateNetUnitChangeOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateTotalProposedUnitsOnSitePostDevelopment(inputData, habitat)
         - calculateExistingUnitsBaselineOnSite(inputData, habitat)
     )
 }
-function calculateExistingAreaOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.area, 0);
 }
-function calculateExistingUnitsOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateExistingUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.totalHabitatUnits, 0);
 }
-function calculateRetainedAreaOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateRetainedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.areaRetained, 0);
 }
-function calculateRetainedUnitsOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateRetainedUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.baselineUnitsRetained + baseline.vhdhBespokeCompensationUnits, 0);
 }
-function calculateProposedAreaCreationOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedAreaCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.areaHabitatLost, 0);
 }
-function calculateProposedUnitsCreationOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
         .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
 }
-function calculateProposedAreaEnhancementOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedAreaEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.area, 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.habitatUnitsDelivered, 0);
 }
-function calculateTotalProposedAreaOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateTotalProposedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.area, 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.habitatUnitsDelivered, 0);
 }
-function calculateOffSiteNetAreaChange(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateOffSiteNetAreaChange(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateTotalProposedAreaOffSite(inputData, habitat)
         - calculateExistingAreaOffSite(inputData, habitat)
     );
 }
-function calculateOffSiteNetUnitChange(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateOffSiteNetUnitChange(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateTotalProposedUnitsOffSite(inputData, habitat)
         - calculateExistingUnitsOffSite(inputData, habitat)
     )
 }
-function calculateOverallAreaChange(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateOverallAreaChange(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateNetAreaChangeOnSite(inputData, habitat)
         + calculateOffSiteNetAreaChange(inputData, habitat)
     )
 }
-function calculateOverallUnitChange(inputData: HeadlineResultsInput, habitat: Habitat): number {
+function calculateOverallUnitChange(inputData: AllFeatures, habitat: Habitat): number {
     return (
         calculateNetUnitChangeOnSite(inputData, habitat)
         + calculateOffSiteNetUnitChange(inputData, habitat)
@@ -255,14 +255,14 @@ function calculateOverallUnitChange(inputData: HeadlineResultsInput, habitat: Ha
 }
 
 /** This seems the same as calculateOverallUnitChange in calculation, but we follow the sheet for now */
-function calculateUnitChangeIncludingOffSite(inputData: HeadlineResultsInput, habitat: Habitat): any {
+function calculateUnitChangeIncludingOffSite(inputData: AllFeatures, habitat: Habitat): any {
     return (
         calculateNetUnitChangeOnSite(inputData, habitat)
         + calculateOffSiteNetUnitChange(inputData, habitat)
     )
 }
 
-function calculateUnitsRequiredOffSite(inputData: HeadlineResultsInput, habitat: Habitat): any {
+function calculateUnitsRequiredOffSite(inputData: AllFeatures, habitat: Habitat): any {
     const unitChange = calculateUnitChangeIncludingOffSite(inputData, habitat)
     return unitChange < 0 ? unitChange : 0;
 }

@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
 import {
-    type HeadlineResultsInput,
     calculateOnSiteHabitatBaseline,
     calculateOnSiteHabitatPostIntervention,
     calculateOnSiteHabitatNetChange,
@@ -27,11 +26,12 @@ import {
     calculateFinalTotalNetUnitChange,
     headlineResults,
 } from './headlineResults';
+import { type AllFeatures } from './features';
 
 /**
  * Creates a minimal valid headline results input with all empty arrays
  */
-export function emptyFixture(overrides: Partial<HeadlineResultsInput> = {}): HeadlineResultsInput {
+export function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
     return {
         onSiteHabitatBaselines: [],
         onSiteHabitatCreations: [],

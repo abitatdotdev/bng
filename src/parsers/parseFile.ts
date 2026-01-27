@@ -31,7 +31,8 @@ import { onSiteHedgerowEnhancementSchema } from "../onSite/hedgerowEnhancement";
 import { offSiteHedgerowBaselineSchema } from "../offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema } from "../offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../offSite/hedgerowEnhancement";
-import { headlineResults, type HeadlineResults, type HeadlineResultsInput } from "../headlineResults";
+import { headlineResults, type HeadlineResults } from "../headlineResults";
+import { type AllFeatures } from '../features';
 import { onSiteHabitatEnhancementSchema } from "../onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../offSite/habitatEnhancement";
 import { onSiteWatercourseBaselineSchema } from "../onSite/watercourseBaseline";
@@ -125,7 +126,7 @@ export function parseWorkbook(file: string | ArrayBuffer) {
 }
 
 interface ParsedMetric {
-    parsedRows: HeadlineResultsInput,
+    parsedRows: AllFeatures,
     headlineResults: HeadlineResults,
 }
 
@@ -315,7 +316,7 @@ export function parseFile(file: string | ArrayBuffer): ParsedMetric {
     );
 
     // Create the input object
-    const parsedRows: HeadlineResultsInput = {
+    const parsedRows: AllFeatures = {
         onSiteHabitatBaselines,
         onSiteHabitatCreations,
         onSiteHabitatEnhancements,
@@ -336,8 +337,8 @@ export function parseFile(file: string | ArrayBuffer): ParsedMetric {
         offSiteWatercourseEnhancements,
     };
 
-    // Calculate headline results
     const calculatedHeadlineResults = headlineResults(parsedRows);
+
 
     return {
         parsedRows,
