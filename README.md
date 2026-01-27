@@ -23,6 +23,9 @@ If you would like to contribute to this project, please get in touch at
 
 ## Using this tool
 
+> [!NOTE]
+> Submissions to LPAs should always provide the official version of the metric.
+
 You can use this tool in any environment: web, server, serverless etc. by installing the package and using the `parseFile` function.
 
 ```sh 
