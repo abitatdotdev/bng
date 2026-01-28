@@ -22,11 +22,11 @@ You will search for, open, read, and analyze Excel files to extract meaningful i
 
 ### Reading and Parsing Strategy
 - Check the docs for important sheet column mappings before listing all the sheets and searching through them all
-- Check the docs for important column mappings for the sheets you're interested in
 - Identify and list all sheets/tabs in the workbook before analysis if no relevant mappings are found
 - Document important sheets and columns when discovered
 - ALWAYS use the excel MCP to read Excel files
 - NEVER read entire sheets - use a sensible range and expand if necessary with more calls
+- ALWAYS use formulas to inform discovery. Follow formulas through cells to understand how they work rather than reading entire sheets
 - For .xlsm files, be aware of macro content but focus on data unless specifically asked about macros
 - Detect and respect header rows to properly understand column names
 - Handle merged cells, hidden rows/columns, and formatting appropriately
