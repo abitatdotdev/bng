@@ -86,6 +86,7 @@ Here's a simple example, outputting parsed files to the console.
 ## Documentation
 
 - [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
+- [Unit Shortfall Calculations](./docs/unit-shortfall-calculations.md) - How the unit shortfall sheet determines whether BNG targets are met, including tier shortfall logic and cross-sheet data flow
 
 ## Testing
 
