@@ -558,7 +558,16 @@ export type Habitat = HabitatMap[HabitatMapLabel]
 export type HabitatLabel = Habitat['label']
 
 export function habitatByLabel(label: HabitatLabel): Habitat | undefined {
-    return Object.values(allHabitats).find(h => h.label === label);
+    let foundHabitat: Habitat | undefined = undefined;
+    foundHabitat = Object.values(allHabitats).find(h => h.label === label);
+    if (foundHabitat) return foundHabitat;
+
+    // Because there is one habitat (Woodland and forest - Replacement for felled woodland)
+    // that has a label that is different from the broad/type combination,
+    // we fall back to checking the parsed combination from the label as well.
+    // This should only happen in this one case.
+    const [broadHabitat, habitatType] = label.split(" - ");
+    return Object.values(allHabitats).find(h => h.broadHabitat === broadHabitat && h.type === habitatType);
 }
 export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): Habitat | undefined {
     return Object.values(allHabitats).find(h => isHabitat({ broadHabitat, habitatType }, h));
