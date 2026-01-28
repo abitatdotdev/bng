@@ -236,20 +236,20 @@ describe("calculateOffSiteHabitatNetChange", () => {
 });
 
 describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
-    test("returns 0 when net change is negative", () => {
+    test("returns N/A when net change is negative", () => {
         const baselines = [
             { totalHabitatUnitsSRM: 50, baselineUnitsRetained: 0, baselineUnitsEnhanced: 0, spatialRiskMultiplier: 0.5 } as any,
         ];
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, [], [], -10);
-        expect(result.units).toBe(0);
+        expect(result).toBe("N/A");
     });
 
-    test("returns 0 when net change is zero", () => {
+    test("returns N/A when net change is zero", () => {
         const baselines = [
             { totalHabitatUnitsSRM: 50, baselineUnitsRetained: 0, baselineUnitsEnhanced: 0, spatialRiskMultiplier: 0.5 } as any,
         ];
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, [], [], 0);
-        expect(result.units).toBe(0);
+        expect(result).toBe("N/A");
     });
 
     test("calculates SRM-adjusted net change for positive gains", () => {
@@ -278,7 +278,7 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         // Post-intervention WITH SRM = 74 + 30 + 20 = 124
         // Net change WITH SRM = 124 - 50 = 74
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, creations, enhancements, 10);
-        expect(result.units).toBe(74);
+        expect(result).toBe(74);
     });
 
     test("handles multiple baselines with different SRM values", () => {
@@ -312,7 +312,7 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         // Post-intervention WITH SRM = 24 + 23.2 = 47.2
         // Net change WITH SRM = 47.2 - (30 + 20) = 47.2 - 50 = -2.8
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, [], [], 10);
-        expect(result.units).toBeCloseTo(-2.8, 1);
+        expect(result).toBeCloseTo(-2.8, 1);
     });
 
     test("handles zero baseline WITH SRM without division by zero", () => {
@@ -333,7 +333,7 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         ];
 
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, creations, [], 40);
-        expect(result.units).toBe(20);
+        expect(result).toBe(20);
     });
 });
 
@@ -377,7 +377,7 @@ describe("headlineResults", () => {
         expect(result.offSiteHabitatPostIntervention).toBe(0);
         expect(result.offSiteHabitatNetChange.units).toBe(0);
         expect(result.offSiteHabitatNetChange.percentage).toBe(0);
-        expect(result.offSiteHabitatNetChangeWithSRM.units).toBe(0);
+        expect(result.offSiteHabitatNetChangeWithSRM).toBe("N/A");
     });
 
     test("calculates off-site habitat results with data", () => {
@@ -423,7 +423,7 @@ describe("headlineResults", () => {
 
         // WITH SRM: baseline = 40, post = 37 + 15 + 10 = 62
         // Net change = 62 - 40 = 22
-        expect(result.offSiteHabitatNetChangeWithSRM.units).toBe(22);
+        expect(result.offSiteHabitatNetChangeWithSRM).toBe(22);
     });
 
     test("SRM not applied when off-site net change is negative", () => {
@@ -450,7 +450,7 @@ describe("headlineResults", () => {
         expect(result.offSiteHabitatBaseline).toBe(100);
         expect(result.offSiteHabitatPostIntervention).toBe(30); // Only retained
         expect(result.offSiteHabitatNetChange.units).toBe(-70); // Negative
-        expect(result.offSiteHabitatNetChangeWithSRM.units).toBe(0); // SRM not applied
+        expect(result.offSiteHabitatNetChangeWithSRM).toBe("N/A");
     });
 });
 
@@ -691,22 +691,20 @@ describe("calculateOffSiteHedgerowNetChange", () => {
 });
 
 describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
-    test("returns 0 when net change is negative", () => {
+    test("returns N/A when net change is negative", () => {
         const baselines = [
             { totalHedgerowUnitsSRM: 30, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.6 } as any,
         ];
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], -10);
-        expect(result.units).toBe(0);
-        expect(result.percentage).toBe(0);
+        expect(result).toBe("N/A");
     });
 
-    test("returns 0 when net change is zero", () => {
+    test("returns N/A when net change is zero", () => {
         const baselines = [
             { totalHedgerowUnitsSRM: 30, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.6 } as any,
         ];
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], 0);
-        expect(result.units).toBe(0);
-        expect(result.percentage).toBe(0);
+        expect(result).toBe("N/A");
     });
 
     test("calculates SRM-adjusted net change for positive gains", () => {
@@ -728,8 +726,7 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
         // Post-intervention WITH SRM = (30 + 10) * 0.6 + 18 + 12 = 24 + 18 + 12 = 54
         // Net change WITH SRM = 54 - 36 = 18
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, creations, enhancements, 10);
-        expect(result.units).toBe(18);
-        expect(result.percentage).toBe(50); // 18/36 * 100
+        expect(result).toBe(18);
     });
 
     test("handles multiple baselines with different SRM values", () => {
@@ -751,7 +748,7 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
         // Post-intervention WITH SRM = (15 + 5) * 0.6 + (12 + 4) * 0.8 = 12 + 12.8 = 24.8
         // Net change WITH SRM = 24.8 - (24 + 20) = 24.8 - 44 = -19.2
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], 10);
-        expect(result.units).toBe(-19.2);
+        expect(result).toBe(-19.2);
     });
 
     test("handles zero baseline WITH SRM without division by zero", () => {
@@ -768,8 +765,7 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
         ];
 
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, creations, [], 25);
-        expect(result.units).toBe(15);
-        expect(result.percentage).toBe(0); // Division by zero handled
+        expect(result).toBe(15);
     });
 });
 
@@ -782,8 +778,7 @@ describe("headlineResults - off-site hedgerows", () => {
         expect(result.offSiteHedgerowPostIntervention).toBe(0);
         expect(result.offSiteHedgerowNetChange.units).toBe(0);
         expect(result.offSiteHedgerowNetChange.percentage).toBe(0);
-        expect(result.offSiteHedgerowNetChangeWithSRM.units).toBe(0);
-        expect(result.offSiteHedgerowNetChangeWithSRM.percentage).toBe(0);
+        expect(result.offSiteHedgerowNetChangeWithSRM).toBe("N/A");
     });
 
     test("calculates off-site hedgerow results with data", () => {
@@ -820,8 +815,7 @@ describe("headlineResults - off-site hedgerows", () => {
 
         // WITH SRM: baseline = 30, post = (35+8)*0.6 + 12 + 9 = 25.8 + 12 + 9 = 46.8
         // Net change = 46.8 - 30 = 16.8
-        expect(result.offSiteHedgerowNetChangeWithSRM.units).toBeCloseTo(16.8, 1);
-        expect(result.offSiteHedgerowNetChangeWithSRM.percentage).toBeCloseTo(56, 1); // 16.8/30 * 100
+        expect(result.offSiteHedgerowNetChangeWithSRM).toBeCloseTo(16.8, 1);
     });
 
     test("SRM not applied when off-site hedgerow net change is negative", () => {
@@ -842,8 +836,7 @@ describe("headlineResults - off-site hedgerows", () => {
         expect(result.offSiteHedgerowBaseline).toBe(80);
         expect(result.offSiteHedgerowPostIntervention).toBe(25); // Only retained
         expect(result.offSiteHedgerowNetChange.units).toBe(-55); // Negative
-        expect(result.offSiteHedgerowNetChangeWithSRM.units).toBe(0); // SRM not applied
-        expect(result.offSiteHedgerowNetChangeWithSRM.percentage).toBe(0);
+        expect(result.offSiteHedgerowNetChangeWithSRM).toBe("N/A");
     });
 });
 
@@ -1082,22 +1075,20 @@ describe("calculateOffSiteWatercourseNetChange", () => {
 });
 
 describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
-    test("returns 0 when net change is negative", () => {
+    test("returns N/A when net change is negative", () => {
         const baselines = [
             { totalWatercourseUnitsSRM: 35, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.7 } as any,
         ];
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, [], [], -12);
-        expect(result.units).toBe(0);
-        expect(result.percentage).toBe(0);
+        expect(result).toBe("N/A");
     });
 
-    test("returns 0 when net change is zero", () => {
+    test("returns N/A when net change is zero", () => {
         const baselines = [
             { totalWatercourseUnitsSRM: 35, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.7 } as any,
         ];
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, [], [], 0);
-        expect(result.units).toBe(0);
-        expect(result.percentage).toBe(0);
+        expect(result).toBe("N/A");
     });
 
     test("calculates SRM-adjusted net change for positive gains", () => {
@@ -1119,8 +1110,7 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
         // Post-intervention WITH SRM = (35 + 12) * 0.7 + 20 + 15 = 32.9 + 20 + 15 = 67.9
         // Net change WITH SRM = 67.9 - 42 = 25.9
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, creations, enhancements, 12);
-        expect(result.units).toBeCloseTo(25.9, 1);
-        expect(result.percentage).toBeCloseTo(61.67, 1); // 25.9/42 * 100
+        expect(result).toBeCloseTo(25.9, 1);
     });
 
     test("handles zero baseline WITH SRM without division by zero", () => {
@@ -1137,8 +1127,7 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
         ];
 
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, creations, [], 28);
-        expect(result.units).toBe(18);
-        expect(result.percentage).toBe(0); // Division by zero handled
+        expect(result).toBe(18);
     });
 });
 
@@ -1151,8 +1140,7 @@ describe("headlineResults - off-site watercourses", () => {
         expect(result.offSiteWatercoursePostIntervention).toBe(0);
         expect(result.offSiteWatercourseNetChange.units).toBe(0);
         expect(result.offSiteWatercourseNetChange.percentage).toBe(0);
-        expect(result.offSiteWatercourseNetChangeWithSRM.units).toBe(0);
-        expect(result.offSiteWatercourseNetChangeWithSRM.percentage).toBe(0);
+        expect(result.offSiteWatercourseNetChangeWithSRM).toBe("N/A");
     });
 
     test("calculates off-site watercourse results with data", () => {
@@ -1189,8 +1177,7 @@ describe("headlineResults - off-site watercourses", () => {
 
         // WITH SRM: baseline = 38.5, post = (40+10)*0.7 + 17.5 + 14 = 35 + 17.5 + 14 = 66.5
         // Net change = 66.5 - 38.5 = 28
-        expect(result.offSiteWatercourseNetChangeWithSRM.units).toBeCloseTo(28, 1);
-        expect(result.offSiteWatercourseNetChangeWithSRM.percentage).toBeCloseTo(72.73, 1); // 28/38.5 * 100
+        expect(result.offSiteWatercourseNetChangeWithSRM).toBeCloseTo(28, 1);
     });
 
     test("SRM not applied when off-site watercourse net change is negative", () => {
@@ -1211,8 +1198,7 @@ describe("headlineResults - off-site watercourses", () => {
         expect(result.offSiteWatercourseBaseline).toBe(85);
         expect(result.offSiteWatercoursePostIntervention).toBe(30); // Only retained
         expect(result.offSiteWatercourseNetChange.units).toBe(-55); // Negative
-        expect(result.offSiteWatercourseNetChangeWithSRM.units).toBe(0); // SRM not applied
-        expect(result.offSiteWatercourseNetChangeWithSRM.percentage).toBe(0);
+        expect(result.offSiteWatercourseNetChangeWithSRM).toBe("N/A");
     });
 });
 

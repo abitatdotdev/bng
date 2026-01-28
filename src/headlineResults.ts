@@ -119,10 +119,10 @@ export function calculateOffSiteHabitatNetChangeWithSRM(
     creations: v.InferOutput<typeof offSiteHabitatCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteHabitatEnhancementSchema>[],
     netChangeUnits: number
-): { units: number } {
+): number | "N/A" {
     // If net change is <= 0, SRM is not applicable
     if (netChangeUnits <= 0) {
-        return { units: 0 };
+        return "N/A" as const;
     }
 
     // Calculate baseline WITH SRM
@@ -139,9 +139,7 @@ export function calculateOffSiteHabitatNetChangeWithSRM(
     const postInterventionWithSRM = sumBaselineUnitsRetained + sumCreatedUnitsDelivered + sumEnhancedUnitsDelivered;
 
     // Calculate net change WITH SRM
-    const units = postInterventionWithSRM - baselineWithSRM;
-
-    return { units };
+    return postInterventionWithSRM - baselineWithSRM;
 }
 
 /**
@@ -254,10 +252,10 @@ export function calculateOffSiteHedgerowNetChangeWithSRM(
     creations: v.InferOutput<typeof offSiteHedgerowCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteHedgerowEnhancementSchema>[],
     netChangeUnits: number
-): { units: number; percentage: number } {
+): number | "N/A" {
     // If net change is <= 0, SRM is not applicable
     if (netChangeUnits <= 0) {
-        return { units: 0, percentage: 0 };
+        return "N/A" as const;
     }
 
     // Calculate baseline WITH SRM
@@ -287,11 +285,7 @@ export function calculateOffSiteHedgerowNetChangeWithSRM(
 
     const postInterventionWithSRM = retainedAndEnhancedWithSRM + createdWithSRM + enhancedWithSRM;
 
-    // Calculate net change WITH SRM
-    const units = postInterventionWithSRM - baselineWithSRM;
-    const percentage = baselineWithSRM === 0 ? 0 : (units / baselineWithSRM) * 100;
-
-    return { units, percentage };
+    return postInterventionWithSRM - baselineWithSRM;
 }
 
 /**
@@ -407,10 +401,10 @@ export function calculateOffSiteWatercourseNetChangeWithSRM(
     creations: v.InferOutput<typeof offSiteWatercourseCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteWatercourseEnhancementSchema>[],
     netChangeUnits: number
-): { units: number; percentage: number } {
+): number | "N/A" {
     // If net change is <= 0, SRM is not applicable
     if (netChangeUnits <= 0) {
-        return { units: 0, percentage: 0 };
+        return "N/A" as const
     }
 
     // Calculate baseline WITH SRM
@@ -438,12 +432,7 @@ export function calculateOffSiteWatercourseNetChangeWithSRM(
     );
 
     const postInterventionWithSRM = retainedAndEnhancedWithSRM + createdWithSRM + enhancedWithSRM;
-
-    // Calculate net change WITH SRM
-    const units = postInterventionWithSRM - baselineWithSRM;
-    const percentage = baselineWithSRM === 0 ? 0 : (units / baselineWithSRM) * 100;
-
-    return { units, percentage };
+    return postInterventionWithSRM - baselineWithSRM;
 }
 
 /**
@@ -474,17 +463,21 @@ export function calculateCombinedNetUnitChange(
  */
 export function calculateTotalSRMDeductions(
     offSiteHabitatNetChange: number,
-    offSiteHabitatNetChangeWithSRM: number,
+    offSiteHabitatNetChangeWithSRM: number | "N/A",
     offSiteHedgerowNetChange: number,
-    offSiteHedgerowNetChangeWithSRM: number,
+    offSiteHedgerowNetChangeWithSRM: number | "N/A",
     offSiteWatercourseNetChange: number,
-    offSiteWatercourseNetChangeWithSRM: number
+    offSiteWatercourseNetChangeWithSRM: number | "N/A"
 ) {
-    const habitat = offSiteHabitatNetChange - offSiteHabitatNetChangeWithSRM;
-    const hedgerow = offSiteHedgerowNetChange - offSiteHedgerowNetChangeWithSRM;
-    const watercourse = offSiteWatercourseNetChange - offSiteWatercourseNetChangeWithSRM;
+    const habitat = offSiteHabitatNetChange - zeroNaN(offSiteHabitatNetChangeWithSRM);
+    const hedgerow = offSiteHedgerowNetChange - zeroNaN(offSiteHedgerowNetChangeWithSRM);
+    const watercourse = offSiteWatercourseNetChange - zeroNaN(offSiteWatercourseNetChangeWithSRM);
 
     return { habitat, hedgerow, watercourse };
+}
+
+function zeroNaN<T>(x: number | T): number {
+    return typeof x === "number" ? x : 0;
 }
 
 /**
@@ -514,6 +507,22 @@ export function calculateTotalNetPercentageChange(
         habitat: onSiteHabitatBaseline === 0 ? 0 : totalNetUnitChange.habitat / onSiteHabitatBaseline,
         hedgerow: onSiteHedgerowBaseline === 0 ? 0 : totalNetUnitChange.hedgerow / onSiteHedgerowBaseline,
         watercourse: onSiteWatercourseBaseline === 0 ? 0 : totalNetUnitChange.watercourse / onSiteWatercourseBaseline,
+    }
+}
+
+function unitSummary(baseline: number, postIntervention: number, change: number, changeWithSRM: number | "N/A", target = 1.1) {
+    const baselineUnits = baseline;
+    const requiredUnits = target * baselineUnits;
+    const unitDeficit = changeWithSRM === "N/A"
+        ? requiredUnits - postIntervention - change
+        : requiredUnits - postIntervention - changeWithSRM
+    const unitDeficitNormalised = unitDeficit < 0 ? 0 : unitDeficit
+
+    return {
+        target,
+        baselineUnits: baseline,
+        requiredUnits: 1.1 * baseline,
+        unitDeficit: unitDeficitNormalised,
     }
 }
 
@@ -626,11 +635,11 @@ export function headlineResults(data: AllFeatures) {
 
     const totalSRMDeductions = calculateTotalSRMDeductions(
         offSiteHabitatNetChange.units,
-        offSiteHabitatNetChangeWithSRM.units,
+        offSiteHabitatNetChangeWithSRM,
         offSiteHedgerowNetChange.units,
-        offSiteHedgerowNetChangeWithSRM.units,
+        offSiteHedgerowNetChangeWithSRM,
         offSiteWatercourseNetChange.units,
-        offSiteWatercourseNetChangeWithSRM.units
+        offSiteWatercourseNetChangeWithSRM
     );
 
     // FINAL RESULTS
@@ -666,6 +675,11 @@ export function headlineResults(data: AllFeatures) {
         && watercourseTradingSummaries.lowSatisfied
     )
 
+    // Unit Summaries
+    const habitatUnitSummary = unitSummary(onSiteHabitatBaseline, onSiteHabitatPostIntervention, offSiteHabitatNetChange.units, offSiteHabitatNetChangeWithSRM)
+    const hedgerowUnitSummary = unitSummary(onSiteHedgerowBaseline, onSiteHedgerowPostIntervention, offSiteHedgerowNetChange.units, offSiteHedgerowNetChangeWithSRM)
+    const watercourseUnitSummary = unitSummary(onSiteWatercourseBaseline, onSiteWatercoursePostIntervention, offSiteWatercourseNetChange.units, offSiteWatercourseNetChangeWithSRM)
+
     return {
         onSiteHabitatBaseline,
         onSiteHabitatPostIntervention,
@@ -693,6 +707,9 @@ export function headlineResults(data: AllFeatures) {
         totalNetUnitChange,
         totalNetPercentageChange,
         tradingRulesSatisfied,
+        habitatUnitSummary,
+        hedgerowUnitSummary,
+        watercourseUnitSummary,
     };
 }
 

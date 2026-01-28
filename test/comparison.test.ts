@@ -137,9 +137,10 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
             if (result.offSiteHabitatNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteHabitatNetChangeWithSRM.units).toEqual(0)
+                expect(result.offSiteHabitatNetChangeWithSRM).toEqual("N/A")
             } else {
-                expectCloseTo(result.offSiteHabitatNetChangeWithSRM.units, excelUnits, 0.01, "Off-site Habitat Net Change with SRM Units");
+                if (typeof result.offSiteHabitatNetChangeWithSRM !== "number") return;
+                expectCloseTo(result.offSiteHabitatNetChangeWithSRM, excelUnits, 0.01, "Off-site Habitat Net Change with SRM Units");
             }
         });
 
@@ -148,9 +149,10 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
             if (result.offSiteHedgerowNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteHedgerowNetChangeWithSRM.units).toEqual(0)
+                expect(result.offSiteHedgerowNetChangeWithSRM).toEqual("N/A")
             } else {
-                expectCloseTo(result.offSiteHedgerowNetChangeWithSRM.units, excelUnits, 0.01, "Off-site Hedgerow Net Change with SRM Units");
+                if (typeof result.offSiteHedgerowNetChangeWithSRM !== "number") return;
+                expectCloseTo(result.offSiteHedgerowNetChangeWithSRM, excelUnits, 0.01, "Off-site Hedgerow Net Change with SRM Units");
             }
         });
 
@@ -159,9 +161,10 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
             if (result.offSiteWatercourseNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteWatercourseNetChangeWithSRM.units).toEqual(0)
+                expect(result.offSiteWatercourseNetChangeWithSRM).toEqual("N/A")
             } else {
-                expectCloseTo(result.offSiteWatercourseNetChangeWithSRM.units, excelUnits, 0.01, "Off-site Watercourse Net Change with SRM Units");
+                if (typeof result.offSiteWatercourseNetChangeWithSRM !== "number") return;
+                expectCloseTo(result.offSiteWatercourseNetChangeWithSRM, excelUnits, 0.01, "Off-site Watercourse Net Change with SRM Units");
             }
         });
 
@@ -209,6 +212,16 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const excelValue = getCellValue(headlineSheet, 54, 5) // F55
             const booleanExcelValue = excelValue.trim() === "No - Check Trading Summaries ▲" ? false : true;
             expect(result.tradingRulesSatisfied).toEqual(booleanExcelValue);
+        })
+
+        test("calculates unit deficit", () => {
+            const habitatValue = getCellValue(headlineSheet, 60, 7) // H61
+            const hedgerowValue = getCellValue(headlineSheet, 61, 7) // H62
+            const watercourseValue = getCellValue(headlineSheet, 62, 7) // H63
+
+            expectCloseTo(result.habitatUnitSummary.unitDeficit, habitatValue, 0.01, "Unit Deficit - Habitat");
+            expectCloseTo(result.hedgerowUnitSummary.unitDeficit, hedgerowValue, 0.01, "Unit Deficit - Hedgerow");
+            expectCloseTo(result.watercourseUnitSummary.unitDeficit, watercourseValue, 0.01, "Unit Deficit - Watercourse");
         })
     });
 
