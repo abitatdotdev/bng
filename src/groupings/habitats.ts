@@ -195,39 +195,41 @@ function calculateRetainedUnitsOffSite(inputData: AllFeatures, habitat: Habitat)
 }
 function calculateProposedAreaCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
-        .offSiteHabitatBaselines
-        .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => sum + baseline.areaHabitatLost, 0);
-}
-function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
-    return inputData
-        .offSiteHabitatBaselines
-        .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
-}
-function calculateProposedAreaEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
-    return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.area, 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
         .reduce((sum, creation) => sum + creation.habitatUnitsDelivered, 0);
 }
-function calculateTotalProposedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
+function calculateProposedAreaEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.area, 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
         .reduce((sum, enhancement) => sum + enhancement.habitatUnitsDelivered, 0);
+}
+function calculateTotalProposedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
+    return (
+        calculateRetainedAreaOffSite(inputData, habitat)
+        + calculateProposedAreaCreationOffSite(inputData, habitat)
+        + calculateProposedAreaEnhancementOffSite(inputData, habitat)
+    )
+}
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
+    return (
+        calculateRetainedUnitsOffSite(inputData, habitat)
+        + calculateProposedUnitsCreationOffSite(inputData, habitat)
+        + calculateProposedUnitsEnhancementOffSite(inputData, habitat)
+    )
 }
 function calculateOffSiteNetAreaChange(inputData: AllFeatures, habitat: Habitat): number {
     return (

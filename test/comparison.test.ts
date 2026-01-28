@@ -207,7 +207,7 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
         test("calculates trading rules satisfied", () => {
             const excelValue = getCellValue(headlineSheet, 54, 5) // F55
-            const booleanExcelValue = excelValue === "No ▲" ? false : true;
+            const booleanExcelValue = excelValue.trim() === "No - Check Trading Summaries ▲" ? false : true;
             expect(result.tradingRulesSatisfied).toEqual(booleanExcelValue);
         })
     });

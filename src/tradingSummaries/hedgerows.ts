@@ -133,14 +133,23 @@ function veryLowDistinctivenessSummary(features: AllFeatures) {
 }
 
 export function hedgerowTradingSummary(features: AllFeatures) {
+    const details = {
+        vHigh: veryHighDistinctivenessSummary(features),
+        high: highDistinctivenessSummary(features),
+        medium: mediumDistinctivenessSummary(features),
+        low: lowDistinctivenessSummary(features),
+        vLow: veryLowDistinctivenessSummary(features),
+    }
+
     return {
-        vHighSatisfied: veryHighDistinctivenessSummary(features).remainingLosses >= 0,
+        details,
+        vHighSatisfied: details.vHigh.remainingLosses >= 0,
         highSatisfied: (
-            veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-            + highDistinctivenessSummary(features).unitsAvailableToOffsetUpwards
+            details.vHigh.unitsAvailableToOffsetDownwards
+            + details.high.unitsAvailableToOffsetUpwards
         ) >= 0,
-        mediumSatisfied: mediumDistinctivenessSummary(features).cumulativeSurplus >= 0,
-        lowSatisfied: lowDistinctivenessSummary(features).cumulativeSurplus >= 0,
-        vLowSatisfied: veryLowDistinctivenessSummary(features).cumulativeSurplus >= 0,
+        mediumSatisfied: details.medium.cumulativeSurplus >= 0,
+        lowSatisfied: details.low.cumulativeSurplus >= 0,
+        vLowSatisfied: details.vLow.cumulativeSurplus >= 0,
     }
 }

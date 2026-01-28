@@ -41,6 +41,7 @@ import { onSiteWatercourseEnhancementSchema } from "../onSite/watercourseEnhance
 import { offSiteWatercourseBaselineSchema } from "../offSite/watercourseBaseline";
 import { offSiteWatercourseCreationSchema } from "../offSite/watercourseCreation";
 import { offSiteWatercourseEnhancementSchema } from "../offSite/watercourseEnhancement";
+import { type TradingSummaries, habitatTradingSummary, hedgerowTradingSummary, watercourseTradingSummary } from "../tradingSummaries";
 
 
 const sheetsToGrab = [
@@ -51,9 +52,9 @@ const sheetsToGrab = [
     // 'Results',
     'Headline Results',
     // 'Detailed Results',
-    // 'Trading Summary Area Habitats',
-    // 'Trading Summary Hedgerows',
-    // "Trading Summary WaterC's",
+    'Trading Summary Area Habitats',
+    'Trading Summary Hedgerows',
+    "Trading Summary WaterC's",
     // 'Off-site gain site summary',
     // 'Irreplaceable Habitats',
     'A-1 On-Site Habitat Baseline',
@@ -128,6 +129,7 @@ export function parseWorkbook(file: string | ArrayBuffer) {
 interface ParsedMetric {
     parsedRows: AllFeatures,
     headlineResults: HeadlineResults,
+    tradingSummaries: TradingSummaries,
 }
 
 /**
@@ -343,6 +345,11 @@ export function parseFile(file: string | ArrayBuffer): ParsedMetric {
     return {
         parsedRows,
         headlineResults: calculatedHeadlineResults,
+        tradingSummaries: {
+            habitats: habitatTradingSummary(parsedRows),
+            hedgerows: hedgerowTradingSummary(parsedRows),
+            watercourses: watercourseTradingSummary(parsedRows),
+        }
     }
 }
 export default parseFile;

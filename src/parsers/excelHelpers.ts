@@ -3,7 +3,7 @@ import XLSX, { utils } from 'xlsx';
 /**
  * Maximum number of rows to process in Excel sheets
  */
-export const MAX_DATA_ROWS = 100;
+export const MAX_DATA_ROWS = 200;
 
 /**
  * Cache for sheet data converted to array of arrays

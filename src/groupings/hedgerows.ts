@@ -188,39 +188,41 @@ function calculateRetainedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgero
 }
 function calculateProposedLengthCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
-        .offSiteHedgerowBaselines
-        .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
-}
-function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return inputData
-        .offSiteHedgerowBaselines
-        .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
-}
-function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.length, 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
         .reduce((sum, creation) => sum + creation.hedgerowUnitsDelivered, 0);
 }
-function calculateTotalProposedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
+function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.length, 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
         .reduce((sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered, 0);
+}
+function calculateTotalProposedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
+    return (
+        calculateRetainedLengthOffSite(inputData, hedgerow)
+        + calculateProposedLengthCreationOffSite(inputData, hedgerow)
+        + calculateProposedLengthEnhancementOffSite(inputData, hedgerow)
+    )
+}
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
+    return (
+        calculateRetainedUnitsOffSite(inputData, hedgerow)
+        + calculateProposedUnitsCreationOffSite(inputData, hedgerow)
+        + calculateProposedUnitsEnhancementOffSite(inputData, hedgerow)
+    )
 }
 function calculateOffSiteNetLengthChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return (

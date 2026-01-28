@@ -2,7 +2,7 @@ import type { BroadHabitat } from "../broadHabitats";
 import type { DistinctivenessCategory } from "../distinctivenessCategories";
 import { type AllFeatures } from "../features";
 import { valuesByHabitat } from "../groupings";
-import { allHabitats, type HabitatLabel } from "../habitats";
+import { allHabitats, type Habitat, type HabitatLabel } from "../habitats";
 
 function onSiteUnitChange(features: AllFeatures, label: HabitatLabel) {
     const { netUnitChangeOnSite } = valuesByHabitat(features)[label]!
@@ -27,13 +27,14 @@ function unitLosses(features: AllFeatures, label: HabitatLabel) {
 // This is simply to match the column name for high distinctiveness summaries
 const lossesNotYetAccountedFor = unitLosses;
 
-/* This is only used for medium distinctiveness for some reason, hence the extra filter condition */
-function cumulativeBroadHabitatChange(features: AllFeatures, broadHabitat: BroadHabitat, distinctivenessCategory: DistinctivenessCategory = "Medium") {
+function cumulativeBroadHabitatChange(features: AllFeatures, distinctivenessCategory: DistinctivenessCategory) {
     return Object.values(allHabitats)
-        .filter(h => h.broadHabitat === broadHabitat && h.distinctivenessCategory === distinctivenessCategory)
-        .map(h => h.label)
-        .map(label => projectWideUnitChange(features, label))
-        .reduce((sum, value) => sum + value, 0)
+        .filter(h => h.distinctivenessCategory === distinctivenessCategory)
+        .reduce((acc, h) => {
+            const existing = acc[h.broadHabitat] || 0;
+            acc[h.broadHabitat] = existing + projectWideUnitChange(features, h.label)
+            return acc;
+        }, {} as { [K in BroadHabitat]: number })
 }
 
 /**
@@ -91,16 +92,17 @@ function highDistinctivenessSummary(features: AllFeatures) {
 }
 
 function mediumDistinctivenessSummary(features: AllFeatures) {
+    debugger;
     const labels = Object.values(allHabitats)
         .filter(h => h.distinctivenessCategory === "Medium")
         .map(f => f.label);
 
-    const availableDownwards = labels
-        .map(label => unitsAvailableToOffsetDownwards(features, label))
-        .reduce((acc, num) => acc + num, 0);
-    const availableUpwards = labels
-        .map(label => unitsAvailableToOffsetUpwards(features, label))
-        .reduce((acc, num) => acc + num, 0)
+    const availableDownwards =
+        Object.values(cumulativeBroadHabitatChange(features, "Medium"))
+            .reduce((acc, num) => num > 0 ? acc + num : acc, 0)
+    const availableUpwards =
+        Object.values(cumulativeBroadHabitatChange(features, "Medium"))
+            .reduce((acc, num) => num < 0 ? acc + num : acc, 0)
 
     const vHighAvailable = veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
     const highAvailable = highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
@@ -143,14 +145,22 @@ function vHighUnitLosses(features: AllFeatures) {
 }
 
 export function habitatTradingSummary(features: AllFeatures) {
+    const details = {
+        vHigh: veryHighDistinctivenessSummary(features),
+        high: highDistinctivenessSummary(features),
+        medium: mediumDistinctivenessSummary(features),
+        low: lowDistinctivenessSummary(features),
+    }
+
     return {
+        details,
         vHighSatisfied: vHighUnitLosses(features) >= 0,
-        highSatisfied: highDistinctivenessSummary(features).remainingLosses >= 0,
+        highSatisfied: details.high.remainingLosses >= 0,
         mediumSatisfied: (
-            veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-            + highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-            + mediumDistinctivenessSummary(features).unitsAvailableToOffsetUpwards
+            details.vHigh.unitsAvailableToOffsetDownwards
+            + details.high.unitsAvailableToOffsetDownwards
+            + details.medium.unitsAvailableToOffsetUpwards
         ) >= 0,
-        lowSatisfied: lowDistinctivenessSummary(features).cumulativeSurplus >= 0
+        lowSatisfied: details.low.cumulativeSurplus >= 0
     }
 }

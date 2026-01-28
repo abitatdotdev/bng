@@ -117,10 +117,18 @@ function lowDistinctivenessSummary(features: AllFeatures) {
 }
 
 export function watercourseTradingSummary(features: AllFeatures) {
+    const details = {
+        vHigh: veryHighDistinctivenessSummary(features),
+        high: highDistinctivenessSummary(features),
+        medium: mediumDistinctivenessSummary(features),
+        low: lowDistinctivenessSummary(features),
+    }
+
     return {
+        details,
         vHighSatisfied: labelsFor("V.High").map(l => projectWideUnitChange(features, l)).reduce((sum, num) => sum + num, 0) >= 0,
-        highSatisfied: highDistinctivenessSummary(features).remainingLosses >= 0,
-        mediumSatisfied: mediumDistinctivenessSummary(features).remainingLosses >= 0,
-        lowSatisfied: lowDistinctivenessSummary(features).cumulativeSurplus >= 0,
+        highSatisfied: details.high.remainingLosses >= 0,
+        mediumSatisfied: details.medium.remainingLosses >= 0,
+        lowSatisfied: details.low.cumulativeSurplus >= 0,
     }
 }
