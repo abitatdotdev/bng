@@ -132,7 +132,7 @@ function veryLowDistinctivenessSummary(features: AllFeatures) {
     }
 }
 
-export function habitatTradingSummary(features: AllFeatures) {
+export function hedgerowTradingSummary(features: AllFeatures) {
     return {
         vHighSatisfied: veryHighDistinctivenessSummary(features).remainingLosses >= 0,
         highSatisfied: (

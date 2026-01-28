@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { habitatTradingSummary } from "./hedgerows";
+import { hedgerowTradingSummary } from "./hedgerows";
 import { type AllFeatures } from "../features";
 
 function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
@@ -32,9 +32,9 @@ function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
 // Low hedgerow: "Native hedgerow"
 // V.Low hedgerow: "Non-native and ornamental hedgerow"
 
-describe("habitatTradingSummary (hedgerows)", () => {
+describe("hedgerowTradingSummary (hedgerows)", () => {
     test("all satisfied when no features present", () => {
-        const result = habitatTradingSummary(emptyFixture());
+        const result = hedgerowTradingSummary(emptyFixture());
         expect(result.vHighSatisfied).toBeTrue();
         expect(result.highSatisfied).toBeTrue();
         expect(result.mediumSatisfied).toBeTrue();
@@ -49,7 +49,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();
         });
 
         test("satisfied when V.High hedgerow breaks even", () => {
@@ -61,7 +61,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();
         });
 
         test("not satisfied when V.High hedgerow has net loss", () => {
@@ -73,7 +73,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 5, length: 50 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vHighSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).vHighSatisfied).toBeFalse();
         });
     });
 
@@ -84,7 +84,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).highSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).highSatisfied).toBeTrue();
         });
 
         test("not satisfied when High has net loss and no V.High surplus", () => {
@@ -93,7 +93,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees", totalHedgerowUnits: 15, length: 150, lengthRetained: 0, unitsRetained: 0, lengthLost: 150, unitsLost: 15 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).highSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).highSatisfied).toBeFalse();
         });
 
         test("V.High surplus offsets High losses", () => {
@@ -107,7 +107,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).highSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).highSatisfied).toBeTrue();
         });
     });
 
@@ -118,7 +118,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).mediumSatisfied).toBeTrue();
         });
 
         test("not satisfied when Medium has net loss and no surplus from above", () => {
@@ -127,7 +127,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow", totalHedgerowUnits: 20, length: 200, lengthRetained: 0, unitsRetained: 0, lengthLost: 200, unitsLost: 20 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).mediumSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).mediumSatisfied).toBeFalse();
         });
 
         test("High surplus carries down to Medium", () => {
@@ -142,7 +142,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).mediumSatisfied).toBeTrue();
         });
     });
 
@@ -153,7 +153,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Native hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).lowSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).lowSatisfied).toBeTrue();
         });
 
         test("not satisfied when Low has net loss and no surplus from above", () => {
@@ -162,7 +162,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Native hedgerow", totalHedgerowUnits: 15, length: 150, lengthRetained: 0, unitsRetained: 0, lengthLost: 150, unitsLost: 15 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).lowSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).lowSatisfied).toBeFalse();
         });
 
         test("Medium cumulative surplus carries down to Low", () => {
@@ -175,7 +175,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Native hedgerow", totalHedgerowUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).lowSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).lowSatisfied).toBeTrue();
         });
 
         test("negative Medium surplus does not carry down", () => {
@@ -187,7 +187,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Native hedgerow", totalHedgerowUnits: 3, length: 30, lengthRetained: 0, unitsRetained: 0, lengthLost: 30, unitsLost: 3 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).lowSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).lowSatisfied).toBeFalse();
         });
     });
 
@@ -198,7 +198,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Non-native and ornamental hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vLowSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).vLowSatisfied).toBeTrue();
         });
 
         test("not satisfied when V.Low has net loss and no surplus from above", () => {
@@ -207,7 +207,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vLowSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).vLowSatisfied).toBeFalse();
         });
 
         test("Low cumulative surplus carries down to V.Low", () => {
@@ -220,7 +220,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vLowSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).vLowSatisfied).toBeTrue();
         });
 
         test("negative Low surplus does not carry down", () => {
@@ -231,7 +231,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 2, length: 20, lengthRetained: 0, unitsRetained: 0, lengthLost: 20, unitsLost: 2 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vLowSatisfied).toBeFalse();
+            expect(hedgerowTradingSummary(input).vLowSatisfied).toBeFalse();
         });
     });
 
@@ -248,7 +248,7 @@ describe("habitatTradingSummary (hedgerows)", () => {
                     { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 12, length: 120 } as any,
                 ],
             });
-            expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
+            expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();
         });
     });
 });

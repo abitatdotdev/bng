@@ -18,6 +18,9 @@ import { offSiteWatercourseBaselineSchema } from './offSite/watercourseBaseline'
 import { offSiteWatercourseCreationSchema } from './offSite/watercourseCreation';
 import { offSiteWatercourseEnhancementSchema } from './offSite/watercourseEnhancement';
 import type { AllFeatures } from './features';
+import { habitatTradingSummary } from './tradingSummaries/habitats';
+import { hedgerowTradingSummary } from './tradingSummaries/hedgerows';
+import { watercourseTradingSummary } from './tradingSummaries/watercourses';
 
 /**
  * Calculates the total on-site habitat baseline units
@@ -643,6 +646,26 @@ export function headlineResults(data: AllFeatures) {
         onSiteWatercourseBaseline,
     )
 
+    // Trading Summaries
+    const habitatTradingSummaries = habitatTradingSummary(data);
+    const hedgerowTradingSummaries = hedgerowTradingSummary(data);
+    const watercourseTradingSummaries = watercourseTradingSummary(data);
+    const tradingRulesSatisfied = (
+        habitatTradingSummaries.vHighSatisfied
+        && habitatTradingSummaries.highSatisfied
+        && habitatTradingSummaries.mediumSatisfied
+        && habitatTradingSummaries.lowSatisfied
+        && hedgerowTradingSummaries.vHighSatisfied
+        && hedgerowTradingSummaries.highSatisfied
+        && hedgerowTradingSummaries.mediumSatisfied
+        && hedgerowTradingSummaries.lowSatisfied
+        && hedgerowTradingSummaries.vLowSatisfied
+        && watercourseTradingSummaries.vHighSatisfied
+        && watercourseTradingSummaries.highSatisfied
+        && watercourseTradingSummaries.mediumSatisfied
+        && watercourseTradingSummaries.lowSatisfied
+    )
+
     return {
         onSiteHabitatBaseline,
         onSiteHabitatPostIntervention,
@@ -669,6 +692,7 @@ export function headlineResults(data: AllFeatures) {
         totalSRMDeductions,
         totalNetUnitChange,
         totalNetPercentageChange,
+        tradingRulesSatisfied,
     };
 }
 

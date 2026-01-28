@@ -204,6 +204,12 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             expectCloseTo(result.totalNetPercentageChange.hedgerow, hedgerowValue, 0.01, "Total Net Percentage Change - Hedgerow");
             expectCloseTo(result.totalNetPercentageChange.watercourse, watercourseValue, 0.01, "Total Net Percentage Change - Watercourse");
         });
+
+        test("calculates trading rules satisfied", () => {
+            const excelValue = getCellValue(headlineSheet, 54, 5) // F55
+            const booleanExcelValue = excelValue === "No ▲" ? false : true;
+            expect(result.tradingRulesSatisfied).toEqual(booleanExcelValue);
+        })
     });
 
     describe("A-1 On-Site Habitat Baseline", () => {
