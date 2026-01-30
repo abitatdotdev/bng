@@ -18,9 +18,7 @@ import { offSiteWatercourseBaselineSchema } from './offSite/watercourseBaseline'
 import { offSiteWatercourseCreationSchema } from './offSite/watercourseCreation';
 import { offSiteWatercourseEnhancementSchema } from './offSite/watercourseEnhancement';
 import type { AllFeatures } from './features';
-import { habitatTradingSummary } from './tradingSummaries/habitats';
-import { hedgerowTradingSummary } from './tradingSummaries/hedgerows';
-import { watercourseTradingSummary } from './tradingSummaries/watercourses';
+import type { TradingSummaries } from './tradingSummaries';
 
 /**
  * Calculates the total on-site habitat baseline units
@@ -529,27 +527,27 @@ function unitSummary(baseline: number, postIntervention: number, change: number,
 /*
  * Calculates all of the fields from the 'Headline Results' sheet
  */
-export function headlineResults(data: AllFeatures) {
+export function headlineResults(features: AllFeatures, tradingSummaries: TradingSummaries) {
     // On-site baseline
-    const onSiteHabitatBaseline = calculateOnSiteHabitatBaseline(data.onSiteHabitatBaselines);
-    const onSiteHedgerowBaseline = calculateOnSiteHedgerowBaseline(data.onSiteHedgerowBaselines);
-    const onSiteWatercourseBaseline = calculateOnSiteWatercourseBaseline(data.onSiteWatercourseBaselines);
+    const onSiteHabitatBaseline = calculateOnSiteHabitatBaseline(features.onSiteHabitatBaselines);
+    const onSiteHedgerowBaseline = calculateOnSiteHedgerowBaseline(features.onSiteHedgerowBaselines);
+    const onSiteWatercourseBaseline = calculateOnSiteWatercourseBaseline(features.onSiteWatercourseBaselines);
 
     // On-site post intervention
     const onSiteHabitatPostIntervention = calculateOnSiteHabitatPostIntervention(
-        data.onSiteHabitatBaselines,
-        data.onSiteHabitatCreations,
-        data.onSiteHabitatEnhancements
+        features.onSiteHabitatBaselines,
+        features.onSiteHabitatCreations,
+        features.onSiteHabitatEnhancements
     );
     const onSiteHedgerowPostIntervention = calculateOnSiteHedgerowPostIntervention(
-        data.onSiteHedgerowBaselines,
-        data.onSiteHedgerowCreations,
-        data.onSiteHedgerowEnhancements
+        features.onSiteHedgerowBaselines,
+        features.onSiteHedgerowCreations,
+        features.onSiteHedgerowEnhancements
     );
     const onSiteWatercoursePostIntervention = calculateOnSiteWatercoursePostIntervention(
-        data.onSiteWatercourseBaselines,
-        data.onSiteWatercourseCreations,
-        data.onSiteWatercourseEnhancements
+        features.onSiteWatercourseBaselines,
+        features.onSiteWatercourseCreations,
+        features.onSiteWatercourseEnhancements
     );
 
     // On-site net change
@@ -567,25 +565,25 @@ export function headlineResults(data: AllFeatures) {
     );
 
     // Off-site baseline
-    const offSiteHabitatBaseline = calculateOffSiteHabitatBaseline(data.offSiteHabitatBaselines);
-    const offSiteHedgerowBaseline = calculateOffSiteHedgerowBaseline(data.offSiteHedgerowBaselines);
-    const offSiteWatercourseBaseline = calculateOffSiteWatercourseBaseline(data.offSiteWatercourseBaselines);
+    const offSiteHabitatBaseline = calculateOffSiteHabitatBaseline(features.offSiteHabitatBaselines);
+    const offSiteHedgerowBaseline = calculateOffSiteHedgerowBaseline(features.offSiteHedgerowBaselines);
+    const offSiteWatercourseBaseline = calculateOffSiteWatercourseBaseline(features.offSiteWatercourseBaselines);
 
     // Off-site post-intervention
     const offSiteHabitatPostIntervention = calculateOffSiteHabitatPostIntervention(
-        data.offSiteHabitatBaselines,
-        data.offSiteHabitatCreations,
-        data.offSiteHabitatEnhancements
+        features.offSiteHabitatBaselines,
+        features.offSiteHabitatCreations,
+        features.offSiteHabitatEnhancements
     );
     const offSiteHedgerowPostIntervention = calculateOffSiteHedgerowPostIntervention(
-        data.offSiteHedgerowBaselines,
-        data.offSiteHedgerowCreations,
-        data.offSiteHedgerowEnhancements
+        features.offSiteHedgerowBaselines,
+        features.offSiteHedgerowCreations,
+        features.offSiteHedgerowEnhancements
     );
     const offSiteWatercoursePostIntervention = calculateOffSiteWatercoursePostIntervention(
-        data.offSiteWatercourseBaselines,
-        data.offSiteWatercourseCreations,
-        data.offSiteWatercourseEnhancements
+        features.offSiteWatercourseBaselines,
+        features.offSiteWatercourseCreations,
+        features.offSiteWatercourseEnhancements
     );
 
     // Off-site net change
@@ -605,21 +603,21 @@ export function headlineResults(data: AllFeatures) {
     // Off-site unit change
     // NOTE: this is hidden by default in the sheet
     const offSiteHabitatNetChangeWithSRM = calculateOffSiteHabitatNetChangeWithSRM(
-        data.offSiteHabitatBaselines,
-        data.offSiteHabitatCreations,
-        data.offSiteHabitatEnhancements,
+        features.offSiteHabitatBaselines,
+        features.offSiteHabitatCreations,
+        features.offSiteHabitatEnhancements,
         offSiteHabitatNetChange.units
     );
     const offSiteHedgerowNetChangeWithSRM = calculateOffSiteHedgerowNetChangeWithSRM(
-        data.offSiteHedgerowBaselines,
-        data.offSiteHedgerowCreations,
-        data.offSiteHedgerowEnhancements,
+        features.offSiteHedgerowBaselines,
+        features.offSiteHedgerowCreations,
+        features.offSiteHedgerowEnhancements,
         offSiteHedgerowNetChange.units
     );
     const offSiteWatercourseNetChangeWithSRM = calculateOffSiteWatercourseNetChangeWithSRM(
-        data.offSiteWatercourseBaselines,
-        data.offSiteWatercourseCreations,
-        data.offSiteWatercourseEnhancements,
+        features.offSiteWatercourseBaselines,
+        features.offSiteWatercourseCreations,
+        features.offSiteWatercourseEnhancements,
         offSiteWatercourseNetChange.units
     );
 
@@ -656,9 +654,9 @@ export function headlineResults(data: AllFeatures) {
     )
 
     // Trading Summaries
-    const habitatTradingSummaries = habitatTradingSummary(data);
-    const hedgerowTradingSummaries = hedgerowTradingSummary(data);
-    const watercourseTradingSummaries = watercourseTradingSummary(data);
+    const habitatTradingSummaries = tradingSummaries.habitats;
+    const hedgerowTradingSummaries = tradingSummaries.hedgerows;
+    const watercourseTradingSummaries = tradingSummaries.watercourses;
     const tradingRulesSatisfied = (
         habitatTradingSummaries.vHighSatisfied
         && habitatTradingSummaries.highSatisfied

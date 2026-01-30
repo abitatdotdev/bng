@@ -126,14 +126,8 @@ export function parseWorkbook(file: string | ArrayBuffer) {
     return workbook
 }
 
-interface ParsedMetric {
-    parsedRows: AllFeatures,
-    headlineResults: HeadlineResults,
-    tradingSummaries: TradingSummaries,
-}
-
 /**
- * Parse a statutory metric file and to get all rows and calculated results
+ * Parse a statutory metric file and to get all parsed rows
  *
  * ```ts
 // for local files
@@ -143,7 +137,7 @@ const results = parseFile(await file.arrayBuffer());
 ```
  * Throws an error when the metric version is unsupported.
  */
-export function parseFile(file: string | ArrayBuffer): ParsedMetric {
+export function parseFile(file: string | ArrayBuffer): AllFeatures {
     const workbook = parseWorkbook(file);
 
     // Parse all input sheets using shared parsers
@@ -339,18 +333,8 @@ export function parseFile(file: string | ArrayBuffer): ParsedMetric {
         offSiteWatercourseEnhancements,
     };
 
-    const calculatedHeadlineResults = headlineResults(parsedRows);
 
-
-    return {
-        parsedRows,
-        headlineResults: calculatedHeadlineResults,
-        tradingSummaries: {
-            habitats: habitatTradingSummary(parsedRows),
-            hedgerows: hedgerowTradingSummary(parsedRows),
-            watercourses: watercourseTradingSummary(parsedRows),
-        }
-    }
+    return parsedRows
 }
 export default parseFile;
 

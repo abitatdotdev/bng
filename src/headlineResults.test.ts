@@ -27,6 +27,7 @@ import {
     headlineResults,
 } from './headlineResults';
 import { type AllFeatures } from './features';
+import type { TradingSummaries } from "./tradingSummaries";
 
 /**
  * Creates a minimal valid headline results input with all empty arrays
@@ -53,6 +54,33 @@ export function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures 
         offSiteWatercourseEnhancements: [],
         ...overrides,
     };
+}
+
+export function emptyTradingSummary(): TradingSummaries {
+    return {
+        habitats: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true
+        },
+        hedgerows: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true,
+            vLowSatisfied: true,
+        },
+        watercourses: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true,
+        },
+    }
 }
 
 describe("calculateOnSiteHabitatBaseline", () => {
@@ -340,7 +368,7 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
 describe("headlineResults", () => {
     test("calculates on-site habitat results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteHabitatBaseline).toBe(0);
         expect(result.onSiteHabitatPostIntervention).toBe(0);
@@ -361,7 +389,7 @@ describe("headlineResults", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteHabitatBaseline).toBe(100);
         expect(result.onSiteHabitatPostIntervention).toBe(120); // 60 + 20 + 30 + 10
@@ -371,7 +399,7 @@ describe("headlineResults", () => {
 
     test("calculates off-site habitat results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHabitatBaseline).toBe(0);
         expect(result.offSiteHabitatPostIntervention).toBe(0);
@@ -414,7 +442,7 @@ describe("headlineResults", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHabitatBaseline).toBe(80);
         expect(result.offSiteHabitatPostIntervention).toBe(110); // 50 + 10 + 30 + 20
@@ -445,7 +473,7 @@ describe("headlineResults", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHabitatBaseline).toBe(100);
         expect(result.offSiteHabitatPostIntervention).toBe(30); // Only retained
@@ -562,7 +590,7 @@ describe("calculateOnSiteHedgerowNetChange", () => {
 describe("headlineResults - on-site hedgerows", () => {
     test("calculates on-site hedgerow results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteHedgerowBaseline).toBe(0);
         expect(result.onSiteHedgerowPostIntervention).toBe(0);
@@ -583,7 +611,7 @@ describe("headlineResults - on-site hedgerows", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteHedgerowBaseline).toBe(60);
         expect(result.onSiteHedgerowPostIntervention).toBe(68); // 40 + 20 + 8
@@ -606,7 +634,7 @@ describe("headlineResults - on-site hedgerows", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteHedgerowBaseline).toBe(55); // 30 + 25
         expect(result.onSiteHedgerowPostIntervention).toBe(61); // 20 + 15 + 12+8 + 6
@@ -772,7 +800,7 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
 describe("headlineResults - off-site hedgerows", () => {
     test("calculates off-site hedgerow results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHedgerowBaseline).toBe(0);
         expect(result.offSiteHedgerowPostIntervention).toBe(0);
@@ -806,7 +834,7 @@ describe("headlineResults - off-site hedgerows", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHedgerowBaseline).toBe(50);
         expect(result.offSiteHedgerowPostIntervention).toBe(78); // 35 + 8 + 20 + 15
@@ -831,7 +859,7 @@ describe("headlineResults - off-site hedgerows", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHedgerowBaseline).toBe(80);
         expect(result.offSiteHedgerowPostIntervention).toBe(25); // Only retained
@@ -942,7 +970,7 @@ describe("calculateOnSiteWatercourseNetChange", () => {
 describe("headlineResults - on-site watercourses", () => {
     test("calculates on-site watercourse results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteWatercourseBaseline).toBe(0);
         expect(result.onSiteWatercoursePostIntervention).toBe(0);
@@ -971,7 +999,7 @@ describe("headlineResults - on-site watercourses", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteWatercourseBaseline).toBe(45);
         expect(result.onSiteWatercoursePostIntervention).toBe(85); // 30 + 10 + 25 + 20
@@ -990,7 +1018,7 @@ describe("headlineResults - on-site watercourses", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.onSiteWatercourseBaseline).toBe(60);
         expect(result.onSiteWatercoursePostIntervention).toBe(55);
@@ -1134,7 +1162,7 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
 describe("headlineResults - off-site watercourses", () => {
     test("calculates off-site watercourse results with empty arrays", () => {
         const input = emptyFixture();
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteWatercourseBaseline).toBe(0);
         expect(result.offSiteWatercoursePostIntervention).toBe(0);
@@ -1168,7 +1196,7 @@ describe("headlineResults - off-site watercourses", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteWatercourseBaseline).toBe(55);
         expect(result.offSiteWatercoursePostIntervention).toBe(95); // 40 + 10 + 25 + 20
@@ -1193,7 +1221,7 @@ describe("headlineResults - off-site watercourses", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteWatercourseBaseline).toBe(85);
         expect(result.offSiteWatercoursePostIntervention).toBe(30); // Only retained
@@ -1394,7 +1422,7 @@ describe("headlineResults - combined calculations", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         // On-site: baseline 100, post 80, net -20
         // Off-site: baseline 50, post 40, net -10
@@ -1424,7 +1452,7 @@ describe("headlineResults - combined calculations", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         // Off-site net change: post = 50 + 10 + 30 = 90, baseline = 80, net = 10
         // Off-site net change with SRM: post with SRM = (50+10)*0.5 + 15 = 30 + 15 = 45, baseline with SRM = 40, net with SRM = 5
@@ -1487,7 +1515,7 @@ describe("headlineResults - combined calculations", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         // Combined: habitat 50, hedgerow 30
         expect(result.combinedNetUnitChange.habitat).toBe(50); // 20 + 30
@@ -1522,7 +1550,7 @@ describe("headlineResults - combined calculations", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         // On-site habitat: baseline 100, post 120 (60+20+40), net +20
         // On-site hedgerow: baseline 50, post 50 (30+20), net 0
@@ -1540,7 +1568,7 @@ describe("headlineResults - combined calculations", () => {
             ],
         });
 
-        const result = headlineResults(input);
+        const result = headlineResults(input, emptyTradingSummary());
 
         // On-site habitat: baseline 0, post 50, net +50
         // Total net percentage: habitat 50/0 = 0 (division by zero handled)

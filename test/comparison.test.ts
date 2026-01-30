@@ -16,11 +16,13 @@ import { offSiteHedgerowEnhancementSchema } from "../src/offSite/hedgerowEnhance
 import { onSiteHabitatEnhancementSchema } from "../src/onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../src/offSite/habitatEnhancement";
 import parseFile, { findAllDataRows } from "../src/parsers/parseFile";
+import { headlineResults } from "../src/headlineResults";
+import { tradingSummaries } from "../src/tradingSummaries";
 
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     describe("Headline Results", () => {
         const parsed = parseFile(fileName);
-        const result = parsed.headlineResults;
+        const result = headlineResults(parsed, tradingSummaries(parsed));
 
         const headlineSheet = getSheet(workbook, 'Headline Results')!;
 
