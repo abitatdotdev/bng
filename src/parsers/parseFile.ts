@@ -31,7 +31,6 @@ import { onSiteHedgerowEnhancementSchema } from "../onSite/hedgerowEnhancement";
 import { offSiteHedgerowBaselineSchema } from "../offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema } from "../offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../offSite/hedgerowEnhancement";
-import { headlineResults, type HeadlineResults } from "../headlineResults";
 import { type AllFeatures } from '../features';
 import { onSiteHabitatEnhancementSchema } from "../onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../offSite/habitatEnhancement";
@@ -41,8 +40,8 @@ import { onSiteWatercourseEnhancementSchema } from "../onSite/watercourseEnhance
 import { offSiteWatercourseBaselineSchema } from "../offSite/watercourseBaseline";
 import { offSiteWatercourseCreationSchema } from "../offSite/watercourseCreation";
 import { offSiteWatercourseEnhancementSchema } from "../offSite/watercourseEnhancement";
-import { type TradingSummaries, habitatTradingSummary, hedgerowTradingSummary, watercourseTradingSummary } from "../tradingSummaries";
 
+let parsedCount = 0;
 
 const sheetsToGrab = [
     // 'Introduction',
@@ -313,6 +312,7 @@ export function parseFile(file: string | ArrayBuffer): AllFeatures {
 
     // Create the input object
     const parsedRows: AllFeatures = {
+        __id: parsedCount++,
         onSiteHabitatBaselines,
         onSiteHabitatCreations,
         onSiteHabitatEnhancements,
@@ -334,7 +334,9 @@ export function parseFile(file: string | ArrayBuffer): AllFeatures {
     };
 
 
-    return parsedRows
+    // NOTE: various downstream implementations rely on this object being frozen
+    // in order to cache computed results. Create a new version by spreading if necessary.
+    return Object.freeze(parsedRows);
 }
 export default parseFile;
 

@@ -2,8 +2,10 @@ import { expect, test, describe } from "bun:test";
 import { habitatTradingSummary } from "./habitats";
 import { type AllFeatures } from "../features";
 
+let __id = 0;
 function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
     return {
+        __id: __id++,
         onSiteHabitatBaselines: [],
         onSiteHabitatCreations: [],
         onSiteHabitatEnhancements: [],

@@ -39,9 +39,18 @@ type ValuesByHabitat = {
     }
 }
 
+const habitatLabels = Object.keys(allHabitats) as HabitatLabel[];
+
+const valuesByHabitatCache = new Map<number, ValuesByHabitat>();
+
+/**
+    * Calculate values per habitat type.
+    * NOTE: input data must not be mutated with new properties or information - there is caching based on the global object ID.
+    */
 export const valuesByHabitat = (inputData: AllFeatures): ValuesByHabitat => {
-    const habitatLabels = Object.keys(allHabitats) as HabitatLabel[];
-    return typeSafeObjectFromEntries(
+    if (valuesByHabitatCache.has(inputData.__id)) return valuesByHabitatCache.get(inputData.__id)!;
+
+    const results = typeSafeObjectFromEntries(
         habitatLabels.map(label => {
             const habitat = habitatByLabel(label)!;
 
@@ -81,6 +90,9 @@ export const valuesByHabitat = (inputData: AllFeatures): ValuesByHabitat => {
                 },
             ]
         }))
+
+    valuesByHabitatCache.set(inputData.__id, results);
+    return results;
 }
 
 function calculateExistingAreaBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {

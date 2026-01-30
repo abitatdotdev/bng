@@ -92,16 +92,14 @@ function highDistinctivenessSummary(features: AllFeatures) {
 }
 
 function mediumDistinctivenessSummary(features: AllFeatures) {
-    debugger;
-    const labels = Object.values(allHabitats)
-        .filter(h => h.distinctivenessCategory === "Medium")
-        .map(f => f.label);
+    const cumulativeBroadHabitatChanges =
+        Object.values(cumulativeBroadHabitatChange(features, "Medium"))
 
     const availableDownwards =
-        Object.values(cumulativeBroadHabitatChange(features, "Medium"))
+        cumulativeBroadHabitatChanges
             .reduce((acc, num) => num > 0 ? acc + num : acc, 0)
     const availableUpwards =
-        Object.values(cumulativeBroadHabitatChange(features, "Medium"))
+        cumulativeBroadHabitatChanges
             .reduce((acc, num) => num < 0 ? acc + num : acc, 0)
 
     const vHighAvailable = veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;

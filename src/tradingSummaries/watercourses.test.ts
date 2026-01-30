@@ -4,6 +4,7 @@ import { type AllFeatures } from "../features";
 
 function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
     return {
+        __id: 0,
         onSiteHabitatBaselines: [],
         onSiteHabitatCreations: [],
         onSiteHabitatEnhancements: [],
