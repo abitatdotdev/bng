@@ -35,7 +35,7 @@ npm add @abitat/bng
 In your code, there are two options for parsing a file.
 
 ```ts
-import { parseFile } from '@abitat/bng';
+import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
 
 // in server environments, where you have access to the local filesystem
 // you can pass a string representing the path to the file
@@ -45,7 +45,9 @@ const parsedSheet = parseFile('./my_metric.xlsm');
 // you can pass the data directly to the function as an array buffer.
 // For example, from an input field on a page...
 const data = await inputElement.files?.[0].arrayBuffer()
-const parsedSheet = parseFile(data);
+const parsedRows = parseFile(data);
+const tradingSums = tradingSummaries(parsedRows);
+const headlineResults = headlineResults(parsedRows, tradingSums);
 ```
 
 ## Documentation
