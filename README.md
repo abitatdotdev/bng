@@ -87,7 +87,9 @@ There is a pretty comprehensive test suite that is split into two sections:
 1. Unit tests
 1. Comparison tests
 
-### Unit tests The unit tests make sure the each pipeline is solid and reflects the rules implicit in the original spreadsheet formulas.
+### Unit tests
+The unit tests make sure the each pipeline is solid and reflects the rules implicit in the original spreadsheet formulas.
+
 They come with the benefit of providing documentation for how each calculation is performed.
 
 These are run quickly and easily using `bun test:fast`.
@@ -100,7 +102,7 @@ To make sure that the tool is compatible with the metric spreadsheets, we compar
 A few simple spreadsheets are included in the `examples/` directory, but changes are tested against the more thorough set of metrics available in the [metrics repository](https://github.com/abitatdotdev/bng-metrics).
 
 #### Setup
-To test against this larger set, you must first add them to a directory: `test/metrics`, either by copying there or by (preferably) symlinking to the other repository.
+To test against this larger set, you must first add them to a directory: `test/metrics`, either by copying there or by symlinking to the other repository.
 
 #### Testing
 `bun test:compare`
