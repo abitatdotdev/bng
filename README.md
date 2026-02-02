@@ -13,7 +13,9 @@ The aims of this library are:
 * work in all javascript environments (server, web, serverless)
 * document and test the functionality/inner workings of the calculations
 
-By doing so, we wish to facilitate better tooling for BNG.
+On its own, this library doesn't do much.
+However, by building on top of this library, we can power the next wave of BNG tooling.
+
 
 ## Community contributions
 
@@ -28,11 +30,10 @@ If you would like to contribute to this project, please get in touch at
 
 You can use this tool in any environment: web, server, serverless etc. by installing the package and using the `parseFile` function.
 
+### Node/Bun
 ```sh 
 npm add @abitat/bng
 ```
-
-In your code, there are two options for parsing a file.
 
 ```ts
 import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
@@ -40,14 +41,40 @@ import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
 // in server environments, where you have access to the local filesystem
 // you can pass a string representing the path to the file
 const parsedSheet = parseFile('./my_metric.xlsm');
-
-// in browser environments, or when you have file information in-memory
-// you can pass the data directly to the function as an array buffer.
-// For example, from an input field on a page...
-const data = await inputElement.files?.[0].arrayBuffer()
-const parsedRows = parseFile(data);
 const tradingSums = tradingSummaries(parsedRows);
 const headlineResults = headlineResults(parsedRows, tradingSums);
+```
+
+### Browser
+Here's a simple example, outputting parsed files to the console.
+
+```html
+<head>
+    <script type="module">
+        import {parseFile,headlineResults,tradingSummaries} from "https://esm.sh/@abitat/bng/dist/browser/index.mjs";
+
+        const fileEl = document.getElementById("file");
+        fileEl.onchange = async (ev) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const data = await file.arrayBuffer();
+            try {
+                const parsed = parseFile(data)
+                const tradingSums = tradingSummaries(parsedRows);
+                const headlineResults = headlineResults(parsedRows, tradingSums);
+                console.info({ parsed, tradingSums, headlineResults });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <input id="file" type="file" />
+</body>
+</html>
 ```
 
 ## Documentation
@@ -60,8 +87,7 @@ There is a pretty comprehensive test suite that is split into two sections:
 1. Unit tests
 1. Comparison tests
 
-### Unit tests
-The unit tests make sure the each pipeline is solid and reflects the rules implicit in the original spreadsheet formulas.
+### Unit tests The unit tests make sure the each pipeline is solid and reflects the rules implicit in the original spreadsheet formulas.
 They come with the benefit of providing documentation for how each calculation is performed.
 
 These are run quickly and easily using `bun test:fast`.

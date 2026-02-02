@@ -1,6 +1,6 @@
 {
   "name": "@abitat/bng",
-  "version": "0.6.2-aplha",
+  "version": "0.6.2",
   "private": false,
   "description": "Open Source Statutory Biodiversity Metric",
   "homepage": "https://github.com/abitatdotdev/bng",
@@ -39,7 +39,7 @@
     "build:types": "tsc -p tsconfig.build.json",
     "build:node": "bun build src/index.ts --format esm --target node --outdir dist",
     "build:node:cjs": "bun build src/index.ts --format cjs --target node --outfile dist/index.cjs",
-    "build:browser:esm": "bun build src/browser.ts --outdir dist/browser --format esm --target browser --outfile dist/browser/index.mjs",
+    "build:browser:esm": "bun build src/browser.ts --format esm --target browser --outfile dist/browser/index.mjs",
     "build": "bun run clean && bun run build:types && bun run build:node && bun run build:node:cjs && bun run build:browser:esm"
   },
   "dependencies": {
