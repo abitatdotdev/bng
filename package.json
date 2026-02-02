@@ -1,6 +1,6 @@
 {
   "name": "@abitat/bng",
-  "version": "0.6.1",
+  "version": "0.6.2-aplha",
   "private": false,
   "description": "Open Source Statutory Biodiversity Metric",
   "homepage": "https://github.com/abitatdotdev/bng",
@@ -14,23 +14,33 @@
   "license": "LGPL-3.0",
   "author": "Matt Williams <matt@abitat.dev>",
   "type": "module",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "test"
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser/index.mjs"
+    }
   },
-  "files": [
-    "index.ts",
-    "index.js",
-    "src/**/*"
-  ],
+  "files": ["dist"],
   "scripts": {
     "mcp:habitat": "bun run mcp-server/habitat-server.ts",
     "gencode": "bun scripts/generateCodeFromSheet.ts",
     "test:fast": "bun test --concurrent ./src",
     "test:compare": "bun test test/comparison.test.ts",
-    "test:debug": "bun test --inspect-wait"
+    "test:debug": "bun test --inspect-wait",
+    "clean": "rm -rf dist",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:node": "bun build src/index.ts --format esm --target node --outdir dist",
+    "build:node:cjs": "bun build src/index.ts --format cjs --target node --outfile dist/index.cjs",
+    "build:browser:esm": "bun build src/browser.ts --outdir dist/browser --format esm --target browser --outfile dist/browser/index.mjs",
+    "build": "bun run clean && bun run build:types && bun run build:node && bun run build:node:cjs && bun run build:browser:esm"
   },
   "dependencies": {
     "valibot": "^1.2.0",
@@ -42,6 +52,5 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "module": "index.ts"
+  }
 }
