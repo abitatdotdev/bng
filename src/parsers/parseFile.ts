@@ -74,7 +74,7 @@ const sheetsToGrab = [
     "F-1 Off-Site WaterC' Baseline",
     "F-2 Off-Site WaterC' Creation",
     'F-3 Off-Site WaterC Enhancement',
-    // 'Unit shortfall calculations',
+    'Unit shortfall calculations',
     // 'G-1 All Habitats',
     // 'G-2 Habitat groups',
     // 'G-3 Multipliers',

@@ -18,6 +18,7 @@ import { offSiteHabitatEnhancementSchema } from "../src/offSite/habitatEnhanceme
 import parseFile, { findAllDataRows } from "../src/parsers/parseFile";
 import { headlineResults } from "../src/headlineResults";
 import { tradingSummaries } from "../src/tradingSummaries";
+import { unitShortfall } from "../src/unitShortfall";
 
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     describe("Headline Results", () => {
@@ -225,6 +226,92 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             expectCloseTo(result.hedgerowUnitSummary.unitDeficit, hedgerowValue, 0.01, "Unit Deficit - Hedgerow");
             expectCloseTo(result.watercourseUnitSummary.unitDeficit, watercourseValue, 0.01, "Unit Deficit - Watercourse");
         })
+    });
+
+    describe("Unit Shortfall", () => {
+        const unitShortfallSheet = getSheet(workbook, 'Unit shortfall calculations')!;
+
+        const parsed = parseFile(fileName);
+        const trading = tradingSummaries(parsed);
+        const headline = headlineResults(parsed, trading);
+        const result = unitShortfall(parsed, headline);
+
+        test("detects very high distinctiveness losses (guard clause)", () => {
+            const excelGuardCell = getCellValue(unitShortfallSheet, 15, 4); // E16
+            const excelHasVeryHighLosses = typeof excelGuardCell === 'string' && excelGuardCell.includes('ERROR');
+
+            expect(result.hasVeryHighLosses).toBe(excelHasVeryHighLosses);
+        });
+
+        test("calculates A5 (V.High) tier shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 12, 5); // F13
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 12, 6); // G13
+
+            expectCloseTo(result.tierShortfalls.habitats.a5.shortfall, excelShortfall, 0.01, "A5 Tier Shortfall");
+            expectCloseTo(result.tierShortfalls.habitats.a5.srmShortfall, excelSrmShortfall, 0.01, "A5 Tier SRM Shortfall");
+        });
+
+        test("calculates A4 (High) tier shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 11, 5); // F12
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 11, 6); // G12
+
+            expectCloseTo(result.tierShortfalls.habitats.a4.shortfall, excelShortfall, 0.01, "A4 Tier Shortfall");
+            expectCloseTo(result.tierShortfalls.habitats.a4.srmShortfall, excelSrmShortfall, 0.01, "A4 Tier SRM Shortfall");
+        });
+
+        test("calculates A3 (Medium) tier shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 10, 5); // F11
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 10, 6); // G11
+
+            expectCloseTo(result.tierShortfalls.habitats.a3.shortfall, excelShortfall, 0.01, "A3 Tier Shortfall");
+            expectCloseTo(result.tierShortfalls.habitats.a3.srmShortfall, excelSrmShortfall, 0.01, "A3 Tier SRM Shortfall");
+        });
+
+        test("calculates A2 (Low) tier shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 9, 5); // F10
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 9, 6); // G10
+
+            expectCloseTo(result.tierShortfalls.habitats.a2.shortfall, excelShortfall, 0.01, "A2 Tier Shortfall");
+            expectCloseTo(result.tierShortfalls.habitats.a2.srmShortfall, excelSrmShortfall, 0.01, "A2 Tier SRM Shortfall");
+        });
+
+        test("calculates A1 (V.Low) tier shortfall with balancing logic", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 8, 5); // F9
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 8, 6); // G9
+
+            expectCloseTo(result.tierShortfalls.habitats.a1.shortfall, excelShortfall, 0.01, "A1 Tier Shortfall");
+            expectCloseTo(result.tierShortfalls.habitats.a1.srmShortfall, excelSrmShortfall, 0.01, "A1 Tier SRM Shortfall");
+        });
+
+        test("calculates hedgerow feature shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 13, 5); // F14
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 13, 6); // G14
+
+            expectCloseTo(result.tierShortfalls.hedgerows.shortfall, excelShortfall, 0.01, "Hedgerow Shortfall");
+            expectCloseTo(result.tierShortfalls.hedgerows.srmShortfall, excelSrmShortfall, 0.01, "Hedgerow SRM Shortfall");
+        });
+
+        test("calculates watercourse feature shortfall", () => {
+            const excelShortfall = getCellValue(unitShortfallSheet, 14, 5); // F15
+            const excelSrmShortfall = getCellValue(unitShortfallSheet, 14, 6); // G15
+
+            expectCloseTo(result.tierShortfalls.watercourses.shortfall, excelShortfall, 0.01, "Watercourse Shortfall");
+            expectCloseTo(result.tierShortfalls.watercourses.srmShortfall, excelSrmShortfall, 0.01, "Watercourse SRM Shortfall");
+        });
+
+        test("summary values match headline results", () => {
+            expect(result.summary.habitats.baselineUnits).toBe(headline.habitatUnitSummary.baselineUnits);
+            expect(result.summary.habitats.requiredUnits).toBe(headline.habitatUnitSummary.requiredUnits);
+            expect(result.summary.habitats.unitDeficit).toBe(headline.habitatUnitSummary.unitDeficit);
+
+            expect(result.summary.hedgerows.baselineUnits).toBe(headline.hedgerowUnitSummary.baselineUnits);
+            expect(result.summary.hedgerows.requiredUnits).toBe(headline.hedgerowUnitSummary.requiredUnits);
+            expect(result.summary.hedgerows.unitDeficit).toBe(headline.hedgerowUnitSummary.unitDeficit);
+
+            expect(result.summary.watercourses.baselineUnits).toBe(headline.watercourseUnitSummary.baselineUnits);
+            expect(result.summary.watercourses.requiredUnits).toBe(headline.watercourseUnitSummary.requiredUnits);
+            expect(result.summary.watercourses.unitDeficit).toBe(headline.watercourseUnitSummary.unitDeficit);
+        });
     });
 
     describe("A-1 On-Site Habitat Baseline", () => {
