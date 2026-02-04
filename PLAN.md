@@ -163,6 +163,14 @@ If the project later adds a top-level orchestrator that chains everything, both 
 
 ---
 
+## How to implement each feature
+
+Follow these rules while completing each task:
+* keep function and variable names as close as possible to the names in the sheet
+* always read and refer to specific formulas before implementing the corresponding function
+
+---
+
 ## What to implement first
 
 1. **Tier loss aggregation** — the foundation. Everything else depends on it, and it's the easiest to validate against Excel (Section 3 values are directly visible).
@@ -170,3 +178,4 @@ If the project later adds a top-level orchestrator that chains everything, both 
 3. **A5–A2 shortfalls** — simple sign-flips of tier losses.
 4. **Feature shortfall** (hedgerow/watercourse) — small self-contained conditional.
 5. **A1 balancing** — last, because it depends on all higher tiers and is the most complex single piece. Test thoroughly against Excel.
+
