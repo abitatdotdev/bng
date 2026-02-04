@@ -30,19 +30,25 @@ If you would like to contribute to this project, please get in touch at
 
 You can use this tool in any environment: web, server, serverless etc. by installing the package and using the `parseFile` function.
 
-### Node/Bun
+### Node
 ```sh 
 npm add @abitat/bng
 ```
 
 ```ts
+const { parseFile, headlineResults, tradingSummaries } = require('@abitat/bng');
+// or, for module-based projects
 import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
+```
 
+```ts
 // in server environments, where you have access to the local filesystem
 // you can pass a string representing the path to the file
 const parsedSheet = parseFile('./my_metric.xlsm');
 const tradingSums = tradingSummaries(parsedRows);
 const headlineResults = headlineResults(parsedRows, tradingSums);
+
+console.log(headlineResults);
 ```
 
 ### Browser
