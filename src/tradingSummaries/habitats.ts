@@ -27,7 +27,7 @@ function unitLosses(features: AllFeatures, label: HabitatLabel) {
 // This is simply to match the column name for high distinctiveness summaries
 const lossesNotYetAccountedFor = unitLosses;
 
-function cumulativeBroadHabitatChange(features: AllFeatures, distinctivenessCategory: DistinctivenessCategory) {
+export function cumulativeBroadHabitatChange(features: AllFeatures, distinctivenessCategory: DistinctivenessCategory) {
     return Object.values(allHabitats)
         .filter(h => h.distinctivenessCategory === distinctivenessCategory)
         .reduce((acc, h) => {

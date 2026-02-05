@@ -1,202 +1,209 @@
-import { describe, expect, test } from 'bun:test';
-import { unitShortfall } from './unitShortfall';
-import type { AllFeatures } from './features';
-import type { HeadlineResults } from './headlineResults';
+import { describe, test, expect } from "bun:test";
+import { featureShortfall, a1BalancingShortfall } from "./unitShortfall";
+import type { HeadlineResults } from "./headlineResults";
 
-// ============================================================================
-// FIXTURES: Minimal mock data to test logical rules
-// ============================================================================
+describe("featureShortfall", () => {
+    test("returns deficit when -finalLosses < deficit", () => {
+        // -(-5) = 5 < 10
+        const result = featureShortfall(-5, 10, 20);
+        expect(result).toBe(10);
+    });
 
-/**
- * Creates an empty features object with no data
- */
-function emptyFeatures(): AllFeatures {
-    return {
-        __id: 1,
-        onSiteHabitatBaselines: [],
-        onSiteHabitatCreations: [],
-        onSiteHabitatEnhancements: [],
-        offSiteHabitatBaselines: [],
-        offSiteHabitatCreations: [],
-        offSiteHabitatEnhancements: [],
-        onSiteHedgerowBaselines: [],
-        onSiteHedgerowCreations: [],
-        onSiteHedgerowEnhancements: [],
-        offSiteHedgerowBaselines: [],
-        offSiteHedgerowCreations: [],
-        offSiteHedgerowEnhancements: [],
-        onSiteWatercourseBaselines: [],
-        onSiteWatercourseCreations: [],
-        onSiteWatercourseEnhancements: [],
-        offSiteWatercourseBaselines: [],
-        offSiteWatercourseCreations: [],
-        offSiteWatercourseEnhancements: [],
-    };
-}
+    test("returns -finalLosses when deficit is zero", () => {
+        // deficit = 0 <= 0
+        const result = featureShortfall(-5, 0, 20);
+        expect(result).toBe(5);
+    });
 
-/**
- * Creates a minimal headline results object
- */
-function createHeadlineResults(
-    habitatDeficit = 0,
-    habitatBaseline = 100,
-    habitatRequired = 110,
-    hedgerowDeficit = 0,
-    hedgerowBaseline = 50,
-    hedgerowRequired = 55,
-    watercourseDeficit = 0,
-    watercourseBaseline = 20,
-    watercourseRequired = 22
-): HeadlineResults {
-    return {
+    test("returns -finalLosses when deficit is negative", () => {
+        // deficit = -2 <= 0
+        const result = featureShortfall(-5, -2, 20);
+        expect(result).toBe(5);
+    });
+
+    test("returns deficit when -finalLosses < deficit (even if deficit >= requiredGap)", () => {
+        // -(-5) = 5 < 20, so first condition catches this
+        // deficit = 20 >= requiredGap = 15, but first check takes precedence
+        const result = featureShortfall(-5, 20, 15);
+        expect(result).toBe(20); // returns deficit, not -finalLosses
+    });
+
+    test("returns -finalLosses + deficit in the else case", () => {
+        // -(-10) = 10 not < 5, deficit = 5 not <= 0, deficit = 5 not >= 20
+        // returns -(-10) + 5 = 15
+        const result = featureShortfall(-10, 5, 20);
+        expect(result).toBe(15);
+    });
+
+    test("handles edge case with exact values", () => {
+        // -(-8) = 8 < 10, so first condition is met
+        // deficit = 10 exactly equals requiredGap = 10
+        const result = featureShortfall(-8, 10, 10);
+        expect(result).toBe(10); // returns deficit since -finalLosses < deficit
+    });
+
+    test("returns -finalLosses when deficit >= requiredGap (after passing first two checks)", () => {
+        // -(-15) = 15 not < 10, deficit = 10 not <= 0, deficit = 10 >= requiredGap = 8
+        const result = featureShortfall(-15, 10, 8);
+        expect(result).toBe(15); // returns -finalLosses
+    });
+
+    test("handles case where -finalLosses equals deficit", () => {
+        // -(-7) = 7 not < 7, deficit = 7 not <= 0, deficit = 7 not >= 20
+        const result = featureShortfall(-7, 7, 20);
+        expect(result).toBe(14); // returns -(-7) + 7 = 14
+    });
+});
+
+describe("a1BalancingShortfall", () => {
+    // Helper to create mock headline results
+    const createHeadline = (
+        unitDeficit: number,
+        requiredUnits: number,
+        baselineUnits: number
+    ): HeadlineResults => ({
         habitatUnitSummary: {
             target: 1.1,
-            baselineUnits: habitatBaseline,
-            requiredUnits: habitatRequired,
-            unitDeficit: habitatDeficit,
+            unitDeficit,
+            requiredUnits,
+            baselineUnits,
         },
         hedgerowUnitSummary: {
             target: 1.1,
-            baselineUnits: hedgerowBaseline,
-            requiredUnits: hedgerowRequired,
-            unitDeficit: hedgerowDeficit,
+            unitDeficit: 0,
+            requiredUnits: 0,
+            baselineUnits: 0,
         },
         watercourseUnitSummary: {
             target: 1.1,
-            baselineUnits: watercourseBaseline,
-            requiredUnits: watercourseRequired,
-            unitDeficit: watercourseDeficit,
+            unitDeficit: 0,
+            requiredUnits: 0,
+            baselineUnits: 0,
         },
-    } as HeadlineResults;
-}
+    } as HeadlineResults);
 
-// ============================================================================
-// UNIT TESTS: Testing logical rules with fixtures
-// ============================================================================
-
-describe('unitShortfall', () => {
-    describe('output structure', () => {
-        test('returns complete structure with empty features', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults();
-            const result = unitShortfall(features, headline);
-
-            // Verify the complete output structure
-            expect(result.hasVeryHighLosses).toBeDefined();
-            expect(typeof result.hasVeryHighLosses).toBe('boolean');
-
-            expect(result.summary).toBeDefined();
-            expect(result.summary.habitats).toBeDefined();
-            expect(result.summary.hedgerows).toBeDefined();
-            expect(result.summary.watercourses).toBeDefined();
-
-            expect(result.tierShortfalls).toBeDefined();
-            expect(result.tierShortfalls.habitats).toBeDefined();
-            expect(result.tierShortfalls.habitats.a5).toBeDefined();
-            expect(result.tierShortfalls.habitats.a4).toBeDefined();
-            expect(result.tierShortfalls.habitats.a3).toBeDefined();
-            expect(result.tierShortfalls.habitats.a2).toBeDefined();
-            expect(result.tierShortfalls.habitats.a1).toBeDefined();
-            expect(result.tierShortfalls.hedgerows).toBeDefined();
-            expect(result.tierShortfalls.watercourses).toBeDefined();
-
-            expect(result.tierDetail).toBeDefined();
-            expect(Array.isArray(result.tierDetail.habitats)).toBe(true);
-            expect(Array.isArray(result.tierDetail.hedgerows)).toBe(true);
-            expect(Array.isArray(result.tierDetail.watercourses)).toBe(true);
-        });
-
-        test('summary values match headline results', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults(10, 100, 110, 5, 50, 55, 2, 20, 22);
-            const result = unitShortfall(features, headline);
-
-            // Summary section should mirror the headline results unit summaries
-            expect(result.summary.habitats.baselineUnits)
-                .toBe(headline.habitatUnitSummary.baselineUnits);
-            expect(result.summary.habitats.requiredUnits)
-                .toBe(headline.habitatUnitSummary.requiredUnits);
-            expect(result.summary.habitats.unitDeficit)
-                .toBe(headline.habitatUnitSummary.unitDeficit);
-
-            expect(result.summary.hedgerows.baselineUnits)
-                .toBe(headline.hedgerowUnitSummary.baselineUnits);
-            expect(result.summary.hedgerows.requiredUnits)
-                .toBe(headline.hedgerowUnitSummary.requiredUnits);
-            expect(result.summary.hedgerows.unitDeficit)
-                .toBe(headline.hedgerowUnitSummary.unitDeficit);
-
-            expect(result.summary.watercourses.baselineUnits)
-                .toBe(headline.watercourseUnitSummary.baselineUnits);
-            expect(result.summary.watercourses.requiredUnits)
-                .toBe(headline.watercourseUnitSummary.requiredUnits);
-            expect(result.summary.watercourses.unitDeficit)
-                .toBe(headline.watercourseUnitSummary.unitDeficit);
-        });
-
-        test('exports UnitShortfallResult type', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults();
-            const result = unitShortfall(features, headline);
-
-            // The return type should be inferred from the function
-            expect(result).toBeDefined();
-        });
+    // Helper to create mock tier details
+    const createDetails = (highA1: number, mediumA1: number, lowA1: number) => ({
+        high: {
+            a1: { lossesInTier: highA1, unitChange: [] },
+            a2: { lossesInTier: 0, unitChange: [] },
+            a3: { lossesInTier: 0, unitChange: [] },
+            a4: { lossesInTier: 0, unitChange: [] },
+            a5: { lossesInTier: 0, unitChange: [] },
+        },
+        medium: {
+            a1: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: mediumA1 },
+            a2: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: 0 },
+            a4: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: 0 },
+        },
+        low: {
+            a1: {
+                netUnitChange: 0,
+                unitChangeFollowingOffset: 0,
+                unitsRemainingAfterRule5: 0,
+                finalLosses: lowA1,
+            },
+        },
+        vh: {
+            a5: { netGains: 0, netLosses: 0 },
+        },
+        hedgerows: { finalLosses: 0 },
+        watercourses: { finalLosses: 0 },
     });
 
-    describe('SRM (Spatial Risk Multiplier) application', () => {
-        test('SRM fields exist and are numbers', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults();
-            const result = unitShortfall(features, headline);
+    test("returns -allA1Losses when a2ToA5Shortfalls - allA1Losses >= habitatUnitDeficit", () => {
+        // a2ToA5Shortfalls = 50, allA1Losses = 10, habitatUnitDeficit = 30
+        // 50 - 10 = 40 >= 30 → returns -10
+        const headline = createHeadline(30, 100, 70);
+        const shortfalls = { a2: 10, a3: 15, a4: 10, a5: 15 }; // sum = 50
+        const details = createDetails(-5, -3, -2); // sum = -10
 
-            // SRM fields should exist and be numbers
-            expect(typeof result.tierShortfalls.habitats.a5.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.habitats.a4.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.habitats.a3.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.habitats.a2.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.habitats.a1.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.hedgerows.srmShortfall).toBe('number');
-            expect(typeof result.tierShortfalls.watercourses.srmShortfall).toBe('number');
-        });
-
-        test('SRM doubles all shortfall values', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults();
-            const result = unitShortfall(features, headline);
-
-            // SRM shortfall should be exactly 2x the regular shortfall
-            expect(result.tierShortfalls.habitats.a5.srmShortfall)
-                .toBe(result.tierShortfalls.habitats.a5.shortfall * 2);
-            expect(result.tierShortfalls.habitats.a4.srmShortfall)
-                .toBe(result.tierShortfalls.habitats.a4.shortfall * 2);
-            expect(result.tierShortfalls.habitats.a3.srmShortfall)
-                .toBe(result.tierShortfalls.habitats.a3.shortfall * 2);
-            expect(result.tierShortfalls.habitats.a2.srmShortfall)
-                .toBe(result.tierShortfalls.habitats.a2.shortfall * 2);
-            expect(result.tierShortfalls.habitats.a1.srmShortfall)
-                .toBe(result.tierShortfalls.habitats.a1.shortfall * 2);
-            expect(result.tierShortfalls.hedgerows.srmShortfall)
-                .toBe(result.tierShortfalls.hedgerows.shortfall * 2);
-            expect(result.tierShortfalls.watercourses.srmShortfall)
-                .toBe(result.tierShortfalls.watercourses.shortfall * 2);
-        });
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(10);
     });
 
-    describe('tier shortfall calculations', () => {
-        test('all shortfall values are non-negative', () => {
-            const features = emptyFeatures();
-            const headline = createHeadlineResults();
-            const result = unitShortfall(features, headline);
+    test("returns complex calculation when a2ToA5Shortfalls - allA1Losses >= habitatUnitDeficit - unitGap", () => {
+        // unitGap = 30, habitatUnitDeficit = 35
+        // a2ToA5Shortfalls = 20, allA1Losses = -10
+        // Check 1: 20 - (-10) = 30 >= 35? NO
+        // Check 2: 30 >= 35 - 30 = 5? YES
+        // returns -(-10) + 35 - 20 + (-10) = 10 + 35 - 20 - 10 = 15
+        const headline = createHeadline(35, 100, 70);
+        const shortfalls = { a2: 5, a3: 5, a4: 5, a5: 5 }; // sum = 20
+        const details = createDetails(-4, -3, -3); // sum = -10
 
-            // All shortfall values should be >= 0
-            expect(result.tierShortfalls.habitats.a5.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.habitats.a4.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.habitats.a3.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.habitats.a2.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.habitats.a1.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.hedgerows.shortfall).toBeGreaterThanOrEqual(0);
-            expect(result.tierShortfalls.watercourses.shortfall).toBeGreaterThanOrEqual(0);
-        });
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(15);
+    });
+
+    test("returns -allA1Losses when habitatUnitDeficit <= 0", () => {
+        // habitatUnitDeficit = 0 <= 0
+        const headline = createHeadline(0, 100, 100);
+        const shortfalls = { a2: 5, a3: 5, a4: 5, a5: 5 };
+        const details = createDetails(-4, -3, -3); // sum = -10
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(10);
+    });
+
+    test("returns -allA1Losses when habitatUnitDeficit is negative", () => {
+        // habitatUnitDeficit = -5 <= 0
+        const headline = createHeadline(-5, 100, 105);
+        const shortfalls = { a2: 5, a3: 5, a4: 5, a5: 5 };
+        const details = createDetails(-4, -3, -3); // sum = -10
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(10);
+    });
+
+    test("returns habitatUnitDeficit - a2ToA5Shortfalls when a2ToA5 - allA1 < deficit", () => {
+        // unitGap = 10, habitatUnitDeficit = 26
+        // a2ToA5Shortfalls = 10, allA1Losses = -5
+        // Check 1: 10 - (-5) = 15 >= 26? NO
+        // Check 2: 15 >= 26 - 10 = 16? NO
+        // Check 3: 26 <= 0? NO
+        // Check 4: 15 < 26? YES → returns 26 - 10 = 16
+        const headline = createHeadline(26, 100, 90);
+        const shortfalls = { a2: 2, a3: 3, a4: 2, a5: 3 }; // sum = 10
+        const details = createDetails(-2, -2, -1); // sum = -5
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(16);
+    });
+
+    test("handles scenario where all A1 losses equal zero", () => {
+        // When allA1Losses = 0, different branches may be reached
+        // unitGap = 30, habitatUnitDeficit = 35
+        // a2ToA5Shortfalls = 40, allA1Losses = 0
+        // Check 1: 40 - 0 = 40 >= 35? YES → returns -0
+        const headline = createHeadline(35, 100, 70);
+        const shortfalls = { a2: 10, a3: 10, a4: 10, a5: 10 }; // sum = 40
+        const details = createDetails(0, 0, 0); // sum = 0
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        // Result is -0 due to -allA1Losses where allA1Losses = 0
+        expect(Math.abs(result)).toBe(0);
+    });
+
+    test("handles scenario with moderate deficit", () => {
+        // unitGap = 30, habitatUnitDeficit = 15
+        // a2ToA5Shortfalls = 20, allA1Losses = -10
+        // Check 1: 20 - (-10) = 30 >= 15? YES → returns -(-10) = 10
+        const headline = createHeadline(15, 100, 70); // unitGap = 30
+        const shortfalls = { a2: 5, a3: 5, a4: 5, a5: 5 }; // sum = 20
+        const details = createDetails(-3, -3, -4); // sum = -10
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        expect(result).toBe(10);
+    });
+
+    test("handles edge case with zero values", () => {
+        const headline = createHeadline(0, 100, 100);
+        const shortfalls = { a2: 0, a3: 0, a4: 0, a5: 0 };
+        const details = createDetails(0, 0, 0);
+
+        const result = a1BalancingShortfall(headline, shortfalls, details);
+        // Result can be 0 or -0, both are valid
+        expect(Math.abs(result)).toBe(0);
     });
 });

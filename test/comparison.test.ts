@@ -21,153 +21,155 @@ import { tradingSummaries } from "../src/tradingSummaries";
 import { unitShortfall } from "../src/unitShortfall";
 
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
-    describe("Headline Results", () => {
-        const parsed = parseFile(fileName);
-        const result = headlineResults(parsed, tradingSummaries(parsed));
+    const parsed = parseFile(fileName);
+    const trading = tradingSummaries(parsed);
+    const headline = headlineResults(parsed, trading);
+    const shortfall = unitShortfall(parsed, headline, trading);
 
+    describe("Headline Results", () => {
         const headlineSheet = getSheet(workbook, 'Headline Results')!;
 
         test("calculates on-site habitat baseline", () => {
             const excelValue = getCellValue(headlineSheet, 7, 7); // H8 (0-indexed row 7)
-            expectCloseTo(result.onSiteHabitatBaseline, excelValue, 0.01, "On-site Habitat Baseline");
+            expectCloseTo(headline.onSiteHabitatBaseline, excelValue, 0.01, "On-site Habitat Baseline");
         });
 
         test("calculates on-site hedgerow baseline", () => {
             const excelValue = getCellValue(headlineSheet, 8, 7); // H9
-            expectCloseTo(result.onSiteHedgerowBaseline, excelValue, 0.01, "On-site Hedgerow Baseline");
+            expectCloseTo(headline.onSiteHedgerowBaseline, excelValue, 0.01, "On-site Hedgerow Baseline");
         });
 
         test("calculates on-site watercourse baseline", () => {
             const excelValue = getCellValue(headlineSheet, 9, 7); // H10
-            expectCloseTo(result.onSiteWatercourseBaseline, excelValue, 0.01, "On-site Watercourse Baseline");
+            expectCloseTo(headline.onSiteWatercourseBaseline, excelValue, 0.01, "On-site Watercourse Baseline");
         });
 
         test("calculates on-site habitat post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 11, 7); // H12
-            expectCloseTo(result.onSiteHabitatPostIntervention, excelValue, 0.01, "On-site Habitat Post-intervention");
+            expectCloseTo(headline.onSiteHabitatPostIntervention, excelValue, 0.01, "On-site Habitat Post-intervention");
         });
 
         test("calculates on-site hedgerow post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 12, 7); // H13
-            expectCloseTo(result.onSiteHedgerowPostIntervention, excelValue, 0.01, "On-site Hedgerow Post-intervention");
+            expectCloseTo(headline.onSiteHedgerowPostIntervention, excelValue, 0.01, "On-site Hedgerow Post-intervention");
         });
 
         test("calculates on-site watercourse post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 13, 7); // H14
-            expectCloseTo(result.onSiteWatercoursePostIntervention, excelValue, 0.01, "On-site Watercourse Post-intervention");
+            expectCloseTo(headline.onSiteWatercoursePostIntervention, excelValue, 0.01, "On-site Watercourse Post-intervention");
         });
 
         test("calculates on-site habitat net change", () => {
             const excelUnits = getCellValue(headlineSheet, 15, 7); // H16
             const excelPercentage = getCellValue(headlineSheet, 15, 9); // J16
 
-            expectCloseTo(result.onSiteHabitatNetChange.units, excelUnits, 0.01, "On-site Habitat Net Change Units");
-            expectCloseTo(result.onSiteHabitatNetChange.percentage, excelPercentage * 100, 0.1, "On-site Habitat Net Change Percentage");
+            expectCloseTo(headline.onSiteHabitatNetChange.units, excelUnits, 0.01, "On-site Habitat Net Change Units");
+            expectCloseTo(headline.onSiteHabitatNetChange.percentage, excelPercentage * 100, 0.1, "On-site Habitat Net Change Percentage");
         });
 
         test("calculates on-site hedgerow net change", () => {
             const excelUnits = getCellValue(headlineSheet, 16, 7); // H17
             const excelPercentage = getCellValue(headlineSheet, 16, 9); // J17
 
-            expectCloseTo(result.onSiteHedgerowNetChange.units, excelUnits, 0.01, "On-site Hedgerow Net Change Units");
-            expectCloseTo(result.onSiteHedgerowNetChange.percentage, excelPercentage * 100, 0.1, "On-site Hedgerow Net Change Percentage");
+            expectCloseTo(headline.onSiteHedgerowNetChange.units, excelUnits, 0.01, "On-site Hedgerow Net Change Units");
+            expectCloseTo(headline.onSiteHedgerowNetChange.percentage, excelPercentage * 100, 0.1, "On-site Hedgerow Net Change Percentage");
         });
 
         test("calculates on-site watercourse net change", () => {
             const excelUnits = getCellValue(headlineSheet, 17, 7); // H18
             const excelPercentage = getCellValue(headlineSheet, 17, 9); // J18
 
-            expectCloseTo(result.onSiteWatercourseNetChange.units, excelUnits, 0.01, "On-site Watercourse Net Change Units");
-            expectCloseTo(result.onSiteWatercourseNetChange.percentage, excelPercentage * 100, 0.1, "On-site Watercourse Net Change Percentage");
+            expectCloseTo(headline.onSiteWatercourseNetChange.units, excelUnits, 0.01, "On-site Watercourse Net Change Units");
+            expectCloseTo(headline.onSiteWatercourseNetChange.percentage, excelPercentage * 100, 0.1, "On-site Watercourse Net Change Percentage");
         });
 
         test("calculates off-site habitat baseline", () => {
             const excelValue = getCellValue(headlineSheet, 19, 7); // H20
-            expectCloseTo(result.offSiteHabitatBaseline, excelValue, 0.01, "Off-site Habitat Baseline");
+            expectCloseTo(headline.offSiteHabitatBaseline, excelValue, 0.01, "Off-site Habitat Baseline");
         });
 
         test("calculates off-site hedgerow baseline", () => {
             const excelValue = getCellValue(headlineSheet, 20, 7); // H21
-            expectCloseTo(result.offSiteHedgerowBaseline, excelValue, 0.01, "Off-site Hedgerow Baseline");
+            expectCloseTo(headline.offSiteHedgerowBaseline, excelValue, 0.01, "Off-site Hedgerow Baseline");
         });
 
         test("calculates off-site watercourse baseline", () => {
             const excelValue = getCellValue(headlineSheet, 21, 7); // H22
-            expectCloseTo(result.offSiteWatercourseBaseline, excelValue, 0.01, "Off-site Watercourse Baseline");
+            expectCloseTo(headline.offSiteWatercourseBaseline, excelValue, 0.01, "Off-site Watercourse Baseline");
         });
 
         test("calculates off-site habitat post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 23, 7); // H24
-            expectCloseTo(result.offSiteHabitatPostIntervention, excelValue, 0.01, "Off-site Habitat Post-intervention");
+            expectCloseTo(headline.offSiteHabitatPostIntervention, excelValue, 0.01, "Off-site Habitat Post-intervention");
         });
 
         test("calculates off-site hedgerow post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 24, 7); // H25
-            expectCloseTo(result.offSiteHedgerowPostIntervention, excelValue, 0.01, "Off-site Hedgerow Post-intervention");
+            expectCloseTo(headline.offSiteHedgerowPostIntervention, excelValue, 0.01, "Off-site Hedgerow Post-intervention");
         });
 
         test("calculates off-site watercourse post-intervention", () => {
             const excelValue = getCellValue(headlineSheet, 25, 7); // H26
-            expectCloseTo(result.offSiteWatercoursePostIntervention, excelValue, 0.01, "Off-site Watercourse Post-intervention");
+            expectCloseTo(headline.offSiteWatercoursePostIntervention, excelValue, 0.01, "Off-site Watercourse Post-intervention");
         });
 
         test("calculates off-site habitat net change", () => {
             const excelUnits = getCellValue(headlineSheet, 27, 7); // H28
             const excelPercentage = getCellValue(headlineSheet, 27, 9); // J28
 
-            expectCloseTo(result.offSiteHabitatNetChange.units, excelUnits, 0.01, "Off-site Habitat Net Change Units");
-            expectCloseTo(result.offSiteHabitatNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Habitat Net Change Percentage");
+            expectCloseTo(headline.offSiteHabitatNetChange.units, excelUnits, 0.01, "Off-site Habitat Net Change Units");
+            expectCloseTo(headline.offSiteHabitatNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Habitat Net Change Percentage");
         });
 
         test("calculates off-site hedgerow net change", () => {
             const excelUnits = getCellValue(headlineSheet, 28, 7); // H29
             const excelPercentage = getCellValue(headlineSheet, 28, 9); // J29
 
-            expectCloseTo(result.offSiteHedgerowNetChange.units, excelUnits, 0.01, "Off-site Hedgerow Net Change Units");
-            expectCloseTo(result.offSiteHedgerowNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Hedgerow Net Change Percentage");
+            expectCloseTo(headline.offSiteHedgerowNetChange.units, excelUnits, 0.01, "Off-site Hedgerow Net Change Units");
+            expectCloseTo(headline.offSiteHedgerowNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Hedgerow Net Change Percentage");
         });
 
         test("calculates off-site watercourse net change", () => {
             const excelUnits = getCellValue(headlineSheet, 29, 7); // H30
             const excelPercentage = getCellValue(headlineSheet, 29, 9); // J30
 
-            expectCloseTo(result.offSiteWatercourseNetChange.units, excelUnits, 0.01, "Off-site Watercourse Net Change Units");
-            expectCloseTo(result.offSiteWatercourseNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Watercourse Net Change Percentage");
+            expectCloseTo(headline.offSiteWatercourseNetChange.units, excelUnits, 0.01, "Off-site Watercourse Net Change Units");
+            expectCloseTo(headline.offSiteWatercourseNetChange.percentage, excelPercentage * 100, 0.1, "Off-site Watercourse Net Change Percentage");
         });
 
         test("calculates off-site habitat net change with SRM", () => {
             const excelUnits = getCellValue(headlineSheet, 31, 7); // H32
 
-            if (result.offSiteHabitatNetChange.units <= 0) {
+            if (headline.offSiteHabitatNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteHabitatNetChangeWithSRM).toEqual("N/A")
+                expect(headline.offSiteHabitatNetChangeWithSRM).toEqual("N/A")
             } else {
-                if (typeof result.offSiteHabitatNetChangeWithSRM !== "number") return;
-                expectCloseTo(result.offSiteHabitatNetChangeWithSRM, excelUnits, 0.01, "Off-site Habitat Net Change with SRM Units");
+                if (typeof headline.offSiteHabitatNetChangeWithSRM !== "number") return;
+                expectCloseTo(headline.offSiteHabitatNetChangeWithSRM, excelUnits, 0.01, "Off-site Habitat Net Change with SRM Units");
             }
         });
 
         test("calculates off-site hedgerow net change with SRM", () => {
             const excelUnits = getCellValue(headlineSheet, 32, 7); // H33
 
-            if (result.offSiteHedgerowNetChange.units <= 0) {
+            if (headline.offSiteHedgerowNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteHedgerowNetChangeWithSRM).toEqual("N/A")
+                expect(headline.offSiteHedgerowNetChangeWithSRM).toEqual("N/A")
             } else {
-                if (typeof result.offSiteHedgerowNetChangeWithSRM !== "number") return;
-                expectCloseTo(result.offSiteHedgerowNetChangeWithSRM, excelUnits, 0.01, "Off-site Hedgerow Net Change with SRM Units");
+                if (typeof headline.offSiteHedgerowNetChangeWithSRM !== "number") return;
+                expectCloseTo(headline.offSiteHedgerowNetChangeWithSRM, excelUnits, 0.01, "Off-site Hedgerow Net Change with SRM Units");
             }
         });
 
         test("calculates off-site watercourse net change with SRM", () => {
             const excelUnits = getCellValue(headlineSheet, 33, 7); // H34
 
-            if (result.offSiteWatercourseNetChange.units <= 0) {
+            if (headline.offSiteWatercourseNetChange.units <= 0) {
                 expect(excelUnits).toEqual("N/A")
-                expect(result.offSiteWatercourseNetChangeWithSRM).toEqual("N/A")
+                expect(headline.offSiteWatercourseNetChangeWithSRM).toEqual("N/A")
             } else {
-                if (typeof result.offSiteWatercourseNetChangeWithSRM !== "number") return;
-                expectCloseTo(result.offSiteWatercourseNetChangeWithSRM, excelUnits, 0.01, "Off-site Watercourse Net Change with SRM Units");
+                if (typeof headline.offSiteWatercourseNetChangeWithSRM !== "number") return;
+                expectCloseTo(headline.offSiteWatercourseNetChangeWithSRM, excelUnits, 0.01, "Off-site Watercourse Net Change with SRM Units");
             }
         });
 
@@ -176,9 +178,9 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const excelHedgerow = getCellValue(headlineSheet, 37, 7); // H38
             const excelWatercourse = getCellValue(headlineSheet, 38, 7); // H39
 
-            expectCloseTo(result.combinedNetUnitChange.habitat, excelHabitat, 0.01, "Combined Net Unit Change - Habitat");
-            expectCloseTo(result.combinedNetUnitChange.hedgerow, excelHedgerow, 0.01, "Combined Net Unit Change - Hedgerow");
-            expectCloseTo(result.combinedNetUnitChange.watercourse, excelWatercourse, 0.01, "Combined Net Unit Change - Watercourse");
+            expectCloseTo(headline.combinedNetUnitChange.habitat, excelHabitat, 0.01, "Combined Net Unit Change - Habitat");
+            expectCloseTo(headline.combinedNetUnitChange.hedgerow, excelHedgerow, 0.01, "Combined Net Unit Change - Hedgerow");
+            expectCloseTo(headline.combinedNetUnitChange.watercourse, excelWatercourse, 0.01, "Combined Net Unit Change - Watercourse");
         });
 
         test("calculates total SRM deductions", () => {
@@ -186,9 +188,9 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const excelHedgerow = parseFloat(getCellValue(headlineSheet, 41, 7)); // H42
             const excelWatercourse = parseFloat(getCellValue(headlineSheet, 42, 7)); // H43
 
-            expectCloseTo(result.totalSRMDeductions.habitat, excelHabitat, 0.01, "Total SRM Deductions - Habitat");
-            expectCloseTo(result.totalSRMDeductions.hedgerow, excelHedgerow, 0.01, "Total SRM Deductions - Hedgerow");
-            expectCloseTo(result.totalSRMDeductions.watercourse, excelWatercourse, 0.01, "Total SRM Deductions - Watercourse");
+            expectCloseTo(headline.totalSRMDeductions.habitat, excelHabitat, 0.01, "Total SRM Deductions - Habitat");
+            expectCloseTo(headline.totalSRMDeductions.hedgerow, excelHedgerow, 0.01, "Total SRM Deductions - Hedgerow");
+            expectCloseTo(headline.totalSRMDeductions.watercourse, excelWatercourse, 0.01, "Total SRM Deductions - Watercourse");
         });
 
         test("calculates final total net unit change", () => {
@@ -196,9 +198,9 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const hedgerowValue = getCellValue(headlineSheet, 47, 7); // H48
             const watercourseValue = getCellValue(headlineSheet, 48, 7); // H49
 
-            expectCloseTo(result.totalNetUnitChange.habitat, habitatValue, 0.01, "Total Net Unit Change - Habitat");
-            expectCloseTo(result.totalNetUnitChange.hedgerow, hedgerowValue, 0.01, "Total Net Unit Change - Hedgerow");
-            expectCloseTo(result.totalNetUnitChange.watercourse, watercourseValue, 0.01, "Total Net Unit Change - Watercourse");
+            expectCloseTo(headline.totalNetUnitChange.habitat, habitatValue, 0.01, "Total Net Unit Change - Habitat");
+            expectCloseTo(headline.totalNetUnitChange.hedgerow, hedgerowValue, 0.01, "Total Net Unit Change - Hedgerow");
+            expectCloseTo(headline.totalNetUnitChange.watercourse, watercourseValue, 0.01, "Total Net Unit Change - Watercourse");
         });
 
         test("calculates final total net percentage change", () => {
@@ -206,15 +208,15 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const hedgerowValue = getCellValue(headlineSheet, 51, 7); // H52
             const watercourseValue = getCellValue(headlineSheet, 52, 7); // H53
 
-            expectCloseTo(result.totalNetPercentageChange.habitat, habitatValue, 0.01, "Total Net Percentage Change - Habitat");
-            expectCloseTo(result.totalNetPercentageChange.hedgerow, hedgerowValue, 0.01, "Total Net Percentage Change - Hedgerow");
-            expectCloseTo(result.totalNetPercentageChange.watercourse, watercourseValue, 0.01, "Total Net Percentage Change - Watercourse");
+            expectCloseTo(headline.totalNetPercentageChange.habitat, habitatValue, 0.01, "Total Net Percentage Change - Habitat");
+            expectCloseTo(headline.totalNetPercentageChange.hedgerow, hedgerowValue, 0.01, "Total Net Percentage Change - Hedgerow");
+            expectCloseTo(headline.totalNetPercentageChange.watercourse, watercourseValue, 0.01, "Total Net Percentage Change - Watercourse");
         });
 
         test("calculates trading rules satisfied", () => {
             const excelValue = getCellValue(headlineSheet, 54, 5) // F55
             const booleanExcelValue = excelValue.trim() === "No - Check Trading Summaries ▲" ? false : true;
-            expect(result.tradingRulesSatisfied).toEqual(booleanExcelValue);
+            expect(headline.tradingRulesSatisfied).toEqual(booleanExcelValue);
         })
 
         test("calculates unit deficit", () => {
@@ -222,95 +224,76 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
             const hedgerowValue = getCellValue(headlineSheet, 61, 7) // H62
             const watercourseValue = getCellValue(headlineSheet, 62, 7) // H63
 
-            expectCloseTo(result.habitatUnitSummary.unitDeficit, habitatValue, 0.01, "Unit Deficit - Habitat");
-            expectCloseTo(result.hedgerowUnitSummary.unitDeficit, hedgerowValue, 0.01, "Unit Deficit - Hedgerow");
-            expectCloseTo(result.watercourseUnitSummary.unitDeficit, watercourseValue, 0.01, "Unit Deficit - Watercourse");
+            expectCloseTo(headline.habitatUnitSummary.unitDeficit, habitatValue, 0.01, "Unit Deficit - Habitat");
+            expectCloseTo(headline.hedgerowUnitSummary.unitDeficit, hedgerowValue, 0.01, "Unit Deficit - Hedgerow");
+            expectCloseTo(headline.watercourseUnitSummary.unitDeficit, watercourseValue, 0.01, "Unit Deficit - Watercourse");
         })
     });
 
     describe("Unit Shortfall", () => {
         const unitShortfallSheet = getSheet(workbook, 'Unit shortfall calculations')!;
 
-        const parsed = parseFile(fileName);
-        const trading = tradingSummaries(parsed);
-        const headline = headlineResults(parsed, trading);
-        const result = unitShortfall(parsed, headline);
-
         test("detects very high distinctiveness losses (guard clause)", () => {
             const excelGuardCell = getCellValue(unitShortfallSheet, 15, 4); // E16
             const excelHasVeryHighLosses = typeof excelGuardCell === 'string' && excelGuardCell.includes('ERROR');
 
-            expect(result.hasVeryHighLosses).toBe(excelHasVeryHighLosses);
+            expect(shortfall.hasVeryHighLosses).toBe(excelHasVeryHighLosses);
         });
 
         test("calculates A5 (V.High) tier shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 12, 5); // F13
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 12, 6); // G13
 
-            expectCloseTo(result.tierShortfalls.habitats.a5.shortfall, excelShortfall, 0.01, "A5 Tier Shortfall");
-            expectCloseTo(result.tierShortfalls.habitats.a5.srmShortfall, excelSrmShortfall, 0.01, "A5 Tier SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a5.shortfall, excelShortfall, 0.01, "A5 Tier Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a5.srmShortfall, excelSrmShortfall, 0.01, "A5 Tier SRM Shortfall");
         });
 
         test("calculates A4 (High) tier shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 11, 5); // F12
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 11, 6); // G12
 
-            expectCloseTo(result.tierShortfalls.habitats.a4.shortfall, excelShortfall, 0.01, "A4 Tier Shortfall");
-            expectCloseTo(result.tierShortfalls.habitats.a4.srmShortfall, excelSrmShortfall, 0.01, "A4 Tier SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a4.shortfall, excelShortfall, 0.01, "A4 Tier Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a4.srmShortfall, excelSrmShortfall, 0.01, "A4 Tier SRM Shortfall");
         });
 
         test("calculates A3 (Medium) tier shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 10, 5); // F11
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 10, 6); // G11
 
-            expectCloseTo(result.tierShortfalls.habitats.a3.shortfall, excelShortfall, 0.01, "A3 Tier Shortfall");
-            expectCloseTo(result.tierShortfalls.habitats.a3.srmShortfall, excelSrmShortfall, 0.01, "A3 Tier SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a3.shortfall, excelShortfall, 0.01, "A3 Tier Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a3.srmShortfall, excelSrmShortfall, 0.01, "A3 Tier SRM Shortfall");
         });
 
         test("calculates A2 (Low) tier shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 9, 5); // F10
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 9, 6); // G10
 
-            expectCloseTo(result.tierShortfalls.habitats.a2.shortfall, excelShortfall, 0.01, "A2 Tier Shortfall");
-            expectCloseTo(result.tierShortfalls.habitats.a2.srmShortfall, excelSrmShortfall, 0.01, "A2 Tier SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a2.shortfall, excelShortfall, 0.01, "A2 Tier Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a2.srmShortfall, excelSrmShortfall, 0.01, "A2 Tier SRM Shortfall");
         });
 
         test("calculates A1 (V.Low) tier shortfall with balancing logic", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 8, 5); // F9
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 8, 6); // G9
 
-            expectCloseTo(result.tierShortfalls.habitats.a1.shortfall, excelShortfall, 0.01, "A1 Tier Shortfall");
-            expectCloseTo(result.tierShortfalls.habitats.a1.srmShortfall, excelSrmShortfall, 0.01, "A1 Tier SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a1.shortfall, excelShortfall, 0.01, "A1 Tier Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.habitats.a1.srmShortfall, excelSrmShortfall, 0.01, "A1 Tier SRM Shortfall");
         });
 
         test("calculates hedgerow feature shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 13, 5); // F14
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 13, 6); // G14
 
-            expectCloseTo(result.tierShortfalls.hedgerows.shortfall, excelShortfall, 0.01, "Hedgerow Shortfall");
-            expectCloseTo(result.tierShortfalls.hedgerows.srmShortfall, excelSrmShortfall, 0.01, "Hedgerow SRM Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.hedgerows.shortfall, excelShortfall, 0.01, "Hedgerow Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.hedgerows.srmShortfall, excelSrmShortfall, 0.01, "Hedgerow SRM Shortfall");
         });
 
         test("calculates watercourse feature shortfall", () => {
             const excelShortfall = getCellValue(unitShortfallSheet, 14, 5); // F15
             const excelSrmShortfall = getCellValue(unitShortfallSheet, 14, 6); // G15
 
-            expectCloseTo(result.tierShortfalls.watercourses.shortfall, excelShortfall, 0.01, "Watercourse Shortfall");
-            expectCloseTo(result.tierShortfalls.watercourses.srmShortfall, excelSrmShortfall, 0.01, "Watercourse SRM Shortfall");
-        });
-
-        test("summary values match headline results", () => {
-            expect(result.summary.habitats.baselineUnits).toBe(headline.habitatUnitSummary.baselineUnits);
-            expect(result.summary.habitats.requiredUnits).toBe(headline.habitatUnitSummary.requiredUnits);
-            expect(result.summary.habitats.unitDeficit).toBe(headline.habitatUnitSummary.unitDeficit);
-
-            expect(result.summary.hedgerows.baselineUnits).toBe(headline.hedgerowUnitSummary.baselineUnits);
-            expect(result.summary.hedgerows.requiredUnits).toBe(headline.hedgerowUnitSummary.requiredUnits);
-            expect(result.summary.hedgerows.unitDeficit).toBe(headline.hedgerowUnitSummary.unitDeficit);
-
-            expect(result.summary.watercourses.baselineUnits).toBe(headline.watercourseUnitSummary.baselineUnits);
-            expect(result.summary.watercourses.requiredUnits).toBe(headline.watercourseUnitSummary.requiredUnits);
-            expect(result.summary.watercourses.unitDeficit).toBe(headline.watercourseUnitSummary.unitDeficit);
+            expectCloseTo(shortfall.tierShortfalls.watercourses.shortfall, excelShortfall, 0.01, "Watercourse Shortfall");
+            expectCloseTo(shortfall.tierShortfalls.watercourses.srmShortfall, excelSrmShortfall, 0.01, "Watercourse SRM Shortfall");
         });
     });
 

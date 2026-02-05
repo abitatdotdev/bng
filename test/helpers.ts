@@ -33,7 +33,7 @@ const exampleMetricsFileNames =
 
 export const EXCEL_FILES = [
     ["./examples/simple-unlocked.xlsm"],
-    ...exampleMetricsFileNames.slice(0, 10),
+    ...exampleMetricsFileNames.slice(0, 250),
 ]
 // Whitelist to help with test isolation when debugging
 // .filter(([name]) => name === './test/metrics/Warrington_2024_012222_FUL.xlsm')
