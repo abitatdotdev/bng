@@ -83,6 +83,41 @@ Here's a simple example, outputting parsed files to the console.
 </html>
 ```
 
+### Data Parsers
+
+For validating and enriching data outside of the metric sheet, the library provides dedicated parsers for each input type. 
+
+```ts
+import {
+    parseOnSiteHabitatBaseline,
+    parseOffSiteHedgerowCreation
+} from '@abitat/bng';
+
+// Validate and enrich habitat baseline data
+const onSiteHabitatBaseline = parseOnSiteHabitatBaseline({
+    broadHabitat: "Grassland",
+    habitatType: "Other neutral grassland",
+    irreplaceableHabitat: false,
+    area: 2.5,
+    condition: "Good",
+    strategicSignificance: "Area/compensation not in local strategy or local nature recovery strategy",
+    areaRetained: 2.0,
+    areaEnhanced: 0.5,
+    bespokeCompensationAgreed: "No",
+});
+
+if (onSiteHabitatBaseline.success) {
+    // See the whole row from the corresponding input sheet
+    console.log(onSiteHabitatBaseline.output);
+} else {
+    console.log(onSiteHabitatBaseline.issues);
+}
+```
+
+These parsers match the shape of the data in the sheet as much as possible,
+so you might have to, for example, convert booleans to "No".
+Typescript will provide type hints where possible.
+
 ## Documentation
 
 - [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
