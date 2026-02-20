@@ -25,7 +25,6 @@ const inputSchema =
         offSiteReferenceNumber: freeTextSchema,
         baselineReferenceNumber: freeTextSchema,
     })
-type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
  * Calculates the final time to target condition and its corresponding multiplier based on:
@@ -184,8 +183,8 @@ export const offSiteHabitatCreationSchema = v.pipe(
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
     v.check(
         s => !(
-            (typeof s.habitatCreationInAdvance === "string" || s.habitatCreationInAdvance > 0)
-            && (typeof s.habitatCreationDelay === "string" || s.habitatCreationDelay > 0)
+            (s.habitatCreationInAdvance === "30+" || s.habitatCreationInAdvance > 0)
+            && (s.habitatCreationDelay === "30+" || s.habitatCreationDelay > 0)
         ),
         "Cannot have both habitat creation in advance and delay in starting habitat creation"
     ),

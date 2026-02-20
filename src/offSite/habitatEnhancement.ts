@@ -294,25 +294,17 @@ const calculateEnhancementUnitsDelivered = <Data extends {
 
 export const offSiteHabitatEnhancementSchema = v.pipe(
     inputSchema,
-
-    // Basic validations
     v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
     v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
     v.check(
         s => !(
-            (typeof s.habitatEnhancedInAdvance === "string" || s.habitatEnhancedInAdvance > 0)
-            && (typeof s.habitatEnhancedDelay === "string" || s.habitatEnhancedDelay > 0)
+            (s.habitatEnhancedInAdvance === "30+" || s.habitatEnhancedInAdvance > 0)
+            && (s.habitatEnhancedDelay === "30+" || s.habitatEnhancedDelay > 0)
         ),
         "Cannot have both habitat enhanced in advance and delay in starting habitat enhancement"
     ),
-
-    // Extract baseline data and area
     v.transform(enrichBaselineHabitatData),
-
-    // Enrich proposed habitat data
     v.transform(enrichWithHabitatData),
-
-    // Validation checks for enhancement
     v.check(
         data => {
             const baseline = data._baselineHabitat;
@@ -401,22 +393,12 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
         },
         "Enhancement not possible for this habitat type from the selected baseline"
     ),
-
-    // Calculate distinctiveness and condition change labels
     v.transform(addDistinctivenessChange),
     v.transform(addEnhancementPathway),
-
-    // Temporal calculation
     v.transform(enrichWithTimeToTargetCondition),
     v.transform(calculateFinalTimeToTargetValues),
-
-    // Difficulty logic
     v.transform(determineEnhancementDifficulty),
-
-    // Spatial risk multiplier
     v.transform(enrichWithSpatialRiskData),
-
-    // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
 )
 export type OffSiteHabitatEnhancementSchema = v.InferInput<typeof offSiteHabitatEnhancementSchema>

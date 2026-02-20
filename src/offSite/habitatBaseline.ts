@@ -48,7 +48,6 @@ export const offSiteHabitatBaselineSchema = v.pipe(
         && s.bespokeCompensationAgreed === "No"
     ), "Any loss unacceptable"),
     v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "Error - you cannot enhance irreplaceable individual trees ▲"),
-    v.check(s => !!s.habitatType || !s.irreplaceableHabitat, "Confirm irreplaceable habitat status ▲"),
     v.check(s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber), "Off-site reference required ▲"),
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (AA)
