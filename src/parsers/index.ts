@@ -54,38 +54,22 @@ export {
     parseOffSiteWatercourseEnhancement,
 } from './dataParsers';
 
-// Export input types (InferInput)
-export type { OnSiteHabitatBaselineSchema } from '../onSite/habitatBaseline';
-export type { OnSiteHabitatCreationSchema } from '../onSite/habitatCreation';
-export type { OnSiteHabitatEnhancementSchema } from '../onSite/habitatEnhancement';
-export type { OnSiteHedgerowBaselineSchema } from '../onSite/hedgerowBaseline';
-export type { OnSiteHedgerowCreationSchema } from '../onSite/hedgerowCreation';
-export type { OnSiteHedgerowEnhancementSchema } from '../onSite/hedgerowEnhancement';
-export type { OnSiteWatercourseBaselineSchema } from '../onSite/watercourseBaseline';
-export type { OnSiteWatercourseCreationSchema } from '../onSite/watercourseCreation';
-export type { OnSiteWatercourseEnhancementSchema } from '../onSite/watercourseEnhancement';
-export type { OffSiteHabitatBaselineSchema } from '../offSite/habitatBaseline';
-export type { OffSiteHabitatCreationSchema } from '../offSite/habitatCreation';
-export type { OffSiteHabitatEnhancementSchema } from '../offSite/habitatEnhancement';
-export type { OffSiteHedgerowBaselineSchema } from '../offSite/hedgerowBaseline';
-export type { OffSiteHedgerowCreationSchema } from '../offSite/hedgerowCreation';
-export type { OffSiteHedgerowEnhancementSchema } from '../offSite/hedgerowEnhancement';
-export type { OffSiteWatercourseBaselineSchema } from '../offSite/watercourseBaseline';
-export type { OffSiteWatercourseCreationSchema } from '../offSite/watercourseCreation';
-export type { OffSiteWatercourseEnhancementSchema } from '../offSite/watercourseEnhancement';
+export type { OnSiteHabitatBaselineSchema, OnSiteHabitatBaseline } from '../onSite/habitatBaseline';
+export type { OnSiteHabitatCreationSchema, OnSiteHabitatCreation } from '../onSite/habitatCreation';
+export type { OnSiteHabitatEnhancementSchema, OnSiteHabitatEnhancement } from '../onSite/habitatEnhancement';
+export type { OnSiteHedgerowBaselineSchema, OnSiteHedgerowBaseline } from '../onSite/hedgerowBaseline';
+export type { OnSiteHedgerowCreationSchema, OnSiteHedgerowCreation } from '../onSite/hedgerowCreation';
+export type { OnSiteHedgerowEnhancementSchema, OnSiteHedgerowEnhancement } from '../onSite/hedgerowEnhancement';
+export type { OnSiteWatercourseBaselineSchema, OnSiteWatercourseBaseline } from '../onSite/watercourseBaseline';
+export type { OnSiteWatercourseCreationSchema, OnSiteWatercourseCreation } from '../onSite/watercourseCreation';
+export type { OnSiteWatercourseEnhancementSchema, OnSiteWatercourseEnhancement } from '../onSite/watercourseEnhancement';
+export type { OffSiteHabitatBaselineSchema, OffSiteHabitatBaseline } from '../offSite/habitatBaseline';
+export type { OffSiteHabitatCreationSchema, OffSiteHabitatCreation } from '../offSite/habitatCreation';
+export type { OffSiteHabitatEnhancementSchema, OffSiteHabitatEnhancement } from '../offSite/habitatEnhancement';
+export type { OffSiteHedgerowBaselineSchema, OffSiteHedgerowBaseline } from '../offSite/hedgerowBaseline';
+export type { OffSiteHedgerowCreationSchema, OffSiteHedgerowCreation } from '../offSite/hedgerowCreation';
+export type { OffSiteHedgerowEnhancementSchema, OffSiteHedgerowEnhancement } from '../offSite/hedgerowEnhancement';
+export type { OffSiteWatercourseBaselineSchema, OffSiteWatercourseBaseline } from '../offSite/watercourseBaseline';
+export type { OffSiteWatercourseCreationSchema, OffSiteWatercourseCreation } from '../offSite/watercourseCreation';
+export type { OffSiteWatercourseEnhancementSchema, OffSiteWatercourseEnhancement } from '../offSite/watercourseEnhancement';
 
-// Export output types (InferOutput)
-export type { OnSiteHabitatBaseline } from '../onSite/habitatBaseline';
-export type { OnSiteHedgerowBaseline } from '../onSite/hedgerowBaseline';
-export type { OnSiteHedgerowCreation } from '../onSite/hedgerowCreation';
-export type { OnSiteHedgerowEnhancement } from '../onSite/hedgerowEnhancement';
-export type { OnSiteWatercourseBaseline } from '../onSite/watercourseBaseline';
-export type { OnSiteWatercourseCreation } from '../onSite/watercourseCreation';
-export type { OnSiteWatercourseEnhancement } from '../onSite/watercourseEnhancement';
-export type { OffSiteHabitatBaseline } from '../offSite/habitatBaseline';
-export type { OffSiteHedgerowBaseline } from '../offSite/hedgerowBaseline';
-export type { OffSiteHedgerowCreation } from '../offSite/hedgerowCreation';
-export type { OffSiteHedgerowEnhancement } from '../offSite/hedgerowEnhancement';
-export type { OffSiteWatercourseBaseline } from '../offSite/watercourseBaseline';
-export type { OffSiteWatercourseCreation } from '../offSite/watercourseCreation';
-export type { OffSiteWatercourseEnhancement } from '../offSite/watercourseEnhancement';

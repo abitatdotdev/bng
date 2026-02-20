@@ -22,7 +22,6 @@ const inputSchema =
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
     })
-type OutputSchema = v.InferOutput<typeof inputSchema>
 
 export const onSiteHabitatBaselineSchema = v.pipe(
     inputSchema,

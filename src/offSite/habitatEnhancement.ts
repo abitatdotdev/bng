@@ -401,5 +401,7 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
     v.transform(enrichWithSpatialRiskData),
     v.transform(calculateEnhancementUnitsDelivered),
 )
+
 export type OffSiteHabitatEnhancementSchema = v.InferInput<typeof offSiteHabitatEnhancementSchema>
+export type OffSiteHabitatEnhancement = v.InferOutput<typeof offSiteHabitatEnhancementSchema>
 

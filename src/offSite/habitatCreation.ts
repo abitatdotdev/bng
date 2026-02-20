@@ -195,5 +195,7 @@ export const offSiteHabitatCreationSchema = v.pipe(
     v.transform(enrichWithSpatialRiskData),
     v.transform(calculateHabitatUnitsDelivered)
 )
+
 export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>
+export type OffSiteHabitatCreation = v.InferOutput<typeof offSiteHabitatCreationSchema>
 

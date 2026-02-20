@@ -21,7 +21,6 @@ const inputSchema =
         planningAuthorityComments: freeTextSchema,
         habitatReferenceNumber: freeTextSchema,
     })
-export type OutputSchema = v.InferOutput<typeof inputSchema>
 
 /**
  * Calculates the final time to target condition and its corresponding multiplier based on:
@@ -322,5 +321,6 @@ export const onSiteHabitatCreationSchema = v.pipe(
     v.transform(enrichWithDifficultyData),
     v.transform(calculateHabitatUnitsDelivered)
 )
+export type OnSiteHabitatCreation = v.InferOutput<typeof onSiteHabitatCreationSchema>
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
 

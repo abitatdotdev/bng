@@ -437,4 +437,6 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
     // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
 )
+
 export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>
+export type OnSiteHabitatEnhancement = v.InferOutput<typeof onSiteHabitatEnhancementSchema>
