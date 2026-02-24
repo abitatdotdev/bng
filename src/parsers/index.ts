@@ -1,7 +1,6 @@
 // Export the main parsing function
 export { parseFile } from './parseFile';
 
-
 // Export all helpers from excelHelpers
 export {
     MAX_DATA_ROWS,
