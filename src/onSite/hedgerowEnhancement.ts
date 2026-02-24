@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import { allHedgerows, type HedgerowLabel, type Hedgerow } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, yearsSchema } from '../schemaUtils';
@@ -174,11 +175,11 @@ const calculateFinalTimeToTargetValues = <Data extends {
             finalTimeToTargetCondition = "30+";
         } else {
             // 30 - advance (capped at 0)
-            const result = 31 - normalisedHedgerowEnhancedInAdvance + normalisedHedgerowEnhancedDelay;
+            const result = new Decimal(31).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
             if (result >= 30) {
                 finalTimeToTargetCondition = "30+";
             } else {
-                finalTimeToTargetCondition = Math.max(0, result);
+                finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
             }
         }
     }
@@ -188,14 +189,14 @@ const calculateFinalTimeToTargetValues = <Data extends {
     }
     // Calculate: standardTime - advance + delay
     else {
-        const result = timeToTargetCondition - normalisedHedgerowEnhancedInAdvance + normalisedHedgerowEnhancedDelay;
+        const result = new Decimal(timeToTargetCondition).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
 
         // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
             // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
+            finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
@@ -300,16 +301,16 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
 
     // Calculate proposed units
-    const proposedUnits = length * proposedD * proposedC;
+    const proposedUnits = new Decimal(length).mul(proposedD).mul(proposedC);
 
     // Calculate baseline units (with effective condition)
-    const baselineUnits = length * baselineD * effectiveBaselineC;
+    const baselineUnits = new Decimal(length).mul(baselineD).mul(effectiveBaselineC);
 
     // Calculate delta with multipliers
-    const delta = (proposedUnits - baselineUnits) * difficulty * temporal;
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
 
     // Add back baseline units and apply strategic significance
-    const hedgerowUnitsDelivered = (delta + baselineUnits) * strategic;
+    const hedgerowUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
 
     return {
         ...data,

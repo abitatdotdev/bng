@@ -1,5 +1,6 @@
 import type { AllFeatures } from '../features';
 import { allWatercourses, watercourseByLabel, isWatercourse, type Watercourse, type WatercourseLabel } from "../watercourses";
+import { Decimal } from '../decimal';
 
 type ValuesByWatercourse = {
     [Label in WatercourseLabel]: {
@@ -80,171 +81,163 @@ function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, watercour
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.length, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.length).toNumber(), 0);
 }
 function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalWatercourseUnits).toNumber(), 0);
 }
 function calculateExistingLengthRetainedOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthRetained).toNumber(), 0);
 }
 function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(), 0);
 }
 function calculateExistingLengthLostOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthLost).toNumber(), 0);
 }
 function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsLost).toNumber(), 0);
 }
 function calculateProposedLengthCreationOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
-        .reduce((sum, creation) => sum + creation.length, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.length).toNumber(), 0);
 }
 function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
-        .reduce((sum, creation) => sum + creation.unitsDelivered, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.unitsDelivered).toNumber(), 0);
 }
 function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
-        .reduce((sum, enhancement) => sum + enhancement.length, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.length).toNumber(), 0);
 }
 function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .onSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
-        .reduce((sum, enhancement) => sum + enhancement.watercourseUnitsDelivered, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.watercourseUnitsDelivered).toNumber(), 0);
 }
 function calculateTotalProposedLengthOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateExistingLengthRetainedOnSite(inputData, watercourse)
-        + calculateProposedLengthCreationOnSitePostDevelopment(inputData, watercourse)
-        + calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, watercourse)
-    );
+    return new Decimal(calculateExistingLengthRetainedOnSite(inputData, watercourse))
+        .plus(calculateProposedLengthCreationOnSitePostDevelopment(inputData, watercourse))
+        .plus(calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, watercourse))
+        .toNumber();
 }
 function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateExistingUnitsRetainedOnSite(inputData, watercourse)
-        + calculateProposedUnitsCreationOnSitePostDevelopment(inputData, watercourse)
-        + calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, watercourse)
-    );
+    return new Decimal(calculateExistingUnitsRetainedOnSite(inputData, watercourse))
+        .plus(calculateProposedUnitsCreationOnSitePostDevelopment(inputData, watercourse))
+        .plus(calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, watercourse))
+        .toNumber();
 }
 function calculateNetLengthChangeOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateTotalProposedLengthOnSitePostDevelopment(inputData, watercourse)
-        - calculateExistingLengthBaselineOnSite(inputData, watercourse)
-    )
+    return new Decimal(calculateTotalProposedLengthOnSitePostDevelopment(inputData, watercourse))
+        .minus(calculateExistingLengthBaselineOnSite(inputData, watercourse))
+        .toNumber();
 }
 function calculateNetUnitChangeOnSite(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateTotalProposedUnitsOnSitePostDevelopment(inputData, watercourse)
-        - calculateExistingUnitsBaselineOnSite(inputData, watercourse)
-    )
+    return new Decimal(calculateTotalProposedUnitsOnSitePostDevelopment(inputData, watercourse))
+        .minus(calculateExistingUnitsBaselineOnSite(inputData, watercourse))
+        .toNumber();
 }
 function calculateExistingLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.length, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.length).toNumber(), 0);
 }
 function calculateExistingUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalWatercourseUnits).toNumber(), 0);
 }
 function calculateRetainedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthRetained).toNumber(), 0);
 }
 function calculateRetainedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(), 0);
 }
 function calculateProposedLengthCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthLost).toNumber(), 0);
 }
 function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseBaselines
         .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsLost).toNumber(), 0);
 }
 function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
-        .reduce((sum, creation) => sum + creation.length, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.length).toNumber(), 0);
 }
 function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
-        .reduce((sum, creation) => sum + creation.unitsDelivered, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.unitsDelivered).toNumber(), 0);
 }
 function calculateTotalProposedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
-        .reduce((sum, enhancement) => sum + enhancement.length, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.length).toNumber(), 0);
 }
 function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
-        .reduce((sum, enhancement) => sum + enhancement.watercourseUnitsDelivered, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.watercourseUnitsDelivered).toNumber(), 0);
 }
 function calculateOffSiteNetLengthChange(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateTotalProposedLengthOffSite(inputData, watercourse)
-        - calculateExistingLengthOffSite(inputData, watercourse)
-    );
+    return new Decimal(calculateTotalProposedLengthOffSite(inputData, watercourse))
+        .minus(calculateExistingLengthOffSite(inputData, watercourse))
+        .toNumber();
 }
 function calculateOffSiteNetUnitChange(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateTotalProposedUnitsOffSite(inputData, watercourse)
-        - calculateExistingUnitsOffSite(inputData, watercourse)
-    )
+    return new Decimal(calculateTotalProposedUnitsOffSite(inputData, watercourse))
+        .minus(calculateExistingUnitsOffSite(inputData, watercourse))
+        .toNumber();
 }
 function calculateOverallLengthChange(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateNetLengthChangeOnSite(inputData, watercourse)
-        + calculateOffSiteNetLengthChange(inputData, watercourse)
-    )
+    return new Decimal(calculateNetLengthChangeOnSite(inputData, watercourse))
+        .plus(calculateOffSiteNetLengthChange(inputData, watercourse))
+        .toNumber();
 }
 function calculateOverallUnitChange(inputData: AllFeatures, watercourse: Watercourse): number {
-    return (
-        calculateNetUnitChangeOnSite(inputData, watercourse)
-        + calculateOffSiteNetUnitChange(inputData, watercourse)
-    )
+    return new Decimal(calculateNetUnitChangeOnSite(inputData, watercourse))
+        .plus(calculateOffSiteNetUnitChange(inputData, watercourse))
+        .toNumber();
 }
 
 // from https://stackoverflow.com/questions/69019873/how-can-i-get-typed-object-entries-and-object-fromentries-in-typescript

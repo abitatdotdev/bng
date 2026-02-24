@@ -8,6 +8,7 @@ import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialR
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
+import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -145,7 +146,7 @@ export function enrichWithTemporalData<Data extends {
             const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
             const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
 
-            finalTimeToTarget = 31 - advanceYears + delayYears;
+            finalTimeToTarget = new Decimal(31).minus(advanceYears).plus(delayYears).toNumber();
 
             // Result stays as "30+" if it's still >= 30
             if (finalTimeToTarget >= 30) {
@@ -164,7 +165,7 @@ export function enrichWithTemporalData<Data extends {
             const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
             const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
 
-            finalTimeToTarget = standardTimeToTarget - advanceYears + delayYears;
+            finalTimeToTarget = new Decimal(standardTimeToTarget).minus(advanceYears).plus(delayYears).toNumber();
 
             // Handle the "30+" case for output
             if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
@@ -248,15 +249,16 @@ export function enrichWithHedgerowUnitsDelivered<Data extends {
         : 0;
 
     // Base calculation without spatial risk
-    const baseUnits = data.length
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier
-        * temporalMultiplierValue
-        * data.difficultyMultiplier;
+    const baseUnits = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(temporalMultiplierValue)
+        .mul(data.difficultyMultiplier)
+        .toNumber();
 
     // With spatial risk multiplier (Column Y in E-2)
-    const hedgerowUnitsDeliveredWithSpatialRisk = baseUnits * data.spatialRiskMultiplier;
+    const hedgerowUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(data.spatialRiskMultiplier).toNumber();
 
     // Without spatial risk multiplier (Column Z in E-2)
     const hedgerowUnitsDelivered = baseUnits;

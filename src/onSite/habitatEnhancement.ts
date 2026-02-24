@@ -8,6 +8,7 @@ import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaseline } from './habit
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
+import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
     baseline: onSiteHabitatBaselineSchema,
@@ -125,9 +126,9 @@ const calculateFinalTimeToTargetValues = <Data extends {
         } else if (habitatEnhancedInAdvance === "30+") {
             finalTimeToTargetCondition = 0;
         } else if (normalisedHabitatEnhancedInAdvance < 30) {
-            finalTimeToTargetCondition = 30 - normalisedHabitatEnhancedInAdvance;
+            finalTimeToTargetCondition = new Decimal(30).minus(normalisedHabitatEnhancedInAdvance).toNumber();
         } else {
-            finalTimeToTargetCondition = 30 - normalisedHabitatEnhancedInAdvance;
+            finalTimeToTargetCondition = new Decimal(30).minus(normalisedHabitatEnhancedInAdvance).toNumber();
         }
     }
     // If advance > standard time, final time is 0
@@ -140,14 +141,14 @@ const calculateFinalTimeToTargetValues = <Data extends {
     }
     // Calculate: standardTime + delay - advance
     else {
-        const result = timeToTargetCondition + normalisedHabitatEnhancedDelay - normalisedHabitatEnhancedInAdvance;
+        const result = new Decimal(timeToTargetCondition).plus(normalisedHabitatEnhancedDelay).minus(normalisedHabitatEnhancedInAdvance).toNumber();
 
         // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
             // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
+            finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
@@ -297,16 +298,16 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
 
     // Calculate proposed units
-    const proposedUnits = area * proposedD * proposedC;
+    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
 
     // Calculate baseline units (with effective condition)
-    const baselineUnits = area * baselineD * effectiveBaselineC;
+    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
 
     // Calculate delta with multipliers
-    const delta = (proposedUnits - baselineUnits) * difficulty * temporal;
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
 
     // Add back baseline units and apply strategic significance
-    const habitatUnitsDelivered = (delta + baselineUnits) * strategic;
+    const habitatUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
 
     return {
         ...data,

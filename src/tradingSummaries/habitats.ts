@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import type { BroadHabitat } from "../broadHabitats";
 import type { DistinctivenessCategory } from "../distinctivenessCategories";
 import { type AllFeatures } from "../features";
@@ -32,7 +33,7 @@ export function cumulativeBroadHabitatChange(features: AllFeatures, distinctiven
         .filter(h => h.distinctivenessCategory === distinctivenessCategory)
         .reduce((acc, h) => {
             const existing = acc[h.broadHabitat] || 0;
-            acc[h.broadHabitat] = existing + projectWideUnitChange(features, h.label)
+            acc[h.broadHabitat] = new Decimal(existing).plus(projectWideUnitChange(features, h.label)).toNumber()
             return acc;
         }, {} as { [K in BroadHabitat]: number })
 }
@@ -66,11 +67,11 @@ function veryHighDistinctivenessSummary(features: AllFeatures) {
         unitsAvailableToOffsetDownwards:
             labels
                 .map(label => unitsAvailableToOffsetDownwards(features, label))
-                .reduce((acc, num) => acc + num, 0),
+                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
         remainingLosses:
             labels
                 .map(label => unitLosses(features, label))
-                .reduce((acc, num) => acc + num, 0),
+                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
     }
 }
 
@@ -83,11 +84,11 @@ function highDistinctivenessSummary(features: AllFeatures) {
         unitsAvailableToOffsetDownwards:
             labels
                 .map(label => unitsAvailableToOffsetDownwards(features, label))
-                .reduce((acc, num) => acc + num, 0),
+                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
         remainingLosses:
             labels
                 .map(label => lossesNotYetAccountedFor(features, label))
-                .reduce((acc, num) => acc + num, 0),
+                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
     }
 }
 
@@ -97,16 +98,16 @@ function mediumDistinctivenessSummary(features: AllFeatures) {
 
     const availableDownwards =
         cumulativeBroadHabitatChanges
-            .reduce((acc, num) => num > 0 ? acc + num : acc, 0)
+            .reduce((acc: number, num: number) => num > 0 ? new Decimal(acc).plus(num).toNumber() : acc, 0)
     const availableUpwards =
         cumulativeBroadHabitatChanges
-            .reduce((acc, num) => num < 0 ? acc + num : acc, 0)
+            .reduce((acc: number, num: number) => num < 0 ? new Decimal(acc).plus(num).toNumber() : acc, 0)
 
     const vHighAvailable = veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
     const highAvailable = highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
-    const surplusUnitsMinusDeficit = vHighAvailable + highAvailable + availableUpwards;
+    const surplusUnitsMinusDeficit = new Decimal(vHighAvailable).plus(highAvailable).plus(availableUpwards).toNumber();
 
-    const cumulativeSurplus = surplusUnitsMinusDeficit + availableDownwards;
+    const cumulativeSurplus = new Decimal(surplusUnitsMinusDeficit).plus(availableDownwards).toNumber();
 
     return {
         unitsAvailableToOffsetDownwards: availableDownwards,
@@ -121,10 +122,10 @@ function lowDistinctivenessSummary(features: AllFeatures) {
         .filter(h => h.distinctivenessCategory === "Low")
         .map(f => f.label);
 
-    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum, num) => sum + num, 0);
+    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0);
 
     const mediumSurplus = mediumDistinctivenessSummary(features).cumulativeSurplus;
-    const cumulativeSurplus = mediumSurplus > 0 ? netChangeInUnits + mediumSurplus : netChangeInUnits;
+    const cumulativeSurplus = mediumSurplus > 0 ? new Decimal(netChangeInUnits).plus(mediumSurplus).toNumber() : netChangeInUnits;
 
     return {
         netChangeInUnits,
@@ -139,7 +140,7 @@ function vHighUnitLosses(features: AllFeatures) {
 
     return labels
         .map(l => unitLosses(features, l))
-        .reduce((sum, num) => sum + num, 0)
+        .reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0)
 }
 
 export function habitatTradingSummary(features: AllFeatures) {
@@ -154,11 +155,10 @@ export function habitatTradingSummary(features: AllFeatures) {
         details,
         vHighSatisfied: vHighUnitLosses(features) >= 0,
         highSatisfied: details.high.remainingLosses >= 0,
-        mediumSatisfied: (
-            details.vHigh.unitsAvailableToOffsetDownwards
-            + details.high.unitsAvailableToOffsetDownwards
-            + details.medium.unitsAvailableToOffsetUpwards
-        ) >= 0,
+        mediumSatisfied: new Decimal(details.vHigh.unitsAvailableToOffsetDownwards)
+            .plus(details.high.unitsAvailableToOffsetDownwards)
+            .plus(details.medium.unitsAvailableToOffsetUpwards)
+            .greaterThanOrEqualTo(0),
         lowSatisfied: details.low.cumulativeSurplus >= 0
     }
 }

@@ -1,4 +1,5 @@
 import XLSX, { utils } from 'xlsx';
+import { Decimal } from '../decimal';
 
 /**
  * Maximum number of rows to process in Excel sheets
@@ -64,7 +65,7 @@ export function parseBoolean(value: any): boolean {
  */
 export function normalizeNumber(value: any): number {
     if (typeof value === "number") {
-        return Math.round(value * 100000000) / 100000000; // 8 decimal places
+        return new Decimal(value).toDecimalPlaces(8).toNumber();
     }
     return 0;
 }

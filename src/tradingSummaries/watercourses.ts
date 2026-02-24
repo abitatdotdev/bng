@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import type { DistinctivenessCategory } from "../distinctivenessCategories";
 import { type AllFeatures } from "../features";
 import { valuesByWatercourse } from "../groupings";
@@ -47,35 +48,35 @@ function labelsFor(distinctivenessCategory: DistinctivenessCategory) {
 function veryHighDistinctivenessSummary(features: AllFeatures) {
     const labels = labelsFor("V.High");
 
-    const remainingLosses = Math.min(
+    const remainingLosses = Decimal.min(
         labels
             .map(label => projectWideUnitChange(features, label))
-            .reduce((acc, num) => acc + num, 0),
+            .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
         0
-    )
+    ).toNumber()
 
     return {
         unitsAvailableToOffsetDownwards:
             labels
                 .map(label => unitsAvailableToOffsetDownwards(features, label))
-                .reduce((acc, num) => acc + num, 0),
+                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
         remainingLosses,
     }
 }
 
 function highDistinctivenessSummary(features: AllFeatures) {
     const labels = labelsFor("High");
-    const availableDownwards = Math.max(
+    const availableDownwards = Decimal.max(
         labels
             .map(label => projectWideUnitChange(features, label))
-            .reduce((acc, num) => acc + num, 0),
+            .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
         0
-    )
+    ).toNumber()
 
     const remainingLosses =
         labels
             .map(label => projectWideUnitChange(features, label))
-            .reduce((acc, num) => acc + num, 0)
+            .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0)
 
     return {
         unitsAvailableToOffsetDownwards: availableDownwards,
@@ -88,11 +89,11 @@ function mediumDistinctivenessSummary(features: AllFeatures) {
 
     const availableDownwards = labels
         .map(label => unitsAvailableToOffsetDownwards(features, label))
-        .reduce((acc, num) => acc + num, 0)
+        .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0)
 
     const remainingLosses = labels
         .map(label => unitsAvailableToOffsetUpwards(features, label))
-        .reduce((acc, num) => acc + num, 0)
+        .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0)
 
     return {
         unitsAvailableToOffsetDownwards: availableDownwards,
@@ -102,13 +103,12 @@ function mediumDistinctivenessSummary(features: AllFeatures) {
 
 function lowDistinctivenessSummary(features: AllFeatures) {
     const labels = labelsFor("Low");
-    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum, num) => sum + num, 0);
-    const cumulativeSurplus = (
-        veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-        + highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-        + mediumDistinctivenessSummary(features).unitsAvailableToOffsetDownwards
-        + netChangeInUnits
-    )
+    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0);
+    const cumulativeSurplus = new Decimal(veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards)
+        .plus(highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards)
+        .plus(mediumDistinctivenessSummary(features).unitsAvailableToOffsetDownwards)
+        .plus(netChangeInUnits)
+        .toNumber()
 
     return {
         netChangeInUnits,
@@ -126,7 +126,7 @@ export function watercourseTradingSummary(features: AllFeatures) {
 
     return {
         details,
-        vHighSatisfied: labelsFor("V.High").map(l => projectWideUnitChange(features, l)).reduce((sum, num) => sum + num, 0) >= 0,
+        vHighSatisfied: labelsFor("V.High").map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0) >= 0,
         highSatisfied: details.high.remainingLosses >= 0,
         mediumSatisfied: details.medium.remainingLosses >= 0,
         lowSatisfied: details.low.cumulativeSurplus >= 0,

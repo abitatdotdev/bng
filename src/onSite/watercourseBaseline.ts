@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema } from '../schemaUtils';
@@ -12,7 +13,6 @@ import {
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
-import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -35,7 +35,7 @@ export const onSiteWatercourseBaselineSchema = v.pipe(
     v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"),
     // Check that retained + enhanced doesn't exceed total length
     v.check(
-        s => s.lengthRetained + s.lengthEnhanced <= s.length,
+        s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
         "Retained and enhanced lengths cannot exceed total length"
     ),
     // Validate encroachment consistency with watercourse type
@@ -80,7 +80,7 @@ export function enrichWithVhdhBespokeCompensationUnits<Data extends {
             data.bespokeCompensation === "Yes"
             || data.bespokeCompensation === "Pending"
         ) && data.tradingRules === "Same habitat required – bespoke compensation option ⚠"
-            ? data.totalWatercourseUnits - data.lengthRetained - data.lengthEnhanced
+            ? new Decimal(data.totalWatercourseUnits).minus(data.lengthRetained).minus(data.lengthEnhanced).toNumber()
             : 0;
 
     return {

@@ -6,6 +6,7 @@ import { getStrategicSignificance, type StrategicSignificanceDescription } from 
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
 import { hedgerowTypeSchema } from '../hedgerowType';
+import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -30,9 +31,8 @@ export const offSiteHedgerowBaselineSchema = v.pipe(
         s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
         "Non-native and ornamental hedgerow can only have Poor condition"
     ),
-    // Check that retained + enhanced doesn't exceed total length
     v.check(
-        s => s.lengthRetained + s.lengthEnhanced <= s.length,
+        s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
         "Retained and enhanced lengths cannot exceed total length"
     ),
     // Enrich with hedgerow data
@@ -115,15 +115,17 @@ export function enrichWithBaselineUnitsData<Data extends {
     conditionScore: number;
     strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const unitsRetained = data.lengthRetained
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier;
+    const unitsRetained = new Decimal(data.lengthRetained)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .toNumber();
 
-    const unitsEnhanced = data.lengthEnhanced
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier;
+    const unitsEnhanced = new Decimal(data.lengthEnhanced)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -143,11 +145,12 @@ export function enrichWithTotalHedgerowUnitsSRM<Data extends {
     strategicSignificanceMultiplier: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const totalHedgerowUnitsSRM = data.length
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.spatialRiskMultiplier;
+    const totalHedgerowUnitsSRM = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.spatialRiskMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -165,10 +168,11 @@ export function enrichWithTotalHedgerowUnits<Data extends {
     conditionScore: number;
     strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const totalHedgerowUnits = data.length
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier;
+    const totalHedgerowUnits = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -188,8 +192,8 @@ export function enrichWithUnitsLost<Data extends {
     unitsRetained: number;
     unitsEnhanced: number;
 }>(data: Data) {
-    const lengthLost = data.length - data.lengthRetained - data.lengthEnhanced;
-    const unitsLost = lengthLost === 0 ? 0 : data.totalHedgerowUnits - data.unitsRetained - data.unitsEnhanced;
+    const lengthLost = new Decimal(data.length).minus(data.lengthRetained).minus(data.lengthEnhanced).toNumber();
+    const unitsLost = lengthLost === 0 ? 0 : new Decimal(data.totalHedgerowUnits).minus(data.unitsRetained).minus(data.unitsEnhanced).toNumber();
 
     return {
         ...data,

@@ -8,6 +8,7 @@ import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
+import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
@@ -270,20 +271,20 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
 
     // Calculate proposed units
-    const proposedUnits = area * proposedD * proposedC;
+    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
 
     // Calculate baseline units (with effective condition)
-    const baselineUnits = area * baselineD * effectiveBaselineC;
+    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
 
     // Calculate delta with multipliers
-    const delta = (proposedUnits - baselineUnits) * difficulty * temporal;
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
 
     // Add back baseline units and apply strategic significance
-    const baseUnits = (delta + baselineUnits) * strategic;
+    const baseUnits = delta.plus(baselineUnits).mul(strategic);
 
     // Two calculations: with and without spatial risk multiplier
-    const habitatUnitsDeliveredWithSpatialRisk = baseUnits * spatialRisk;
-    const habitatUnitsDelivered = baseUnits;
+    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
+    const habitatUnitsDelivered = baseUnits.toNumber();
 
     return {
         ...data,

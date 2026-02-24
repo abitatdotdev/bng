@@ -2,6 +2,7 @@ import type { AllFeatures } from '../features';
 import { habitatByLabel, type HabitatLabel } from "../habitats"
 import type { BroadHabitat } from "../broadHabitats";
 import { valuesByHabitat } from "./habitats";
+import { Decimal } from '../decimal';
 
 type ValuesByBroadHabitat = {
     [Label in BroadHabitat]: {
@@ -42,18 +43,18 @@ export const valuesByBroadHabitat = (inputData: AllFeatures): ValuesByBroadHabit
         }
 
         results[broadHabitat] = {
-            onSiteExistingArea: broadHabitatResults.onSiteExistingArea + values.existingAreaBaselineOnSite,
-            onSiteExistingValue: broadHabitatResults.onSiteExistingValue + values.existingUnitsBaselineOnSite,
-            onSiteProposedArea: broadHabitatResults.onSiteProposedArea + values.totalProposedAreaOnSitePostDevelopment,
-            onSiteProposedValue: broadHabitatResults.onSiteProposedValue + values.totalProposedUnitsOnSitePostDevelopment,
-            onSiteAreaChange: broadHabitatResults.onSiteAreaChange + values.netAreaChangeOnSite,
-            onSiteUnitChange: broadHabitatResults.onSiteUnitChange + values.netUnitChangeOnSite,
-            offSiteExistingArea: broadHabitatResults.offSiteExistingArea + values.existingAreaOffSite,
-            offSiteExistingValue: broadHabitatResults.offSiteExistingValue + values.existingUnitsOffSite,
-            offSiteProposedArea: broadHabitatResults.offSiteProposedArea + values.totalProposedAreaOffSite,
-            offSiteProposedValue: broadHabitatResults.offSiteProposedValue + values.totalProposedUnitsOffSite,
-            offSiteAreaChange: broadHabitatResults.offSiteAreaChange + values.offSiteNetAreaChange,
-            offSiteUnitChange: broadHabitatResults.offSiteUnitChange + values.offSiteNetUnitChange,
+            onSiteExistingArea: new Decimal(broadHabitatResults.onSiteExistingArea).plus(values.existingAreaBaselineOnSite).toNumber(),
+            onSiteExistingValue: new Decimal(broadHabitatResults.onSiteExistingValue).plus(values.existingUnitsBaselineOnSite).toNumber(),
+            onSiteProposedArea: new Decimal(broadHabitatResults.onSiteProposedArea).plus(values.totalProposedAreaOnSitePostDevelopment).toNumber(),
+            onSiteProposedValue: new Decimal(broadHabitatResults.onSiteProposedValue).plus(values.totalProposedUnitsOnSitePostDevelopment).toNumber(),
+            onSiteAreaChange: new Decimal(broadHabitatResults.onSiteAreaChange).plus(values.netAreaChangeOnSite).toNumber(),
+            onSiteUnitChange: new Decimal(broadHabitatResults.onSiteUnitChange).plus(values.netUnitChangeOnSite).toNumber(),
+            offSiteExistingArea: new Decimal(broadHabitatResults.offSiteExistingArea).plus(values.existingAreaOffSite).toNumber(),
+            offSiteExistingValue: new Decimal(broadHabitatResults.offSiteExistingValue).plus(values.existingUnitsOffSite).toNumber(),
+            offSiteProposedArea: new Decimal(broadHabitatResults.offSiteProposedArea).plus(values.totalProposedAreaOffSite).toNumber(),
+            offSiteProposedValue: new Decimal(broadHabitatResults.offSiteProposedValue).plus(values.totalProposedUnitsOffSite).toNumber(),
+            offSiteAreaChange: new Decimal(broadHabitatResults.offSiteAreaChange).plus(values.offSiteNetAreaChange).toNumber(),
+            offSiteUnitChange: new Decimal(broadHabitatResults.offSiteUnitChange).plus(values.offSiteNetUnitChange).toNumber(),
         }
 
         return results;

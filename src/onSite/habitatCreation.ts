@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import { broadHabitatSchema } from '../broadHabitats';
 import { creationHabitatType, type CreationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
@@ -81,7 +82,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
             finalTimeToTargetCondition = "30+";
         } else {
             // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - normalisedHabitatCreationInAdvance);
+            finalTimeToTargetCondition = Decimal.max(0, new Decimal(30).minus(normalisedHabitatCreationInAdvance)).toNumber();
         }
     }
     // If advance >= standard time, final time is 0
@@ -90,14 +91,14 @@ const calculateFinalTimeToTargetValues = <Data extends {
     }
     // Calculate: standardTime - advance + delay
     else {
-        const result = timeToTargetCondition - normalisedHabitatCreationInAdvance + normalisedHabitatCreationDelay;
+        const result = new Decimal(timeToTargetCondition).minus(normalisedHabitatCreationInAdvance).plus(normalisedHabitatCreationDelay).toNumber();
 
         // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
             // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
+            finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
@@ -290,13 +291,13 @@ const calculateHabitatUnitsDelivered = <Data extends {
     finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    const habitatUnitsDelivered =
-        data.area *
-        data.distinctivenessScore *
-        data.conditionScore *
-        data.strategicSignificanceMultiplier *
-        (data.finalTimeToTargetMultiplier ?? 0) *
-        data.difficultyMultiplierApplied;
+    const habitatUnitsDelivered = new Decimal(data.area)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.finalTimeToTargetMultiplier ?? 0)
+        .mul(data.difficultyMultiplierApplied)
+        .toNumber();
 
     return {
         ...data,

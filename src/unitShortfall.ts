@@ -1,3 +1,4 @@
+import { Decimal } from './decimal';
 import type { AllFeatures } from './features';
 import { type HeadlineResults } from './headlineResults';
 import { type HabitatLabel } from './habitats';
@@ -56,7 +57,7 @@ export function featureShortfall(finalLosses: number, deficit: number, requiredG
         return -finalLosses;
     }
 
-    return -finalLosses + deficit;
+    return new Decimal(-finalLosses).plus(deficit).toNumber();
 }
 
 /**
@@ -160,48 +161,47 @@ export function a1BalancingShortfall(
     shortfalls: { a2: number; a3: number; a4: number; a5: number; },
     details: ReturnType<typeof buildTierDetail>
 ): number {
-    const a2ToA5Shortfalls = (
-        shortfalls.a2
-        + shortfalls.a3
-        + shortfalls.a4
-        + shortfalls.a5
-    )
-    const allA1Losses = (
-        details.high.a1.lossesInTier
-        + details.medium.a1.finalLosses
-        + details.low.a1.finalLosses
-    )
+    const a2ToA5Shortfalls = new Decimal(shortfalls.a2)
+        .plus(shortfalls.a3)
+        .plus(shortfalls.a4)
+        .plus(shortfalls.a5)
+        .toNumber();
+    const allA1Losses = new Decimal(details.high.a1.lossesInTier)
+        .plus(details.medium.a1.finalLosses)
+        .plus(details.low.a1.finalLosses)
+        .toNumber();
     const habitatUnitDeficit = headline.habitatUnitSummary.unitDeficit;
-    const unitGap = headline.habitatUnitSummary.requiredUnits - headline.habitatUnitSummary.baselineUnits
+    const unitGap = new Decimal(headline.habitatUnitSummary.requiredUnits)
+        .minus(headline.habitatUnitSummary.baselineUnits)
+        .toNumber();
 
     // NOTE: the following formulas are a bit weird,
     // but they match the excel formulas as closely as possible.
-    if (a2ToA5Shortfalls - allA1Losses >= habitatUnitDeficit) {
+    const a2ToA5MinusA1 = new Decimal(a2ToA5Shortfalls).minus(allA1Losses).toNumber();
+
+    if (a2ToA5MinusA1 >= habitatUnitDeficit) {
         return -allA1Losses;
     }
 
-    if (a2ToA5Shortfalls - allA1Losses >= habitatUnitDeficit - unitGap) {
-        return (
-            -allA1Losses
-            + habitatUnitDeficit
-            - a2ToA5Shortfalls
-            + allA1Losses
-        )
+    if (a2ToA5MinusA1 >= habitatUnitDeficit - unitGap) {
+        // -allA1Losses + habitatUnitDeficit - a2ToA5Shortfalls + allA1Losses
+        // simplifies to: habitatUnitDeficit - a2ToA5Shortfalls
+        return new Decimal(habitatUnitDeficit).minus(a2ToA5Shortfalls).toNumber();
     }
 
     if (habitatUnitDeficit <= 0) {
         return -allA1Losses;
     }
 
-    if (a2ToA5Shortfalls - allA1Losses < habitatUnitDeficit) {
-        return habitatUnitDeficit - a2ToA5Shortfalls
+    if (a2ToA5MinusA1 < habitatUnitDeficit) {
+        return new Decimal(habitatUnitDeficit).minus(a2ToA5Shortfalls).toNumber();
     }
 
     if (habitatUnitDeficit >= unitGap) {
-        return -allA1Losses + unitGap;
+        return new Decimal(-allA1Losses).plus(unitGap).toNumber();
     }
 
-    return -allA1Losses + habitatUnitDeficit;
+    return new Decimal(-allA1Losses).plus(habitatUnitDeficit).toNumber();
 }
 
 /**
@@ -212,10 +212,10 @@ function habitatTierShortfall(
     headlineResults: HeadlineResults,
     details: ReturnType<typeof buildTierDetail>
 ): { a5: number; a4: number; a3: number; a2: number; a1: number } {
-    const a5 = -(details.high.a5.lossesInTier)
-    const a4 = -(details.high.a4.lossesInTier + details.medium.a4.finalLosses)
-    const a3 = -(details.high.a3.lossesInTier)
-    const a2 = -(details.high.a2.lossesInTier + details.medium.a2.finalLosses)
+    const a5 = new Decimal(details.high.a5.lossesInTier).neg().toNumber();
+    const a4 = new Decimal(details.high.a4.lossesInTier).plus(details.medium.a4.finalLosses).neg().toNumber();
+    const a3 = new Decimal(details.high.a3.lossesInTier).neg().toNumber();
+    const a2 = new Decimal(details.high.a2.lossesInTier).plus(details.medium.a2.finalLosses).neg().toNumber();
 
     const shortfalls = { a2, a3, a4, a5 }
 
@@ -227,7 +227,7 @@ function habitatTierShortfall(
 function highTierDetail(features: AllFeatures, habitats: HabitatLabel[]) {
     const byHabitat = valuesByHabitat(features);
     const unitChange = habitats.map(label => byHabitat[label as HabitatLabel].unitChangeIncludingOffSite)
-    const lossesInTier = unitChange.reduce((sum, num) => num < 0 ? sum + num : sum, 0)
+    const lossesInTier = unitChange.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
     return {
         unitChange,
         lossesInTier,
@@ -259,7 +259,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Grassland - Upland hay meadows",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         [
@@ -273,7 +273,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Heathland and shrub - Mountain heaths and willow scrub"
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         [
@@ -282,7 +282,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Urban - Open mosaic habitats on previously developed land",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         ["Individual trees", 0],
@@ -304,7 +304,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Woodland and forest - Wood-pasture and parkland",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         [
@@ -332,7 +332,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Intertidal sediment - Littoral seagrass on peat, clay or chalk",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
     ]
@@ -352,7 +352,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Lakes - Aquifer fed naturally fluctuating water bodies",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         [
@@ -368,7 +368,7 @@ function mediumTierDetail(features: AllFeatures) {
                 "Sparsely vegetated land - Limestone pavement",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
         [
@@ -386,45 +386,44 @@ function mediumTierDetail(features: AllFeatures) {
                 "Wetland - Transition mires and quaking bogs (H7140)",
             ] satisfies HabitatLabel[]).reduce((sum, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? sum + value : sum;
+                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
             }, 0),
         ],
     ]
 
     const a1Rule1 = a1HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = unitGainAvailable + lossesRequiringOffset;
+        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
 
         return remainingAvailableAfterRule1
     })
     const a2Rule1 = a2HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = unitGainAvailable + lossesRequiringOffset;
+        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
 
         return remainingAvailableAfterRule1
     })
     const a4Rule1 = a4HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = unitGainAvailable + lossesRequiringOffset;
+        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
 
         return remainingAvailableAfterRule1
     })
-    const rule1Sum = [a1Rule1, a2Rule1, a4Rule1].flat().reduce((sum, num) => num > 0 ? sum + num : sum, 0)
+    const rule1Sum = [a1Rule1, a2Rule1, a4Rule1].flat().reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
 
-    const a1Rule2 = a1Rule1.reduce((sum, num) => num < 0 ? sum + num : sum, 0)
-    const a2Rule2 = a2Rule1.reduce((sum, num) => num < 0 ? sum + num : sum, 0)
-    const a4Rule2 = (
-        a4Rule1.reduce((sum, num) => num < 0 ? sum + num : sum, 0)
-        + rule1Sum
-    )
-    const rule2Sum = [a1Rule2, a2Rule2, a4Rule2].reduce((sum, num) => num > 0 ? sum + num : sum, 0)
+    const a1Rule2 = a1Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const a2Rule2 = a2Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const a4Rule2 = new Decimal(
+        a4Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    ).plus(rule1Sum).toNumber();
+    const rule2Sum = [a1Rule2, a2Rule2, a4Rule2].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
 
-    const a1Rule3 = [a1Rule2].reduce((sum, num) => num < 0 ? sum + num : sum, 0)
-    const a2Rule3 = [a2Rule2].reduce((sum, num) => num < 0 ? sum + num : sum, 0) + rule2Sum
-    const a4Rule3 = [a4Rule2].reduce((sum, num) => num < 0 ? sum + num : sum, 0)
-    const rule3Sum = [a1Rule3, a2Rule3, a4Rule3].reduce((sum, num) => num > 0 ? sum + num : sum, 0)
+    const a1Rule3 = [a1Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const a2Rule3 = new Decimal([a2Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)).plus(rule2Sum).toNumber();
+    const a4Rule3 = [a4Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const rule3Sum = [a1Rule3, a2Rule3, a4Rule3].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
 
-    const a1Rule4 = a1Rule3 + rule3Sum;
+    const a1Rule4 = new Decimal(a1Rule3).plus(rule3Sum).toNumber();
     const a2Rule4 = a2Rule3 < 0 ? a2Rule3 : 0;
     const a4Rule4 = a4Rule3 < 0 ? a4Rule3 : 0;
 
@@ -441,8 +440,12 @@ function mediumTierDetail(features: AllFeatures) {
 
 function lowTierDetail(tradingSummaries: TradingSummaries, mediumTier: ReturnType<typeof mediumTierDetail>) {
     const netUnitChange = tradingSummaries.habitats.details.low.netChangeInUnits;
-    const unitChangeFollowingOffset = (netUnitChange < 0 ? netUnitChange : 0) + tradingSummaries.habitats.details.medium.unitsAvailableToOffsetDownwards;
-    const unitsRemainingAfterRule5 = unitChangeFollowingOffset + [mediumTier.a1.rule4, mediumTier.a2.rule4, mediumTier.a4.rule4].reduce((sum, num) => num > 0 ? sum + num : sum, 0)
+    const unitChangeFollowingOffset = new Decimal(netUnitChange < 0 ? netUnitChange : 0)
+        .plus(tradingSummaries.habitats.details.medium.unitsAvailableToOffsetDownwards)
+        .toNumber();
+    const unitsRemainingAfterRule5 = new Decimal(unitChangeFollowingOffset)
+        .plus([mediumTier.a1.rule4, mediumTier.a2.rule4, mediumTier.a4.rule4].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0))
+        .toNumber();
     const finalLosses = unitsRemainingAfterRule5 < 0 ? unitsRemainingAfterRule5 : 0;
 
     return {
@@ -457,7 +460,7 @@ function hedgerowDetail(tradingSummaries: TradingSummaries) {
         tradingSummaries.hedgerows.details.medium.cumulativeSurplus,
         tradingSummaries.hedgerows.details.low.cumulativeSurplus,
         tradingSummaries.hedgerows.details.vLow.cumulativeSurplus,
-    ].reduce((sum, num) => num < 0 ? sum + num : sum, 0)
+    ].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
 
     return {
         finalLosses,
@@ -470,7 +473,7 @@ function watercourseDetail(tradingSummaries: TradingSummaries) {
         tradingSummaries.watercourses.details.high.remainingLosses,
         tradingSummaries.watercourses.details.medium.remainingLosses,
         tradingSummaries.watercourses.details.low.cumulativeSurplus,
-    ].reduce((sum, num) => num < 0 ? sum + num : sum, 0)
+    ].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
 
     return {
         finalLosses,
@@ -578,13 +581,13 @@ export function unitShortfall(features: AllFeatures, headline: HeadlineResults, 
     const hedgerowShortfall = featureShortfall(
         tierDetail.hedgerows.finalLosses,
         headline.hedgerowUnitSummary.unitDeficit,
-        headline.hedgerowUnitSummary.requiredUnits - headline.hedgerowUnitSummary.baselineUnits
+        new Decimal(headline.hedgerowUnitSummary.requiredUnits).minus(headline.hedgerowUnitSummary.baselineUnits).toNumber()
     );
 
     const watercourseShortfall = featureShortfall(
         tierDetail.watercourses.finalLosses,
         headline.watercourseUnitSummary.unitDeficit,
-        headline.watercourseUnitSummary.requiredUnits - headline.watercourseUnitSummary.baselineUnits
+        new Decimal(headline.watercourseUnitSummary.requiredUnits).minus(headline.watercourseUnitSummary.baselineUnits).toNumber()
     );
 
     return {
@@ -593,32 +596,32 @@ export function unitShortfall(features: AllFeatures, headline: HeadlineResults, 
             habitats: {
                 a5: {
                     shortfall: habitatShortfalls.a5,
-                    srmShortfall: habitatShortfalls.a5 * 2, // SRM application: * 2
+                    srmShortfall: new Decimal(habitatShortfalls.a5).mul(2).toNumber(), // SRM application: * 2
                 },
                 a4: {
                     shortfall: habitatShortfalls.a4,
-                    srmShortfall: habitatShortfalls.a4 * 2,
+                    srmShortfall: new Decimal(habitatShortfalls.a4).mul(2).toNumber(),
                 },
                 a3: {
                     shortfall: habitatShortfalls.a3,
-                    srmShortfall: habitatShortfalls.a3 * 2,
+                    srmShortfall: new Decimal(habitatShortfalls.a3).mul(2).toNumber(),
                 },
                 a2: {
                     shortfall: habitatShortfalls.a2,
-                    srmShortfall: habitatShortfalls.a2 * 2,
+                    srmShortfall: new Decimal(habitatShortfalls.a2).mul(2).toNumber(),
                 },
                 a1: {
                     shortfall: habitatShortfalls.a1,
-                    srmShortfall: habitatShortfalls.a1 * 2,
+                    srmShortfall: new Decimal(habitatShortfalls.a1).mul(2).toNumber(),
                 },
             },
             hedgerows: {
                 shortfall: hedgerowShortfall,
-                srmShortfall: hedgerowShortfall * 2, // SRM application: * 2
+                srmShortfall: new Decimal(hedgerowShortfall).mul(2).toNumber(), // SRM application: * 2
             },
             watercourses: {
                 shortfall: watercourseShortfall,
-                srmShortfall: watercourseShortfall * 2, // SRM application: * 2
+                srmShortfall: new Decimal(watercourseShortfall).mul(2).toNumber(), // SRM application: * 2
             },
         },
         tierDetail,

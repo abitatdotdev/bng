@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
@@ -35,7 +36,7 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "You cannot enhance irreplaceable individual trees ▲"),
     v.check(s => !(
         s.irreplaceableHabitat
-        && (s.areaRetained + s.areaEnhanced) < s.area
+        && new Decimal(s.areaRetained).plus(s.areaEnhanced).lessThan(s.area)
         && s.bespokeCompensationAgreed === "No"
     ), "Any loss unacceptable"),
     v.check(s => !(
@@ -46,7 +47,7 @@ export const onSiteHabitatBaselineSchema = v.pipe(
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (X)
     // See https://opncd.ai/share/4Z0sTzAw for translation
-    v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Area sums do not add up"),
+    v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Area sums do not add up"),
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
 )
@@ -57,15 +58,20 @@ export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSc
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean; area: number; areaRetained: number; areaEnhanced: number; distinctivenessScore: number; conditionScore: number; strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const baselineUnitsRetained = data.areaRetained
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier;
-    const baselineUnitsEnhanced = data.areaEnhanced
-        * data.distinctivenessScore
-        * data.conditionScore
-        * data.strategicSignificanceMultiplier;
-    const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
+    const baselineUnitsRetained = new Decimal(data.areaRetained)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .toNumber();
+    const baselineUnitsEnhanced = new Decimal(data.areaEnhanced)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .toNumber();
+    const areaHabitatLost = new Decimal(data.area)
+        .minus(data.areaRetained)
+        .minus(data.areaEnhanced)
+        .toNumber();
     return {
         ...data,
         baselineUnitsRetained: data.irreplaceableHabitat
@@ -83,7 +89,10 @@ export function enrichWithUnitsLost<Data extends {
     baselineUnitsRetained: number,
     baselineUnitsEnhanced: number,
 }>(data: Data) {
-    const unitsLost = data.areaHabitatLost === 0 ? 0 : data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced;
+    const unitsLost = data.areaHabitatLost === 0 ? 0 : new Decimal(data.totalHabitatUnits)
+        .minus(data.baselineUnitsRetained)
+        .minus(data.baselineUnitsEnhanced)
+        .toNumber();
     return {
         ...data,
         unitsLost,
@@ -105,7 +114,10 @@ export function enrichWithVhdhBespokeCompensationUnits<Data extends {
             data.bespokeCompensationAgreed === "Yes"
             || data.bespokeCompensationAgreed === "Pending"
         ) && data.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            ? data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced
+            ? new Decimal(data.totalHabitatUnits)
+                .minus(data.baselineUnitsRetained)
+                .minus(data.baselineUnitsEnhanced)
+                .toNumber()
             : 0;
 
     return {

@@ -1,5 +1,6 @@
 import type { AllFeatures } from '../features';
 import { allHedgerows, hedgerowByLabel, isHedgerow, type Hedgerow, type HedgerowLabel } from "../hedgerows";
+import { Decimal } from '../decimal';
 
 type ValuesByHedgerow = {
     [Label in HedgerowLabel]: {
@@ -80,173 +81,163 @@ function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, hedgerow:
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.length, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.length).toNumber(), 0);
 }
 function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalHedgerowUnits).toNumber(), 0);
 }
 function calculateExistingLengthRetainedOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthRetained).toNumber(), 0);
 }
 function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(), 0);
 }
 function calculateExistingLengthLostOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.lengthLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthLost).toNumber(), 0);
 }
 function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.unitsLost, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsLost).toNumber(), 0);
 }
 function calculateProposedLengthCreationOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
-        .reduce((sum, creation) => sum + creation.length, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.length).toNumber(), 0);
 }
 function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
-        .reduce((sum, creation) => sum + creation.hedgerowUnitsDelivered, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.hedgerowUnitsDelivered).toNumber(), 0);
 }
 function calculateProposedLengthEnhancementOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
-        .reduce((sum, enhancement) => sum + enhancement.length, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.length).toNumber(), 0);
 }
 function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .onSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
-        .reduce((sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.hedgerowUnitsDelivered).toNumber(), 0);
 }
 function calculateTotalProposedLengthOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateExistingLengthRetainedOnSite(inputData, hedgerow)
-        + calculateProposedLengthCreationOnSitePostDevelopment(inputData, hedgerow)
-        + calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, hedgerow)
-    );
+    return new Decimal(calculateExistingLengthRetainedOnSite(inputData, hedgerow))
+        .plus(calculateProposedLengthCreationOnSitePostDevelopment(inputData, hedgerow))
+        .plus(calculateProposedLengthEnhancementOnSitePostDevelopment(inputData, hedgerow))
+        .toNumber();
 }
 function calculateTotalProposedUnitsOnSitePostDevelopment(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateExistingUnitsRetainedOnSite(inputData, hedgerow)
-        + calculateProposedUnitsCreationOnSitePostDevelopment(inputData, hedgerow)
-        + calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, hedgerow)
-    );
+    return new Decimal(calculateExistingUnitsRetainedOnSite(inputData, hedgerow))
+        .plus(calculateProposedUnitsCreationOnSitePostDevelopment(inputData, hedgerow))
+        .plus(calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData, hedgerow))
+        .toNumber();
 }
 function calculateNetLengthChangeOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateTotalProposedLengthOnSitePostDevelopment(inputData, hedgerow)
-        - calculateExistingLengthBaselineOnSite(inputData, hedgerow)
-    )
+    return new Decimal(calculateTotalProposedLengthOnSitePostDevelopment(inputData, hedgerow))
+        .minus(calculateExistingLengthBaselineOnSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateNetUnitChangeOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateTotalProposedUnitsOnSitePostDevelopment(inputData, hedgerow)
-        - calculateExistingUnitsBaselineOnSite(inputData, hedgerow)
-    )
+    return new Decimal(calculateTotalProposedUnitsOnSitePostDevelopment(inputData, hedgerow))
+        .minus(calculateExistingUnitsBaselineOnSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateExistingLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.length, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.length).toNumber(), 0);
 }
 function calculateExistingUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalHedgerowUnits).toNumber(), 0);
 }
 function calculateRetainedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.lengthRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthRetained).toNumber(), 0);
 }
 function calculateRetainedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowBaselines
         .filter(baseline => isHedgerow(baseline, hedgerow))
-        .reduce((sum, baseline) => sum + baseline.unitsRetained, 0);
+        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(), 0);
 }
 function calculateProposedLengthCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
-        .reduce((sum, creation) => sum + creation.length, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.length).toNumber(), 0);
 }
 function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowCreations
         .filter(creation => isHedgerow(creation, hedgerow))
-        .reduce((sum, creation) => sum + creation.hedgerowUnitsDelivered, 0);
+        .reduce((sum, creation) => new Decimal(sum).plus(creation.hedgerowUnitsDelivered).toNumber(), 0);
 }
 function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
-        .reduce((sum, enhancement) => sum + enhancement.length, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.length).toNumber(), 0);
 }
 function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
     return inputData
         .offSiteHedgerowEnhancements
         .filter(enhancement => isHedgerow(enhancement, hedgerow))
-        .reduce((sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered, 0);
+        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.hedgerowUnitsDelivered).toNumber(), 0);
 }
 function calculateTotalProposedLengthOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateRetainedLengthOffSite(inputData, hedgerow)
-        + calculateProposedLengthCreationOffSite(inputData, hedgerow)
-        + calculateProposedLengthEnhancementOffSite(inputData, hedgerow)
-    )
+    return new Decimal(calculateRetainedLengthOffSite(inputData, hedgerow))
+        .plus(calculateProposedLengthCreationOffSite(inputData, hedgerow))
+        .plus(calculateProposedLengthEnhancementOffSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateRetainedUnitsOffSite(inputData, hedgerow)
-        + calculateProposedUnitsCreationOffSite(inputData, hedgerow)
-        + calculateProposedUnitsEnhancementOffSite(inputData, hedgerow)
-    )
+    return new Decimal(calculateRetainedUnitsOffSite(inputData, hedgerow))
+        .plus(calculateProposedUnitsCreationOffSite(inputData, hedgerow))
+        .plus(calculateProposedUnitsEnhancementOffSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateOffSiteNetLengthChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateTotalProposedLengthOffSite(inputData, hedgerow)
-        - calculateExistingLengthOffSite(inputData, hedgerow)
-    );
+    return new Decimal(calculateTotalProposedLengthOffSite(inputData, hedgerow))
+        .minus(calculateExistingLengthOffSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateOffSiteNetUnitChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateTotalProposedUnitsOffSite(inputData, hedgerow)
-        - calculateExistingUnitsOffSite(inputData, hedgerow)
-    )
+    return new Decimal(calculateTotalProposedUnitsOffSite(inputData, hedgerow))
+        .minus(calculateExistingUnitsOffSite(inputData, hedgerow))
+        .toNumber();
 }
 function calculateOverallLengthChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateNetLengthChangeOnSite(inputData, hedgerow)
-        + calculateOffSiteNetLengthChange(inputData, hedgerow)
-    )
+    return new Decimal(calculateNetLengthChangeOnSite(inputData, hedgerow))
+        .plus(calculateOffSiteNetLengthChange(inputData, hedgerow))
+        .toNumber();
 }
 function calculateOverallUnitChange(inputData: AllFeatures, hedgerow: Hedgerow): number {
-    return (
-        calculateNetUnitChangeOnSite(inputData, hedgerow)
-        + calculateOffSiteNetUnitChange(inputData, hedgerow)
-    )
+    return new Decimal(calculateNetUnitChangeOnSite(inputData, hedgerow))
+        .plus(calculateOffSiteNetUnitChange(inputData, hedgerow))
+        .toNumber();
 }
 
 // from https://stackoverflow.com/questions/69019873/how-can-i-get-typed-object-entries-and-object-fromentries-in-typescript

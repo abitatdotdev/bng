@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
@@ -39,7 +40,7 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     // Initial validation checks
     v.check(s => !(
         s.irreplaceableHabitat
-        && (s.areaRetained + s.areaEnhanced) < s.area
+        && new Decimal(s.areaRetained).plus(s.areaEnhanced).lessThan(s.area)
         && s.bespokeCompensationAgreed === "No"
     ), "Any loss unacceptable"),
     v.check(s => !(
@@ -51,7 +52,7 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     v.check(s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber), "Off-site reference required ▲"),
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (AA)
-    v.check(s => s.area - s.areaRetained - s.areaEnhanced >= 0, "Error in Areas ▲"),
+    v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Error in Areas ▲"),
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
     v.transform(enrichWithBaselineUnitsRetainedSRM),
@@ -72,13 +73,24 @@ export function enrichWithBaselineUnitsData<Data extends {
 }>(data: Data) {
     const baselineUnitsRetained = data.irreplaceableHabitat
         ? 0
-        : data.areaRetained * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier;
+        : new Decimal(data.areaRetained)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .toNumber();
 
     const baselineUnitsEnhanced = (data.broadHabitat === "Individual trees" && data.areaEnhanced > 0 && data.irreplaceableHabitat)
         ? 0
-        : data.areaEnhanced * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier;
+        : new Decimal(data.areaEnhanced)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .toNumber();
 
-    const areaHabitatLost = data.area - data.areaRetained - data.areaEnhanced;
+    const areaHabitatLost = new Decimal(data.area)
+        .minus(data.areaRetained)
+        .minus(data.areaEnhanced)
+        .toNumber();
 
     return {
         ...data,
@@ -109,11 +121,19 @@ export function enrichWithTotalHabitatUnitsSRM<Data extends {
     let totalHabitatUnitsSRM: number = 0;
 
     if (bespokeRequired && !hasBiodiversityGain) {
-        totalHabitatUnitsSRM = data.area * data.spatialRiskMultiplier;
+        totalHabitatUnitsSRM = new Decimal(data.area).mul(data.spatialRiskMultiplier).toNumber();
     } else if (bespokeRequired && hasBiodiversityGain) {
-        totalHabitatUnitsSRM = (data.baselineUnitsRetained + data.baselineUnitsEnhanced) * data.spatialRiskMultiplier;
+        totalHabitatUnitsSRM = new Decimal(data.baselineUnitsRetained)
+            .plus(data.baselineUnitsEnhanced)
+            .mul(data.spatialRiskMultiplier)
+            .toNumber();
     } else {
-        totalHabitatUnitsSRM = data.area * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier * data.spatialRiskMultiplier;
+        totalHabitatUnitsSRM = new Decimal(data.area)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .mul(data.spatialRiskMultiplier)
+            .toNumber();
     }
 
     return {
@@ -145,13 +165,22 @@ export function enrichWithTotalHabitatUnits<Data extends {
     let totalHabitatUnits: number = 0;
 
     if (data.irreplaceableHabitat) {
-        totalHabitatUnits = (data.areaRetained + data.areaEnhanced) * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier;
+        totalHabitatUnits = new Decimal(data.areaRetained)
+            .plus(data.areaEnhanced)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .toNumber();
     } else if (bespokeRequired && !hasBiodiversityGain && data.bespokeCompensationAgreed === "Yes") {
         totalHabitatUnits = 0;
     } else if (bespokeRequired && hasBiodiversityGain) {
-        totalHabitatUnits = data.baselineUnitsRetained + data.baselineUnitsEnhanced;
+        totalHabitatUnits = new Decimal(data.baselineUnitsRetained).plus(data.baselineUnitsEnhanced).toNumber();
     } else {
-        totalHabitatUnits = data.area * data.distinctivenessScore * data.conditionScore * data.strategicSignificanceMultiplier;
+        totalHabitatUnits = new Decimal(data.area)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .toNumber();
     }
 
     return {
@@ -180,7 +209,10 @@ export function enrichWithUnitsLost<Data extends {
     ) {
         unitsLost = 0;
     } else {
-        unitsLost = data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced;
+        unitsLost = new Decimal(data.totalHabitatUnits)
+            .minus(data.baselineUnitsRetained)
+            .minus(data.baselineUnitsEnhanced)
+            .toNumber();
     }
 
     return {
@@ -204,7 +236,10 @@ export function enrichWithVhdhBespokeCompensationUnits<Data extends {
             data.bespokeCompensationAgreed === "Yes"
             || data.bespokeCompensationAgreed === "Pending"
         ) && data.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            ? data.totalHabitatUnits - data.baselineUnitsRetained - data.baselineUnitsEnhanced
+            ? new Decimal(data.totalHabitatUnits)
+                .minus(data.baselineUnitsRetained)
+                .minus(data.baselineUnitsEnhanced)
+                .toNumber()
             : 0;
 
     return {
@@ -228,13 +263,13 @@ export function enrichWithBaselineUnitsRetainedSRM<Data extends {
     if (data.irreplaceableHabitat) return { ...data, baselineUnitsRetainedWithSRM: 0 };
 
     const baselineUnitsRetainedWithSRM =
-        (data.areaRetained
-            * data.distinctivenessScore
-            * data.conditionScore
-            * data.strategicSignificanceMultiplier
-            * data.spatialRiskMultiplier
-        )
-        + (data.vhdhBespokeCompensationUnits * data.spatialRiskMultiplier)
+        new Decimal(data.areaRetained)
+            .mul(data.distinctivenessScore)
+            .mul(data.conditionScore)
+            .mul(data.strategicSignificanceMultiplier)
+            .mul(data.spatialRiskMultiplier)
+            .plus(new Decimal(data.vhdhBespokeCompensationUnits).mul(data.spatialRiskMultiplier))
+            .toNumber()
 
     return {
         ...data,

@@ -18,6 +18,7 @@ import {
     calculateEnhancementUnitsDelivered
 } from '../watercourses/shared';
 import { enrichWithSpatialRisk } from './common';
+import { Decimal } from '../decimal';
 
 
 const inputSchema = v.object({
@@ -132,7 +133,7 @@ export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends 
     watercourseUnitsDelivered: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const watercourseUnitsDeliveredWithSpatialRisk = data.watercourseUnitsDelivered * data.spatialRiskMultiplier;
+    const watercourseUnitsDeliveredWithSpatialRisk = new Decimal(data.watercourseUnitsDelivered).mul(data.spatialRiskMultiplier).toNumber();
 
     return {
         ...data,

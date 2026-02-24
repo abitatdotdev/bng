@@ -6,6 +6,7 @@ import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
+import { Decimal } from '../decimal';
 import {
     enrichWithCreationWatercourseData,
     enrichWithTemporalData,
@@ -52,7 +53,7 @@ export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends 
     unitsDelivered: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const netUnitChangeWithSpatialRisk = data.unitsDelivered * data.spatialRiskMultiplier;
+    const netUnitChangeWithSpatialRisk = new Decimal(data.unitsDelivered).mul(data.spatialRiskMultiplier).toNumber();
 
     return {
         ...data,

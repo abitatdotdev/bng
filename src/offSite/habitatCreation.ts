@@ -8,6 +8,7 @@ import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
+import { Decimal } from '../decimal';
 
 const inputSchema =
     v.object({
@@ -159,15 +160,15 @@ const calculateHabitatUnitsDelivered = <Data extends {
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
-    const baseUnits =
-        data.area *
-        data.distinctivenessScore *
-        data.conditionScore *
-        data.strategicSignificanceMultiplier *
-        (data.finalTimeToTargetMultiplier ?? 0) *
-        data.difficultyMultiplierApplied;
+    const baseUnits = new Decimal(data.area)
+        .mul(data.distinctivenessScore)
+        .mul(data.conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.finalTimeToTargetMultiplier ?? 0)
+        .mul(data.difficultyMultiplierApplied)
+        .toNumber();
 
-    const habitatUnitsDeliveredWithSpatialRisk = baseUnits * data.spatialRiskMultiplier;
+    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(data.spatialRiskMultiplier).toNumber();
     const habitatUnitsDelivered = baseUnits;
 
     return {

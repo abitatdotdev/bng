@@ -7,6 +7,7 @@
  * All functions use generics to work with both on-site and off-site types.
  */
 
+import { Decimal } from '../decimal';
 import { allWatercourses, type Watercourse, type WatercourseLabel } from '../watercourses';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { yearsToTargetCondition, type WatercourseCondition } from '../watercourseCondition';
@@ -80,19 +81,21 @@ export function enrichWithBaselineUnitsData<Data extends {
 }>(data: Data) {
     // At this point, validation has ensured conditionScore is a number
     const conditionScore = data.conditionScore as number;
-    const unitsRetained = data.lengthRetained
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
+    const unitsRetained = new Decimal(data.lengthRetained)
+        .mul(data.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.watercourseEncroachmentMultiplier)
+        .mul(data.riparianEncroachmentMultiplier)
+        .toNumber();
 
-    const unitsEnhanced = data.lengthEnhanced
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
+    const unitsEnhanced = new Decimal(data.lengthEnhanced)
+        .mul(data.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.watercourseEncroachmentMultiplier)
+        .mul(data.riparianEncroachmentMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -118,12 +121,13 @@ export function enrichWithTotalWatercourseUnits<Data extends {
     // At this point, validation has ensured conditionScore is a number
     const conditionScore = data.conditionScore as number;
 
-    const totalWatercourseUnits = data.length
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
+    const totalWatercourseUnits = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.watercourseEncroachmentMultiplier)
+        .mul(data.riparianEncroachmentMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -143,9 +147,14 @@ export function enrichWithUnitsLost<Data extends {
     unitsRetained: number;
     unitsEnhanced: number;
 }>(data: Data) {
-    const lengthLost = data.length - data.lengthRetained - data.lengthEnhanced;
-    const unitsLost = lengthLost === 0 ? 0 :
-        data.totalWatercourseUnits - data.unitsRetained - data.unitsEnhanced;
+    const lengthLost = new Decimal(data.length)
+        .minus(data.lengthRetained)
+        .minus(data.lengthEnhanced)
+        .toNumber();
+    const unitsLost = lengthLost === 0 ? 0 : new Decimal(data.totalWatercourseUnits)
+        .minus(data.unitsRetained)
+        .minus(data.unitsEnhanced)
+        .toNumber();
 
     return {
         ...data,
@@ -211,7 +220,7 @@ export function enrichWithTemporalData<Data extends {
                     : "Standard time to target condition applied" as const;
 
     // Calculate adjusted time to target
-    let finalTimeToTarget = data.standardTimeToTarget + data.delayInStarting - data.habitatCreatedInAdvance;
+    let finalTimeToTarget = new Decimal(data.standardTimeToTarget).plus(data.delayInStarting).minus(data.habitatCreatedInAdvance).toNumber();
 
     // Cap at 30+ years
     if (finalTimeToTarget > 30) {
@@ -312,14 +321,15 @@ export function enrichWithUnitsDelivered<Data extends {
     // At this point, validation has ensured conditionScore is a number
     const conditionScore = data.conditionScore as number;
 
-    const unitsDelivered = data.length
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.temporalMultiplier
-        * data.difficultyMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier;
+    const unitsDelivered = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.temporalMultiplier)
+        .mul(data.difficultyMultiplier)
+        .mul(data.watercourseEncroachmentMultiplier)
+        .mul(data.riparianEncroachmentMultiplier)
+        .toNumber();
 
     return {
         ...data,
@@ -478,14 +488,14 @@ export function calculateFinalTimeToTargetValues<Data extends {
     }
     // Calculate: standardTime - advance + delay
     else {
-        const result = timeToTargetCondition - normalisedEnhancedInAdvance + normalisedEnhancedDelay;
+        const result = new Decimal(timeToTargetCondition).minus(normalisedEnhancedInAdvance).plus(normalisedEnhancedDelay).toNumber();
 
         // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
             // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
+            finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
@@ -610,16 +620,16 @@ export function calculateEnhancementUnitsDelivered<
     // Delta method accounting for length changes
     if (proposedLength > baselineLength) {
         // Proposed length exceeds baseline - use baseline length for baseline calculation
-        const proposedUnits = proposedLength * proposedD * proposedC;
-        const baselineUnits = baselineLength * baselineD * baselineC;
-        const delta = (proposedUnits - baselineUnits) * difficultyMult * temporal;
-        watercourseUnitsDelivered = (delta + baselineUnits) * strategic * watercourseEncroachment * riparianEncroachment;
+        const proposedUnits = new Decimal(proposedLength).mul(proposedD).mul(proposedC);
+        const baselineUnits = new Decimal(baselineLength).mul(baselineD).mul(baselineC);
+        const delta = proposedUnits.minus(baselineUnits).mul(difficultyMult).mul(temporal);
+        watercourseUnitsDelivered = delta.plus(baselineUnits).mul(strategic).mul(watercourseEncroachment).mul(riparianEncroachment).toNumber();
     } else {
         // Proposed length <= baseline - use proposed length for baseline calculation
-        const proposedUnits = proposedLength * proposedD * proposedC;
-        const baselineUnits = proposedLength * baselineD * baselineC;
-        const delta = (proposedUnits - baselineUnits) * difficultyMult * temporal;
-        watercourseUnitsDelivered = (delta + baselineUnits) * strategic * watercourseEncroachment * riparianEncroachment;
+        const proposedUnits = new Decimal(proposedLength).mul(proposedD).mul(proposedC);
+        const baselineUnits = new Decimal(proposedLength).mul(baselineD).mul(baselineC);
+        const delta = proposedUnits.minus(baselineUnits).mul(difficultyMult).mul(temporal);
+        watercourseUnitsDelivered = delta.plus(baselineUnits).mul(strategic).mul(watercourseEncroachment).mul(riparianEncroachment).toNumber();
     }
 
     return {

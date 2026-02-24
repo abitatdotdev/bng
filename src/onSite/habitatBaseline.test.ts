@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { expect, test } from "bun:test";
 import * as v from 'valibot';
 import { onSiteHabitatBaselineSchema, enrichWithBaselineUnitsData, enrichWithUnitsLost, type OnSiteHabitatBaselineSchema } from "./habitatBaseline";
 
@@ -45,8 +45,8 @@ test("enrichWithBaselineUnitsData calculations", () => {
 
     const result = enrichWithBaselineUnitsData(inputData)
 
-    expect(result.baselineUnitsRetained).toEqual(6 * 2 * 0.8 * 1.5)
-    expect(result.baselineUnitsEnhanced).toEqual(3 * 2 * 0.8 * 1.5)
+    expect(result.baselineUnitsRetained).toEqual(14.4)
+    expect(result.baselineUnitsEnhanced).toEqual(7.2)
     expect(result.areaHabitatLost).toEqual(10 - 6 - 3)
     expect(result).toMatchObject(inputData)
 })

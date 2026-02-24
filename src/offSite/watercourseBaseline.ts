@@ -6,6 +6,7 @@ import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { enrichWithSpatialRisk } from './common';
+import { Decimal } from '../decimal';
 import {
     enrichWithBaselineWatercourseData,
     enrichWithBaselineUnitsData,
@@ -38,11 +39,9 @@ const inputSchema = v.object({
 
 export const offSiteWatercourseBaselineSchema = v.pipe(
     inputSchema,
-    // Validate that the watercourse type is valid
     v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"),
-    // Check that retained + enhanced doesn't exceed total length
     v.check(
-        s => s.lengthRetained + s.lengthEnhanced <= s.length,
+        s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
         "Retained and enhanced lengths cannot exceed total length"
     ),
     // Validate encroachment consistency with watercourse type
@@ -99,13 +98,14 @@ export function enrichWithTotalWatercourseUnitsSRM<Data extends {
     // At this point, validation has ensured conditionScore is a number
     const conditionScore = data.conditionScore as number;
 
-    const totalWatercourseUnitsSRM = data.length
-        * data.distinctivenessScore
-        * conditionScore
-        * data.strategicSignificanceMultiplier
-        * data.watercourseEncroachmentMultiplier
-        * data.riparianEncroachmentMultiplier
-        * data.spatialRiskMultiplier;
+    const totalWatercourseUnitsSRM = new Decimal(data.length)
+        .mul(data.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(data.strategicSignificanceMultiplier)
+        .mul(data.watercourseEncroachmentMultiplier)
+        .mul(data.riparianEncroachmentMultiplier)
+        .mul(data.spatialRiskMultiplier)
+        .toNumber();
 
     return {
         ...data,

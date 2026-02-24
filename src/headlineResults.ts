@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { Decimal } from './decimal';
 import { onSiteHabitatBaselineSchema } from './onSite/habitatBaseline';
 import { onSiteHabitatCreationSchema } from './onSite/habitatCreation';
 import { onSiteHabitatEnhancementSchema } from './onSite/habitatEnhancement';
@@ -28,7 +29,7 @@ import type { TradingSummaries } from './tradingSummaries';
 export function calculateOnSiteHabitatBaseline(
     baselines: v.InferOutput<typeof onSiteHabitatBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalHabitatUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalHabitatUnits).toNumber(), 0);
 }
 
 /**
@@ -43,11 +44,10 @@ export function calculateOnSiteHabitatPostIntervention(
     creations: v.InferOutput<typeof onSiteHabitatCreationSchema>[],
     enhancements: v.InferOutput<typeof onSiteHabitatEnhancementSchema>[]
 ): number {
-    return (
-        creations.reduce((sum, c) => sum + c.habitatUnitsDelivered, 0)
-        + enhancements.reduce((sum, e) => sum + e.habitatUnitsDelivered, 0)
-        + baselines.reduce((sum, b) => sum + b.baselineUnitsRetained + b.vhdhBespokeCompensationUnits, 0)
-    )
+    const createdUnits = creations.reduce((sum: number, c) => new Decimal(sum).plus(c.habitatUnitsDelivered).toNumber(), 0);
+    const enhancedUnits = enhancements.reduce((sum: number, e) => new Decimal(sum).plus(e.habitatUnitsDelivered).toNumber(), 0);
+    const retainedUnits = baselines.reduce((sum: number, b) => new Decimal(sum).plus(b.baselineUnitsRetained).plus(b.vhdhBespokeCompensationUnits).toNumber(), 0);
+    return new Decimal(createdUnits).plus(enhancedUnits).plus(retainedUnits).toNumber();
 }
 
 /**
@@ -58,8 +58,8 @@ export function calculateOnSiteHabitatNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -72,7 +72,7 @@ export function calculateOnSiteHabitatNetChange(
 export function calculateOffSiteHabitatBaseline(
     baselines: v.InferOutput<typeof offSiteHabitatBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalHabitatUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalHabitatUnits).toNumber(), 0);
 }
 
 /**
@@ -85,11 +85,10 @@ export function calculateOffSiteHabitatPostIntervention(
     creations: v.InferOutput<typeof offSiteHabitatCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteHabitatEnhancementSchema>[]
 ): number {
-    return (
-        creations.reduce((sum, c) => sum + c.habitatUnitsDelivered, 0)
-        + enhancements.reduce((sum, e) => sum + e.habitatUnitsDelivered, 0)
-        + baselines.reduce((sum, b) => sum + b.baselineUnitsRetained + b.vhdhBespokeCompensationUnits, 0)
-    )
+    const createdUnits = creations.reduce((sum: number, c) => new Decimal(sum).plus(c.habitatUnitsDelivered).toNumber(), 0);
+    const enhancedUnits = enhancements.reduce((sum: number, e) => new Decimal(sum).plus(e.habitatUnitsDelivered).toNumber(), 0);
+    const retainedUnits = baselines.reduce((sum: number, b) => new Decimal(sum).plus(b.baselineUnitsRetained).plus(b.vhdhBespokeCompensationUnits).toNumber(), 0);
+    return new Decimal(createdUnits).plus(enhancedUnits).plus(retainedUnits).toNumber();
 }
 
 /**
@@ -100,8 +99,8 @@ export function calculateOffSiteHabitatNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -125,19 +124,19 @@ export function calculateOffSiteHabitatNetChangeWithSRM(
 
     // Calculate baseline WITH SRM
     const baselineWithSRM = baselines.reduce(
-        (sum, baseline) => sum + baseline.totalHabitatUnitsSRM,
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.totalHabitatUnitsSRM).toNumber(),
         0
     );
 
     // Calculate post-intervention WITH SRM
-    const sumBaselineUnitsRetained = baselines.reduce((sum, baseline) => sum + baseline.baselineUnitsRetainedWithSRM, 0)
-    const sumCreatedUnitsDelivered = creations.reduce((sum, creation) => sum + creation.habitatUnitsDeliveredWithSpatialRisk, 0)
-    const sumEnhancedUnitsDelivered = enhancements.reduce((sum, enhancement) => sum + enhancement.habitatUnitsDeliveredWithSpatialRisk, 0)
+    const sumBaselineUnitsRetained = baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.baselineUnitsRetainedWithSRM).toNumber(), 0);
+    const sumCreatedUnitsDelivered = creations.reduce((sum: number, creation) => new Decimal(sum).plus(creation.habitatUnitsDeliveredWithSpatialRisk).toNumber(), 0);
+    const sumEnhancedUnitsDelivered = enhancements.reduce((sum: number, enhancement) => new Decimal(sum).plus(enhancement.habitatUnitsDeliveredWithSpatialRisk).toNumber(), 0);
 
-    const postInterventionWithSRM = sumBaselineUnitsRetained + sumCreatedUnitsDelivered + sumEnhancedUnitsDelivered;
+    const postInterventionWithSRM = new Decimal(sumBaselineUnitsRetained).plus(sumCreatedUnitsDelivered).plus(sumEnhancedUnitsDelivered).toNumber();
 
     // Calculate net change WITH SRM
-    return postInterventionWithSRM - baselineWithSRM;
+    return new Decimal(postInterventionWithSRM).minus(baselineWithSRM).toNumber();
 }
 
 /**
@@ -148,7 +147,7 @@ export function calculateOffSiteHabitatNetChangeWithSRM(
 export function calculateOnSiteHedgerowBaseline(
     baselines: v.InferOutput<typeof onSiteHedgerowBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalHedgerowUnits).toNumber(), 0);
 }
 
 /**
@@ -162,12 +161,12 @@ export function calculateOnSiteHedgerowPostIntervention(
     enhancements: v.InferOutput<typeof onSiteHedgerowEnhancementSchema>[]
 ): number {
     // = 'B-2 On-Site Hedge Creation'!W260
-    const createdUnits = creations.reduce((sum, c) => sum + c.hedgerowUnitsDelivered, 0)
+    const createdUnits = creations.reduce((sum: number, c) => new Decimal(sum).plus(c.hedgerowUnitsDelivered).toNumber(), 0);
     // +'B-3 On-Site Hedge Enhancement'!AH258
-    const enhancedUnits = enhancements.reduce((sum, e) => sum + e.hedgerowUnitsDelivered, 0)
+    const enhancedUnits = enhancements.reduce((sum: number, e) => new Decimal(sum).plus(e.hedgerowUnitsDelivered).toNumber(), 0);
     // +'B-1 On-Site Hedge Baseline'!R258
-    const retainedUnits = baselines.reduce((sum, b) => sum + b.unitsRetained, 0)
-    return createdUnits + enhancedUnits + retainedUnits
+    const retainedUnits = baselines.reduce((sum: number, b) => new Decimal(sum).plus(b.unitsRetained).toNumber(), 0);
+    return new Decimal(createdUnits).plus(enhancedUnits).plus(retainedUnits).toNumber();
 }
 
 /**
@@ -178,8 +177,8 @@ export function calculateOnSiteHedgerowNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -192,7 +191,7 @@ export function calculateOnSiteHedgerowNetChange(
 export function calculateOffSiteHedgerowBaseline(
     baselines: v.InferOutput<typeof offSiteHedgerowBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalHedgerowUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalHedgerowUnits).toNumber(), 0);
 }
 
 /**
@@ -207,23 +206,23 @@ export function calculateOffSiteHedgerowPostIntervention(
 ): number {
     // Sum retained and enhanced units from baselines
     const retainedAndEnhanced = baselines.reduce(
-        (sum, baseline) => sum + baseline.unitsRetained + baseline.unitsEnhanced,
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).plus(baseline.unitsEnhanced).toNumber(),
         0
     );
 
     // Sum created units
     const created = creations.reduce(
-        (sum, creation) => sum + creation.hedgerowUnitsDelivered,
+        (sum: number, creation) => new Decimal(sum).plus(creation.hedgerowUnitsDelivered).toNumber(),
         0
     );
 
     // Sum enhanced units
     const enhanced = enhancements.reduce(
-        (sum, enhancement) => sum + enhancement.hedgerowUnitsDelivered,
+        (sum: number, enhancement) => new Decimal(sum).plus(enhancement.hedgerowUnitsDelivered).toNumber(),
         0
     );
 
-    return retainedAndEnhanced + created + enhanced;
+    return new Decimal(retainedAndEnhanced).plus(created).plus(enhanced).toNumber();
 }
 
 /**
@@ -234,8 +233,8 @@ export function calculateOffSiteHedgerowNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -258,32 +257,32 @@ export function calculateOffSiteHedgerowNetChangeWithSRM(
 
     // Calculate baseline WITH SRM
     const baselineWithSRM = baselines.reduce(
-        (sum, baseline) => sum + baseline.totalHedgerowUnitsSRM,
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.totalHedgerowUnitsSRM).toNumber(),
         0
     );
 
     // Calculate post-intervention WITH SRM
     // For retained/enhanced from baselines, apply SRM manually
     const retainedAndEnhancedWithSRM = baselines.reduce(
-        (sum, baseline) =>
-            sum + (baseline.unitsRetained + baseline.unitsEnhanced) * baseline.spatialRiskMultiplier,
+        (sum: number, baseline) =>
+            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).plus(baseline.unitsEnhanced).mul(baseline.spatialRiskMultiplier)).toNumber(),
         0
     );
 
     // Created and enhanced already have SRM-adjusted values
     const createdWithSRM = creations.reduce(
-        (sum, creation) => sum + creation.hedgerowUnitsDeliveredWithSpatialRisk,
+        (sum: number, creation) => new Decimal(sum).plus(creation.hedgerowUnitsDeliveredWithSpatialRisk).toNumber(),
         0
     );
 
     const enhancedWithSRM = enhancements.reduce(
-        (sum, enhancement) => sum + enhancement.hedgerowUnitsDeliveredWithSpatialRisk,
+        (sum: number, enhancement) => new Decimal(sum).plus(enhancement.hedgerowUnitsDeliveredWithSpatialRisk).toNumber(),
         0
     );
 
-    const postInterventionWithSRM = retainedAndEnhancedWithSRM + createdWithSRM + enhancedWithSRM;
+    const postInterventionWithSRM = new Decimal(retainedAndEnhancedWithSRM).plus(createdWithSRM).plus(enhancedWithSRM).toNumber();
 
-    return postInterventionWithSRM - baselineWithSRM;
+    return new Decimal(postInterventionWithSRM).minus(baselineWithSRM).toNumber();
 }
 
 /**
@@ -294,7 +293,7 @@ export function calculateOffSiteHedgerowNetChangeWithSRM(
 export function calculateOnSiteWatercourseBaseline(
     baselines: v.InferOutput<typeof onSiteWatercourseBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalWatercourseUnits).toNumber(), 0);
 }
 
 /**
@@ -307,15 +306,15 @@ export function calculateOnSiteWatercoursePostIntervention(
     enhancements: v.InferOutput<typeof onSiteWatercourseEnhancementSchema>[]
 ): number {
     // ='C-2 On-Site WaterC'' Creation'!Z260
-    const creationUnits = creations.reduce((sum, c) => sum + c.unitsDelivered, 0)
+    const creationUnits = creations.reduce((sum: number, c) => new Decimal(sum).plus(c.unitsDelivered).toNumber(), 0);
     // + 'C-3 On-Site WaterC'' Enhancement'!AM258
-    const enhancementUnits = enhancements.reduce((sum, e) => sum + e.watercourseUnitsDelivered, 0)
+    const enhancementUnits = enhancements.reduce((sum: number, e) => new Decimal(sum).plus(e.watercourseUnitsDelivered).toNumber(), 0);
     // + 'C-1 On-Site WaterC'' Baseline'!W258
-    const retainedUnits = baselines.reduce((sum, b) => sum + b.unitsRetained, 0)
+    const retainedUnits = baselines.reduce((sum: number, b) => new Decimal(sum).plus(b.unitsRetained).toNumber(), 0);
     // + 'C-1 On-Site WaterC'' Baseline'!AT258
-    const bespokeCompensationUnits = baselines.reduce((sum, b) => sum + b.vhdhBespokeCompensationUnits, 0)
+    const bespokeCompensationUnits = baselines.reduce((sum: number, b) => new Decimal(sum).plus(b.vhdhBespokeCompensationUnits).toNumber(), 0);
 
-    return creationUnits + enhancementUnits + retainedUnits + bespokeCompensationUnits
+    return new Decimal(creationUnits).plus(enhancementUnits).plus(retainedUnits).plus(bespokeCompensationUnits).toNumber();
 }
 
 /**
@@ -326,8 +325,8 @@ export function calculateOnSiteWatercourseNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -340,7 +339,7 @@ export function calculateOnSiteWatercourseNetChange(
 export function calculateOffSiteWatercourseBaseline(
     baselines: v.InferOutput<typeof offSiteWatercourseBaselineSchema>[]
 ): number {
-    return baselines.reduce((sum, baseline) => sum + baseline.totalWatercourseUnits, 0);
+    return baselines.reduce((sum: number, baseline) => new Decimal(sum).plus(baseline.totalWatercourseUnits).toNumber(), 0);
 }
 
 /**
@@ -355,23 +354,23 @@ export function calculateOffSiteWatercoursePostIntervention(
 ): number {
     // Sum retained and enhanced units from baselines
     const retainedAndEnhanced = baselines.reduce(
-        (sum, baseline) => sum + baseline.unitsRetained + baseline.unitsEnhanced,
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).plus(baseline.unitsEnhanced).toNumber(),
         0
     );
 
     // Sum created units
     const created = creations.reduce(
-        (sum, creation) => sum + creation.unitsDelivered,
+        (sum: number, creation) => new Decimal(sum).plus(creation.unitsDelivered).toNumber(),
         0
     );
 
     // Sum enhanced units
     const enhanced = enhancements.reduce(
-        (sum, enhancement) => sum + enhancement.watercourseUnitsDelivered,
+        (sum: number, enhancement) => new Decimal(sum).plus(enhancement.watercourseUnitsDelivered).toNumber(),
         0
     );
 
-    return retainedAndEnhanced + created + enhanced;
+    return new Decimal(retainedAndEnhanced).plus(created).plus(enhanced).toNumber();
 }
 
 /**
@@ -382,8 +381,8 @@ export function calculateOffSiteWatercourseNetChange(
     baseline: number,
     postIntervention: number
 ): { units: number; percentage: number } {
-    const units = postIntervention - baseline;
-    const percentage = baseline === 0 ? 0 : (units / baseline) * 100;
+    const units = new Decimal(postIntervention).minus(baseline).toNumber();
+    const percentage = baseline === 0 ? 0 : new Decimal(units).div(baseline).mul(100).toNumber();
 
     return { units, percentage };
 }
@@ -407,30 +406,30 @@ export function calculateOffSiteWatercourseNetChangeWithSRM(
 
     // Calculate baseline WITH SRM
     const baselineWithSRM = baselines.reduce(
-        (sum, baseline) => sum + baseline.totalWatercourseUnitsSRM,
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.totalWatercourseUnitsSRM).toNumber(),
         0
     );
 
     // Calculate post-intervention WITH SRM
     // For retained/enhanced from baselines, apply SRM manually
     const retainedAndEnhancedWithSRM = baselines.reduce(
-        (sum, baseline) =>
-            sum + (baseline.unitsRetained + baseline.unitsEnhanced) * baseline.spatialRiskMultiplier,
+        (sum: number, baseline) =>
+            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).plus(baseline.unitsEnhanced).mul(baseline.spatialRiskMultiplier)).toNumber(),
         0
     );
 
     const createdWithSRM = creations.reduce(
-        (sum, creation) => sum + creation.netUnitChangeWithSpatialRisk,
+        (sum: number, creation) => new Decimal(sum).plus(creation.netUnitChangeWithSpatialRisk).toNumber(),
         0
     );
 
     const enhancedWithSRM = enhancements.reduce(
-        (sum, enhancement) => sum + enhancement.watercourseUnitsDeliveredWithSpatialRisk,
+        (sum: number, enhancement) => new Decimal(sum).plus(enhancement.watercourseUnitsDeliveredWithSpatialRisk).toNumber(),
         0
     );
 
-    const postInterventionWithSRM = retainedAndEnhancedWithSRM + createdWithSRM + enhancedWithSRM;
-    return postInterventionWithSRM - baselineWithSRM;
+    const postInterventionWithSRM = new Decimal(retainedAndEnhancedWithSRM).plus(createdWithSRM).plus(enhancedWithSRM).toNumber();
+    return new Decimal(postInterventionWithSRM).minus(baselineWithSRM).toNumber();
 }
 
 /**
@@ -446,9 +445,9 @@ export function calculateCombinedNetUnitChange(
     onSiteWatercourseNetChange: number,
     offSiteWatercourseNetChange: number
 ) {
-    const habitat = onSiteHabitatNetChange + offSiteHabitatNetChange;
-    const hedgerow = onSiteHedgerowNetChange + offSiteHedgerowNetChange;
-    const watercourse = onSiteWatercourseNetChange + offSiteWatercourseNetChange;
+    const habitat = new Decimal(onSiteHabitatNetChange).plus(offSiteHabitatNetChange).toNumber();
+    const hedgerow = new Decimal(onSiteHedgerowNetChange).plus(offSiteHedgerowNetChange).toNumber();
+    const watercourse = new Decimal(onSiteWatercourseNetChange).plus(offSiteWatercourseNetChange).toNumber();
 
     return { habitat, hedgerow, watercourse };
 }
@@ -467,9 +466,9 @@ export function calculateTotalSRMDeductions(
     offSiteWatercourseNetChange: number,
     offSiteWatercourseNetChangeWithSRM: number | "N/A"
 ) {
-    const habitat = offSiteHabitatNetChange - zeroNaN(offSiteHabitatNetChangeWithSRM);
-    const hedgerow = offSiteHedgerowNetChange - zeroNaN(offSiteHedgerowNetChangeWithSRM);
-    const watercourse = offSiteWatercourseNetChange - zeroNaN(offSiteWatercourseNetChangeWithSRM);
+    const habitat = new Decimal(offSiteHabitatNetChange).minus(zeroNaN(offSiteHabitatNetChangeWithSRM)).toNumber();
+    const hedgerow = new Decimal(offSiteHedgerowNetChange).minus(zeroNaN(offSiteHedgerowNetChangeWithSRM)).toNumber();
+    const watercourse = new Decimal(offSiteWatercourseNetChange).minus(zeroNaN(offSiteWatercourseNetChangeWithSRM)).toNumber();
 
     return { habitat, hedgerow, watercourse };
 }
@@ -489,9 +488,9 @@ export function calculateFinalTotalNetUnitChange(
     totalSRMDeductions: ReturnType<typeof calculateTotalSRMDeductions>
 ) {
     return {
-        habitat: combinedNetUnitChange.habitat - totalSRMDeductions.habitat,
-        hedgerow: combinedNetUnitChange.hedgerow - totalSRMDeductions.hedgerow,
-        watercourse: combinedNetUnitChange.watercourse - totalSRMDeductions.watercourse,
+        habitat: new Decimal(combinedNetUnitChange.habitat).minus(totalSRMDeductions.habitat).toNumber(),
+        hedgerow: new Decimal(combinedNetUnitChange.hedgerow).minus(totalSRMDeductions.hedgerow).toNumber(),
+        watercourse: new Decimal(combinedNetUnitChange.watercourse).minus(totalSRMDeductions.watercourse).toNumber(),
     }
 }
 
@@ -502,24 +501,24 @@ export function calculateTotalNetPercentageChange(
     onSiteWatercourseBaseline: number,
 ) {
     return {
-        habitat: onSiteHabitatBaseline === 0 ? 0 : totalNetUnitChange.habitat / onSiteHabitatBaseline,
-        hedgerow: onSiteHedgerowBaseline === 0 ? 0 : totalNetUnitChange.hedgerow / onSiteHedgerowBaseline,
-        watercourse: onSiteWatercourseBaseline === 0 ? 0 : totalNetUnitChange.watercourse / onSiteWatercourseBaseline,
+        habitat: onSiteHabitatBaseline === 0 ? 0 : new Decimal(totalNetUnitChange.habitat).div(onSiteHabitatBaseline).toNumber(),
+        hedgerow: onSiteHedgerowBaseline === 0 ? 0 : new Decimal(totalNetUnitChange.hedgerow).div(onSiteHedgerowBaseline).toNumber(),
+        watercourse: onSiteWatercourseBaseline === 0 ? 0 : new Decimal(totalNetUnitChange.watercourse).div(onSiteWatercourseBaseline).toNumber(),
     }
 }
 
 function unitSummary(baseline: number, postIntervention: number, change: number, changeWithSRM: number | "N/A", target = 1.1) {
     const baselineUnits = baseline;
-    const requiredUnits = target * baselineUnits;
+    const requiredUnits = new Decimal(target).mul(baselineUnits).toNumber();
     const unitDeficit = changeWithSRM === "N/A"
-        ? requiredUnits - postIntervention - change
-        : requiredUnits - postIntervention - changeWithSRM
+        ? new Decimal(requiredUnits).minus(postIntervention).minus(change).toNumber()
+        : new Decimal(requiredUnits).minus(postIntervention).minus(changeWithSRM).toNumber();
     const unitDeficitNormalised = unitDeficit < 0 ? 0 : unitDeficit
 
     return {
         target,
         baselineUnits: baseline,
-        requiredUnits: 1.1 * baseline,
+        requiredUnits: new Decimal(1.1).mul(baseline).toNumber(),
         unitDeficit: unitDeficitNormalised,
     }
 }

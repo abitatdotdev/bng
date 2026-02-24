@@ -1,3 +1,4 @@
+import { Decimal } from '../decimal';
 import { getSpatialRiskMultiplier } from '../spatialRisk';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 
@@ -35,7 +36,7 @@ export function calculateFinalTimeToTargetValues<Data extends {
             finalTimeToTargetCondition = "30+";
         } else {
             // 30 - advance (capped at 0)
-            finalTimeToTargetCondition = Math.max(0, 30 - normalisedAdvance);
+            finalTimeToTargetCondition = Decimal.max(0, new Decimal(30).minus(normalisedAdvance)).toNumber();
         }
     }
     // If advance >= standard time, final time is 0
@@ -44,14 +45,14 @@ export function calculateFinalTimeToTargetValues<Data extends {
     }
     // Calculate: standardTime - advance + delay
     else {
-        const result = timeToTargetCondition - normalisedAdvance + normalisedDelay;
+        const result = new Decimal(timeToTargetCondition).minus(normalisedAdvance).plus(normalisedDelay).toNumber();
 
         // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
             // Ensure non-negative result
-            finalTimeToTargetCondition = Math.max(0, result);
+            finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
