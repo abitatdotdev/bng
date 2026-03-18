@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import { Decimal } from '../decimal';
-import { allHedgerows, type HedgerowLabel } from '../hedgerows';
+import { allHedgerows, type HedgerowLabel, type Hedgerow } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, yearsSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
@@ -32,11 +32,13 @@ const enrichBaselineHedgerowData = <Data extends {
     baseline: OffSiteHedgerowBaseline
 }>(data: Data) => {
     const { baseline } = data;
+    const hedgerow = allHedgerows[baseline.habitatType];
 
     return {
         ...data,
         length: baseline.lengthEnhanced,
         _baselineHedgerow: {
+            ...hedgerow,
             label: baseline.habitatType,
             distinctivenessScore: baseline.distinctivenessScore,
             distinctivenessCategory: baseline.distinctiveness,
@@ -101,24 +103,32 @@ const addEnhancementPathway = <Data extends {
  * Uses the enhancement pathway (baseline→proposed condition) to find years to target
  */
 const lookupEnhancementTimeToTarget = <Data extends {
+    _baselineHedgerow: Pick<Hedgerow, 'distinctivenessScore' | 'yearsToTargetConditionViaDistinctiveness'>,
+    distinctivenessScore: Hedgerow['distinctivenessScore'],
     habitatType: HedgerowLabel,
     enhancementPathway: string
 }>(data: Data) => {
-    const hedgerow = allHedgerows[data.habitatType];
+    const notPossible = { ...data, timeToTargetCondition: "Not possible ▲" as const };
 
-    // Get enhancement temporal data for this hedgerow
-    const enhancementTemporal = hedgerow.yearsToTargetConditionViaEnhancement;
+    // If distinctiveness is being upgraded, use the baseline hedgerow's distinctiveness temporal data
+    if (data._baselineHedgerow.distinctivenessScore < data.distinctivenessScore) {
+        const pathways = data._baselineHedgerow.yearsToTargetConditionViaDistinctiveness;
+        if (!pathways) return notPossible;
 
-    // Lookup time to target for this enhancement pathway
-    let timeToTargetCondition: number | "30+" | "Not possible ▲" = "Not possible ▲";
+        const timeToTargetCondition = pathways[data.habitatType as keyof typeof pathways] as number | "30+" | undefined;
+        if (!timeToTargetCondition) return notPossible;
 
-    if (enhancementTemporal) {
-        const pathway = data.enhancementPathway as keyof typeof enhancementTemporal;
-        if (pathway in enhancementTemporal) {
-            const value = enhancementTemporal[pathway];
-            timeToTargetCondition = value as any;
-        }
+        return { ...data, timeToTargetCondition };
     }
+
+    const hedgerow = allHedgerows[data.habitatType];
+    const enhancementTemporal = hedgerow.yearsToTargetConditionViaEnhancement;
+    if (!enhancementTemporal) return notPossible;
+
+    const pathway = data.enhancementPathway as keyof typeof enhancementTemporal;
+    if (!(pathway in enhancementTemporal)) return notPossible;
+
+    const timeToTargetCondition = enhancementTemporal[pathway] as number | "30+" | "Not possible ▲";
 
     return {
         ...data,

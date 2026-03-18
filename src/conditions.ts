@@ -1,13 +1,21 @@
 import * as v from 'valibot';
 
-export const conditionSchema = v.union([
-    v.literal("Good"),
-    v.literal("Fairly Good"),
-    v.literal("Moderate"),
-    v.literal("Fairly Poor"),
-    v.literal("Poor"),
-    v.literal("Condition Assessment N/A"),
-    v.literal("N/A - Other"),
-])
+const conditions = [
+    "Good",
+    "Fairly Good",
+    "Moderate",
+    "Fairly Poor",
+    "Poor",
+    "Condition Assessment N/A",
+    "N/A - Other",
+] as const;
+
+const conditionLookup = new Map(conditions.map(c => [c.toLowerCase(), c]));
+
+export const conditionSchema = v.pipe(
+    v.string(), v.trim(),
+    v.transform(s => conditionLookup.get(s.toLowerCase()) ?? s),
+    v.picklist(conditions),
+)
 export type Condition = v.InferOutput<typeof conditionSchema>
 

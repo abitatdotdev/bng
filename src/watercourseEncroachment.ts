@@ -22,16 +22,24 @@ export const riparianEncroachmentMultipliers = {
 } as const
 
 // Watercourse encroachment levels for creation
+const watercourseEncroachmentKeys = Object.keys(watercourseEncroachmentMultipliers) as (keyof typeof watercourseEncroachmentMultipliers)[];
+const watercourseEncroachmentLookup = new Map(watercourseEncroachmentKeys.map(k => [k.toLowerCase(), k]));
+
 export const watercourseEncroachmentSchema = v.pipe(
     v.string(),
     v.trim(),
-    v.picklist(Object.keys(watercourseEncroachmentMultipliers) as (keyof typeof watercourseEncroachmentMultipliers)[]));
+    v.transform(s => watercourseEncroachmentLookup.get(s.toLowerCase()) ?? s),
+    v.picklist(watercourseEncroachmentKeys));
 export type WatercourseEncroachment = v.InferOutput<typeof watercourseEncroachmentSchema>
 
 // Riparian encroachment levels for creation
+const riparianEncroachmentKeys = Object.keys(riparianEncroachmentMultipliers) as (keyof typeof riparianEncroachmentMultipliers)[];
+const riparianEncroachmentLookup = new Map(riparianEncroachmentKeys.map(k => [k.toLowerCase(), k]));
+
 export const riparianEncroachmentSchema = v.pipe(
     v.string(),
     v.trim(),
-    v.picklist(Object.keys(riparianEncroachmentMultipliers) as (keyof typeof riparianEncroachmentMultipliers)[]));
+    v.transform(s => riparianEncroachmentLookup.get(s.toLowerCase()) ?? s),
+    v.picklist(riparianEncroachmentKeys));
 export type RiparianEncroachment = v.InferOutput<typeof riparianEncroachmentSchema>
 
