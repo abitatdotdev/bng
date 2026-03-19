@@ -484,8 +484,8 @@ export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: n
     // M (12): Watercourse encroachment
     // O (14): Riparian encroachment
     // S (18): Spatial risk category
-    // X (22): Length retained
-    // Y (23): Length enhanced
+    // X (23): Length retained
+    // Y (24): Length enhanced
     // AD (29): Bespoke compensation agreed
     // AE (30): User comments
     // AF (31): Planning Authority Comments
@@ -500,9 +500,8 @@ export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: n
         watercourseEncroachment: getCellValue(sheet, dataRow, 12), // M
         riparianEncroachment: getCellValue(sheet, dataRow, 14), // O
         spatialRiskCategory: getCellValue(sheet, dataRow, 18), // S
-        lengthRetained: 0,
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 4)), // E (total length = all enhanced)
-        proposedLength: normalizeNumber(getCellValue(sheet, dataRow, 24)) || undefined, // Y (proposed length after enhancement)
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, 23)) || 0, // X
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 24)) || 0, // Y
         bespokeCompensation: getCellValue(sheet, dataRow, 29) || undefined, // AD
         userComments: String(getCellValue(sheet, dataRow, 30) || ""), // AE
         planningAuthorityComments: String(getCellValue(sheet, dataRow, 31) || ""), // AF

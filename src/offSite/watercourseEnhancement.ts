@@ -48,12 +48,6 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         "Cannot have both watercourse enhanced in advance and delay in starting watercourse enhancement"
     ),
 
-    // Use proposed length from baseline if available (for re-meandering scenarios)
-    v.transform(data => {
-        const proposedLength = data.baseline.proposedLength;
-        return proposedLength ? { ...data, length: proposedLength } : data;
-    }),
-
     // Extract baseline data and length
     v.transform(enrichBaselineWatercourseData),
 

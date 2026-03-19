@@ -25,7 +25,6 @@ const inputSchema = v.object({
     spatialRiskCategory: spatialRiskCategorySchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    proposedLength: v.optional(lengthSchema),
     bespokeCompensation: v.optional(
         v.pipe(
             v.string(),
