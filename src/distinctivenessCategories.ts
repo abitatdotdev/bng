@@ -1,17 +1,15 @@
 import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
-export const distinctivenessSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        'V.High',
-        'High',
-        'Medium',
-        'Low',
-        'V.Low',
-        'Irreplaceable',
-    ])
-);
+const distinctiveness = [
+    'V.High',
+    'High',
+    'Medium',
+    'Low',
+    'V.Low',
+    'Irreplaceable',
+] as const;
+export const distinctivenessSchema = fuzzyPicklist(distinctiveness);
 export type DistinctivenessCategory = v.InferOutput<typeof distinctivenessSchema>;
 
 export const distinctivenessCategories = {

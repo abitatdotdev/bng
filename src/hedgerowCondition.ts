@@ -1,14 +1,12 @@
 import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
-export const hedgerowConditionSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        "Good",
-        "Moderate",
-        "Poor",
-    ])
-);
+const condition = [
+    "Good",
+    "Moderate",
+    "Poor",
+] as const;
+export const hedgerowConditionSchema = fuzzyPicklist(condition);
 export type HedgerowCondition = v.InferOutput<typeof hedgerowConditionSchema>;
 
 

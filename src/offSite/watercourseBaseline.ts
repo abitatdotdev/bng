@@ -14,6 +14,7 @@ import {
     enrichWithUnitsLost
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
+import { fuzzyPicklist } from '../valibotPipes';
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -25,12 +26,7 @@ const inputSchema = v.object({
     spatialRiskCategory: spatialRiskCategorySchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    bespokeCompensation: v.optional(
-        v.pipe(
-            v.string(),
-            v.trim(),
-            v.picklist(["Yes", "No", "Pending"])
-        ), "No"),
+    bespokeCompensation: v.optional(fuzzyPicklist(["Yes", "No", "Pending"] as const), "No"),
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,

@@ -850,7 +850,7 @@ describe("enrichWithDifficultyData", () => {
     test("preserves all input properties in output", () => {
         const input = {
             broadHabitat: "Grassland",
-            habitatType: "Lowland calcareous grassland",
+            habitatType: "Lowland calcareous grassland" as const,
             standardOrAdjustedTimeToTarget: "Standard time to target condition applied" as const,
             timeToTargetCondition: 20 as const,
             habitatCreationInAdvance: 0 as const,
