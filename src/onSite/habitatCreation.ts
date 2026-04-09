@@ -130,7 +130,7 @@ const calculateFinalTimeToTargetValues = <Data extends {
  */
 export const enrichWithDifficultyData = <Data extends {
     broadHabitat: string,
-    habitatType: string,
+    habitatType: CreationHabitatType,
     standardOrAdjustedTimeToTarget: ReturnType<typeof calculateStandardOrAdjustedTimeToTarget>,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",

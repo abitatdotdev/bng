@@ -204,9 +204,9 @@ export function calculateOffSiteHedgerowPostIntervention(
     creations: v.InferOutput<typeof offSiteHedgerowCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteHedgerowEnhancementSchema>[]
 ): number {
-    // Sum retained and enhanced units from baselines
-    const retainedAndEnhanced = baselines.reduce(
-        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).plus(baseline.unitsEnhanced).toNumber(),
+    // Sum retained units from baselines (not enhanced - those are counted via E-3 enhancement units)
+    const retained = baselines.reduce(
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(),
         0
     );
 
@@ -222,7 +222,7 @@ export function calculateOffSiteHedgerowPostIntervention(
         0
     );
 
-    return new Decimal(retainedAndEnhanced).plus(created).plus(enhanced).toNumber();
+    return new Decimal(retained).plus(created).plus(enhanced).toNumber();
 }
 
 /**
@@ -262,10 +262,10 @@ export function calculateOffSiteHedgerowNetChangeWithSRM(
     );
 
     // Calculate post-intervention WITH SRM
-    // For retained/enhanced from baselines, apply SRM manually
+    // Only retained from baselines (not enhanced - those are counted via E-3 enhancement units)
     const retainedAndEnhancedWithSRM = baselines.reduce(
         (sum: number, baseline) =>
-            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).plus(baseline.unitsEnhanced).mul(baseline.spatialRiskMultiplier)).toNumber(),
+            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).mul(baseline.spatialRiskMultiplier)).toNumber(),
         0
     );
 
@@ -352,9 +352,9 @@ export function calculateOffSiteWatercoursePostIntervention(
     creations: v.InferOutput<typeof offSiteWatercourseCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteWatercourseEnhancementSchema>[]
 ): number {
-    // Sum retained and enhanced units from baselines
-    const retainedAndEnhanced = baselines.reduce(
-        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).plus(baseline.unitsEnhanced).toNumber(),
+    // Sum retained units from baselines (not enhanced - those are counted via F-3 enhancement units)
+    const retained = baselines.reduce(
+        (sum: number, baseline) => new Decimal(sum).plus(baseline.unitsRetained).toNumber(),
         0
     );
 
@@ -370,7 +370,7 @@ export function calculateOffSiteWatercoursePostIntervention(
         0
     );
 
-    return new Decimal(retainedAndEnhanced).plus(created).plus(enhanced).toNumber();
+    return new Decimal(retained).plus(created).plus(enhanced).toNumber();
 }
 
 /**
@@ -411,10 +411,10 @@ export function calculateOffSiteWatercourseNetChangeWithSRM(
     );
 
     // Calculate post-intervention WITH SRM
-    // For retained/enhanced from baselines, apply SRM manually
+    // Only retained from baselines (not enhanced - those are counted via F-3 enhancement units)
     const retainedAndEnhancedWithSRM = baselines.reduce(
         (sum: number, baseline) =>
-            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).plus(baseline.unitsEnhanced).mul(baseline.spatialRiskMultiplier)).toNumber(),
+            new Decimal(sum).plus(new Decimal(baseline.unitsRetained).mul(baseline.spatialRiskMultiplier)).toNumber(),
         0
     );
 

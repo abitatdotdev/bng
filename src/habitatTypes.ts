@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
 const sharedHabitatTypes = [
     "Arable field margins cultivated annually",
@@ -132,31 +133,19 @@ const sharedHabitatTypes = [
     "Artificial features of hard structures",
     "Artificial hard structures with integrated greening of grey infrastructure (IGGI)",
     "Watercourse footprint",
-]
+] as const
 
-export const baselineHabitatType = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        ...sharedHabitatTypes,
-        "Felled",
-    ])
-)
+export const baselineHabitatType = fuzzyPicklist([
+    ...sharedHabitatTypes,
+    "Felled",
+] as const);
 export type BaselineHabitatType = v.InferOutput<typeof baselineHabitatType>;
 
-export const creationHabitatType = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist(sharedHabitatTypes)
-);
+export const creationHabitatType = fuzzyPicklist(sharedHabitatTypes);
 export type CreationHabitatType = v.InferOutput<typeof creationHabitatType>;
 
-export const enhancedHabitatType = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist([
-        ...sharedHabitatTypes,
-        "Replacement for felled woodland",
-    ])
-);
+export const enhancedHabitatType = fuzzyPicklist([
+    ...sharedHabitatTypes,
+    "Replacement for felled woodland",
+] as const);
 export type EnhancedHabitatType = v.InferOutput<typeof enhancedHabitatType>;

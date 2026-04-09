@@ -325,23 +325,23 @@ export function parseOffSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sh
     // M (12): Proposed habitat type
     // S (18): Proposed condition
     // U (20): Strategic Significance
-    // W (22): Hedgerow enhanced in advance (years)
-    // X (23): Delay in starting hedgerow enhancement (years)
-    // AE (30): User Comments
-    // AF (31): Planning Authority Comments
-    // AG (32): Habitat Reference Number
-    // AH (33): Off-site Reference Number
+    // Y (24): Hedgerow enhanced in advance (years)
+    // Z (25): Delay in starting hedgerow enhancement (years)
+    // AL (37): User Comments
+    // AM (38): Planning Authority Comments
+    // AN (39): Habitat Reference Number
+    // AO (40): Off-site Reference Number
     return {
         baseline: baselineData,
         habitatType: getCellValue(sheet, dataRow, 12), // M
         condition: getCellValue(sheet, dataRow, 18), // S
         strategicSignificance: getCellValue(sheet, dataRow, 20), // U
-        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, 22)) || 0, // W
-        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, 23)) || 0, // X
-        userComments: String(getCellValue(sheet, dataRow, 30) || ""), // AE
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, 31) || ""), // AF
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, 32) || ""), // AG
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, 33) || ""), // AH
+        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, 24)) || 0, // Y
+        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, 25)) || 0, // Z
+        userComments: String(getCellValue(sheet, dataRow, 37) || ""), // AL
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, 38) || ""), // AM
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, 39) || ""), // AN
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, 40) || ""), // AO
     }
 }
 
@@ -484,8 +484,8 @@ export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: n
     // M (12): Watercourse encroachment
     // O (14): Riparian encroachment
     // S (18): Spatial risk category
-    // X (22): Length retained
-    // Y (23): Length enhanced
+    // X (23): Length retained
+    // Y (24): Length enhanced
     // AD (29): Bespoke compensation agreed
     // AE (30): User comments
     // AF (31): Planning Authority Comments
@@ -500,8 +500,8 @@ export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: n
         watercourseEncroachment: getCellValue(sheet, dataRow, 12), // M
         riparianEncroachment: getCellValue(sheet, dataRow, 14), // O
         spatialRiskCategory: getCellValue(sheet, dataRow, 18), // S
-        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, 22)) || 0, // X
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 23)) || 0, // Y
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, 23)) || 0, // X
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, 24)) || 0, // Y
         bespokeCompensation: getCellValue(sheet, dataRow, 29) || undefined, // AD
         userComments: String(getCellValue(sheet, dataRow, 30) || ""), // AE
         planningAuthorityComments: String(getCellValue(sheet, dataRow, 31) || ""), // AF

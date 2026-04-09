@@ -499,19 +499,20 @@ test("full schema validation - Native hedgerow to Species-rich (distinctiveness 
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
         expect(result.output.spatialRiskMultiplier).toBe(0.5);
 
-        // Species-rich native hedgerow Moderate to Good = 2 years
-        expect(result.output.timeToTargetCondition).toBe(2);
-        expect(result.output.finalTimeToTargetCondition).toBe(2);
-        expect(result.output.temporalMultiplier).toBeCloseTo(0.931225, 5);
+        // Distinctiveness upgrade: Native hedgerow (Low) → Species-rich native hedgerow (Medium)
+        // Uses baseline's yearsToTargetConditionViaDistinctiveness = 5 years
+        expect(result.output.timeToTargetCondition).toBe(5);
+        expect(result.output.finalTimeToTargetCondition).toBe(5);
+        expect(result.output.temporalMultiplier).toBeCloseTo(0.8368287006, 5);
 
         // Calculate expected units:
         // Baseline: 0.3 * 2 * 2 = 1.2
         // Proposed: 0.3 * 4 * 3 = 3.6
-        // Delta: (3.6 - 1.2) * 1 * 0.931225 = 2.2349400
-        // Final (no SRM): (2.2349400 + 1.2) * 1.1 = 3.778434
-        // Final (with SRM): 3.778434 * 0.5 = 1.889217
-        expect(result.output.hedgerowUnitsDelivered).toBeCloseTo(3.778434, 3);
-        expect(result.output.hedgerowUnitsDeliveredWithSpatialRisk).toBeCloseTo(1.889217, 3);
+        // Delta: (3.6 - 1.2) * 1 * 0.8368287006 = 2.00838888
+        // Final (no SRM): (2.00838888 + 1.2) * 1.1 = 3.52922777
+        // Final (with SRM): 3.52922777 * 0.5 = 1.76461388
+        expect(result.output.hedgerowUnitsDelivered).toBeCloseTo(3.52922777, 3);
+        expect(result.output.hedgerowUnitsDeliveredWithSpatialRisk).toBeCloseTo(1.76461388, 3);
     }
 });
 

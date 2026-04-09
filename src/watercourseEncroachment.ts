@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
 export const watercourseEncroachmentMultipliers = {
     "No Encroachment": 1,
@@ -22,16 +23,14 @@ export const riparianEncroachmentMultipliers = {
 } as const
 
 // Watercourse encroachment levels for creation
-export const watercourseEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist(Object.keys(watercourseEncroachmentMultipliers) as (keyof typeof watercourseEncroachmentMultipliers)[]));
+const watercourseEncroachmentKeys = Object.keys(watercourseEncroachmentMultipliers) as (keyof typeof watercourseEncroachmentMultipliers)[];
+
+export const watercourseEncroachmentSchema = fuzzyPicklist(watercourseEncroachmentKeys);
 export type WatercourseEncroachment = v.InferOutput<typeof watercourseEncroachmentSchema>
 
 // Riparian encroachment levels for creation
-export const riparianEncroachmentSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist(Object.keys(riparianEncroachmentMultipliers) as (keyof typeof riparianEncroachmentMultipliers)[]));
+const riparianEncroachmentKeys = Object.keys(riparianEncroachmentMultipliers) as (keyof typeof riparianEncroachmentMultipliers)[];
+
+export const riparianEncroachmentSchema = fuzzyPicklist(riparianEncroachmentKeys);
 export type RiparianEncroachment = v.InferOutput<typeof riparianEncroachmentSchema>
 

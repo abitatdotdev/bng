@@ -1,4 +1,4 @@
-import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
 export const bespokeCompensation = [
     "Yes",
@@ -7,8 +7,4 @@ export const bespokeCompensation = [
 ] as const
 export type BespokeCompensation = typeof bespokeCompensation[number];
 
-export const bespokeCompensationSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist(bespokeCompensation),
-)
+export const bespokeCompensationSchema = fuzzyPicklist(bespokeCompensation);

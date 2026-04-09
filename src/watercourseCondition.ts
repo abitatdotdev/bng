@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { fuzzyPicklist } from './valibotPipes';
 
 export const yearsToTargetCondition = {
     "Good": 10,
@@ -8,11 +9,8 @@ export const yearsToTargetCondition = {
     "Poor": 1,
 } as const
 
-export const watercourseConditionSchema = v.pipe(
-    v.string(),
-    v.trim(),
-    v.picklist(Object.keys(yearsToTargetCondition) as (keyof typeof yearsToTargetCondition)[]),
-);
+const watercourseConditions = Object.keys(yearsToTargetCondition) as (keyof typeof yearsToTargetCondition)[];
 
+export const watercourseConditionSchema = fuzzyPicklist(watercourseConditions);
 export type WatercourseCondition = v.InferOutput<typeof watercourseConditionSchema>;
 

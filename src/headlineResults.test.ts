@@ -675,13 +675,13 @@ describe("calculateOffSiteHedgerowPostIntervention", () => {
         expect(result).toBe(0);
     });
 
-    test("sums retained and enhanced units from baselines only", () => {
+    test("sums retained units from baselines only (not enhanced)", () => {
         const baselines = [
             { unitsRetained: 10, unitsEnhanced: 5 } as any,
             { unitsRetained: 8, unitsEnhanced: 3 } as any,
         ];
         const result = calculateOffSiteHedgerowPostIntervention(baselines, [], []);
-        expect(result).toBe(26);
+        expect(result).toBe(18); // 10 + 8 (enhanced not counted here)
     });
 
     test("sums all units from baselines, creations, and enhancements", () => {
@@ -695,7 +695,7 @@ describe("calculateOffSiteHedgerowPostIntervention", () => {
             { hedgerowUnitsDelivered: 14 } as any,
         ];
         const result = calculateOffSiteHedgerowPostIntervention(baselines, creations, enhancements);
-        expect(result).toBe(50);
+        expect(result).toBe(44); // 12 + 18 + 14 (enhanced not counted from baselines)
     });
 });
 
@@ -752,10 +752,10 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
             { hedgerowUnitsDeliveredWithSpatialRisk: 12 } as any, // already includes SRM
         ];
 
-        // Post-intervention WITH SRM = (30 + 10) * 0.6 + 18 + 12 = 24 + 18 + 12 = 54
-        // Net change WITH SRM = 54 - 36 = 18
+        // Post-intervention WITH SRM = 30 * 0.6 + 18 + 12 = 18 + 18 + 12 = 48
+        // Net change WITH SRM = 48 - 36 = 12
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, creations, enhancements, 10);
-        expect(result).toBe(18);
+        expect(result).toBe(12);
     });
 
     test("handles multiple baselines with different SRM values", () => {
@@ -774,10 +774,10 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
             } as any,
         ];
 
-        // Post-intervention WITH SRM = (15 + 5) * 0.6 + (12 + 4) * 0.8 = 12 + 12.8 = 24.8
-        // Net change WITH SRM = 24.8 - (24 + 20) = 24.8 - 44 = -19.2
+        // Post-intervention WITH SRM = 15 * 0.6 + 12 * 0.8 = 9 + 9.6 = 18.6
+        // Net change WITH SRM = 18.6 - (24 + 20) = 18.6 - 44 = -25.4
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], 10);
-        expect(result).toBe(-19.2);
+        expect(result).toBe(-25.4);
     });
 
     test("handles zero baseline WITH SRM without division by zero", () => {
@@ -838,13 +838,13 @@ describe("headlineResults - off-site hedgerows", () => {
         const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteHedgerowBaseline).toBe(50);
-        expect(result.offSiteHedgerowPostIntervention).toBe(78); // 35 + 8 + 20 + 15
-        expect(result.offSiteHedgerowNetChange.units).toBe(28);
-        expect(result.offSiteHedgerowNetChange.percentage).toBeCloseTo(56, 1); // 28/50 * 100
+        expect(result.offSiteHedgerowPostIntervention).toBe(70); // 35 + 20 + 15 (enhanced not counted from baselines)
+        expect(result.offSiteHedgerowNetChange.units).toBe(20);
+        expect(result.offSiteHedgerowNetChange.percentage).toBeCloseTo(40, 1); // 20/50 * 100
 
-        // WITH SRM: baseline = 30, post = (35+8)*0.6 + 12 + 9 = 25.8 + 12 + 9 = 46.8
-        // Net change = 46.8 - 30 = 16.8
-        expect(result.offSiteHedgerowNetChangeWithSRM).toBeCloseTo(16.8, 1);
+        // WITH SRM: baseline = 30, post = 35*0.6 + 12 + 9 = 21 + 12 + 9 = 42
+        // Net change = 42 - 30 = 12
+        expect(result.offSiteHedgerowNetChangeWithSRM).toBeCloseTo(12, 1);
     });
 
     test("SRM not applied when off-site hedgerow net change is negative", () => {
@@ -1059,13 +1059,13 @@ describe("calculateOffSiteWatercoursePostIntervention", () => {
         expect(result).toBe(0);
     });
 
-    test("sums retained and enhanced units from baselines only", () => {
+    test("sums retained units from baselines only (not enhanced)", () => {
         const baselines = [
             { unitsRetained: 14, unitsEnhanced: 7 } as any,
             { unitsRetained: 11, unitsEnhanced: 5 } as any,
         ];
         const result = calculateOffSiteWatercoursePostIntervention(baselines, [], []);
-        expect(result).toBe(37);
+        expect(result).toBe(25); // 14 + 11 (enhanced not counted here)
     });
 
     test("sums all units from baselines, creations, and enhancements", () => {
@@ -1079,7 +1079,7 @@ describe("calculateOffSiteWatercoursePostIntervention", () => {
             { watercourseUnitsDelivered: 18 } as any,
         ];
         const result = calculateOffSiteWatercoursePostIntervention(baselines, creations, enhancements);
-        expect(result).toBe(64); // 16 + 8 + 22 + 18
+        expect(result).toBe(56); // 16 + 22 + 18 (enhanced not counted from baselines)
     });
 });
 
@@ -1136,10 +1136,10 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
             { watercourseUnitsDeliveredWithSpatialRisk: 15 } as any,
         ];
 
-        // Post-intervention WITH SRM = (35 + 12) * 0.7 + 20 + 15 = 32.9 + 20 + 15 = 67.9
-        // Net change WITH SRM = 67.9 - 42 = 25.9
+        // Post-intervention WITH SRM = 35 * 0.7 + 20 + 15 = 24.5 + 20 + 15 = 59.5
+        // Net change WITH SRM = 59.5 - 42 = 17.5
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, creations, enhancements, 12);
-        expect(result).toBeCloseTo(25.9, 1);
+        expect(result).toBeCloseTo(17.5, 1);
     });
 
     test("handles zero baseline WITH SRM without division by zero", () => {
@@ -1200,13 +1200,13 @@ describe("headlineResults - off-site watercourses", () => {
         const result = headlineResults(input, emptyTradingSummary());
 
         expect(result.offSiteWatercourseBaseline).toBe(55);
-        expect(result.offSiteWatercoursePostIntervention).toBe(95); // 40 + 10 + 25 + 20
-        expect(result.offSiteWatercourseNetChange.units).toBe(40);
-        expect(result.offSiteWatercourseNetChange.percentage).toBeCloseTo(72.73, 1); // 40/55 * 100
+        expect(result.offSiteWatercoursePostIntervention).toBe(85); // 40 + 25 + 20 (enhanced not counted from baselines)
+        expect(result.offSiteWatercourseNetChange.units).toBe(30);
+        expect(result.offSiteWatercourseNetChange.percentage).toBeCloseTo(54.55, 1); // 30/55 * 100
 
-        // WITH SRM: baseline = 38.5, post = (40+10)*0.7 + 17.5 + 14 = 35 + 17.5 + 14 = 66.5
-        // Net change = 66.5 - 38.5 = 28
-        expect(result.offSiteWatercourseNetChangeWithSRM).toBeCloseTo(28, 1);
+        // WITH SRM: baseline = 38.5, post = 40*0.7 + 17.5 + 14 = 28 + 17.5 + 14 = 59.5
+        // Net change = 59.5 - 38.5 = 21
+        expect(result.offSiteWatercourseNetChangeWithSRM).toBeCloseTo(21, 1);
     });
 
     test("SRM not applied when off-site watercourse net change is negative", () => {
@@ -1518,14 +1518,17 @@ describe("headlineResults - combined calculations", () => {
 
         const result = headlineResults(input, emptyTradingSummary());
 
-        // Combined: habitat 50, hedgerow 30
+        // On-site hedgerow: baseline 50, post = 30 + 20 = 50, net 0
+        // Off-site hedgerow: baseline 60, post = 35 + 35 = 70 (enhanced not counted from baselines), net 10
+        // Combined: habitat 50, hedgerow 10
         expect(result.combinedNetUnitChange.habitat).toBe(50); // 20 + 30
-        expect(result.combinedNetUnitChange.hedgerow).toBe(20); // 20
+        expect(result.combinedNetUnitChange.hedgerow).toBe(10); // 0 + 10
         expect(result.combinedNetUnitChange.watercourse).toBe(0);
 
-        // SRM deductions: habitat 15, hedgerow 8
+        // Off-site hedgerow WITH SRM: baseline = 36, post = 35*0.6 + 21 = 21 + 21 = 42, net = 42 - 36 = 6
+        // SRM deduction hedgerow: 10 - 6 = 4
         expect(result.totalSRMDeductions.habitat).toBe(15);
-        expect(result.totalSRMDeductions.hedgerow).toBe(8);
+        expect(result.totalSRMDeductions.hedgerow).toBe(4);
         expect(result.totalSRMDeductions.watercourse).toBe(0);
     });
 
