@@ -116,6 +116,38 @@ const calculateFinalTimeToTargetCondition = <Data extends {
  *
  * Corresponds to columns U-X in Excel sheet A-2
  */
+/**
+ * Pure calculation: derives all difficulty fields from resolved habitat difficulty values.
+ */
+export function calculateDifficultyData(input: {
+    habitatType: CreationHabitatType,
+    standardOrAdjustedTimeToTarget: ReturnType<typeof calculateStandardOrAdjustedTimeToTarget>,
+    timeToTargetCondition: number | "30+" | "Not Possible ▲",
+    habitatCreationInAdvance: number | "30+",
+    standardDifficultyOfCreation: Habitat['technicalDifficultyCreation'],
+    technicalDifficultyEnhancement: Habitat['technicalDifficultyEnhancement'],
+}) {
+    const appliedDifficultyMultiplier = calculateAppliedDifficultyMultiplier(
+        input.standardOrAdjustedTimeToTarget,
+        input.habitatType,
+    );
+    const finalDifficultyOfCreation = calculateFinalDifficultyOfCreation(
+        appliedDifficultyMultiplier,
+        input.timeToTargetCondition,
+        input.habitatCreationInAdvance,
+        input.standardDifficultyOfCreation,
+        input.technicalDifficultyEnhancement,
+    );
+    const difficultyMultiplierApplied = calculateDifficultyMultiplierApplied(finalDifficultyOfCreation);
+
+    return {
+        standardDifficultyOfCreation: input.standardDifficultyOfCreation,
+        appliedDifficultyMultiplier,
+        finalDifficultyOfCreation,
+        difficultyMultiplierApplied,
+    };
+}
+
 export const enrichWithDifficultyData = <Data extends {
     broadHabitat: string,
     habitatType: CreationHabitatType,
@@ -126,28 +158,16 @@ export const enrichWithDifficultyData = <Data extends {
 }>(data: Data) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-    const standardDifficultyOfCreation = habitat.technicalDifficultyCreation;
-    const appliedDifficultyMultiplier = calculateAppliedDifficultyMultiplier(
-        data.standardOrAdjustedTimeToTarget,
-        data.habitatType,
-    );
-    const finalDifficultyOfCreation = calculateFinalDifficultyOfCreation(
-        appliedDifficultyMultiplier,
-        data.timeToTargetCondition,
-        data.habitatCreationInAdvance,
-        standardDifficultyOfCreation,
-        habitat.technicalDifficultyEnhancement,
-    );
-    const difficultyMultiplierApplied = calculateDifficultyMultiplierApplied(
-        finalDifficultyOfCreation
-    );
-
     return {
         ...data,
-        standardDifficultyOfCreation,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfCreation,
-        difficultyMultiplierApplied
+        ...calculateDifficultyData({
+            habitatType: data.habitatType,
+            standardOrAdjustedTimeToTarget: data.standardOrAdjustedTimeToTarget,
+            timeToTargetCondition: data.timeToTargetCondition,
+            habitatCreationInAdvance: data.habitatCreationInAdvance,
+            standardDifficultyOfCreation: habitat.technicalDifficultyCreation,
+            technicalDifficultyEnhancement: habitat.technicalDifficultyEnhancement,
+        }),
     };
 }
 

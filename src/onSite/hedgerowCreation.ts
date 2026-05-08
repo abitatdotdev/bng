@@ -191,8 +191,36 @@ export function enrichWithTemporalData<Data extends {
 }
 
 /**
- * Calculate difficulty data: determine final difficulty and multiplier
+ * Pure calculation: derives finalDifficulty and difficultyMultiplier from resolved
+ * standard hedgerow difficulty values.
  */
+export function calculateDifficultyData(input: {
+    habitatCreatedInAdvance: number | "30+";
+    finalTimeToTargetCondition: number | string | undefined;
+    standardDifficulty: string;
+    standardDifficultyMultiplier: number;
+}) {
+    let finalDifficulty = input.standardDifficulty;
+    let difficultyMultiplier = input.standardDifficultyMultiplier;
+
+    const isCreatedInAdvance = input.habitatCreatedInAdvance === "30+" ||
+        (typeof input.habitatCreatedInAdvance === "number" && input.habitatCreatedInAdvance > 0);
+    const finalTime = typeof input.finalTimeToTargetCondition === 'number'
+        ? input.finalTimeToTargetCondition
+        : 999;
+
+    if (isCreatedInAdvance && finalTime <= 0) {
+        finalDifficulty = 'Low';
+        difficultyMultiplier = difficulty['Low'];
+    }
+
+    return {
+        standardDifficulty: input.standardDifficulty,
+        finalDifficulty,
+        difficultyMultiplier,
+    };
+}
+
 export function enrichWithDifficultyData<Data extends {
     habitatType: HedgerowLabel;
     habitatCreatedInAdvance: number | "30+";
@@ -202,30 +230,15 @@ export function enrichWithDifficultyData<Data extends {
     technicalDifficultyCreationMultiplier: number;
 }>(data: Data) {
     const hedgerow = allHedgerows[data.habitatType];
-    const standardDifficulty = hedgerow.technicalDifficultyCreation;
-
-    // Determine final difficulty
-    // Logic from Excel: If habitat created in advance and final time <= 0, use "Low" difficulty
-    // Otherwise, use standard difficulty
-    let finalDifficulty = standardDifficulty;
-    let difficultyMultiplier = hedgerow.technicalDifficultyCreationMultiplier;
-
-    const isCreatedInAdvance = data.habitatCreatedInAdvance === "30+" ||
-        (typeof data.habitatCreatedInAdvance === "number" && data.habitatCreatedInAdvance > 0);
-    const finalTime = typeof data.finalTimeToTargetCondition === 'number'
-        ? data.finalTimeToTargetCondition
-        : 999; // Large number for non-numeric values
-
-    if (isCreatedInAdvance && finalTime <= 0) {
-        finalDifficulty = 'Low';
-        difficultyMultiplier = difficulty['Low'];
-    }
 
     return {
         ...data,
-        standardDifficulty,
-        finalDifficulty,
-        difficultyMultiplier,
+        ...calculateDifficultyData({
+            habitatCreatedInAdvance: data.habitatCreatedInAdvance,
+            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
+            standardDifficulty: hedgerow.technicalDifficultyCreation,
+            standardDifficultyMultiplier: hedgerow.technicalDifficultyCreationMultiplier,
+        }),
     };
 }
 

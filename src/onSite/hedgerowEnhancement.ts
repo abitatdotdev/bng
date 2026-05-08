@@ -119,6 +119,39 @@ const addEnhancementPathway = <Data extends {
  * Lookup enhancement time to target from hedgerow enhancement temporal data
  * Uses the enhancement pathway (baseline→proposed condition) to find years to target
  */
+/**
+ * Pure calculation: resolves the enhancement time-to-target by branching on
+ * distinctiveness then doing a key lookup into the appropriate pathway map.
+ */
+export function calculateEnhancementTimeToTarget(input: {
+    baselineDistinctivenessScore: Hedgerow['distinctivenessScore'],
+    distinctivenessScore: Hedgerow['distinctivenessScore'],
+    yearsToTargetConditionViaDistinctiveness: Hedgerow['yearsToTargetConditionViaDistinctiveness'] | undefined,
+    yearsToTargetConditionViaEnhancement: Hedgerow['yearsToTargetConditionViaEnhancement'] | undefined,
+    habitatType: HedgerowLabel,
+    enhancementPathway: string,
+}) {
+    const notPossible = { timeToTargetCondition: "Not possible ▲" as const };
+
+    if (input.baselineDistinctivenessScore < input.distinctivenessScore) {
+        const pathways = input.yearsToTargetConditionViaDistinctiveness;
+        if (!pathways) return notPossible;
+
+        const timeToTargetCondition = pathways[input.habitatType as keyof typeof pathways] as TimeToTargetConditionValue | undefined;
+        if (!timeToTargetCondition) return notPossible;
+
+        return { timeToTargetCondition };
+    }
+
+    const pathways = input.yearsToTargetConditionViaEnhancement;
+    if (!pathways) return notPossible;
+
+    const timeToTargetCondition = pathways[input.enhancementPathway as keyof typeof pathways] as TimeToTargetConditionValue | undefined;
+    if (!timeToTargetCondition) return notPossible;
+
+    return { timeToTargetCondition };
+}
+
 const lookupEnhancementTimeToTarget = <Data extends {
     _baselineHedgerow: Pick<Hedgerow, 'distinctivenessScore' | 'yearsToTargetConditionViaDistinctiveness'>,
     _hedgerow: Pick<Hedgerow, 'yearsToTargetConditionViaEnhancement'>
@@ -126,27 +159,16 @@ const lookupEnhancementTimeToTarget = <Data extends {
     habitatType: HedgerowLabel,
     enhancementPathway: string,
 }>(data: Data) => {
-    const notPossible = { ...data, timeToTargetCondition: "Not possible ▲" as const };
-
-    if (data._baselineHedgerow.distinctivenessScore < data.distinctivenessScore) {
-        const pathways = data._baselineHedgerow.yearsToTargetConditionViaDistinctiveness;
-        if (!pathways) return notPossible;
-
-        const timeToTargetCondition = pathways[data.habitatType as keyof typeof pathways] as TimeToTargetConditionValue | undefined
-        if (!timeToTargetCondition) return notPossible;
-
-        return { ...data, timeToTargetCondition }
-    }
-
-    const pathways = data._hedgerow.yearsToTargetConditionViaEnhancement;
-    if (!pathways) return notPossible;
-
-    const timeToTargetCondition = pathways[data.enhancementPathway as keyof typeof pathways] as TimeToTargetConditionValue | undefined
-    if (!timeToTargetCondition) return notPossible;
-
     return {
         ...data,
-        timeToTargetCondition
+        ...calculateEnhancementTimeToTarget({
+            baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
+            distinctivenessScore: data.distinctivenessScore,
+            yearsToTargetConditionViaDistinctiveness: data._baselineHedgerow.yearsToTargetConditionViaDistinctiveness,
+            yearsToTargetConditionViaEnhancement: data._hedgerow.yearsToTargetConditionViaEnhancement,
+            habitatType: data.habitatType,
+            enhancementPathway: data.enhancementPathway,
+        }),
     };
 }
 
@@ -225,6 +247,45 @@ const lookupTemporalMultiplierStep = <Data extends {
 /**
  * Determine enhancement difficulty based on whether hedgerow reached target before losses
  */
+/**
+ * Pure calculation: derives all hedgerow enhancement difficulty fields from resolved
+ * standard difficulty.
+ */
+export function calculateEnhancementDifficulty(input: {
+    hedgerowEnhancedInAdvance: number | "30+",
+    finalTimeToTargetCondition: number | "30+" | "Not possible ▲",
+    standardDifficultyOfEnhancement: string,
+}) {
+    const normalisedHedgerowEnhancedInAdvance = yearsToNumber(input.hedgerowEnhancedInAdvance);
+
+    const hasReachedTargetCondition =
+        normalisedHedgerowEnhancedInAdvance > 0 &&
+        input.finalTimeToTargetCondition === 0;
+
+    let appliedDifficultyMultiplier: string;
+    if (hasReachedTargetCondition) {
+        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠";
+    } else {
+        appliedDifficultyMultiplier = "Standard difficulty applied";
+    }
+
+    let finalDifficultyOfEnhancement: keyof typeof difficulty;
+    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠") {
+        finalDifficultyOfEnhancement = "Low";
+    } else {
+        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement as keyof typeof difficulty;
+    }
+
+    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
+
+    return {
+        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
+        appliedDifficultyMultiplier,
+        finalDifficultyOfEnhancement,
+        difficultyMultiplierApplied,
+    };
+}
+
 const determineEnhancementDifficulty = <Data extends {
     habitatType: HedgerowLabel,
     timeToTargetCondition: number | "30+" | "Not possible ▲",
@@ -235,42 +296,13 @@ const determineEnhancementDifficulty = <Data extends {
 }>(data: Data) => {
     const hedgerow = allHedgerows[data.habitatType];
 
-    // Normalize hedgerowEnhancedInAdvance for comparisons
-    const normalisedHedgerowEnhancedInAdvance = yearsToNumber(data.hedgerowEnhancedInAdvance);
-
-    // Standard difficulty of enhancement
-    const standardDifficultyOfEnhancement = hedgerow.technicalDifficultyEnhancement;
-
-    // Determine if hedgerow has reached target condition (advance >= standard time)
-    const hasReachedTargetCondition =
-        normalisedHedgerowEnhancedInAdvance > 0 &&
-        data.finalTimeToTargetCondition === 0;
-
-    // Applied difficulty multiplier
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-    }
-
-    // Final difficulty of enhancement
-    let finalDifficultyOfEnhancement: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠") {
-        finalDifficultyOfEnhancement = "Low";
-    } else {
-        finalDifficultyOfEnhancement = standardDifficultyOfEnhancement as keyof typeof difficulty;
-    }
-
-    // Difficulty multiplier applied
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
     return {
         ...data,
-        standardDifficultyOfEnhancement,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied
+        ...calculateEnhancementDifficulty({
+            hedgerowEnhancedInAdvance: data.hedgerowEnhancedInAdvance,
+            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
+            standardDifficultyOfEnhancement: hedgerow.technicalDifficultyEnhancement,
+        }),
     };
 }
 

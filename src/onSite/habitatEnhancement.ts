@@ -45,20 +45,29 @@ const enrichBaselineHabitatData = <Data extends {
  * Lookup enhancement time to target from habitat enhancement temporal multipliers
  * Uses the enhancement pathway (baseline→proposed condition) to find years to target
  */
+/**
+ * Pure calculation: resolves a pathway key against an enhancement-temporal map,
+ * falling back to "Not Possible ▲" when the key is missing.
+ */
+export function calculateEnhancementTimeToTarget(input: {
+    enhancementTemporalMultipliers: Habitat['enhancementTemporalMultipliers'],
+    conditionChange: string,
+}) {
+    const value = input.enhancementTemporalMultipliers[input.conditionChange as keyof typeof input.enhancementTemporalMultipliers];
+    const timeToTargetCondition: number | "30+" | "Not Possible ▲" = value ? value : "Not Possible ▲";
+    return { timeToTargetCondition };
+}
+
 const lookupEnhancementTimeToTarget = <Data extends {
     _habitat: Habitat,
     conditionChange: ReturnType<typeof addDistinctivenessAndConditionChange>['conditionChange'],
 }>(data: Data) => {
-    // Get enhancement temporal multipliers for this habitat
-    const enhancementTemporal = data._habitat.enhancementTemporalMultipliers;
-    const conditionChange = data.conditionChange;
-
-    const timeToTargetCondition = enhancementTemporal[conditionChange as keyof typeof enhancementTemporal];
-    if (!timeToTargetCondition) return { ...data, timeToTargetCondition: "Not Possible ▲" as const }
-
     return {
         ...data,
-        timeToTargetCondition
+        ...calculateEnhancementTimeToTarget({
+            enhancementTemporalMultipliers: data._habitat.enhancementTemporalMultipliers,
+            conditionChange: data.conditionChange,
+        }),
     };
 }
 
@@ -148,6 +157,44 @@ const calculateFinalTimeToTargetCondition = <Data extends {
  * Determine enhancement difficulty based on whether habitat reached target before losses
  * Simpler than creation difficulty logic
  */
+/**
+ * Pure calculation: derives all enhancement difficulty fields from resolved standard difficulty.
+ */
+export function calculateEnhancementDifficulty(input: {
+    habitatEnhancedInAdvance: number | "30+",
+    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲",
+    standardDifficultyOfEnhancement: keyof typeof difficulty,
+}) {
+    const normalisedHabitatEnhancedInAdvance = typeof input.habitatEnhancedInAdvance === "string" ? 30 : input.habitatEnhancedInAdvance;
+
+    const hasReachedTargetCondition =
+        normalisedHabitatEnhancedInAdvance > 0 &&
+        input.finalTimeToTargetCondition === 0;
+
+    let appliedDifficultyMultiplier: string;
+    if (hasReachedTargetCondition) {
+        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
+    } else {
+        appliedDifficultyMultiplier = "Standard difficulty applied";
+    }
+
+    let finalDifficultyOfEnhancement: keyof typeof difficulty;
+    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
+        finalDifficultyOfEnhancement = "Low";
+    } else {
+        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement;
+    }
+
+    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
+
+    return {
+        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
+        appliedDifficultyMultiplier,
+        finalDifficultyOfEnhancement,
+        difficultyMultiplierApplied,
+    };
+}
+
 const determineEnhancementDifficulty = <Data extends {
     broadHabitat: string,
     habitatType: string,
@@ -157,42 +204,13 @@ const determineEnhancementDifficulty = <Data extends {
 }>(data: Data) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-    // Normalize habitatEnhancedInAdvance for comparisons
-    const normalisedHabitatEnhancedInAdvance = typeof data.habitatEnhancedInAdvance === "string" ? 30 : data.habitatEnhancedInAdvance;
-
-    // Standard difficulty of enhancement
-    const standardDifficultyOfEnhancement = habitat.technicalDifficultyEnhancement;
-
-    // Determine if habitat has reached target condition (advance >= standard time)
-    const hasReachedTargetCondition =
-        normalisedHabitatEnhancedInAdvance > 0 &&
-        data.finalTimeToTargetCondition === 0;
-
-    // Applied difficulty multiplier
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-    }
-
-    // Final difficulty of enhancement
-    let finalDifficultyOfEnhancement: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
-        finalDifficultyOfEnhancement = "Low";
-    } else {
-        finalDifficultyOfEnhancement = standardDifficultyOfEnhancement;
-    }
-
-    // Difficulty multiplier applied
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
     return {
         ...data,
-        standardDifficultyOfEnhancement,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied
+        ...calculateEnhancementDifficulty({
+            habitatEnhancedInAdvance: data.habitatEnhancedInAdvance,
+            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
+            standardDifficultyOfEnhancement: habitat.technicalDifficultyEnhancement,
+        }),
     };
 }
 
@@ -200,6 +218,34 @@ const determineEnhancementDifficulty = <Data extends {
  * Add distinctiveness and condition change labels
  * Matches Excel columns T and U
  */
+/**
+ * Pure calculation: derives distinctivenessChange and conditionChange labels.
+ */
+export function calculateDistinctivenessAndConditionChange(input: {
+    baselineDistinctivenessCategory: string,
+    baselineLabel: string,
+    baselineCondition: string,
+    baselineDistinctivenessScore: number,
+    proposedLabel: string,
+    proposedDistinctiveness: string,
+    proposedDistinctivenessScore: number,
+    condition: string,
+}) {
+    const distinctivenessChange = `${input.baselineDistinctivenessCategory} - ${input.proposedDistinctiveness}`;
+
+    const isHabitatChange = input.baselineLabel !== input.proposedLabel;
+    const isDistinctivenessUpgrade = input.proposedDistinctivenessScore > input.baselineDistinctivenessScore;
+
+    let conditionChange: string;
+    if (isHabitatChange && isDistinctivenessUpgrade) {
+        conditionChange = `Lower Distinctiveness Habitat - ${input.condition}`;
+    } else {
+        conditionChange = `${input.baselineCondition} - ${input.condition}`;
+    }
+
+    return { distinctivenessChange, conditionChange };
+}
+
 const addDistinctivenessAndConditionChange = <Data extends {
     baseline: any,
     _baselineHabitat: any,
@@ -209,30 +255,19 @@ const addDistinctivenessAndConditionChange = <Data extends {
     distinctiveness: string,
     distinctivenessScore: number
 }>(data: Data) => {
-    const baselineHabitat = data._baselineHabitat;
     const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
-
-    // Column T: Distinctiveness Change
-    // Format: "baseline distinctiveness - proposed distinctiveness"
-    const distinctivenessChange = `${baselineHabitat.distinctivenessCategory} - ${data.distinctiveness}`;
-
-    // Column U: Condition Change
-    // If habitat changes AND distinctiveness improves, prefix with "Lower Distinctiveness Habitat"
-    // Otherwise, show baseline condition - proposed condition
-    let conditionChange: string;
-    const isHabitatChange = baselineHabitat.label !== proposedHabitat.label;
-    const isDistinctivenessUpgrade = data.distinctivenessScore > baselineHabitat.distinctivenessScore;
-
-    if (isHabitatChange && isDistinctivenessUpgrade) {
-        conditionChange = `Lower Distinctiveness Habitat - ${data.condition}`;
-    } else {
-        conditionChange = `${data.baseline.condition} - ${data.condition}`;
-    }
-
     return {
         ...data,
-        distinctivenessChange,
-        conditionChange
+        ...calculateDistinctivenessAndConditionChange({
+            baselineDistinctivenessCategory: data._baselineHabitat.distinctivenessCategory,
+            baselineLabel: data._baselineHabitat.label,
+            baselineCondition: data.baseline.condition,
+            baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+            proposedLabel: proposedHabitat.label,
+            proposedDistinctiveness: data.distinctiveness,
+            proposedDistinctivenessScore: data.distinctivenessScore,
+            condition: data.condition,
+        }),
     };
 }
 

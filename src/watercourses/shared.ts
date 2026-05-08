@@ -299,6 +299,41 @@ export function enrichWithTemporalData<Data extends {
  * Calculate difficulty multiplier.
  * Used by both on-site and off-site creation calculations.
  */
+/**
+ * Pure calculation: derives appliedDifficulty, finalDifficultyOfCreation and
+ * difficultyMultiplier for watercourse creation.
+ */
+export function calculateDifficultyData(input: {
+    standardOrAdjustedTimeToTargetCondition: ReturnType<typeof calculateTemporalAdjustments>['standardOrAdjustedTimeToTargetCondition'],
+    standardTimeToTarget: ReturnType<typeof enrichWithCreationWatercourseData>['standardTimeToTarget'],
+    standardDifficulty: ReturnType<typeof enrichWithCreationWatercourseData>['standardDifficulty'],
+    habitatCreatedInAdvance: number;
+}) {
+    const standardDifficultyOfCreation = input.standardDifficulty;
+    const appliedDifficulty =
+        input.standardOrAdjustedTimeToTargetCondition === "Check details - Is there evidence that habitat has reached target condition? ⚠"
+            ? "Low Difficulty - only applicable if all habitat created before losses ⚠" as const
+            : "Standard difficulty applied" as const;
+
+    const finalDifficultyOfCreation =
+        (appliedDifficulty === "Standard difficulty applied"
+            && (typeof input.standardTimeToTarget === "number" && input.standardTimeToTarget > input.habitatCreatedInAdvance))
+            ? standardDifficultyOfCreation
+            : (appliedDifficulty === "Low Difficulty - only applicable if all habitat created before losses ⚠"
+                && (typeof input.standardTimeToTarget === "number"
+                    && input.habitatCreatedInAdvance >= input.standardTimeToTarget))
+                ? "Low"
+                : standardDifficultyOfCreation;
+
+    const difficultyMultiplier = difficulty[finalDifficultyOfCreation];
+
+    return {
+        appliedDifficulty,
+        finalDifficultyOfCreation,
+        difficultyMultiplier,
+    };
+}
+
 export function enrichWithDifficultyData<Data extends {
     standardOrAdjustedTimeToTargetCondition: ReturnType<typeof enrichWithTemporalData>['standardOrAdjustedTimeToTargetCondition'],
     standardTimeToTarget: ReturnType<typeof enrichWithCreationWatercourseData>['standardTimeToTarget'],
@@ -306,31 +341,7 @@ export function enrichWithDifficultyData<Data extends {
     isDitchFairlyCategory: boolean;
     habitatCreatedInAdvance: number;
 }>(data: Data) {
-
-    const standardDifficultyOfCreation = data.standardDifficulty;
-    const appliedDifficulty =
-        data.standardOrAdjustedTimeToTargetCondition === "Check details - Is there evidence that habitat has reached target condition? ⚠"
-            ? "Low Difficulty - only applicable if all habitat created before losses ⚠" as const
-            : "Standard difficulty applied" as const;
-
-    const finalDifficultyOfCreation =
-        (appliedDifficulty === "Standard difficulty applied"
-            && (typeof data.standardTimeToTarget === "number" && data.standardTimeToTarget > data.habitatCreatedInAdvance))
-            ? standardDifficultyOfCreation
-            : (appliedDifficulty === "Low Difficulty - only applicable if all habitat created before losses ⚠"
-                && (typeof data.standardTimeToTarget === "number"
-                    && data.habitatCreatedInAdvance >= data.standardTimeToTarget))
-                ? "Low"
-                : standardDifficultyOfCreation;
-
-    const difficultyMultiplier = difficulty[finalDifficultyOfCreation];
-
-    return {
-        ...data,
-        appliedDifficulty,
-        finalDifficultyOfCreation,
-        difficultyMultiplier,
-    };
+    return { ...data, ...calculateDifficultyData(data) };
 }
 
 /**
@@ -521,28 +532,41 @@ export function addEnhancementPathway<Data extends {
  * Uses the enhancement pathway (baseline→proposed condition) to find years to target.
  * Special case: If baseline distinctiveness < proposed distinctiveness, use fallback (10 years).
  */
+/**
+ * Pure calculation: branches on distinctiveness; for upgrades returns the
+ * fixed upgrade years, otherwise resolves the pathway against the matrix.
+ */
+export function calculateEnhancementTimeToTarget(input: {
+    baselineDistinctivenessScore: number;
+    distinctivenessScore: number;
+    enhancementPathway: string;
+    enhancementTemporalMatrix: typeof watercourseEnhancementTemporalMatrix;
+}) {
+    let timeToTargetCondition: number | "N/A";
+
+    if (input.baselineDistinctivenessScore < input.distinctivenessScore) {
+        timeToTargetCondition = DISTINCTIVENESS_UPGRADE_YEARS;
+    } else {
+        const pathwayValue = input.enhancementTemporalMatrix[input.enhancementPathway];
+        timeToTargetCondition = pathwayValue !== undefined ? pathwayValue : "N/A";
+    }
+
+    return { timeToTargetCondition };
+}
+
 export function lookupEnhancementTimeToTarget<Data extends {
     _baselineWatercourse: { distinctivenessScore: number };
     distinctivenessScore: number;
     enhancementPathway: string;
 }>(data: Data) {
-    const baselineDistinctiveness = data._baselineWatercourse.distinctivenessScore;
-    const proposedDistinctiveness = data.distinctivenessScore;
-
-    let timeToTargetCondition: number | "N/A";
-
-    // Special case: If upgrading distinctiveness (e.g., Ditches to Other rivers and streams)
-    if (baselineDistinctiveness < proposedDistinctiveness) {
-        timeToTargetCondition = DISTINCTIVENESS_UPGRADE_YEARS;
-    } else {
-        // Normal case: lookup from enhancement matrix
-        const pathwayValue = watercourseEnhancementTemporalMatrix[data.enhancementPathway];
-        timeToTargetCondition = pathwayValue !== undefined ? pathwayValue : "N/A";
-    }
-
     return {
         ...data,
-        timeToTargetCondition
+        ...calculateEnhancementTimeToTarget({
+            baselineDistinctivenessScore: data._baselineWatercourse.distinctivenessScore,
+            distinctivenessScore: data.distinctivenessScore,
+            enhancementPathway: data.enhancementPathway,
+            enhancementTemporalMatrix: watercourseEnhancementTemporalMatrix,
+        }),
     };
 }
 
@@ -619,20 +643,19 @@ export function calculateFinalTimeToTargetValues<Data extends {
 /**
  * Determine enhancement difficulty based on whether watercourse reached target before losses.
  */
-export function determineEnhancementDifficulty<Data extends {
+/**
+ * Pure calculation: derives enhancement difficulty fields for a watercourse.
+ */
+export function calculateEnhancementDifficulty(input: {
     watercourseEnhancedInAdvance: number | "30+";
     finalTimeToTargetCondition: number | "30+" | "N/A";
-    technicalDifficulty: Watercourse['technicalDifficultyOfEnhancement'];
-}>(data: Data) {
-    // Normalize watercourseEnhancedInAdvance for comparisons
-    const normalisedEnhancedInAdvance = yearsToNumber(data.watercourseEnhancedInAdvance);
-    // Standard difficulty of enhancement
-    const standardDifficultyOfEnhancement = data.technicalDifficulty;
+    standardDifficultyOfEnhancement: Watercourse['technicalDifficultyOfEnhancement'];
+}) {
+    const normalisedEnhancedInAdvance = yearsToNumber(input.watercourseEnhancedInAdvance);
 
-    // Determine if watercourse has reached target condition (advance > 0 and final time is 0)
     const hasReachedTargetCondition =
         normalisedEnhancedInAdvance > 0 &&
-        data.finalTimeToTargetCondition === 0;
+        input.finalTimeToTargetCondition === 0;
 
     let appliedDifficultyMultiplier: string;
     let finalDifficultyOfEnhancement: keyof typeof difficulty;
@@ -641,18 +664,31 @@ export function determineEnhancementDifficulty<Data extends {
         finalDifficultyOfEnhancement = "Low";
     } else {
         appliedDifficultyMultiplier = "Standard difficulty applied";
-        finalDifficultyOfEnhancement = standardDifficultyOfEnhancement as keyof typeof difficulty;
+        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement as keyof typeof difficulty;
     }
 
-    // Difficulty multiplier applied
     const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
 
     return {
-        ...data,
-        standardDifficultyOfEnhancement,
+        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
         appliedDifficultyMultiplier,
         finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied
+        difficultyMultiplierApplied,
+    };
+}
+
+export function determineEnhancementDifficulty<Data extends {
+    watercourseEnhancedInAdvance: number | "30+";
+    finalTimeToTargetCondition: number | "30+" | "N/A";
+    technicalDifficulty: Watercourse['technicalDifficultyOfEnhancement'];
+}>(data: Data) {
+    return {
+        ...data,
+        ...calculateEnhancementDifficulty({
+            watercourseEnhancedInAdvance: data.watercourseEnhancedInAdvance,
+            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
+            standardDifficultyOfEnhancement: data.technicalDifficulty,
+        }),
     };
 }
 

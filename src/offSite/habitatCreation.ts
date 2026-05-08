@@ -58,25 +58,19 @@ const calculateFinalTimeToTargetCondition = <Data extends {
  *
  * Corresponds to columns U-X in Excel sheet D-2
  */
-const enrichWithDifficultyData = <Data extends {
-    broadHabitat: string,
+/**
+ * Pure calculation: derives all difficulty fields from resolved habitat values.
+ */
+export function calculateDifficultyData(input: {
     habitatType: string,
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
-}>(data: Data) => {
-    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲",
+    standardDifficultyOfCreation: keyof typeof difficulty,
+    technicalDifficultyEnhancement: keyof typeof difficulty,
+    timeToPoorCondition: number | "30+" | "Not Possible ▲",
+}) {
+    const normalisedHabitatCreationInAdvance = typeof input.habitatCreationInAdvance === "string" ? 30 : input.habitatCreationInAdvance;
 
-    // Normalize habitatCreationInAdvance for comparisons
-    const normalisedHabitatCreationInAdvance = typeof data.habitatCreationInAdvance === "string" ? 30 : data.habitatCreationInAdvance;
-
-    // Standard difficulty of creation (column U)
-    const standardDifficultyOfCreation = habitat.technicalDifficultyCreation;
-
-    // Get the time to Poor condition to check if the threshold has been reached
-    const timeToPoorCondition = habitat.temporalMultipliers['Poor'];
-
-    // List of habitats that should not use enhancement difficulty
     const excludedHabitats = [
         "Traditional orchards",
         "Ornamental lake or pond",
@@ -86,48 +80,64 @@ const enrichWithDifficultyData = <Data extends {
         "Developed land; sealed surface"
     ];
 
-    // Determine if habitat has reached target condition (advance >= standard time)
     const hasReachedTargetCondition =
         normalisedHabitatCreationInAdvance > 0 &&
-        data.finalTimeToTargetCondition === 0;
+        input.finalTimeToTargetCondition === 0;
 
-    // Determine if habitat creation started and Poor threshold reached
     const hasReachedPoorThreshold =
         normalisedHabitatCreationInAdvance > 0 &&
-        timeToPoorCondition !== "Not Possible ▲" &&
-        (timeToPoorCondition === 0 ||
-            (typeof timeToPoorCondition === 'number' && normalisedHabitatCreationInAdvance >= timeToPoorCondition)) &&
+        input.timeToPoorCondition !== "Not Possible ▲" &&
+        (input.timeToPoorCondition === 0 ||
+            (typeof input.timeToPoorCondition === 'number' && normalisedHabitatCreationInAdvance >= input.timeToPoorCondition)) &&
         !hasReachedTargetCondition;
 
-    // Applied difficulty multiplier (column V)
     let appliedDifficultyMultiplier: string;
     if (hasReachedTargetCondition) {
         appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
-    } else if (hasReachedPoorThreshold && !excludedHabitats.includes(data.habitatType)) {
+    } else if (hasReachedPoorThreshold && !excludedHabitats.includes(input.habitatType)) {
         appliedDifficultyMultiplier = "Enhancement difficulty applied";
     } else {
         appliedDifficultyMultiplier = "Standard difficulty applied";
     }
 
-    // Final difficulty of creation (column W)
     let finalDifficultyOfCreation: keyof typeof difficulty;
     if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
         finalDifficultyOfCreation = "Low";
     } else if (appliedDifficultyMultiplier === "Enhancement difficulty applied") {
-        finalDifficultyOfCreation = habitat.technicalDifficultyEnhancement;
+        finalDifficultyOfCreation = input.technicalDifficultyEnhancement;
     } else {
-        finalDifficultyOfCreation = standardDifficultyOfCreation;
+        finalDifficultyOfCreation = input.standardDifficultyOfCreation;
     }
 
-    // Difficulty multiplier applied (column X)
     const difficultyMultiplierApplied = difficulty[finalDifficultyOfCreation];
 
     return {
-        ...data,
-        standardDifficultyOfCreation,
+        standardDifficultyOfCreation: input.standardDifficultyOfCreation,
         appliedDifficultyMultiplier,
         finalDifficultyOfCreation,
-        difficultyMultiplierApplied
+        difficultyMultiplierApplied,
+    };
+}
+
+const enrichWithDifficultyData = <Data extends {
+    broadHabitat: string,
+    habitatType: string,
+    timeToTargetCondition: number | "30+" | "Not Possible ▲",
+    habitatCreationInAdvance: number | "30+",
+    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
+}>(data: Data) => {
+    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+
+    return {
+        ...data,
+        ...calculateDifficultyData({
+            habitatType: data.habitatType,
+            habitatCreationInAdvance: data.habitatCreationInAdvance,
+            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
+            standardDifficultyOfCreation: habitat.technicalDifficultyCreation,
+            technicalDifficultyEnhancement: habitat.technicalDifficultyEnhancement,
+            timeToPoorCondition: habitat.temporalMultipliers['Poor'],
+        }),
     };
 }
 
