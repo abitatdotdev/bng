@@ -21,7 +21,10 @@ export function getSheet(workbook: XLSX.WorkBook, sheetName: string) {
  * Helper function to get cell value from worksheet
  * Uses cached array of arrays for faster access
  */
-export function getCellValue(sheet: XLSX.WorkSheet, row: number, col: number): any {
+export function getCellValue(sheet: XLSX.WorkSheet, row: number | string, col: number | string): any {
+    const rowIndex = typeof row === "number" ? row : utils.decode_row(row);
+    const colIndex = typeof col === "number" ? col : utils.decode_col(col);
+
     // Try to get cached data
     let data = sheetDataCache.get(sheet);
 
@@ -40,8 +43,8 @@ export function getCellValue(sheet: XLSX.WorkSheet, row: number, col: number): a
     }
 
     // Access the cell from the cached array
-    if (row < data.length && data[row] && col < data[row].length) {
-        const value = data[row][col];
+    if (rowIndex < data.length && data[rowIndex] && colIndex < data[rowIndex].length) {
+        const value = data[rowIndex][colIndex];
         return value === undefined ? null : value;
     }
 
