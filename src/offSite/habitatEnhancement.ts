@@ -7,7 +7,7 @@ import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat
 import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
-import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
+import { calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon, lookupFinalTimeToTargetMultiplier, enrichWithSpatialRisk } from './common';
 import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
@@ -28,17 +28,21 @@ const inputSchema = v.object({
  * Extract baseline habitat data including area
  * The baseline contains the area that is being enhanced
  */
+/**
+ * Pure restructure: extracts baseline-derived fields onto a flat object.
+ */
+export function calculateBaselineHabitatData(input: { baseline: any }) {
+    return {
+        area: input.baseline.areaEnhanced,
+        _baselineHabitat: input.baseline._habitat,
+        _baselineCondition: input.baseline.conditionScore,
+    };
+}
+
 const enrichBaselineHabitatData = <Data extends {
     baseline: any
 }>(data: Data) => {
-    const { baseline } = data;
-
-    return {
-        ...data,
-        area: baseline.areaEnhanced,
-        _baselineHabitat: baseline._habitat,
-        _baselineCondition: baseline.conditionScore,
-    };
+    return { ...data, ...calculateBaselineHabitatData(data) };
 }
 
 /**
@@ -152,12 +156,12 @@ const enrichWithTimeToTargetCondition = <Data extends {
  * - Years of habitat enhanced in advance
  * - Years of delay in starting enhancement
  */
-const calculateFinalTimeToTargetValues = <Data extends {
+const calculateFinalTimeToTargetCondition = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatEnhancedInAdvance: number | "30+",
     habitatEnhancedDelay: number | "30+"
 }>(data: Data) => {
-    return calculateFinalTimeToTargetValuesCommon({
+    return calculateFinalTimeToTargetConditionCommon({
         ...data,
         advance: data.habitatEnhancedInAdvance,
         delay: data.habitatEnhancedDelay,
@@ -245,6 +249,42 @@ const enrichWithSpatialRiskData = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
+/**
+ * Pure calculation: derives habitatUnitsDelivered (with and without spatial risk) for an enhancement.
+ */
+export function calculateEnhancementUnitsDeliveredPure(input: {
+    area: number,
+    baselineDistinctivenessScore: number,
+    baselineConditionScore: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
+    difficultyMultiplierApplied: number,
+    spatialRiskMultiplier: number
+}) {
+    const area = input.area;
+    const baselineD = input.baselineDistinctivenessScore;
+    const baselineC = input.baselineConditionScore;
+    const proposedD = input.distinctivenessScore;
+    const proposedC = input.conditionScore;
+    const strategic = input.strategicSignificanceMultiplier;
+    const difficulty = input.difficultyMultiplierApplied;
+    const temporal = input.finalTimeToTargetMultiplier ?? 0;
+    const spatialRisk = input.spatialRiskMultiplier;
+
+    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
+    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
+    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
+    const baseUnits = delta.plus(baselineUnits).mul(strategic);
+
+    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
+    const habitatUnitsDelivered = baseUnits.toNumber();
+
+    return { habitatUnitsDeliveredWithSpatialRisk, habitatUnitsDelivered };
+}
+
 const calculateEnhancementUnitsDelivered = <Data extends {
     area: number,
     _baselineHabitat: any,
@@ -256,40 +296,19 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
-    const area = data.area;
-    const baselineD = data._baselineHabitat.distinctivenessScore;
-    const baselineC = data._baselineCondition;
-    const proposedD = data.distinctivenessScore;
-    const proposedC = data.conditionScore;
-    const strategic = data.strategicSignificanceMultiplier;
-    const difficulty = data.difficultyMultiplierApplied;
-    const temporal = data.finalTimeToTargetMultiplier ?? 0;
-    const spatialRisk = data.spatialRiskMultiplier;
-
-    // Special case: baseline condition > proposed condition (condition reduced)
-    // Use proposed condition as the effective baseline condition
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-
-    // Calculate proposed units
-    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
-
-    // Calculate baseline units (with effective condition)
-    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
-
-    // Calculate delta with multipliers
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-
-    // Add back baseline units and apply strategic significance
-    const baseUnits = delta.plus(baselineUnits).mul(strategic);
-
-    // Two calculations: with and without spatial risk multiplier
-    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
-    const habitatUnitsDelivered = baseUnits.toNumber();
-
     return {
         ...data,
-        habitatUnitsDeliveredWithSpatialRisk,
-        habitatUnitsDelivered
+        ...calculateEnhancementUnitsDeliveredPure({
+            area: data.area,
+            baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+            baselineConditionScore: data._baselineCondition,
+            distinctivenessScore: data.distinctivenessScore,
+            conditionScore: data.conditionScore,
+            strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+            finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+            difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+            spatialRiskMultiplier: data.spatialRiskMultiplier,
+        })
     };
 }
 
@@ -397,7 +416,8 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
     v.transform(addDistinctivenessChange),
     v.transform(addEnhancementPathway),
     v.transform(enrichWithTimeToTargetCondition),
-    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(determineEnhancementDifficulty),
     v.transform(enrichWithSpatialRiskData),
     v.transform(calculateEnhancementUnitsDelivered),

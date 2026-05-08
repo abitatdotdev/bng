@@ -129,16 +129,23 @@ export type OffSiteWatercourseEnhancement = v.InferOutput<typeof offSiteWatercou
  * Calculates SRM-adjusted watercourse units delivered for off-site watercourse enhancement
  * watercourseUnitsDeliveredWithSpatialRisk = watercourseUnitsDelivered * spatialRiskMultiplier
  */
+/**
+ * Pure calculation: derives watercourseUnitsDeliveredWithSpatialRisk.
+ */
+export function calculateWatercourseUnitsDeliveredWithSpatialRisk(input: {
+    watercourseUnitsDelivered: number;
+    spatialRiskMultiplier: number;
+}) {
+    const watercourseUnitsDeliveredWithSpatialRisk = new Decimal(input.watercourseUnitsDelivered).mul(input.spatialRiskMultiplier).toNumber();
+
+    return { watercourseUnitsDeliveredWithSpatialRisk };
+}
+
 export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends {
     watercourseUnitsDelivered: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const watercourseUnitsDeliveredWithSpatialRisk = new Decimal(data.watercourseUnitsDelivered).mul(data.spatialRiskMultiplier).toNumber();
-
-    return {
-        ...data,
-        watercourseUnitsDeliveredWithSpatialRisk,
-    };
+    return { ...data, ...calculateWatercourseUnitsDeliveredWithSpatialRisk(data) };
 }
 
 

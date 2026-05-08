@@ -49,16 +49,23 @@ export function enrichWithSpatialRiskMultiplier<Data extends {
  * Calculates SRM-adjusted net unit change for off-site watercourse creation
  * netUnitChangeWithSpatialRisk = netUnitChange * spatialRiskMultiplier
  */
+/**
+ * Pure calculation: derives netUnitChangeWithSpatialRisk.
+ */
+export function calculateNetUnitChangeWithSpatialRisk(input: {
+    unitsDelivered: number;
+    spatialRiskMultiplier: number;
+}) {
+    const netUnitChangeWithSpatialRisk = new Decimal(input.unitsDelivered).mul(input.spatialRiskMultiplier).toNumber();
+
+    return { netUnitChangeWithSpatialRisk };
+}
+
 export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends {
     unitsDelivered: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const netUnitChangeWithSpatialRisk = new Decimal(data.unitsDelivered).mul(data.spatialRiskMultiplier).toNumber();
-
-    return {
-        ...data,
-        netUnitChangeWithSpatialRisk,
-    };
+    return { ...data, ...calculateNetUnitChangeWithSpatialRisk(data) };
 }
 
 export const offSiteWatercourseCreationSchema = v.pipe(

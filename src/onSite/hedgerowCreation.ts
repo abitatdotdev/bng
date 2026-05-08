@@ -41,7 +41,9 @@ export const onSiteHedgerowCreationSchema = v.pipe(
     // Enrich with hedgerow data
     v.transform(enrichWithHedgerowData),
     // Calculate temporal data
-    v.transform(enrichWithTemporalData),
+    v.transform(lookupStandardTimeToTargetCondition),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupTemporalMultiplierStep),
     // Calculate difficulty data
     v.transform(enrichWithDifficultyData),
     // Calculate hedgerow units delivered
@@ -92,53 +94,55 @@ function yearsToNumber(years: number | "30+"): number {
 }
 
 /**
- * Calculate temporal data: standard time to target, final time to target, and temporal multiplier
+ * Lookup: attaches standardTimeToTargetCondition from hedgerow.yearsToTargetConditionViaCreation.
  */
-export function enrichWithTemporalData<Data extends {
+export function lookupStandardTimeToTargetCondition<Data extends {
     habitatType: HedgerowLabel;
     condition: HedgerowCondition;
+}>(data: Data) {
+    const hedgerow = allHedgerows[data.habitatType];
+    const standardTimeToTargetCondition = hedgerow.yearsToTargetConditionViaCreation[data.condition];
+
+    return {
+        ...data,
+        standardTimeToTargetCondition,
+    };
+}
+
+/**
+ * Pure calculation: derives finalTimeToTargetCondition from standardTimeToTargetCondition,
+ * advance, and delay.
+ */
+export function calculateFinalTimeToTargetCondition<Data extends {
+    standardTimeToTargetCondition: number | string | undefined;
     habitatCreatedInAdvance: number | "30+";
     delayInStartingHabitatCreation: number | "30+";
 }>(data: Data) {
-    const hedgerow = allHedgerows[data.habitatType];
-
-    // Get standard time to target condition from the matrix lookup
-    const yearsMap = hedgerow.yearsToTargetConditionViaCreation;
-    const standardTimeToTarget = yearsMap[data.condition];
-
-    // Calculate final time to target condition
-    // Formula: standard time - advance + delay
+    const standardTimeToTarget = data.standardTimeToTargetCondition;
     let finalTimeToTarget: number | string | undefined = undefined;
 
     if (typeof standardTimeToTarget === 'string') {
-        // Handle "30+" or "Not possible ▲" or other string values
         if (standardTimeToTarget === '30+') {
-            // Convert "30+" to 31 for arithmetic when it's the standard time
             const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
             const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
 
             finalTimeToTarget = new Decimal(31).minus(advanceYears).plus(delayYears).toNumber();
 
-            // Result stays as "30+" if it's still >= 30
             if (finalTimeToTarget >= 30) {
                 finalTimeToTarget = '30+';
             }
         } else {
-            // Other string values like "Not possible ▲"
             finalTimeToTarget = standardTimeToTarget;
         }
     } else {
         if (!standardTimeToTarget) {
             finalTimeToTarget = undefined;
         } else {
-            // Numeric standard time
-            // Convert "30+" to 31 for arithmetic
             const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
             const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
 
             finalTimeToTarget = new Decimal(standardTimeToTarget).minus(advanceYears).plus(delayYears).toNumber();
 
-            // Handle the "30+" case for output
             if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
                 finalTimeToTarget = '30+';
             } else if (finalTimeToTarget >= 30) {
@@ -147,17 +151,43 @@ export function enrichWithTemporalData<Data extends {
         }
     }
 
-    // Get temporal multiplier
+    return {
+        ...data,
+        finalTimeToTargetCondition: finalTimeToTarget,
+    };
+}
+
+/**
+ * Lookup: attaches temporalMultiplier from finalTimeToTargetCondition.
+ */
+export function lookupTemporalMultiplierStep<Data extends {
+    finalTimeToTargetCondition: number | string | undefined;
+}>(data: Data) {
+    const finalTimeToTarget = data.finalTimeToTargetCondition;
     const temporalMultiplier = typeof finalTimeToTarget === 'number' || finalTimeToTarget === '30+'
         ? lookupTemporalMultiplier(finalTimeToTarget)
         : finalTimeToTarget;
 
     return {
         ...data,
-        standardTimeToTargetCondition: standardTimeToTarget,
-        finalTimeToTargetCondition: finalTimeToTarget,
         temporalMultiplier,
     };
+}
+
+/**
+ * Backwards-compatible composed transform: lookup → calc → lookup.
+ */
+export function enrichWithTemporalData<Data extends {
+    habitatType: HedgerowLabel;
+    condition: HedgerowCondition;
+    habitatCreatedInAdvance: number | "30+";
+    delayInStartingHabitatCreation: number | "30+";
+}>(data: Data) {
+    return lookupTemporalMultiplierStep(
+        calculateFinalTimeToTargetCondition(
+            lookupStandardTimeToTargetCondition(data)
+        )
+    );
 }
 
 /**
@@ -200,6 +230,32 @@ export function enrichWithDifficultyData<Data extends {
 }
 
 /**
+ * Pure calculation: derives hedgerowUnitsDelivered.
+ */
+export function calculateHedgerowUnitsDelivered(input: {
+    length: number;
+    distinctivenessScore: number;
+    conditionScore: number;
+    strategicSignificanceMultiplier: number;
+    temporalMultiplier: number | string | undefined;
+    difficultyMultiplier: number;
+}) {
+    const temporalMultiplierValue = typeof input.temporalMultiplier === 'number'
+        ? input.temporalMultiplier
+        : 0;
+
+    const hedgerowUnitsDelivered = new Decimal(input.length)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .mul(temporalMultiplierValue)
+        .mul(input.difficultyMultiplier)
+        .toNumber();
+
+    return { hedgerowUnitsDelivered };
+}
+
+/**
  * Calculate hedgerow units delivered
  */
 export function enrichWithHedgerowUnitsDelivered<Data extends {
@@ -210,7 +266,6 @@ export function enrichWithHedgerowUnitsDelivered<Data extends {
     temporalMultiplier: number | string | undefined;
     difficultyMultiplier: number;
 }>(data: Data) {
-    // If temporal multiplier is not a number (e.g., "Check Data ⚠" or "N/A"), return 0
     const temporalMultiplierValue = typeof data.temporalMultiplier === 'number'
         ? data.temporalMultiplier
         : 0;

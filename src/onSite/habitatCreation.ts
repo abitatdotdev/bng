@@ -5,9 +5,9 @@ import { creationHabitatType, type CreationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
-import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
+import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 
 const inputSchema =
     v.object({
@@ -41,25 +41,28 @@ const inputSchema =
  *
  * Corresponds to formulas in Excel cells R12, S12, and T12 of sheet A-2
  */
-const calculateFinalTimeToTargetValues = <Data extends {
+/**
+ * Pure calculation: derives standardOrAdjustedTimeToTarget and finalTimeToTargetCondition.
+ *
+ * Reads timeToPoorCondition from data._habitat.temporalMultipliers['Poor'] (already attached
+ * by enrichWithHabitatData earlier in the pipeline).
+ */
+const calculateFinalTimeToTargetCondition = <Data extends {
     broadHabitat: string,
     habitatType: string,
     distinctivenessScore: number,
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",
-    habitatCreationDelay: number | "30+"
+    habitatCreationDelay: number | "30+",
+    _habitat: Habitat
 }>(data: Data) => {
     const { timeToTargetCondition, habitatCreationInAdvance, habitatCreationDelay, distinctivenessScore } = data;
 
-    // Get habitat data to access Poor condition threshold
-    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
-    const timeToPoorCondition = habitat.temporalMultipliers['Poor'];
+    const timeToPoorCondition = data._habitat.temporalMultipliers['Poor'];
 
     const normalisedHabitatCreationInAdvance = typeof habitatCreationInAdvance === "string" ? 30 : habitatCreationInAdvance;
     const normalisedHabitatCreationDelay = typeof habitatCreationDelay === "string" ? 30 : habitatCreationDelay;
 
-    // Calculate standardOrAdjustedTimeToTarget (column R)
-    // This provides validation messages based on habitat creation parameters
     let standardOrAdjustedTimeToTarget = calculateStandardOrAdjustedTimeToTarget(
         normalisedHabitatCreationInAdvance,
         habitatCreationInAdvance,
@@ -72,48 +75,33 @@ const calculateFinalTimeToTargetValues = <Data extends {
 
     let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
 
-    // If standard time is "Not Possible", final time is also "Not Possible"
     if (timeToTargetCondition === "Not Possible ▲") {
         finalTimeToTargetCondition = "Not Possible ▲";
     }
-    // Handle "30+" standard time
     else if (timeToTargetCondition === "30+") {
         if (habitatCreationInAdvance === 0) {
             finalTimeToTargetCondition = "30+";
         } else {
-            // 30 - advance (capped at 0)
             finalTimeToTargetCondition = Decimal.max(0, new Decimal(30).minus(normalisedHabitatCreationInAdvance)).toNumber();
         }
     }
-    // If advance >= standard time, final time is 0
     else if (normalisedHabitatCreationInAdvance >= timeToTargetCondition && normalisedHabitatCreationInAdvance !== 0 && timeToTargetCondition !== 0) {
         finalTimeToTargetCondition = 0;
     }
-    // Calculate: standardTime - advance + delay
     else {
         const result = new Decimal(timeToTargetCondition).minus(normalisedHabitatCreationInAdvance).plus(normalisedHabitatCreationDelay).toNumber();
 
-        // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
-            // Ensure non-negative result
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
-
-    // Look up the temporal multiplier for the final time
-    const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
-    const multiplierResult = getTemporalMultiplier(multiplierKey);
-
-    // Convert 'N/A' to undefined for calculations, keep numeric values
-    const finalTimeToTargetMultiplier = multiplierResult === 'N/A' ? undefined : multiplierResult;
 
     return {
         ...data,
         standardOrAdjustedTimeToTarget,
         finalTimeToTargetCondition,
-        finalTimeToTargetMultiplier
     };
 }
 
@@ -283,6 +271,28 @@ export function calculateDifficultyMultiplierApplied(finalDifficultyOfCreation: 
  *
  * Corresponds to column Y in Excel sheet A-2
  */
+/**
+ * Pure calculation: derives habitatUnitsDelivered.
+ */
+export function calculateHabitatUnitsDeliveredPure(input: {
+    area: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
+    difficultyMultiplierApplied: number
+}) {
+    const habitatUnitsDelivered = new Decimal(input.area)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .mul(input.finalTimeToTargetMultiplier ?? 0)
+        .mul(input.difficultyMultiplierApplied)
+        .toNumber();
+
+    return { habitatUnitsDelivered };
+}
+
 const calculateHabitatUnitsDelivered = <Data extends {
     area: number,
     distinctivenessScore: number,
@@ -291,18 +301,7 @@ const calculateHabitatUnitsDelivered = <Data extends {
     finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    const habitatUnitsDelivered = new Decimal(data.area)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .mul(data.finalTimeToTargetMultiplier ?? 0)
-        .mul(data.difficultyMultiplierApplied)
-        .toNumber();
-
-    return {
-        ...data,
-        habitatUnitsDelivered
-    };
+    return { ...data, ...calculateHabitatUnitsDeliveredPure(data) };
 }
 
 export const onSiteHabitatCreationSchema = v.pipe(
@@ -318,7 +317,8 @@ export const onSiteHabitatCreationSchema = v.pipe(
     ),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
-    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
     v.transform(calculateHabitatUnitsDelivered)
 )

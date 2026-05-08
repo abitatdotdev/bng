@@ -80,6 +80,32 @@ export type OffSiteWatercourseBaseline = v.InferOutput<typeof offSiteWatercourse
  * Calculate total watercourse units (SRM) - includes spatial risk multiplier
  * This is the "Total river units (SRM)" column in the Excel sheet
  */
+/**
+ * Pure calculation: derives totalWatercourseUnitsSRM.
+ */
+export function calculateTotalWatercourseUnitsSRM(input: {
+    length: number;
+    distinctivenessScore: number;
+    conditionScore: number | 'Not possible';
+    strategicSignificanceMultiplier: number;
+    watercourseEncroachmentMultiplier: number;
+    riparianEncroachmentMultiplier: number;
+    spatialRiskMultiplier: number;
+}) {
+    const conditionScore = input.conditionScore as number;
+
+    const totalWatercourseUnitsSRM = new Decimal(input.length)
+        .mul(input.distinctivenessScore)
+        .mul(conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .mul(input.watercourseEncroachmentMultiplier)
+        .mul(input.riparianEncroachmentMultiplier)
+        .mul(input.spatialRiskMultiplier)
+        .toNumber();
+
+    return { totalWatercourseUnitsSRM };
+}
+
 export function enrichWithTotalWatercourseUnitsSRM<Data extends {
     length: number;
     lengthRetained: number;
@@ -91,21 +117,6 @@ export function enrichWithTotalWatercourseUnitsSRM<Data extends {
     riparianEncroachmentMultiplier: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    // At this point, validation has ensured conditionScore is a number
-    const conditionScore = data.conditionScore as number;
-
-    const totalWatercourseUnitsSRM = new Decimal(data.length)
-        .mul(data.distinctivenessScore)
-        .mul(conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .mul(data.watercourseEncroachmentMultiplier)
-        .mul(data.riparianEncroachmentMultiplier)
-        .mul(data.spatialRiskMultiplier)
-        .toNumber();
-
-    return {
-        ...data,
-        totalWatercourseUnitsSRM,
-    };
+    return { ...data, ...calculateTotalWatercourseUnitsSRM(data) };
 }
 

@@ -84,17 +84,26 @@ const enrichProposedHedgerowData = <Data extends {
  * Add enhancement pathway label
  * Format: "baseline condition to proposed condition"
  */
+/**
+ * Pure calculation: derives the enhancementPathway label.
+ */
+export function calculateEnhancementPathway(input: {
+    baselineCondition: HedgerowCondition,
+    proposedCondition: HedgerowCondition
+}) {
+    return { enhancementPathway: `${input.baselineCondition} to ${input.proposedCondition}` };
+}
+
 const addEnhancementPathway = <Data extends {
     baseline: OffSiteHedgerowBaseline,
     condition: HedgerowCondition
 }>(data: Data) => {
-    const baselineCondition = data.baseline.condition;
-    const proposedCondition = data.condition;
-    const enhancementPathway = `${baselineCondition} to ${proposedCondition}`;
-
     return {
         ...data,
-        enhancementPathway
+        ...calculateEnhancementPathway({
+            baselineCondition: data.baseline.condition,
+            proposedCondition: data.condition
+        })
     };
 }
 
@@ -168,7 +177,7 @@ function yearsToNumber(years: number | "30+"): number {
  * - Years of hedgerow enhanced in advance
  * - Years of delay in starting enhancement
  */
-const calculateFinalTimeToTargetValues = <Data extends {
+const calculateFinalTimeToTargetCondition = <Data extends {
     timeToTargetCondition: number | "30+" | "Not possible ▲",
     hedgerowEnhancedInAdvance: number | "30+",
     hedgerowEnhancedDelay: number | "30+"
@@ -179,16 +188,13 @@ const calculateFinalTimeToTargetValues = <Data extends {
     const normalisedHedgerowEnhancedInAdvance = yearsToNumber(hedgerowEnhancedInAdvance);
     const normalisedHedgerowEnhancedDelay = yearsToNumber(hedgerowEnhancedDelay);
 
-    // If standard time is "Not possible", final time is also "Not possible"
     if (timeToTargetCondition === "Not possible ▲") {
         finalTimeToTargetCondition = "Not possible ▲";
     }
-    // Handle "30+" standard time
     else if (timeToTargetCondition === "30+") {
         if (hedgerowEnhancedInAdvance === 0) {
             finalTimeToTargetCondition = "30+";
         } else {
-            // 30 - advance (capped at 0)
             const result = new Decimal(31).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
             if (result >= 30) {
                 finalTimeToTargetCondition = "30+";
@@ -197,34 +203,37 @@ const calculateFinalTimeToTargetValues = <Data extends {
             }
         }
     }
-    // If advance >= standard time, final time is 0
     else if (normalisedHedgerowEnhancedInAdvance >= timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
     }
-    // Calculate: standardTime - advance + delay
     else {
         const result = new Decimal(timeToTargetCondition).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
 
-        // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
-            // Ensure non-negative result
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
 
-    // Look up the temporal multiplier for the final time
+    return {
+        ...data,
+        finalTimeToTargetCondition,
+    };
+}
+
+const lookupTemporalMultiplierStep = <Data extends {
+    finalTimeToTargetCondition: number | "30+" | "Not possible ▲"
+}>(data: Data) => {
+    const finalTimeToTargetCondition = data.finalTimeToTargetCondition;
     const temporalMultiplier = typeof finalTimeToTargetCondition === 'number' || finalTimeToTargetCondition === '30+'
         ? lookupTemporalMultiplier(finalTimeToTargetCondition)
         : finalTimeToTargetCondition;
 
-    // Convert temporal multiplier from string to number or undefined for calculations
     const finalTimeToTargetMultiplier = typeof temporalMultiplier === 'number' ? temporalMultiplier : undefined;
 
     return {
         ...data,
-        finalTimeToTargetCondition,
         temporalMultiplier,
         finalTimeToTargetMultiplier
     };
@@ -311,6 +320,42 @@ const enrichWithSpatialRiskData = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
+/**
+ * Pure calculation: derives hedgerowUnitsDelivered (with and without spatial risk) for an enhancement.
+ */
+export function calculateEnhancementUnitsDeliveredPure(input: {
+    length: number,
+    baselineDistinctivenessScore: number,
+    baselineConditionScore: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
+    difficultyMultiplierApplied: number,
+    spatialRiskMultiplier: number
+}) {
+    const length = input.length;
+    const baselineD = input.baselineDistinctivenessScore;
+    const baselineC = input.baselineConditionScore;
+    const proposedD = input.distinctivenessScore;
+    const proposedC = input.conditionScore;
+    const strategic = input.strategicSignificanceMultiplier;
+    const difficulty = input.difficultyMultiplierApplied;
+    const temporal = input.finalTimeToTargetMultiplier ?? 0;
+    const spatialRisk = input.spatialRiskMultiplier;
+
+    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
+    const proposedUnits = new Decimal(length).mul(proposedD).mul(proposedC);
+    const baselineUnits = new Decimal(length).mul(baselineD).mul(effectiveBaselineC);
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
+    const baseUnits = delta.plus(baselineUnits).mul(strategic);
+
+    const hedgerowUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
+    const hedgerowUnitsDelivered = baseUnits.toNumber();
+
+    return { hedgerowUnitsDeliveredWithSpatialRisk, hedgerowUnitsDelivered };
+}
+
 const calculateEnhancementUnitsDelivered = <Data extends {
     length: number,
     _baselineHedgerow: any,
@@ -322,40 +367,19 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
-    const length = data.length;
-    const baselineD = data._baselineHedgerow.distinctivenessScore;
-    const baselineC = data._baselineCondition;
-    const proposedD = data.distinctivenessScore;
-    const proposedC = data.conditionScore;
-    const strategic = data.strategicSignificanceMultiplier;
-    const difficulty = data.difficultyMultiplierApplied;
-    const temporal = data.finalTimeToTargetMultiplier ?? 0;
-    const spatialRisk = data.spatialRiskMultiplier;
-
-    // Special case: baseline condition > proposed condition (condition reduced)
-    // Use proposed condition as the effective baseline condition
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-
-    // Calculate proposed units
-    const proposedUnits = new Decimal(length).mul(proposedD).mul(proposedC);
-
-    // Calculate baseline units (with effective condition)
-    const baselineUnits = new Decimal(length).mul(baselineD).mul(effectiveBaselineC);
-
-    // Calculate delta with multipliers
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-
-    // Add back baseline units and apply strategic significance
-    const baseUnits = delta.plus(baselineUnits).mul(strategic);
-
-    // Two calculations: with and without spatial risk multiplier
-    const hedgerowUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
-    const hedgerowUnitsDelivered = baseUnits.toNumber();
-
     return {
         ...data,
-        hedgerowUnitsDeliveredWithSpatialRisk,
-        hedgerowUnitsDelivered
+        ...calculateEnhancementUnitsDeliveredPure({
+            length: data.length,
+            baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
+            baselineConditionScore: data._baselineCondition,
+            distinctivenessScore: data.distinctivenessScore,
+            conditionScore: data.conditionScore,
+            strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+            finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+            difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+            spatialRiskMultiplier: data.spatialRiskMultiplier,
+        })
     };
 }
 
@@ -434,7 +458,8 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
 
     // Temporal calculation
     v.transform(lookupEnhancementTimeToTarget),
-    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupTemporalMultiplierStep),
 
     // Difficulty logic
     v.transform(determineEnhancementDifficulty),

@@ -66,8 +66,26 @@ export const onSiteWatercourseBaselineSchema = v.pipe(
 export type OnSiteWatercourseBaselineSchema = v.InferInput<typeof onSiteWatercourseBaselineSchema>;
 export type OnSiteWatercourseBaseline = v.InferOutput<typeof onSiteWatercourseBaselineSchema>;
 /*
- * Calculates hidden cell AT, which is used later in the headline results
+ * Pure calculation of hidden cell AT, used later in the headline results.
  */
+export function calculateVhdhBespokeCompensationUnits(input: {
+    bespokeCompensation: BespokeCompensation,
+    tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
+    totalWatercourseUnits: number,
+    lengthRetained: number,
+    lengthEnhanced: number,
+}) {
+    const vhdhBespokeCompensationUnits =
+        (
+            input.bespokeCompensation === "Yes"
+            || input.bespokeCompensation === "Pending"
+        ) && input.tradingRules === "Same habitat required – bespoke compensation option ⚠"
+            ? new Decimal(input.totalWatercourseUnits).minus(input.lengthRetained).minus(input.lengthEnhanced).toNumber()
+            : 0;
+
+    return { vhdhBespokeCompensationUnits };
+}
+
 export function enrichWithVhdhBespokeCompensationUnits<Data extends {
     bespokeCompensation: BespokeCompensation,
     tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
@@ -75,16 +93,5 @@ export function enrichWithVhdhBespokeCompensationUnits<Data extends {
     lengthRetained: number,
     lengthEnhanced: number,
 }>(data: Data) {
-    const vhdhBespokeCompensationUnits =
-        (
-            data.bespokeCompensation === "Yes"
-            || data.bespokeCompensation === "Pending"
-        ) && data.tradingRules === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(data.totalWatercourseUnits).minus(data.lengthRetained).minus(data.lengthEnhanced).toNumber()
-            : 0;
-
-    return {
-        ...data,
-        vhdhBespokeCompensationUnits,
-    }
+    return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
 }

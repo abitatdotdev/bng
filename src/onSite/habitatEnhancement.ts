@@ -6,8 +6,8 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
 import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaseline } from './habitatBaseline';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
-import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
+import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { Decimal } from '../decimal';
 
 const inputSchema = v.object({
@@ -73,22 +73,15 @@ const lookupEnhancementTimeToTarget = <Data extends {
  *
  * Matches Excel columns AD-AI in sheet A-3
  */
-const calculateFinalTimeToTargetValues = <Data extends {
+const calculateFinalTimeToTargetCondition = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatEnhancedInAdvance: number | "30+",
     habitatEnhancedDelay: number | "30+"
 }>(data: Data) => {
     const { timeToTargetCondition, habitatEnhancedInAdvance, habitatEnhancedDelay } = data;
 
-    // Column AD: Standard time to target condition (years)
-    // Already calculated in lookupEnhancementTimeToTarget as timeToTargetCondition
     const standardTimeToTargetCondition = timeToTargetCondition;
 
-    // Column AE: Habitat enhanced in advance (years) - input data
-    // Column AF: Delay in starting habitat enhancement (years) - input data
-
-    // Column AG: Standard or adjusted time to target condition
-    // Determine which adjustment applies
     let standardOrAdjustedTimeToTargetCondition: string;
     const hasAdvance = typeof habitatEnhancedInAdvance === "string" || habitatEnhancedInAdvance > 0;
     const hasDelay = typeof habitatEnhancedDelay === "string" || habitatEnhancedDelay > 0;
@@ -109,17 +102,13 @@ const calculateFinalTimeToTargetValues = <Data extends {
         standardOrAdjustedTimeToTargetCondition = "Standard time to target condition applied";
     }
 
-    // Column AH: Final time to target condition (years)
-    // Calculate based on standard time, advance, and delay
     let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
     const normalisedHabitatEnhancedInAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
     const normalisedHabitatEnhancedDelay = typeof habitatEnhancedDelay === "string" ? 30 : habitatEnhancedDelay;
 
-    // If standard time is "Not Possible", final time is also "Not Possible"
     if (timeToTargetCondition === "Not Possible ▲") {
         finalTimeToTargetCondition = "Not Possible ▲";
     }
-    // Handle "30+" standard time
     else if (timeToTargetCondition === "30+") {
         if (habitatEnhancedInAdvance === 0) {
             finalTimeToTargetCondition = "30+";
@@ -131,41 +120,27 @@ const calculateFinalTimeToTargetValues = <Data extends {
             finalTimeToTargetCondition = new Decimal(30).minus(normalisedHabitatEnhancedInAdvance).toNumber();
         }
     }
-    // If advance > standard time, final time is 0
     else if (normalisedHabitatEnhancedInAdvance > timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
     }
-    // If delay is "30+", result is "30+"
     else if (habitatEnhancedDelay === "30+") {
         finalTimeToTargetCondition = "30+";
     }
-    // Calculate: standardTime + delay - advance
     else {
         const result = new Decimal(timeToTargetCondition).plus(normalisedHabitatEnhancedDelay).minus(normalisedHabitatEnhancedInAdvance).toNumber();
 
-        // Cap at "30+" if result > 30
         if (result > 30) {
             finalTimeToTargetCondition = "30+";
         } else {
-            // Ensure non-negative result
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
     }
-
-    // Column AI: Final time to target multiplier
-    // Look up the temporal multiplier for the final time
-    const multiplierKey = String(finalTimeToTargetCondition) as TemporalMultiplierKey;
-    const multiplierResult = getTemporalMultiplier(multiplierKey);
-
-    // Convert 'N/A' to undefined for calculations, keep numeric values
-    const finalTimeToTargetMultiplier = multiplierResult === 'N/A' ? undefined : multiplierResult;
 
     return {
         ...data,
         standardTimeToTargetCondition,
         standardOrAdjustedTimeToTargetCondition,
         finalTimeToTargetCondition,
-        finalTimeToTargetMultiplier
     };
 }
 
@@ -274,6 +249,38 @@ const addDistinctivenessAndConditionChange = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
+/**
+ * Pure calculation: derives habitatUnitsDelivered for an enhancement.
+ */
+export function calculateEnhancementUnitsDeliveredPure(input: {
+    area: number,
+    baselineDistinctivenessScore: number,
+    baselineConditionScore: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
+    difficultyMultiplierApplied: number
+}) {
+    const area = input.area;
+    const baselineD = input.baselineDistinctivenessScore;
+    const baselineC = input.baselineConditionScore;
+    const proposedD = input.distinctivenessScore;
+    const proposedC = input.conditionScore;
+    const strategic = input.strategicSignificanceMultiplier;
+    const difficulty = input.difficultyMultiplierApplied;
+    const temporal = input.finalTimeToTargetMultiplier ?? 0;
+
+    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
+
+    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
+    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
+    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
+    const habitatUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
+
+    return { habitatUnitsDelivered };
+}
+
 const calculateEnhancementUnitsDelivered = <Data extends {
     area: number,
     _baselineHabitat: any,
@@ -284,34 +291,18 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    const area = data.area;
-    const baselineD = data._baselineHabitat.distinctivenessScore;
-    const baselineC = data._baselineCondition;
-    const proposedD = data.distinctivenessScore;
-    const proposedC = data.conditionScore;
-    const strategic = data.strategicSignificanceMultiplier;
-    const difficulty = data.difficultyMultiplierApplied;
-    const temporal = data.finalTimeToTargetMultiplier ?? 0;
-
-    // Special case: baseline condition > proposed condition (condition reduced)
-    // Use proposed condition as the effective baseline condition
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-
-    // Calculate proposed units
-    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
-
-    // Calculate baseline units (with effective condition)
-    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
-
-    // Calculate delta with multipliers
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-
-    // Add back baseline units and apply strategic significance
-    const habitatUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
-
     return {
         ...data,
-        habitatUnitsDelivered
+        ...calculateEnhancementUnitsDeliveredPure({
+            area: data.area,
+            baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+            baselineConditionScore: data._baselineCondition,
+            distinctivenessScore: data.distinctivenessScore,
+            conditionScore: data.conditionScore,
+            strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+            finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+            difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+        })
     };
 }
 
@@ -430,7 +421,8 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
 
     // Temporal calculation
     v.transform(lookupEnhancementTimeToTarget),
-    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupFinalTimeToTargetMultiplier),
 
     // Difficulty logic
     v.transform(determineEnhancementDifficulty),

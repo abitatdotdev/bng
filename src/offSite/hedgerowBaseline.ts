@@ -106,8 +106,30 @@ export function enrichWithSpatialRiskMultiplier<Data extends {
 }
 
 /**
- * Calculate baseline units for retained and enhanced portions
+ * Pure calculation: derives baseline units retained and enhanced.
  */
+export function calculateBaselineUnits(input: {
+    lengthRetained: number;
+    lengthEnhanced: number;
+    distinctivenessScore: number;
+    conditionScore: number;
+    strategicSignificanceMultiplier: number;
+}) {
+    const unitsRetained = new Decimal(input.lengthRetained)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .toNumber();
+
+    const unitsEnhanced = new Decimal(input.lengthEnhanced)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .toNumber();
+
+    return { unitsRetained, unitsEnhanced };
+}
+
 export function enrichWithBaselineUnitsData<Data extends {
     lengthRetained: number;
     lengthEnhanced: number;
@@ -115,29 +137,29 @@ export function enrichWithBaselineUnitsData<Data extends {
     conditionScore: number;
     strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const unitsRetained = new Decimal(data.lengthRetained)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .toNumber();
-
-    const unitsEnhanced = new Decimal(data.lengthEnhanced)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .toNumber();
-
-    return {
-        ...data,
-        unitsRetained,
-        unitsEnhanced,
-    };
+    return { ...data, ...calculateBaselineUnits(data) };
 }
 
 /**
- * Calculate total hedgerow units SRM (with spatial risk multiplier)
- * This is column N in the Excel sheet - includes spatial risk
+ * Pure calculation: derives totalHedgerowUnitsSRM.
  */
+export function calculateTotalHedgerowUnitsSRM(input: {
+    length: number;
+    distinctivenessScore: number;
+    conditionScore: number;
+    strategicSignificanceMultiplier: number;
+    spatialRiskMultiplier: number;
+}) {
+    const totalHedgerowUnitsSRM = new Decimal(input.length)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .mul(input.spatialRiskMultiplier)
+        .toNumber();
+
+    return { totalHedgerowUnitsSRM };
+}
+
 export function enrichWithTotalHedgerowUnitsSRM<Data extends {
     length: number;
     distinctivenessScore: number;
@@ -145,45 +167,53 @@ export function enrichWithTotalHedgerowUnitsSRM<Data extends {
     strategicSignificanceMultiplier: number;
     spatialRiskMultiplier: number;
 }>(data: Data) {
-    const totalHedgerowUnitsSRM = new Decimal(data.length)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .mul(data.spatialRiskMultiplier)
-        .toNumber();
-
-    return {
-        ...data,
-        totalHedgerowUnitsSRM,
-    };
+    return { ...data, ...calculateTotalHedgerowUnitsSRM(data) };
 }
 
 /**
- * Calculate total hedgerow units (without spatial risk multiplier)
- * This is column Q in the Excel sheet - baseline calculation
+ * Pure calculation: derives totalHedgerowUnits.
  */
+export function calculateTotalHedgerowUnits(input: {
+    length: number;
+    distinctivenessScore: number;
+    conditionScore: number;
+    strategicSignificanceMultiplier: number;
+}) {
+    const totalHedgerowUnits = new Decimal(input.length)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .toNumber();
+
+    return { totalHedgerowUnits };
+}
+
 export function enrichWithTotalHedgerowUnits<Data extends {
     length: number;
     distinctivenessScore: number;
     conditionScore: number;
     strategicSignificanceMultiplier: number;
 }>(data: Data) {
-    const totalHedgerowUnits = new Decimal(data.length)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .toNumber();
-
-    return {
-        ...data,
-        totalHedgerowUnits,
-    };
+    return { ...data, ...calculateTotalHedgerowUnits(data) };
 }
 
 /**
- * Calculate length lost and units lost
- * Units lost is based on totalHedgerowUnits (without spatial risk), not totalHedgerowUnitsSRM
+ * Pure calculation: derives lengthLost and unitsLost.
  */
+export function calculateUnitsLost(input: {
+    length: number;
+    lengthRetained: number;
+    lengthEnhanced: number;
+    totalHedgerowUnits: number;
+    unitsRetained: number;
+    unitsEnhanced: number;
+}) {
+    const lengthLost = new Decimal(input.length).minus(input.lengthRetained).minus(input.lengthEnhanced).toNumber();
+    const unitsLost = lengthLost === 0 ? 0 : new Decimal(input.totalHedgerowUnits).minus(input.unitsRetained).minus(input.unitsEnhanced).toNumber();
+
+    return { lengthLost, unitsLost };
+}
+
 export function enrichWithUnitsLost<Data extends {
     length: number;
     lengthRetained: number;
@@ -192,12 +222,5 @@ export function enrichWithUnitsLost<Data extends {
     unitsRetained: number;
     unitsEnhanced: number;
 }>(data: Data) {
-    const lengthLost = new Decimal(data.length).minus(data.lengthRetained).minus(data.lengthEnhanced).toNumber();
-    const unitsLost = lengthLost === 0 ? 0 : new Decimal(data.totalHedgerowUnits).minus(data.unitsRetained).minus(data.unitsEnhanced).toNumber();
-
-    return {
-        ...data,
-        lengthLost,
-        unitsLost,
-    };
+    return { ...data, ...calculateUnitsLost(data) };
 }

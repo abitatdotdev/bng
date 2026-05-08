@@ -7,7 +7,7 @@ import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSche
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
-import { calculateFinalTimeToTargetValues as calculateFinalTimeToTargetValuesCommon, enrichWithSpatialRisk } from './common';
+import { calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon, lookupFinalTimeToTargetMultiplier, enrichWithSpatialRisk } from './common';
 import { Decimal } from '../decimal';
 
 const inputSchema =
@@ -35,12 +35,12 @@ const inputSchema =
  *
  * Corresponds to formula in Excel cell S11 of sheet D-2
  */
-const calculateFinalTimeToTargetValues = <Data extends {
+const calculateFinalTimeToTargetCondition = <Data extends {
     timeToTargetCondition: number | "30+" | "Not Possible ▲",
     habitatCreationInAdvance: number | "30+",
     habitatCreationDelay: number | "30+"
 }>(data: Data) => {
-    return calculateFinalTimeToTargetValuesCommon({
+    return calculateFinalTimeToTargetConditionCommon({
         ...data,
         advance: data.habitatCreationInAdvance,
         delay: data.habitatCreationDelay,
@@ -151,6 +151,32 @@ const enrichWithSpatialRiskData = enrichWithSpatialRisk;
  *
  * Corresponds to columns AA and AB in Excel sheet D-2
  */
+/**
+ * Pure calculation: derives habitatUnitsDelivered (with and without spatial risk).
+ */
+export function calculateHabitatUnitsDeliveredPure(input: {
+    area: number,
+    distinctivenessScore: number,
+    conditionScore: number,
+    strategicSignificanceMultiplier: number,
+    finalTimeToTargetMultiplier: number | undefined,
+    difficultyMultiplierApplied: number,
+    spatialRiskMultiplier: number
+}) {
+    const baseUnits = new Decimal(input.area)
+        .mul(input.distinctivenessScore)
+        .mul(input.conditionScore)
+        .mul(input.strategicSignificanceMultiplier)
+        .mul(input.finalTimeToTargetMultiplier ?? 0)
+        .mul(input.difficultyMultiplierApplied)
+        .toNumber();
+
+    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(input.spatialRiskMultiplier).toNumber();
+    const habitatUnitsDelivered = baseUnits;
+
+    return { habitatUnitsDeliveredWithSpatialRisk, habitatUnitsDelivered };
+}
+
 const calculateHabitatUnitsDelivered = <Data extends {
     area: number,
     distinctivenessScore: number,
@@ -160,21 +186,9 @@ const calculateHabitatUnitsDelivered = <Data extends {
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
-    const baseUnits = new Decimal(data.area)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .mul(data.finalTimeToTargetMultiplier ?? 0)
-        .mul(data.difficultyMultiplierApplied)
-        .toNumber();
-
-    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(data.spatialRiskMultiplier).toNumber();
-    const habitatUnitsDelivered = baseUnits;
-
     return {
         ...data,
-        habitatUnitsDeliveredWithSpatialRisk,
-        habitatUnitsDelivered
+        ...calculateHabitatUnitsDeliveredPure(data)
     };
 }
 
@@ -191,7 +205,8 @@ export const offSiteHabitatCreationSchema = v.pipe(
     ),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
-    v.transform(calculateFinalTimeToTargetValues),
+    v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
     v.transform(enrichWithSpatialRiskData),
     v.transform(calculateHabitatUnitsDelivered)
