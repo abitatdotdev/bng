@@ -30,9 +30,9 @@ export function parseOnSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number
         areaRetained: normalizeNumber(getCellValue(sheet, dataRow, "S")) || 0,
         areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "T")) || 0,
         bespokeCompensationAgreed: getCellValue(sheet, dataRow, "Y") || undefined,
-        userComments: "",
-        planningAuthorityComments: "",
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "D") || ""),
+        userComments: String(getCellValue(sheet, dataRow, "Z") || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AA") || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AB") || ""),
     };
 }
 
@@ -45,9 +45,9 @@ export function parseOnSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number
         strategicSignificance: getCellValue(sheet, dataRow, "L"),
         habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
         habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
-        userComments: "",
-        planningAuthorityComments: "",
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "B") || ""),
+        userComments: String(getCellValue(sheet, dataRow, "Z") || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AA") || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AB") || ""),
     };
 };
 
@@ -101,8 +101,8 @@ export function parseOffSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: numbe
         habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
         habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
         spatialRiskCategory: getCellValue(sheet, dataRow, "Y") || "Low",
-        userComments: "",
-        planningAuthorityComments: "",
+        userComments: String(getCellValue(sheet, dataRow, "AC") || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AD") || ""),
         habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AE") || ""),
         offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AF") || ""),
         baselineReferenceNumber: String(getCellValue(sheet, dataRow, "AG") || ""),
@@ -315,9 +315,9 @@ export function parseOffSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: n
         watercourseEncroachment: getCellValue(sheet, dataRow, "V"),
         riparianEncroachment: getCellValue(sheet, dataRow, "X"),
         spatialRiskCategory: getCellValue(sheet, dataRow, "Z"),
-        userComments: String(getCellValue(sheet, dataRow, "AA") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AB") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AC") || ""),
+        userComments: String(getCellValue(sheet, dataRow, "AD") || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AE") || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AF") || ""),
     };
 }
 
@@ -336,8 +336,8 @@ export function parseOffSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet,
         watercourseEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "AA")) || 0,
         watercourseEncroachment: String(getCellValue(sheet, dataRow, "AI") || ""),
         riparianEncroachment: String(getCellValue(sheet, dataRow, "AK") || ""),
-        userComments: String(getCellValue(sheet, dataRow, "AN") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AO") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AP") || ""),
+        userComments: String(getCellValue(sheet, dataRow, "AQ") || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AR") || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AS") || ""),
     }
 }
