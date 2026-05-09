@@ -4,12 +4,11 @@ import { parseFile } from './parseFile';
 import { onSiteHabitatBaselineUncheckedSchema } from '../onSite/habitatBaseline';
 
 const SAMPLE = './examples/simple-unlocked.xlsm';
+const validated = parseFile(SAMPLE);
+const unchecked = parseFile(SAMPLE, { validate: false });
 
 describe('parseFile({ validate: false })', () => {
     test('produces the same row counts as the validated parse on a clean workbook', () => {
-        const validated = parseFile(SAMPLE);
-        const unchecked = parseFile(SAMPLE, { validate: false });
-
         const sheetKeys = Object.keys(validated).filter(k => k !== '__id') as Array<
             Exclude<keyof typeof validated, '__id'>
         >;
@@ -62,9 +61,6 @@ describe('parseFile({ validate: false })', () => {
     });
 
     test('produces the same numeric unit values as the validated parse on a clean workbook', () => {
-        const validated = parseFile(SAMPLE);
-        const unchecked = parseFile(SAMPLE, { validate: false });
-
         // Spot-check a few representative numeric fields across feature types.
         const totalsValidated = {
             baseline: validated.onSiteHabitatBaselines.reduce(
