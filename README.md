@@ -89,8 +89,7 @@ By default, `parseFile` rejects rows that fail any of the metric's
 business-logic checks (e.g. an incompatible broad habitat / habitat type
 combination). Pass `{ validate: false }` to skip those checks while still
 running every enrichment and unit-value calculation. Rows that hit a missing
-lookup get `undefined`/`NaN` unit values; the rest of the file calculates
-normally.
+lookup get `undefined` unit values; the rest of the file calculates normally.
 
 ```ts
 import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';

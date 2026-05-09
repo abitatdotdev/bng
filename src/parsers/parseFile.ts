@@ -146,7 +146,7 @@ export interface ParseFileOptions {
      * and then through the same enrichment/calculation transforms. If a
      * transform throws (e.g. an unknown habitat lookup), the row is passed on
      * with whatever fields had already been computed; downstream unit values
-     * for that row will be undefined or NaN. Other rows are unaffected.
+     * for that row will be `undefined`. Other rows are unaffected.
      *
      * Rows whose input shape itself can't be parsed (e.g. an unrecognised
      * picklist value) are logged and skipped.

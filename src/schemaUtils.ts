@@ -11,7 +11,7 @@ import { calculateTotalHabitatUnits } from './habitatCalc';
 /**
  * Like `v.transform`, but silently passes the input through unchanged if the
  * callback throws. Used by the *UncheckedSchema variants so that a row with a
- * missing lookup (e.g. an unknown habitat type) yields undefined-derived
+ * missing lookup (e.g. an unknown habitat type) yields `undefined` derived
  * fields instead of failing the whole row.
  */
 export function safeTransform<I, O>(fn: (input: I) => O) {
