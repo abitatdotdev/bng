@@ -83,6 +83,23 @@ Here's a simple example, outputting parsed files to the console.
 </html>
 ```
 
+### Skipping validation
+
+By default, `parseFile` rejects rows that fail any of the metric's
+business-logic checks (e.g. an incompatible broad habitat / habitat type
+combination). Pass `{ validate: false }` to skip those checks while still
+running every enrichment and unit-value calculation. Rows that hit a missing
+lookup get `undefined`/`NaN` unit values; the rest of the file calculates
+normally.
+
+```ts
+import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
+
+const parsed = parseFile('./my_metric.xlsm', { validate: false });
+const tradingSums = tradingSummaries(parsed);
+console.log(headlineResults(parsed, tradingSums));
+```
+
 ### Data Parsers
 
 For validating and enriching data outside of the metric sheet, the library provides dedicated parsers for each input type. 
