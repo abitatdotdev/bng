@@ -10,6 +10,11 @@ import { hedgerowTypeSchema } from '../hedgerowType';
 import { offSiteHedgerowBaselineSchema, type OffSiteHedgerowBaseline } from './hedgerowBaseline';
 import { enrichWithSpatialRisk } from './common';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
+import {
+    calculateEnhancementPathway,
+    calculateEnhancementTimeToTarget,
+    calculateEnhancementUnitsDelivered,
+} from '../hedgerowCalc';
 
 const inputSchema = v.object({
     baseline: offSiteHedgerowBaselineSchema,
@@ -80,20 +85,6 @@ const enrichProposedHedgerowData = <Data extends {
     };
 }
 
-/**
- * Add enhancement pathway label
- * Format: "baseline condition to proposed condition"
- */
-/**
- * Pure calculation: derives the enhancementPathway label.
- */
-export function calculateEnhancementPathway(input: {
-    baselineCondition: HedgerowCondition,
-    proposedCondition: HedgerowCondition
-}) {
-    return { enhancementPathway: `${input.baselineCondition} to ${input.proposedCondition}` };
-}
-
 const addEnhancementPathway = <Data extends {
     baseline: OffSiteHedgerowBaseline,
     condition: HedgerowCondition
@@ -105,40 +96,6 @@ const addEnhancementPathway = <Data extends {
             proposedCondition: data.condition
         })
     };
-}
-
-/**
- * Pure calculation: resolves the enhancement time-to-target by branching on
- * distinctiveness then doing a key lookup into the appropriate pathway map.
- */
-export function calculateEnhancementTimeToTarget(input: {
-    baselineDistinctivenessScore: Hedgerow['distinctivenessScore'],
-    distinctivenessScore: Hedgerow['distinctivenessScore'],
-    yearsToTargetConditionViaDistinctiveness: Hedgerow['yearsToTargetConditionViaDistinctiveness'] | undefined,
-    yearsToTargetConditionViaEnhancement: Hedgerow['yearsToTargetConditionViaEnhancement'] | undefined,
-    habitatType: HedgerowLabel,
-    enhancementPathway: string,
-}) {
-    const notPossible = { timeToTargetCondition: "Not possible ▲" as const };
-
-    if (input.baselineDistinctivenessScore < input.distinctivenessScore) {
-        const pathways = input.yearsToTargetConditionViaDistinctiveness;
-        if (!pathways) return notPossible;
-
-        const timeToTargetCondition = pathways[input.habitatType as keyof typeof pathways] as number | "30+" | undefined;
-        if (!timeToTargetCondition) return notPossible;
-
-        return { timeToTargetCondition };
-    }
-
-    const enhancementTemporal = input.yearsToTargetConditionViaEnhancement;
-    if (!enhancementTemporal) return notPossible;
-
-    const pathway = input.enhancementPathway as keyof typeof enhancementTemporal;
-    if (!(pathway in enhancementTemporal)) return notPossible;
-
-    const timeToTargetCondition = enhancementTemporal[pathway] as number | "30+" | "Not possible ▲";
-    return { timeToTargetCondition };
 }
 
 const lookupEnhancementTimeToTarget = <Data extends {
@@ -327,63 +284,27 @@ const enrichWithSpatialRiskData = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-/**
- * Pure calculation: derives hedgerowUnitsDelivered (with and without spatial risk) for an enhancement.
- */
-export function calculateEnhancementUnitsDeliveredPure(input: {
-    length: number,
-    baselineDistinctivenessScore: number,
-    baselineConditionScore: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier: number
-}) {
-    const length = input.length;
-    const baselineD = input.baselineDistinctivenessScore;
-    const baselineC = input.baselineConditionScore;
-    const proposedD = input.distinctivenessScore;
-    const proposedC = input.conditionScore;
-    const strategic = input.strategicSignificanceMultiplier;
-    const difficulty = input.difficultyMultiplierApplied;
-    const temporal = input.finalTimeToTargetMultiplier ?? 0;
-    const spatialRisk = input.spatialRiskMultiplier;
-
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-    const proposedUnits = new Decimal(length).mul(proposedD).mul(proposedC);
-    const baselineUnits = new Decimal(length).mul(baselineD).mul(effectiveBaselineC);
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-    const baseUnits = delta.plus(baselineUnits).mul(strategic);
-
-    const hedgerowUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
-    const hedgerowUnitsDelivered = baseUnits.toNumber();
-
-    return { hedgerowUnitsDeliveredWithSpatialRisk, hedgerowUnitsDelivered };
-}
-
-const calculateEnhancementUnitsDelivered = <Data extends {
+const enrichWithEnhancementUnitsDelivered = <Data extends {
     length: number,
     _baselineHedgerow: any,
     _baselineCondition: number,
     distinctivenessScore: number,
     conditionScore: number,
     strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
+    temporalMultiplier: number | string,
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
     return {
         ...data,
-        ...calculateEnhancementUnitsDeliveredPure({
+        ...calculateEnhancementUnitsDelivered({
             length: data.length,
             baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
             baselineConditionScore: data._baselineCondition,
             distinctivenessScore: data.distinctivenessScore,
             conditionScore: data.conditionScore,
             strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
-            finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+            temporalMultiplier: data.temporalMultiplier,
             difficultyMultiplierApplied: data.difficultyMultiplierApplied,
             spatialRiskMultiplier: data.spatialRiskMultiplier,
         })
@@ -475,7 +396,7 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
     v.transform(enrichWithSpatialRiskData),
 
     // Final calculation
-    v.transform(calculateEnhancementUnitsDelivered),
+    v.transform(enrichWithEnhancementUnitsDelivered),
 )
 
 export type OffSiteHedgerowEnhancementSchema = v.InferInput<typeof offSiteHedgerowEnhancementSchema>

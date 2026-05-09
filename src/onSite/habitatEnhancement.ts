@@ -9,6 +9,7 @@ import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { Decimal } from '../decimal';
+import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 
 const inputSchema = v.object({
     baseline: onSiteHabitatBaselineSchema,
@@ -284,39 +285,7 @@ const addDistinctivenessAndConditionChange = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-/**
- * Pure calculation: derives habitatUnitsDelivered for an enhancement.
- */
-export function calculateEnhancementUnitsDeliveredPure(input: {
-    area: number,
-    baselineDistinctivenessScore: number,
-    baselineConditionScore: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number
-}) {
-    const area = input.area;
-    const baselineD = input.baselineDistinctivenessScore;
-    const baselineC = input.baselineConditionScore;
-    const proposedD = input.distinctivenessScore;
-    const proposedC = input.conditionScore;
-    const strategic = input.strategicSignificanceMultiplier;
-    const difficulty = input.difficultyMultiplierApplied;
-    const temporal = input.finalTimeToTargetMultiplier ?? 0;
-
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-
-    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
-    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-    const habitatUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
-
-    return { habitatUnitsDelivered };
-}
-
-const calculateEnhancementUnitsDelivered = <Data extends {
+const enrichWithEnhancementUnitsDelivered = <Data extends {
     area: number,
     _baselineHabitat: any,
     _baselineCondition: number,
@@ -326,19 +295,17 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    return {
-        ...data,
-        ...calculateEnhancementUnitsDeliveredPure({
-            area: data.area,
-            baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
-            baselineConditionScore: data._baselineCondition,
-            distinctivenessScore: data.distinctivenessScore,
-            conditionScore: data.conditionScore,
-            strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
-            finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
-            difficultyMultiplierApplied: data.difficultyMultiplierApplied,
-        })
-    };
+    const { habitatUnitsDelivered } = calculateEnhancementUnitsDelivered({
+        area: data.area,
+        baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+        baselineConditionScore: data._baselineCondition,
+        distinctivenessScore: data.distinctivenessScore,
+        conditionScore: data.conditionScore,
+        strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+        finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+        difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+    });
+    return { ...data, habitatUnitsDelivered };
 }
 
 export const onSiteHabitatEnhancementSchema = v.pipe(
@@ -463,7 +430,7 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
     v.transform(determineEnhancementDifficulty),
 
     // Final calculation
-    v.transform(calculateEnhancementUnitsDelivered),
+    v.transform(enrichWithEnhancementUnitsDelivered),
 )
 
 export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>

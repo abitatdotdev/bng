@@ -8,7 +8,7 @@ import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon, lookupFinalTimeToTargetMultiplier, enrichWithSpatialRisk } from './common';
-import { Decimal } from '../decimal';
+import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 
 const inputSchema =
     v.object({
@@ -161,33 +161,7 @@ const enrichWithSpatialRiskData = enrichWithSpatialRisk;
  *
  * Corresponds to columns AA and AB in Excel sheet D-2
  */
-/**
- * Pure calculation: derives habitatUnitsDelivered (with and without spatial risk).
- */
-export function calculateHabitatUnitsDeliveredPure(input: {
-    area: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier: number
-}) {
-    const baseUnits = new Decimal(input.area)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(input.finalTimeToTargetMultiplier ?? 0)
-        .mul(input.difficultyMultiplierApplied)
-        .toNumber();
-
-    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(input.spatialRiskMultiplier).toNumber();
-    const habitatUnitsDelivered = baseUnits;
-
-    return { habitatUnitsDeliveredWithSpatialRisk, habitatUnitsDelivered };
-}
-
-const calculateHabitatUnitsDelivered = <Data extends {
+const enrichWithHabitatUnitsDelivered = <Data extends {
     area: number,
     distinctivenessScore: number,
     conditionScore: number,
@@ -196,10 +170,7 @@ const calculateHabitatUnitsDelivered = <Data extends {
     difficultyMultiplierApplied: number,
     spatialRiskMultiplier: number
 }>(data: Data) => {
-    return {
-        ...data,
-        ...calculateHabitatUnitsDeliveredPure(data)
-    };
+    return { ...data, ...calculateHabitatUnitsDelivered(data) };
 }
 
 export const offSiteHabitatCreationSchema = v.pipe(
@@ -219,7 +190,7 @@ export const offSiteHabitatCreationSchema = v.pipe(
     v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
     v.transform(enrichWithSpatialRiskData),
-    v.transform(calculateHabitatUnitsDelivered)
+    v.transform(enrichWithHabitatUnitsDelivered)
 )
 
 export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>

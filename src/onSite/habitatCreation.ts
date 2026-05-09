@@ -8,6 +8,7 @@ import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSche
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
+import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 
 const inputSchema =
     v.object({
@@ -291,29 +292,7 @@ export function calculateDifficultyMultiplierApplied(finalDifficultyOfCreation: 
  *
  * Corresponds to column Y in Excel sheet A-2
  */
-/**
- * Pure calculation: derives habitatUnitsDelivered.
- */
-export function calculateHabitatUnitsDeliveredPure(input: {
-    area: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number
-}) {
-    const habitatUnitsDelivered = new Decimal(input.area)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(input.finalTimeToTargetMultiplier ?? 0)
-        .mul(input.difficultyMultiplierApplied)
-        .toNumber();
-
-    return { habitatUnitsDelivered };
-}
-
-const calculateHabitatUnitsDelivered = <Data extends {
+const enrichWithHabitatUnitsDelivered = <Data extends {
     area: number,
     distinctivenessScore: number,
     conditionScore: number,
@@ -321,7 +300,8 @@ const calculateHabitatUnitsDelivered = <Data extends {
     finalTimeToTargetMultiplier: number | undefined,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    return { ...data, ...calculateHabitatUnitsDeliveredPure(data) };
+    const { habitatUnitsDelivered } = calculateHabitatUnitsDelivered(data);
+    return { ...data, habitatUnitsDelivered };
 }
 
 export const onSiteHabitatCreationSchema = v.pipe(
@@ -340,7 +320,7 @@ export const onSiteHabitatCreationSchema = v.pipe(
     v.transform(calculateFinalTimeToTargetCondition),
     v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
-    v.transform(calculateHabitatUnitsDelivered)
+    v.transform(enrichWithHabitatUnitsDelivered)
 )
 export type OnSiteHabitatCreation = v.InferOutput<typeof onSiteHabitatCreationSchema>
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>

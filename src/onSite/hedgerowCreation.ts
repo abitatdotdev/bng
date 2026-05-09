@@ -1,5 +1,4 @@
 import * as v from 'valibot';
-import { Decimal } from '../decimal';
 import { allHedgerows, type HedgerowLabel } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema, yearsSchema } from '../schemaUtils';
@@ -8,6 +7,10 @@ import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCond
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
+import {
+    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionPure,
+    calculateHedgerowUnitsDelivered,
+} from '../hedgerowCalc';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -87,13 +90,6 @@ export function enrichWithHedgerowData<Data extends {
 }
 
 /**
- * Helper to convert years value to number for arithmetic
- */
-function yearsToNumber(years: number | "30+"): number {
-    return years === "30+" ? 31 : years;
-}
-
-/**
  * Lookup: attaches standardTimeToTargetCondition from hedgerow.yearsToTargetConditionViaCreation.
  */
 export function lookupStandardTimeToTargetCondition<Data extends {
@@ -110,51 +106,14 @@ export function lookupStandardTimeToTargetCondition<Data extends {
 }
 
 /**
- * Pure calculation: derives finalTimeToTargetCondition from standardTimeToTargetCondition,
- * advance, and delay.
+ * Pipeline transform: calls the pure final-time calculation and merges into data.
  */
 export function calculateFinalTimeToTargetCondition<Data extends {
     standardTimeToTargetCondition: number | string | undefined;
     habitatCreatedInAdvance: number | "30+";
     delayInStartingHabitatCreation: number | "30+";
 }>(data: Data) {
-    const standardTimeToTarget = data.standardTimeToTargetCondition;
-    let finalTimeToTarget: number | string | undefined = undefined;
-
-    if (typeof standardTimeToTarget === 'string') {
-        if (standardTimeToTarget === '30+') {
-            const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(31).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        } else {
-            finalTimeToTarget = standardTimeToTarget;
-        }
-    } else {
-        if (!standardTimeToTarget) {
-            finalTimeToTarget = undefined;
-        } else {
-            const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(standardTimeToTarget).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            } else if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        }
-    }
-
-    return {
-        ...data,
-        finalTimeToTargetCondition: finalTimeToTarget,
-    };
+    return { ...data, ...calculateFinalTimeToTargetConditionPure(data) };
 }
 
 /**
@@ -243,33 +202,7 @@ export function enrichWithDifficultyData<Data extends {
 }
 
 /**
- * Pure calculation: derives hedgerowUnitsDelivered.
- */
-export function calculateHedgerowUnitsDelivered(input: {
-    length: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-    temporalMultiplier: number | string | undefined;
-    difficultyMultiplier: number;
-}) {
-    const temporalMultiplierValue = typeof input.temporalMultiplier === 'number'
-        ? input.temporalMultiplier
-        : 0;
-
-    const hedgerowUnitsDelivered = new Decimal(input.length)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(temporalMultiplierValue)
-        .mul(input.difficultyMultiplier)
-        .toNumber();
-
-    return { hedgerowUnitsDelivered };
-}
-
-/**
- * Calculate hedgerow units delivered
+ * Pipeline transform: calls the pure units-delivered calculation and merges into data.
  */
 export function enrichWithHedgerowUnitsDelivered<Data extends {
     length: number;
@@ -279,20 +212,6 @@ export function enrichWithHedgerowUnitsDelivered<Data extends {
     temporalMultiplier: number | string | undefined;
     difficultyMultiplier: number;
 }>(data: Data) {
-    const temporalMultiplierValue = typeof data.temporalMultiplier === 'number'
-        ? data.temporalMultiplier
-        : 0;
-
-    const hedgerowUnitsDelivered = new Decimal(data.length)
-        .mul(data.distinctivenessScore)
-        .mul(data.conditionScore)
-        .mul(data.strategicSignificanceMultiplier)
-        .mul(temporalMultiplierValue)
-        .mul(data.difficultyMultiplier)
-        .toNumber();
-
-    return {
-        ...data,
-        hedgerowUnitsDelivered,
-    };
+    const { hedgerowUnitsDelivered } = calculateHedgerowUnitsDelivered(data);
+    return { ...data, hedgerowUnitsDelivered };
 }

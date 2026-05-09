@@ -9,14 +9,11 @@ import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { onSiteHedgerowBaselineSchema, type OnSiteHedgerowBaseline } from './hedgerowBaseline';
 import { hedgerowTypeSchema } from '../hedgerowType';
-
-// Extract all possible time-to-target values from hedgerow pathways
-type AllHedgerowsType = typeof allHedgerows;
-type TimeToTargetConditionValue = {
-    [K in keyof AllHedgerowsType]:
-        | (AllHedgerowsType[K]['yearsToTargetConditionViaEnhancement'] extends Record<string, infer V> ? V : never)
-        | (AllHedgerowsType[K]['yearsToTargetConditionViaDistinctiveness'] extends Record<string, infer V> ? V : never)
-}[keyof AllHedgerowsType];
+import {
+    calculateEnhancementPathway,
+    calculateEnhancementTimeToTarget,
+    calculateEnhancementUnitsDelivered,
+} from '../hedgerowCalc';
 
 const inputSchema = v.object({
     baseline: onSiteHedgerowBaselineSchema,
@@ -88,20 +85,6 @@ const enrichProposedHedgerowData = <Data extends {
     };
 }
 
-/**
- * Add enhancement pathway label
- * Format: "baseline condition - proposed condition"
- */
-/**
- * Pure calculation: derives the enhancementPathway label.
- */
-export function calculateEnhancementPathway(input: {
-    baselineCondition: HedgerowCondition,
-    proposedCondition: HedgerowCondition
-}) {
-    return { enhancementPathway: `${input.baselineCondition} to ${input.proposedCondition}` };
-}
-
 const addEnhancementPathway = <Data extends {
     baseline: OnSiteHedgerowBaseline,
     condition: HedgerowCondition
@@ -113,43 +96,6 @@ const addEnhancementPathway = <Data extends {
             proposedCondition: data.condition
         })
     };
-}
-
-/**
- * Lookup enhancement time to target from hedgerow enhancement temporal data
- * Uses the enhancement pathway (baseline→proposed condition) to find years to target
- */
-/**
- * Pure calculation: resolves the enhancement time-to-target by branching on
- * distinctiveness then doing a key lookup into the appropriate pathway map.
- */
-export function calculateEnhancementTimeToTarget(input: {
-    baselineDistinctivenessScore: Hedgerow['distinctivenessScore'],
-    distinctivenessScore: Hedgerow['distinctivenessScore'],
-    yearsToTargetConditionViaDistinctiveness: Hedgerow['yearsToTargetConditionViaDistinctiveness'] | undefined,
-    yearsToTargetConditionViaEnhancement: Hedgerow['yearsToTargetConditionViaEnhancement'] | undefined,
-    habitatType: HedgerowLabel,
-    enhancementPathway: string,
-}) {
-    const notPossible = { timeToTargetCondition: "Not possible ▲" as const };
-
-    if (input.baselineDistinctivenessScore < input.distinctivenessScore) {
-        const pathways = input.yearsToTargetConditionViaDistinctiveness;
-        if (!pathways) return notPossible;
-
-        const timeToTargetCondition = pathways[input.habitatType as keyof typeof pathways] as TimeToTargetConditionValue | undefined;
-        if (!timeToTargetCondition) return notPossible;
-
-        return { timeToTargetCondition };
-    }
-
-    const pathways = input.yearsToTargetConditionViaEnhancement;
-    if (!pathways) return notPossible;
-
-    const timeToTargetCondition = pathways[input.enhancementPathway as keyof typeof pathways] as TimeToTargetConditionValue | undefined;
-    if (!timeToTargetCondition) return notPossible;
-
-    return { timeToTargetCondition };
 }
 
 const lookupEnhancementTimeToTarget = <Data extends {
@@ -319,38 +265,7 @@ const determineEnhancementDifficulty = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-/**
- * Pure calculation: derives hedgerowUnitsDelivered for an enhancement.
- */
-export function calculateEnhancementUnitsDeliveredPure(input: {
-    length: number,
-    baselineDistinctivenessScore: number,
-    baselineConditionScore: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    temporalMultiplier: number | string,
-    difficultyMultiplierApplied: number
-}) {
-    const length = input.length;
-    const baselineD = input.baselineDistinctivenessScore;
-    const baselineC = input.baselineConditionScore;
-    const proposedD = input.distinctivenessScore;
-    const proposedC = input.conditionScore;
-    const strategic = input.strategicSignificanceMultiplier;
-    const difficulty = input.difficultyMultiplierApplied;
-    const temporal = typeof input.temporalMultiplier === 'number' ? input.temporalMultiplier : 0;
-
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-    const proposedUnits = new Decimal(length).mul(proposedD).mul(proposedC);
-    const baselineUnits = new Decimal(length).mul(baselineD).mul(effectiveBaselineC);
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-    const hedgerowUnitsDelivered = delta.plus(baselineUnits).mul(strategic).toNumber();
-
-    return { hedgerowUnitsDelivered };
-}
-
-const calculateEnhancementUnitsDelivered = <Data extends {
+const enrichWithEnhancementUnitsDelivered = <Data extends {
     length: number,
     _baselineHedgerow: Pick<Hedgerow, 'distinctivenessScore'>,
     _baselineCondition: number,
@@ -360,19 +275,17 @@ const calculateEnhancementUnitsDelivered = <Data extends {
     temporalMultiplier: number | string,
     difficultyMultiplierApplied: number
 }>(data: Data) => {
-    return {
-        ...data,
-        ...calculateEnhancementUnitsDeliveredPure({
-            length: data.length,
-            baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
-            baselineConditionScore: data._baselineCondition,
-            distinctivenessScore: data.distinctivenessScore,
-            conditionScore: data.conditionScore,
-            strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
-            temporalMultiplier: data.temporalMultiplier,
-            difficultyMultiplierApplied: data.difficultyMultiplierApplied,
-        })
-    };
+    const { hedgerowUnitsDelivered } = calculateEnhancementUnitsDelivered({
+        length: data.length,
+        baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
+        baselineConditionScore: data._baselineCondition,
+        distinctivenessScore: data.distinctivenessScore,
+        conditionScore: data.conditionScore,
+        strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+        temporalMultiplier: data.temporalMultiplier,
+        difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+    });
+    return { ...data, hedgerowUnitsDelivered };
 }
 
 export const onSiteHedgerowEnhancementSchema = v.pipe(
@@ -457,7 +370,7 @@ export const onSiteHedgerowEnhancementSchema = v.pipe(
     v.transform(determineEnhancementDifficulty),
 
     // Final calculation
-    v.transform(calculateEnhancementUnitsDelivered),
+    v.transform(enrichWithEnhancementUnitsDelivered),
 )
 
 export type OnSiteHedgerowEnhancementSchema = v.InferInput<typeof onSiteHedgerowEnhancementSchema>

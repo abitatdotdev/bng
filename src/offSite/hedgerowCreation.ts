@@ -8,7 +8,10 @@ import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialR
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
-import { Decimal } from '../decimal';
+import {
+    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionPure,
+    calculateHedgerowUnitsDelivered,
+} from '../hedgerowCalc';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -116,13 +119,6 @@ export function enrichWithSpatialRiskMultiplier<Data extends {
 }
 
 /**
- * Helper to convert years value to number for arithmetic
- */
-function yearsToNumber(years: number | "30+"): number {
-    return years === "30+" ? 31 : years;
-}
-
-/**
  * Lookup: attaches standardTimeToTargetCondition from hedgerow.yearsToTargetConditionViaCreation.
  */
 export function lookupStandardTimeToTargetCondition<Data extends {
@@ -140,51 +136,14 @@ export function lookupStandardTimeToTargetCondition<Data extends {
 }
 
 /**
- * Pure calculation: derives finalTimeToTargetCondition from standardTimeToTargetCondition,
- * advance, and delay.
+ * Pipeline transform: calls the pure final-time calculation and merges into data.
  */
 export function calculateFinalTimeToTargetCondition<Data extends {
     standardTimeToTargetCondition: number | string | undefined;
     habitatCreatedInAdvance: number | "30+";
     delayInStartingHabitatCreation: number | "30+";
 }>(data: Data) {
-    const standardTimeToTarget = data.standardTimeToTargetCondition;
-    let finalTimeToTarget: number | string | undefined = 0;
-
-    if (typeof standardTimeToTarget === 'string') {
-        if (standardTimeToTarget === '30+') {
-            const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(31).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        } else {
-            finalTimeToTarget = standardTimeToTarget;
-        }
-    } else {
-        if (!standardTimeToTarget) {
-            finalTimeToTarget = undefined;
-        } else {
-            const advanceYears = yearsToNumber(data.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(data.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(standardTimeToTarget).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            } else if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        }
-    }
-
-    return {
-        ...data,
-        finalTimeToTargetCondition: finalTimeToTarget,
-    };
+    return { ...data, ...calculateFinalTimeToTargetConditionPure(data) };
 }
 
 /**
@@ -260,41 +219,9 @@ export function enrichWithDifficultyData<Data extends {
 }
 
 /**
- * Calculate hedgerow units delivered
- * For off-site creation, calculates two values:
- * 1. hedgerowUnitsDeliveredWithSpatialRisk - includes spatial risk multiplier
- * 2. hedgerowUnitsDelivered - excludes spatial risk multiplier (baseline)
+ * Pipeline transform: calls the shared pure units-delivered calculation and merges
+ * both with-spatial-risk and without into data.
  */
-/**
- * Pure calculation: derives hedgerowUnitsDelivered (with and without spatial risk).
- */
-export function calculateHedgerowUnitsDelivered(input: {
-    length: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-    temporalMultiplier: number | string | undefined;
-    difficultyMultiplier: number;
-    spatialRiskMultiplier: number;
-}) {
-    const temporalMultiplierValue = typeof input.temporalMultiplier === 'number'
-        ? input.temporalMultiplier
-        : 0;
-
-    const baseUnits = new Decimal(input.length)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(temporalMultiplierValue)
-        .mul(input.difficultyMultiplier)
-        .toNumber();
-
-    const hedgerowUnitsDeliveredWithSpatialRisk = new Decimal(baseUnits).mul(input.spatialRiskMultiplier).toNumber();
-    const hedgerowUnitsDelivered = baseUnits;
-
-    return { hedgerowUnitsDeliveredWithSpatialRisk, hedgerowUnitsDelivered };
-}
-
 export function enrichWithHedgerowUnitsDelivered<Data extends {
     length: number;
     distinctivenessScore: number;

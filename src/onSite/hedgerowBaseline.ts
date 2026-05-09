@@ -6,6 +6,7 @@ import { freeTextSchema, lengthSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { hedgerowTypeSchema } from '../hedgerowType';
+import { calculateBaselineUnits, calculateTotalHedgerowUnits, calculateUnitsLost } from '../hedgerowCalc';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -79,34 +80,6 @@ export function enrichWithHedgerowData<Data extends {
     };
 }
 
-/**
- * Calculate baseline units for retained and enhanced portions
- */
-/**
- * Pure calculation: derives unitsRetained and unitsEnhanced for a hedgerow baseline.
- */
-export function calculateBaselineUnits(input: {
-    lengthRetained: number;
-    lengthEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-}) {
-    const unitsRetained = new Decimal(input.lengthRetained)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .toNumber();
-
-    const unitsEnhanced = new Decimal(input.lengthEnhanced)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .toNumber();
-
-    return { unitsRetained, unitsEnhanced };
-}
-
 export function enrichWithBaselineUnitsData<Data extends {
     lengthRetained: number;
     lengthEnhanced: number;
@@ -117,24 +90,6 @@ export function enrichWithBaselineUnitsData<Data extends {
     return { ...data, ...calculateBaselineUnits(data) };
 }
 
-/**
- * Pure calculation: derives totalHedgerowUnits.
- */
-export function calculateTotalHedgerowUnits(input: {
-    length: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-}) {
-    const totalHedgerowUnits = new Decimal(input.length)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .toNumber();
-
-    return { totalHedgerowUnits };
-}
-
 export function enrichWithTotalHedgerowUnits<Data extends {
     length: number;
     distinctivenessScore: number;
@@ -142,29 +97,6 @@ export function enrichWithTotalHedgerowUnits<Data extends {
     strategicSignificanceMultiplier: number;
 }>(data: Data) {
     return { ...data, ...calculateTotalHedgerowUnits(data) };
-}
-
-/**
- * Pure calculation: derives lengthLost and unitsLost.
- */
-export function calculateUnitsLost(input: {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    totalHedgerowUnits: number;
-    unitsRetained: number;
-    unitsEnhanced: number;
-}) {
-    const lengthLost = new Decimal(input.length)
-        .minus(input.lengthRetained)
-        .minus(input.lengthEnhanced)
-        .toNumber();
-    const unitsLost = lengthLost === 0 ? 0 : new Decimal(input.totalHedgerowUnits)
-        .minus(input.unitsRetained)
-        .minus(input.unitsEnhanced)
-        .toNumber();
-
-    return { lengthLost, unitsLost };
 }
 
 export function enrichWithUnitsLost<Data extends {

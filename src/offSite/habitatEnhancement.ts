@@ -8,7 +8,7 @@ import { offSiteHabitatBaselineSchema } from './habitatBaseline';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon, lookupFinalTimeToTargetMultiplier, enrichWithSpatialRisk } from './common';
-import { Decimal } from '../decimal';
+import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
@@ -277,43 +277,7 @@ const enrichWithSpatialRiskData = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-/**
- * Pure calculation: derives habitatUnitsDelivered (with and without spatial risk) for an enhancement.
- */
-export function calculateEnhancementUnitsDeliveredPure(input: {
-    area: number,
-    baselineDistinctivenessScore: number,
-    baselineConditionScore: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier: number
-}) {
-    const area = input.area;
-    const baselineD = input.baselineDistinctivenessScore;
-    const baselineC = input.baselineConditionScore;
-    const proposedD = input.distinctivenessScore;
-    const proposedC = input.conditionScore;
-    const strategic = input.strategicSignificanceMultiplier;
-    const difficulty = input.difficultyMultiplierApplied;
-    const temporal = input.finalTimeToTargetMultiplier ?? 0;
-    const spatialRisk = input.spatialRiskMultiplier;
-
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
-    const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
-    const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
-    const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
-    const baseUnits = delta.plus(baselineUnits).mul(strategic);
-
-    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(spatialRisk).toNumber();
-    const habitatUnitsDelivered = baseUnits.toNumber();
-
-    return { habitatUnitsDeliveredWithSpatialRisk, habitatUnitsDelivered };
-}
-
-const calculateEnhancementUnitsDelivered = <Data extends {
+const enrichWithEnhancementUnitsDelivered = <Data extends {
     area: number,
     _baselineHabitat: any,
     _baselineCondition: number,
@@ -326,7 +290,7 @@ const calculateEnhancementUnitsDelivered = <Data extends {
 }>(data: Data) => {
     return {
         ...data,
-        ...calculateEnhancementUnitsDeliveredPure({
+        ...calculateEnhancementUnitsDelivered({
             area: data.area,
             baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
             baselineConditionScore: data._baselineCondition,
@@ -448,7 +412,7 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
     v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(determineEnhancementDifficulty),
     v.transform(enrichWithSpatialRiskData),
-    v.transform(calculateEnhancementUnitsDelivered),
+    v.transform(enrichWithEnhancementUnitsDelivered),
 )
 
 export type OffSiteHabitatEnhancementSchema = v.InferInput<typeof offSiteHabitatEnhancementSchema>
