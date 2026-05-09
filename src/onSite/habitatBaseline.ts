@@ -5,6 +5,7 @@ import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { addTotalHabitatUnits as enrichWithTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { calculateBaselineUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
@@ -55,40 +56,6 @@ export const onSiteHabitatBaselineSchema = v.pipe(
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
 export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSchema>
 
-/**
- * Pure calculation: derives baseline units retained/enhanced and area habitat lost.
- * Returns only computed values; suitable for use outside the valibot pipeline.
- */
-export function calculateBaselineUnits(input: {
-    irreplaceableHabitat: boolean;
-    area: number;
-    areaRetained: number;
-    areaEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-}) {
-    const baselineUnitsRetained = new Decimal(input.areaRetained)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .toNumber();
-    const baselineUnitsEnhanced = new Decimal(input.areaEnhanced)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .toNumber();
-    const areaHabitatLost = new Decimal(input.area)
-        .minus(input.areaRetained)
-        .minus(input.areaEnhanced)
-        .toNumber();
-    return {
-        baselineUnitsRetained: input.irreplaceableHabitat ? 0 : baselineUnitsRetained,
-        baselineUnitsEnhanced,
-        areaHabitatLost,
-    };
-}
-
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean; area: number; areaRetained: number; areaEnhanced: number; distinctivenessScore: number; conditionScore: number; strategicSignificanceMultiplier: number;
 }>(data: Data) {
@@ -119,30 +86,6 @@ export function enrichWithUnitsLost<Data extends {
     baselineUnitsEnhanced: number,
 }>(data: Data) {
     return { ...data, ...calculateUnitsLost(data) };
-}
-
-/*
- * Pure calculation of hidden cell AT, used later in the headline results.
- */
-export function calculateVhdhBespokeCompensationUnits(input: {
-    bespokeCompensationAgreed: BespokeCompensation,
-    requiredAction: SuggestedTradingActions,
-    totalHabitatUnits: number,
-    baselineUnitsRetained: number,
-    baselineUnitsEnhanced: number,
-}) {
-    const vhdhBespokeCompensationUnits =
-        (
-            input.bespokeCompensationAgreed === "Yes"
-            || input.bespokeCompensationAgreed === "Pending"
-        ) && input.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(input.totalHabitatUnits)
-                .minus(input.baselineUnitsRetained)
-                .minus(input.baselineUnitsEnhanced)
-                .toNumber()
-            : 0;
-
-    return { vhdhBespokeCompensationUnits };
 }
 
 export function enrichWithVhdhBespokeCompensationUnits<Data extends {

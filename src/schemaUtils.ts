@@ -6,6 +6,7 @@ import type { Condition } from './conditions';
 import { getStrategicSignificance, type StrategicSignificance, type StrategicSignificanceDescription } from './strategicSignificanceSchema';
 import { distinctivenessCategories, type SuggestedTradingActions } from './distinctivenessCategories';
 import type { BespokeCompensation } from './bespokeCompensation';
+import { calculateTotalHabitatUnits } from './habitatCalc';
 
 export const areaSchema = v.pipe(
     v.number(),
@@ -89,39 +90,6 @@ export const enrichWithCreationData = <Data extends { broadHabitat: BroadHabitat
         // @ts-ignore-line This is covered by the isValidCondition check above
         timeToTargetCondition: habitat.temporalMultipliers[data.condition],
     }
-}
-
-/**
- * Pure calculation: derives totalHabitatUnits.
- * Returns only the computed value.
- */
-export function calculateTotalHabitatUnits(input: {
-    requiredAction: SuggestedTradingActions,
-    area: number,
-    areaRetained: number,
-    areaEnhanced: number,
-    bespokeCompensationAgreed: BespokeCompensation,
-    baselineUnitsRetained: number,
-    baselineUnitsEnhanced: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-}) {
-    const bespokeRequired = input.requiredAction === "Bespoke compensation likely to be required";
-    const hasRetention = input.areaRetained > 0;
-    const hasEnhancement = input.areaEnhanced > 0;
-    const hasBiodiversityGain = hasRetention || hasEnhancement;
-
-    let totalHabitatUnits: number = 0;
-
-    if (bespokeRequired && !hasBiodiversityGain && input.bespokeCompensationAgreed === "Yes") {
-        totalHabitatUnits = 0;
-    } else if (bespokeRequired && hasBiodiversityGain) {
-        totalHabitatUnits = input.baselineUnitsRetained + input.baselineUnitsEnhanced;
-    } else {
-        totalHabitatUnits = input.area * input.distinctivenessScore * input.conditionScore * input.strategicSignificanceMultiplier;
-    }
-    return { totalHabitatUnits };
 }
 
 export function addTotalHabitatUnits<Data extends {

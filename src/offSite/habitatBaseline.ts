@@ -9,6 +9,7 @@ import { spatialRiskCategorySchema } from '../spatialRisk';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './common';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
+import { calculateBaselineUnits, calculateTotalHabitatUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
 
 const inputSchema =
     v.object({
@@ -59,43 +60,6 @@ export const offSiteHabitatBaselineSchema = v.pipe(
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>
 export type OffSiteHabitatBaseline = v.InferOutput<typeof offSiteHabitatBaselineSchema>
-
-/**
- * Pure calculation: derives baseline units retained/enhanced and area habitat lost.
- */
-export function calculateBaselineUnits(input: {
-    irreplaceableHabitat: boolean;
-    area: number;
-    areaRetained: number;
-    areaEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-    broadHabitat: string;
-}) {
-    const baselineUnitsRetained = input.irreplaceableHabitat
-        ? 0
-        : new Decimal(input.areaRetained)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
-            .toNumber();
-
-    const baselineUnitsEnhanced = (input.broadHabitat === "Individual trees" && input.areaEnhanced > 0 && input.irreplaceableHabitat)
-        ? 0
-        : new Decimal(input.areaEnhanced)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
-            .toNumber();
-
-    const areaHabitatLost = new Decimal(input.area)
-        .minus(input.areaRetained)
-        .minus(input.areaEnhanced)
-        .toNumber();
-
-    return { baselineUnitsRetained, baselineUnitsEnhanced, areaHabitatLost };
-}
 
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean;
@@ -152,7 +116,7 @@ export function calculateTotalHabitatUnitsSRM(input: {
 }
 
 export function enrichWithTotalHabitatUnitsSRM<Data extends {
-    requiredAction: string;
+    requiredAction: SuggestedTradingActions;
     area: number;
     areaRetained: number;
     areaEnhanced: number;
@@ -166,64 +130,18 @@ export function enrichWithTotalHabitatUnitsSRM<Data extends {
     return { ...data, ...calculateTotalHabitatUnitsSRM(data) };
 }
 
-/**
- * Pure calculation: derives totalHabitatUnits.
- */
-export function calculateTotalHabitatUnits(input: {
-    irreplaceableHabitat: boolean;
-    area: number;
-    areaRetained: number;
-    areaEnhanced: number;
-    bespokeCompensationAgreed: string;
-    baselineUnitsRetained: number;
-    baselineUnitsEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
-    requiredAction: string;
-    areaHabitatLost: number;
-}) {
-    const bespokeRequired = input.requiredAction === "Bespoke compensation likely to be required";
-    const hasRetention = input.areaRetained > 0;
-    const hasEnhancement = input.areaEnhanced > 0;
-    const hasBiodiversityGain = hasRetention || hasEnhancement;
-
-    let totalHabitatUnits: number = 0;
-
-    if (input.irreplaceableHabitat) {
-        totalHabitatUnits = new Decimal(input.areaRetained)
-            .plus(input.areaEnhanced)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
-            .toNumber();
-    } else if (bespokeRequired && !hasBiodiversityGain && input.bespokeCompensationAgreed === "Yes") {
-        totalHabitatUnits = 0;
-    } else if (bespokeRequired && hasBiodiversityGain) {
-        totalHabitatUnits = new Decimal(input.baselineUnitsRetained).plus(input.baselineUnitsEnhanced).toNumber();
-    } else {
-        totalHabitatUnits = new Decimal(input.area)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
-            .toNumber();
-    }
-
-    return { totalHabitatUnits };
-}
-
 export function enrichWithTotalHabitatUnits<Data extends {
     irreplaceableHabitat: boolean;
     area: number;
     areaRetained: number;
     areaEnhanced: number;
-    bespokeCompensationAgreed: string;
+    bespokeCompensationAgreed: BespokeCompensation;
     baselineUnitsRetained: number;
     baselineUnitsEnhanced: number;
     distinctivenessScore: number;
     conditionScore: number;
     strategicSignificanceMultiplier: number;
-    requiredAction: string;
+    requiredAction: SuggestedTradingActions;
     areaHabitatLost: number;
 }>(data: Data) {
     return { ...data, ...calculateTotalHabitatUnits(data) };
@@ -269,30 +187,6 @@ export function enrichWithUnitsLost<Data extends {
     requiredAction: string;
 }>(data: Data) {
     return { ...data, ...calculateUnitsLost(data) };
-}
-
-/**
- * Pure calculation of hidden cell AS, used later in the headline results.
- */
-export function calculateVhdhBespokeCompensationUnits(input: {
-    bespokeCompensationAgreed: BespokeCompensation,
-    requiredAction: SuggestedTradingActions,
-    totalHabitatUnits: number,
-    baselineUnitsRetained: number,
-    baselineUnitsEnhanced: number,
-}) {
-    const vhdhBespokeCompensationUnits =
-        (
-            input.bespokeCompensationAgreed === "Yes"
-            || input.bespokeCompensationAgreed === "Pending"
-        ) && input.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(input.totalHabitatUnits)
-                .minus(input.baselineUnitsRetained)
-                .minus(input.baselineUnitsEnhanced)
-                .toNumber()
-            : 0;
-
-    return { vhdhBespokeCompensationUnits };
 }
 
 export function enrichWithVhdhBespokeCompensationUnits<Data extends {

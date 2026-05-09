@@ -19,6 +19,7 @@ import {
 } from '../watercourseEncroachment';
 import { getTemporalMultiplier, lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
+import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 import { watercourseEnhancementTemporalMatrix } from '../watercourseEnhancementTemporalMatrix';
 
 // ============================================================================
@@ -643,38 +644,17 @@ export function calculateFinalTimeToTargetValues<Data extends {
 /**
  * Determine enhancement difficulty based on whether watercourse reached target before losses.
  */
-/**
- * Pure calculation: derives enhancement difficulty fields for a watercourse.
- */
 export function calculateEnhancementDifficulty(input: {
     watercourseEnhancedInAdvance: number | "30+";
     finalTimeToTargetCondition: number | "30+" | "N/A";
     standardDifficultyOfEnhancement: Watercourse['technicalDifficultyOfEnhancement'];
 }) {
-    const normalisedEnhancedInAdvance = yearsToNumber(input.watercourseEnhancedInAdvance);
-
-    const hasReachedTargetCondition =
-        normalisedEnhancedInAdvance > 0 &&
-        input.finalTimeToTargetCondition === 0;
-
-    let appliedDifficultyMultiplier: string;
-    let finalDifficultyOfEnhancement: keyof typeof difficulty;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all watercourse enhanced before losses ⚠";
-        finalDifficultyOfEnhancement = "Low";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement as keyof typeof difficulty;
-    }
-
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
-    return {
-        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied,
-    };
+    return calculateEnhancementDifficultyShared({
+        enhancedInAdvance: input.watercourseEnhancedInAdvance,
+        finalTimeToTargetCondition: input.finalTimeToTargetCondition,
+        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement as keyof typeof difficulty,
+        lowDifficultyMessage: "Low Difficulty - only applicable if all watercourse enhanced before losses ⚠",
+    });
 }
 
 export function determineEnhancementDifficulty<Data extends {

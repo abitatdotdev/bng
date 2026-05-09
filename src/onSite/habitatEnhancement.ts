@@ -10,6 +10,7 @@ import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { Decimal } from '../decimal';
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
+import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 
 const inputSchema = v.object({
     baseline: onSiteHabitatBaselineSchema,
@@ -158,42 +159,17 @@ const calculateFinalTimeToTargetCondition = <Data extends {
  * Determine enhancement difficulty based on whether habitat reached target before losses
  * Simpler than creation difficulty logic
  */
-/**
- * Pure calculation: derives all enhancement difficulty fields from resolved standard difficulty.
- */
 export function calculateEnhancementDifficulty(input: {
     habitatEnhancedInAdvance: number | "30+",
     finalTimeToTargetCondition: number | "30+" | "Not Possible ▲",
     standardDifficultyOfEnhancement: keyof typeof difficulty,
 }) {
-    const normalisedHabitatEnhancedInAdvance = typeof input.habitatEnhancedInAdvance === "string" ? 30 : input.habitatEnhancedInAdvance;
-
-    const hasReachedTargetCondition =
-        normalisedHabitatEnhancedInAdvance > 0 &&
-        input.finalTimeToTargetCondition === 0;
-
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-    }
-
-    let finalDifficultyOfEnhancement: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
-        finalDifficultyOfEnhancement = "Low";
-    } else {
-        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement;
-    }
-
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
-    return {
+    return calculateEnhancementDifficultyShared({
+        enhancedInAdvance: input.habitatEnhancedInAdvance,
+        finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied,
-    };
+        lowDifficultyMessage: "Low Difficulty - only applicable if all habitat created before losses ⚠",
+    });
 }
 
 const determineEnhancementDifficulty = <Data extends {

@@ -14,6 +14,7 @@ import {
     calculateEnhancementTimeToTarget,
     calculateEnhancementUnitsDelivered,
 } from '../hedgerowCalc';
+import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 
 const inputSchema = v.object({
     baseline: onSiteHedgerowBaselineSchema,
@@ -193,43 +194,17 @@ const lookupTemporalMultiplierStep = <Data extends {
 /**
  * Determine enhancement difficulty based on whether hedgerow reached target before losses
  */
-/**
- * Pure calculation: derives all hedgerow enhancement difficulty fields from resolved
- * standard difficulty.
- */
 export function calculateEnhancementDifficulty(input: {
     hedgerowEnhancedInAdvance: number | "30+",
     finalTimeToTargetCondition: number | "30+" | "Not possible ▲",
     standardDifficultyOfEnhancement: string,
 }) {
-    const normalisedHedgerowEnhancedInAdvance = yearsToNumber(input.hedgerowEnhancedInAdvance);
-
-    const hasReachedTargetCondition =
-        normalisedHedgerowEnhancedInAdvance > 0 &&
-        input.finalTimeToTargetCondition === 0;
-
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠";
-    } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
-    }
-
-    let finalDifficultyOfEnhancement: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠") {
-        finalDifficultyOfEnhancement = "Low";
-    } else {
-        finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement as keyof typeof difficulty;
-    }
-
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfEnhancement];
-
-    return {
-        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfEnhancement,
-        difficultyMultiplierApplied,
-    };
+    return calculateEnhancementDifficultyShared({
+        enhancedInAdvance: input.hedgerowEnhancedInAdvance,
+        finalTimeToTargetCondition: input.finalTimeToTargetCondition,
+        standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement as keyof typeof difficulty,
+        lowDifficultyMessage: "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠",
+    });
 }
 
 const determineEnhancementDifficulty = <Data extends {
