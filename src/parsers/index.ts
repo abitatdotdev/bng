@@ -1,5 +1,28 @@
 // Export the main parsing function
-export { parseFile } from './parseFile';
+export { parseFile, type ParseFileOptions } from './parseFile';
+
+// Export unchecked schemas — same enrich/calculate transforms as the validated
+// schemas, but with all `v.check` business-logic guards removed. Use these
+// directly to compute unit values for a single row without rejecting it on
+// cross-field validation failures.
+export { onSiteHabitatBaselineUncheckedSchema } from '../onSite/habitatBaseline';
+export { onSiteHabitatCreationUncheckedSchema } from '../onSite/habitatCreation';
+export { onSiteHabitatEnhancementUncheckedSchema } from '../onSite/habitatEnhancement';
+export { onSiteHedgerowBaselineUncheckedSchema } from '../onSite/hedgerowBaseline';
+export { onSiteHedgerowCreationUncheckedSchema } from '../onSite/hedgerowCreation';
+export { onSiteHedgerowEnhancementUncheckedSchema } from '../onSite/hedgerowEnhancement';
+export { onSiteWatercourseBaselineUncheckedSchema } from '../onSite/watercourseBaseline';
+export { onSiteWatercourseCreationUncheckedSchema } from '../onSite/watercourseCreation';
+export { onSiteWatercourseEnhancementUncheckedSchema } from '../onSite/watercourseEnhancement';
+export { offSiteHabitatBaselineUncheckedSchema } from '../offSite/habitatBaseline';
+export { offSiteHabitatCreationUncheckedSchema } from '../offSite/habitatCreation';
+export { offSiteHabitatEnhancementUncheckedSchema } from '../offSite/habitatEnhancement';
+export { offSiteHedgerowBaselineUncheckedSchema } from '../offSite/hedgerowBaseline';
+export { offSiteHedgerowCreationUncheckedSchema } from '../offSite/hedgerowCreation';
+export { offSiteHedgerowEnhancementUncheckedSchema } from '../offSite/hedgerowEnhancement';
+export { offSiteWatercourseBaselineUncheckedSchema } from '../offSite/watercourseBaseline';
+export { offSiteWatercourseCreationUncheckedSchema } from '../offSite/watercourseCreation';
+export { offSiteWatercourseEnhancementUncheckedSchema } from '../offSite/watercourseEnhancement';
 
 // Export all helpers from excelHelpers
 export {

@@ -3,8 +3,8 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { enhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
-import { onSiteHabitatBaselineSchema, type OnSiteHabitatBaseline } from './habitatBaseline';
+import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, safeTransform, yearsSchema } from '../schemaUtils';
+import { onSiteHabitatBaselineSchema, onSiteHabitatBaselineUncheckedSchema, type OnSiteHabitatBaseline } from './habitatBaseline';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
@@ -411,3 +411,20 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
 
 export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>
 export type OnSiteHabitatEnhancement = v.InferOutput<typeof onSiteHabitatEnhancementSchema>
+
+const uncheckedInputSchema = v.object({
+    ...inputSchema.entries,
+    baseline: onSiteHabitatBaselineUncheckedSchema,
+})
+
+export const onSiteHabitatEnhancementUncheckedSchema = v.pipe(
+    uncheckedInputSchema,
+    safeTransform(enrichBaselineHabitatData),
+    safeTransform(enrichWithHabitatData),
+    safeTransform(addDistinctivenessAndConditionChange),
+    safeTransform(lookupEnhancementTimeToTarget),
+    safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(lookupFinalTimeToTargetMultiplier),
+    safeTransform(determineEnhancementDifficulty),
+    safeTransform(enrichWithEnhancementUnitsDelivered),
+)

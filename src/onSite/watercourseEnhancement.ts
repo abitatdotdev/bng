@@ -1,9 +1,9 @@
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, yearsSchema } from '../schemaUtils';
+import { freeTextSchema, safeTransform, yearsSchema } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
-import { onSiteWatercourseBaselineSchema } from './watercourseBaseline';
+import { onSiteWatercourseBaselineSchema, onSiteWatercourseBaselineUncheckedSchema } from './watercourseBaseline';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import {
@@ -111,3 +111,20 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
 
 export type OnSiteWatercourseEnhancementSchema = v.InferInput<typeof onSiteWatercourseEnhancementSchema>
 export type OnSiteWatercourseEnhancement = v.InferOutput<typeof onSiteWatercourseEnhancementSchema>
+
+const uncheckedInputSchema = v.object({
+    ...inputSchema.entries,
+    baseline: onSiteWatercourseBaselineUncheckedSchema,
+})
+
+export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
+    uncheckedInputSchema,
+    safeTransform(enrichBaselineWatercourseData),
+    safeTransform(enrichProposedWatercourseData),
+    safeTransform(addEnhancementPathway),
+    safeTransform(lookupEnhancementTimeToTarget),
+    safeTransform(calculateFinalTimeToTargetValues),
+    safeTransform(determineEnhancementDifficulty),
+    safeTransform(enrichEnhancementWithEncroachmentData),
+    safeTransform(calculateEnhancementUnitsDelivered),
+)

@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
@@ -64,3 +64,12 @@ export const onSiteWatercourseCreationSchema = v.pipe(
 
 export type OnSiteWatercourseCreationSchema = v.InferInput<typeof onSiteWatercourseCreationSchema>;
 export type OnSiteWatercourseCreation = v.InferOutput<typeof onSiteWatercourseCreationSchema>;
+
+export const onSiteWatercourseCreationUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithCreationWatercourseData),
+    safeTransform(enrichWithTemporalData),
+    safeTransform(enrichWithDifficultyData),
+    safeTransform(enrichCreationWithEncroachmentData),
+    safeTransform(enrichWithUnitsDelivered),
+);

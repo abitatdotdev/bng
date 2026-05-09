@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import { Decimal } from '../decimal';
 import { allHedgerows, type HedgerowLabel } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { hedgerowTypeSchema } from '../hedgerowType';
@@ -48,6 +48,14 @@ export const onSiteHedgerowBaselineSchema = v.pipe(
 
 export type OnSiteHedgerowBaselineSchema = v.InferInput<typeof onSiteHedgerowBaselineSchema>;
 export type OnSiteHedgerowBaseline = v.InferOutput<typeof onSiteHedgerowBaselineSchema>;
+
+export const onSiteHedgerowBaselineUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHedgerowData),
+    safeTransform(enrichWithBaselineUnitsData),
+    safeTransform(enrichWithTotalHedgerowUnits),
+    safeTransform(enrichWithUnitsLost),
+);
 
 /**
  * Enrich data with hedgerow properties from the hedgerows lookup

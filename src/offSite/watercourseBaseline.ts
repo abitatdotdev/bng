@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { spatialRiskCategorySchema } from '../spatialRisk';
@@ -75,6 +75,16 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
 
 export type OffSiteWatercourseBaselineSchema = v.InferInput<typeof offSiteWatercourseBaselineSchema>;
 export type OffSiteWatercourseBaseline = v.InferOutput<typeof offSiteWatercourseBaselineSchema>;
+
+export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithBaselineWatercourseData),
+    safeTransform(enrichWithSpatialRisk),
+    safeTransform(enrichWithBaselineUnitsData),
+    safeTransform(enrichWithTotalWatercourseUnitsSRM),
+    safeTransform(enrichWithTotalWatercourseUnits),
+    safeTransform(enrichWithUnitsLost),
+);
 
 /**
  * Calculate total watercourse units (SRM) - includes spatial risk multiplier

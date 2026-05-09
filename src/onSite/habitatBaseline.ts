@@ -4,7 +4,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { addTotalHabitatUnits as enrichWithTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { addTotalHabitatUnits as enrichWithTotalHabitatUnits, areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable, safeTransform } from '../schemaUtils';
 import { calculateBaselineUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
@@ -55,6 +55,15 @@ export const onSiteHabitatBaselineSchema = v.pipe(
 
 export type OnSiteHabitatBaselineSchema = v.InferInput<typeof onSiteHabitatBaselineSchema>
 export type OnSiteHabitatBaseline = v.InferOutput<typeof onSiteHabitatBaselineSchema>
+
+export const onSiteHabitatBaselineUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHabitatData),
+    safeTransform(enrichWithBaselineUnitsData),
+    safeTransform(enrichWithTotalHabitatUnits),
+    safeTransform(enrichWithUnitsLost),
+    safeTransform(enrichWithVhdhBespokeCompensationUnits),
+)
 
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean; area: number; areaRetained: number; areaEnhanced: number; distinctivenessScore: number; conditionScore: number; strategicSignificanceMultiplier: number;

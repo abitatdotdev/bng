@@ -4,7 +4,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { creationHabitatType, type CreationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
+import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, safeTransform, yearsSchema } from '../schemaUtils';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
@@ -324,4 +324,14 @@ export const onSiteHabitatCreationSchema = v.pipe(
 )
 export type OnSiteHabitatCreation = v.InferOutput<typeof onSiteHabitatCreationSchema>
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>
+
+export const onSiteHabitatCreationUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHabitatData),
+    safeTransform(enrichWithCreationData),
+    safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(lookupFinalTimeToTargetMultiplier),
+    safeTransform(enrichWithDifficultyData),
+    safeTransform(enrichWithHabitatUnitsDelivered),
+)
 

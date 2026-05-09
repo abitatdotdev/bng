@@ -4,7 +4,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable } from '../schemaUtils';
+import { areaSchema, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, isValidIrreplaceable, safeTransform } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './common';
@@ -60,6 +60,18 @@ export const offSiteHabitatBaselineSchema = v.pipe(
 )
 export type OffSiteHabitatBaselineSchema = v.InferInput<typeof offSiteHabitatBaselineSchema>
 export type OffSiteHabitatBaseline = v.InferOutput<typeof offSiteHabitatBaselineSchema>
+
+export const offSiteHabitatBaselineUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHabitatData),
+    safeTransform(enrichWithSpatialRiskMultiplier),
+    safeTransform(enrichWithBaselineUnitsData),
+    safeTransform(enrichWithTotalHabitatUnitsSRM),
+    safeTransform(enrichWithTotalHabitatUnits),
+    safeTransform(enrichWithUnitsLost),
+    safeTransform(enrichWithVhdhBespokeCompensationUnits),
+    safeTransform(enrichWithBaselineUnitsRetainedSRM),
+)
 
 export function enrichWithBaselineUnitsData<Data extends {
     irreplaceableHabitat: boolean;

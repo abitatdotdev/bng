@@ -3,7 +3,7 @@ import { broadHabitatSchema } from '../broadHabitats';
 import { creationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, yearsSchema } from '../schemaUtils';
+import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, safeTransform, yearsSchema } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
@@ -195,4 +195,15 @@ export const offSiteHabitatCreationSchema = v.pipe(
 
 export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>
 export type OffSiteHabitatCreation = v.InferOutput<typeof offSiteHabitatCreationSchema>
+
+export const offSiteHabitatCreationUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHabitatData),
+    safeTransform(enrichWithCreationData),
+    safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(lookupFinalTimeToTargetMultiplier),
+    safeTransform(enrichWithDifficultyData),
+    safeTransform(enrichWithSpatialRiskData),
+    safeTransform(enrichWithHabitatUnitsDelivered),
+)
 

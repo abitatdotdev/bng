@@ -2,12 +2,12 @@ import * as v from 'valibot';
 import { Decimal } from '../decimal';
 import { allHedgerows, type HedgerowLabel, type Hedgerow } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, yearsSchema } from '../schemaUtils';
+import { freeTextSchema, safeTransform, yearsSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
-import { onSiteHedgerowBaselineSchema, type OnSiteHedgerowBaseline } from './hedgerowBaseline';
+import { onSiteHedgerowBaselineSchema, onSiteHedgerowBaselineUncheckedSchema, type OnSiteHedgerowBaseline } from './hedgerowBaseline';
 import { hedgerowTypeSchema } from '../hedgerowType';
 import {
     calculateEnhancementPathway,
@@ -350,3 +350,20 @@ export const onSiteHedgerowEnhancementSchema = v.pipe(
 
 export type OnSiteHedgerowEnhancementSchema = v.InferInput<typeof onSiteHedgerowEnhancementSchema>
 export type OnSiteHedgerowEnhancement = v.InferOutput<typeof onSiteHedgerowEnhancementSchema>
+
+const uncheckedInputSchema = v.object({
+    ...inputSchema.entries,
+    baseline: onSiteHedgerowBaselineUncheckedSchema,
+})
+
+export const onSiteHedgerowEnhancementUncheckedSchema = v.pipe(
+    uncheckedInputSchema,
+    safeTransform(enrichBaselineHedgerowData),
+    safeTransform(enrichProposedHedgerowData),
+    safeTransform(addEnhancementPathway),
+    safeTransform(lookupEnhancementTimeToTarget),
+    safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(lookupTemporalMultiplierStep),
+    safeTransform(determineEnhancementDifficulty),
+    safeTransform(enrichWithEnhancementUnitsDelivered),
+)

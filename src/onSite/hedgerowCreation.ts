@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { allHedgerows, type HedgerowLabel } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema, yearsSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform, yearsSchema } from '../schemaUtils';
 import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
@@ -55,6 +55,16 @@ export const onSiteHedgerowCreationSchema = v.pipe(
 
 export type OnSiteHedgerowCreationSchema = v.InferInput<typeof onSiteHedgerowCreationSchema>;
 export type OnSiteHedgerowCreation = v.InferOutput<typeof onSiteHedgerowCreationSchema>;
+
+export const onSiteHedgerowCreationUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithHedgerowData),
+    safeTransform(lookupStandardTimeToTargetCondition),
+    safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(lookupTemporalMultiplierStep),
+    safeTransform(enrichWithDifficultyData),
+    safeTransform(enrichWithHedgerowUnitsDelivered),
+);
 
 /**
  * Enrich data with hedgerow properties from the hedgerows lookup

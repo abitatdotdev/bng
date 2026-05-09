@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import { Decimal } from '../decimal';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import {
@@ -65,6 +65,15 @@ export const onSiteWatercourseBaselineSchema = v.pipe(
 
 export type OnSiteWatercourseBaselineSchema = v.InferInput<typeof onSiteWatercourseBaselineSchema>;
 export type OnSiteWatercourseBaseline = v.InferOutput<typeof onSiteWatercourseBaselineSchema>;
+
+export const onSiteWatercourseBaselineUncheckedSchema = v.pipe(
+    inputSchema,
+    safeTransform(enrichWithBaselineWatercourseData),
+    safeTransform(enrichWithBaselineUnitsData),
+    safeTransform(enrichWithTotalWatercourseUnits),
+    safeTransform(enrichWithUnitsLost),
+    safeTransform(enrichWithVhdhBespokeCompensationUnits),
+);
 /*
  * Pure calculation of hidden cell AT, used later in the headline results.
  */

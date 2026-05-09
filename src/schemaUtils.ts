@@ -8,6 +8,19 @@ import { distinctivenessCategories, type SuggestedTradingActions } from './disti
 import type { BespokeCompensation } from './bespokeCompensation';
 import { calculateTotalHabitatUnits } from './habitatCalc';
 
+/**
+ * Like `v.transform`, but silently passes the input through unchanged if the
+ * callback throws. Used by the *UncheckedSchema variants so that a row with a
+ * missing lookup (e.g. an unknown habitat type) yields undefined-derived
+ * fields instead of failing the whole row.
+ */
+export function safeTransform<I, O>(fn: (input: I) => O) {
+    return v.transform((input: I) => {
+        try { return fn(input); }
+        catch { return input as unknown as O; }
+    });
+}
+
 export const areaSchema = v.pipe(
     v.number(),
     v.toMinValue(0),
