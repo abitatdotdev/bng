@@ -35,34 +35,34 @@ const inputSchema = v.object({
 
 export const offSiteWatercourseBaselineSchema = v.pipe(
     inputSchema,
-    v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"),
-    v.check(
+    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
+    v.forward(v.check(
         s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
         "Retained and enhanced lengths cannot exceed total length"
-    ),
+    ), ['length']),
     // Validate encroachment consistency with watercourse type
-    v.check(
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ),
-    v.check(
+    ), ['watercourseEncroachment']),
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ),
+    ), ['riparianEncroachment']),
     // Enrich with watercourse data
     v.transform(enrichWithBaselineWatercourseData),
     // Validate that the condition is possible for this watercourse type
-    v.check(
+    v.forward(v.check(
         s => typeof s.conditionScore === 'number',
         "The selected condition is not possible for this watercourse type"
-    ),
+    ), ['condition']),
     // Enrich with spatial risk multiplier
     v.transform(enrichWithSpatialRisk),
     // Check that off-site reference is provided when spatial risk is present
-    v.check(
+    v.forward(v.check(
         s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber),
         "Off-site reference required ▲"
-    ),
+    ), ['offSiteReferenceNumber']),
     // Calculate baseline units
     v.transform(enrichWithBaselineUnitsData),
     // Calculate total watercourse units (SRM)

@@ -27,12 +27,12 @@ const inputSchema = v.object({
 export const onSiteHedgerowCreationSchema = v.pipe(
     inputSchema,
     // Validate that the habitat type is valid
-    v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"),
+    v.forward(v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"), ['habitatType']),
     // Check if Non-native and ornamental hedgerow has only Poor condition
-    v.check(
+    v.forward(v.check(
         s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
         "Non-native and ornamental hedgerow can only have Poor condition"
-    ),
+    ), ['condition']),
     // Check that both advance and delay are not both > 0 (invalid scenario)
     v.check(
         s => !(

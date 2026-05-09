@@ -27,28 +27,28 @@ const inputSchema =
 
 export const onSiteHabitatBaselineSchema = v.pipe(
     inputSchema,
-    v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
-    v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"),
-    v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
+    v.forward(v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"), ['habitatType']),
+    v.forward(v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"), ['irreplaceableHabitat']),
+    v.forward(v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"), ['condition']),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithBaselineUnitsData),
     // Checks from within the total habitat units cell (Q)
     // See https://opncd.ai/share/5IiLnaI4 for translation
-    v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "You cannot enhance irreplaceable individual trees ▲"),
-    v.check(s => !(
+    v.forward(v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "You cannot enhance irreplaceable individual trees ▲"), ['areaEnhanced']),
+    v.forward(v.check(s => !(
         s.irreplaceableHabitat
         && new Decimal(s.areaRetained).plus(s.areaEnhanced).lessThan(s.area)
         && s.bespokeCompensationAgreed === "No"
-    ), "Any loss unacceptable"),
-    v.check(s => !(
+    ), "Any loss unacceptable"), ['irreplaceableHabitat']),
+    v.forward(v.check(s => !(
         s.requiredAction === "Bespoke compensation likely to be required"
         && !(s.areaRetained > 0 || s.areaEnhanced > 0)
         && s.bespokeCompensationAgreed === "No"
-    ), "Any loss unacceptable"),
+    ), "Any loss unacceptable"), ['bespokeCompensationAgreed']),
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (X)
     // See https://opncd.ai/share/4Z0sTzAw for translation
-    v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Area sums do not add up"),
+    v.forward(v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Area sums do not add up"), ['area']),
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
 )

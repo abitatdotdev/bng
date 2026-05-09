@@ -306,8 +306,8 @@ const enrichWithHabitatUnitsDelivered = <Data extends {
 
 export const onSiteHabitatCreationSchema = v.pipe(
     inputSchema,
-    v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
-    v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
+    v.forward(v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"), ['habitatType']),
+    v.forward(v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"), ['condition']),
     v.check(
         s => !(
             (typeof s.habitatCreationInAdvance === "string" || s.habitatCreationInAdvance > 0)

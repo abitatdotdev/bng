@@ -31,29 +31,29 @@ const inputSchema =
 
 export const offSiteHabitatBaselineSchema = v.pipe(
     inputSchema,
-    v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"),
-    v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"),
-    v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"),
+    v.forward(v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"), ['habitatType']),
+    v.forward(v.check(s => isValidIrreplaceable(s.broadHabitat, s.habitatType, s.irreplaceableHabitat), "This habitat cannot be irreplaceable"), ['irreplaceableHabitat']),
+    v.forward(v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"), ['condition']),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithSpatialRiskMultiplier),
     v.transform(enrichWithBaselineUnitsData),
     v.transform(enrichWithTotalHabitatUnitsSRM),
     // Initial validation checks
-    v.check(s => !(
+    v.forward(v.check(s => !(
         s.irreplaceableHabitat
         && new Decimal(s.areaRetained).plus(s.areaEnhanced).lessThan(s.area)
         && s.bespokeCompensationAgreed === "No"
-    ), "Any loss unacceptable"),
-    v.check(s => !(
+    ), "Any loss unacceptable"), ['irreplaceableHabitat']),
+    v.forward(v.check(s => !(
         s.requiredAction === "Bespoke compensation likely to be required"
         && !(s.areaRetained > 0 || s.areaEnhanced > 0)
         && s.bespokeCompensationAgreed === "No"
-    ), "Any loss unacceptable"),
-    v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "Error - you cannot enhance irreplaceable individual trees ▲"),
-    v.check(s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber), "Off-site reference required ▲"),
+    ), "Any loss unacceptable"), ['bespokeCompensationAgreed']),
+    v.forward(v.check(s => !(s.broadHabitat === "Individual trees" && s.areaEnhanced > 0 && s.irreplaceableHabitat), "Error - you cannot enhance irreplaceable individual trees ▲"), ['areaEnhanced']),
+    v.forward(v.check(s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber), "Off-site reference required ▲"), ['offSiteReferenceNumber']),
     v.transform(enrichWithTotalHabitatUnits),
     // Checks from within the units lost cell (AA)
-    v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Error in Areas ▲"),
+    v.forward(v.check(s => new Decimal(s.area).minus(s.areaRetained).minus(s.areaEnhanced).greaterThanOrEqualTo(0), "Error in Areas ▲"), ['area']),
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
     v.transform(enrichWithBaselineUnitsRetainedSRM),

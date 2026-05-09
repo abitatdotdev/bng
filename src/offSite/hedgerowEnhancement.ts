@@ -290,11 +290,11 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
     inputSchema,
 
     // Basic validations
-    v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"),
-    v.check(
+    v.forward(v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"), ['habitatType']),
+    v.forward(v.check(
         s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
         "Non-native and ornamental hedgerow can only have Poor condition"
-    ),
+    ), ['condition']),
     v.check(
         s => !(
             (typeof s.hedgerowEnhancedInAdvance === "string" || s.hedgerowEnhancedInAdvance > 0)

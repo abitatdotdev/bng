@@ -23,19 +23,19 @@ const inputSchema = v.object({
 export const onSiteHedgerowBaselineSchema = v.pipe(
     inputSchema,
     // Validate that the habitat type is valid
-    v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"),
+    v.forward(v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"), ['habitatType']),
     // Check if Non-native and ornamental hedgerow has only Poor condition
     // Column I (Condition Score)
-    v.check(
+    v.forward(v.check(
         s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
         "Non-native and ornamental hedgerow can only have Poor condition"
-    ),
+    ), ['condition']),
     // Check that retained + enhanced doesn't exceed total length
     // Column T (Length Lost)
-    v.check(
+    v.forward(v.check(
         s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
         "Retained and enhanced lengths cannot exceed total length"
-    ),
+    ), ['length']),
     // Enrich with hedgerow data
     v.transform(enrichWithHedgerowData),
     // Calculate baseline units

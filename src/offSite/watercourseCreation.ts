@@ -71,7 +71,7 @@ export function enrichWithWatercourseUnitsDeliveredWithSpatialRisk<Data extends 
 export const offSiteWatercourseCreationSchema = v.pipe(
     inputSchema,
     // Validate that the watercourse type is valid
-    v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"),
+    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
     // Validate temporal inputs - can't have both advance and delay
     v.check(
         s => !(s.habitatCreatedInAdvance > 0 && s.delayInStarting > 0),
@@ -80,19 +80,19 @@ export const offSiteWatercourseCreationSchema = v.pipe(
     // Enrich with watercourse data
     v.transform(enrichWithCreationWatercourseData),
     // Validate that the condition is possible for this watercourse type
-    v.check(
+    v.forward(v.check(
         s => typeof s.conditionScore === 'number',
         "The selected condition is not possible for this watercourse type"
-    ),
+    ), ['condition']),
     // Validate encroachment consistency with watercourse type
-    v.check(
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ),
-    v.check(
+    ), ['watercourseEncroachment']),
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ),
+    ), ['riparianEncroachment']),
     // Enrich with spatial risk multiplier
     v.transform(enrichWithSpatialRiskMultiplier),
     // Calculate temporal adjustments

@@ -31,12 +31,12 @@ const inputSchema = v.object({
 export const offSiteHedgerowCreationSchema = v.pipe(
     inputSchema,
     // Validate that the habitat type is valid
-    v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"),
+    v.forward(v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"), ['habitatType']),
     // Check if Non-native and ornamental hedgerow has only Poor condition
-    v.check(
+    v.forward(v.check(
         s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
         "Non-native and ornamental hedgerow can only have Poor condition"
-    ),
+    ), ['condition']),
     // Check that both advance and delay are not both > 0 (invalid scenario)
     v.check(
         s => {
@@ -57,10 +57,10 @@ export const offSiteHedgerowCreationSchema = v.pipe(
     // Calculate difficulty data
     v.transform(enrichWithDifficultyData),
     // Check that off-site reference is required when spatial risk is set
-    v.check(
+    v.forward(v.check(
         s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber),
         "Off-site reference required ▲"
-    ),
+    ), ['offSiteReferenceNumber']),
     // Calculate hedgerow units delivered (with and without spatial risk)
     v.transform(enrichWithHedgerowUnitsDelivered),
 );

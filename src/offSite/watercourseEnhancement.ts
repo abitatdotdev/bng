@@ -39,7 +39,7 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     inputSchema,
 
     // Basic validations
-    v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"),
+    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
     v.check(
         s => !(
             (typeof s.watercourseEnhancedInAdvance === "string" || s.watercourseEnhancedInAdvance > 0)
@@ -55,10 +55,10 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     v.transform(enrichProposedWatercourseData),
 
     // Validate that the condition is possible for this watercourse type
-    v.check(
+    v.forward(v.check(
         s => typeof s.conditionScore === 'number',
         "The selected condition is not possible for this watercourse type"
-    ),
+    ), ['condition']),
 
     // Validation checks for enhancement
     v.check(
@@ -94,14 +94,14 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     ),
 
     // Validate encroachment consistency with watercourse type
-    v.check(
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ),
-    v.check(
+    ), ['watercourseEncroachment']),
+    v.forward(v.check(
         s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
         "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ),
+    ), ['riparianEncroachment']),
 
     // Calculate enhancement pathway label
     v.transform(addEnhancementPathway),
