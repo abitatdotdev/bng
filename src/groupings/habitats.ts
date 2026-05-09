@@ -42,14 +42,15 @@ type ValuesByHabitat = {
 
 const habitatLabels = Object.keys(allHabitats) as HabitatLabel[];
 
-const valuesByHabitatCache = new Map<number, ValuesByHabitat>();
+const valuesByHabitatCache = new WeakMap<AllFeatures, ValuesByHabitat>();
 
 /**
     * Calculate values per habitat type.
-    * NOTE: input data must not be mutated with new properties or information - there is caching based on the global object ID.
+    * NOTE: input data must not be mutated - results are cached per input object identity.
     */
 export const valuesByHabitat = (inputData: AllFeatures): ValuesByHabitat => {
-    if (valuesByHabitatCache.has(inputData.__id)) return valuesByHabitatCache.get(inputData.__id)!;
+    const cached = valuesByHabitatCache.get(inputData);
+    if (cached) return cached;
 
     const results = typeSafeObjectFromEntries(
         habitatLabels.map(label => {
@@ -92,7 +93,7 @@ export const valuesByHabitat = (inputData: AllFeatures): ValuesByHabitat => {
             ]
         }))
 
-    valuesByHabitatCache.set(inputData.__id, results);
+    valuesByHabitatCache.set(inputData, results);
     return results;
 }
 
