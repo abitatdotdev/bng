@@ -34,7 +34,6 @@ import type { TradingSummaries } from "./tradingSummaries";
  */
 export function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
     return {
-        __id: 0,
         onSiteHabitatBaselines: [],
         onSiteHabitatCreations: [],
         onSiteHabitatEnhancements: [],

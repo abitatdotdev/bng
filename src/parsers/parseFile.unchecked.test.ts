@@ -9,9 +9,7 @@ const unchecked = parseFile(SAMPLE, { validate: false });
 
 describe('parseFile({ validate: false })', () => {
     test('produces the same row counts as the validated parse on a clean workbook', () => {
-        const sheetKeys = Object.keys(validated).filter(k => k !== '__id') as Array<
-            Exclude<keyof typeof validated, '__id'>
-        >;
+        const sheetKeys = Object.keys(validated) as Array<keyof typeof validated>;
 
         for (const key of sheetKeys) {
             expect((unchecked[key] as unknown[]).length).toBe(

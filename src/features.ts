@@ -19,9 +19,6 @@ import type { onSiteWatercourseCreationSchema } from './onSite/watercourseCreati
 import type { onSiteWatercourseEnhancementSchema } from './onSite/watercourseEnhancement';
 
 export type AllFeatures = {
-    // Used for caching results downstream
-    __id: number;
-
     // On-site Habitats (A-1, A-2, A-3)
     onSiteHabitatBaselines: v.InferOutput<typeof onSiteHabitatBaselineSchema>[];
     onSiteHabitatCreations: v.InferOutput<typeof onSiteHabitatCreationSchema>[];

@@ -41,8 +41,6 @@ import { offSiteWatercourseBaselineSchema, offSiteWatercourseBaselineUncheckedSc
 import { offSiteWatercourseCreationSchema, offSiteWatercourseCreationUncheckedSchema } from "../offSite/watercourseCreation";
 import { offSiteWatercourseEnhancementSchema, offSiteWatercourseEnhancementUncheckedSchema } from "../offSite/watercourseEnhancement";
 
-let parsedCount = 0;
-
 const sheetsToGrab = [
     // 'Introduction',
     // 'Start',
@@ -351,7 +349,6 @@ export function parseFile(file: string | ArrayBuffer, options: ParseFileOptions 
 
     // Create the input object
     const parsedRows: AllFeatures = {
-        __id: parsedCount++,
         onSiteHabitatBaselines,
         onSiteHabitatCreations,
         onSiteHabitatEnhancements,
