@@ -3,6 +3,7 @@ import { addTotalHabitatUnits, isValidIrreplaceable } from "./schemaUtils";
 
 test("addTotalHabitatUnits - bespoke required and compensation agreed", () => {
     const data = {
+        irreplaceableHabitat: false,
         requiredAction: "Bespoke compensation likely to be required" as const,
         area: 100,
         areaRetained: 0,
@@ -21,6 +22,7 @@ test("addTotalHabitatUnits - bespoke required and compensation agreed", () => {
 
 test("addTotalHabitatUnits - bespoke required with no bespoke compensation", () => {
     const data = {
+        irreplaceableHabitat: false,
         requiredAction: "Bespoke compensation likely to be required" as const,
         area: 100,
         areaRetained: 50,
@@ -39,6 +41,7 @@ test("addTotalHabitatUnits - bespoke required with no bespoke compensation", () 
 
 test("addTotalHabitatUnits - standard calculation", () => {
     const data = {
+        irreplaceableHabitat: false,
         requiredAction: "Compensation Not Required" as const,
         area: 100,
         areaRetained: 0,
@@ -53,6 +56,25 @@ test("addTotalHabitatUnits - standard calculation", () => {
 
     const result = addTotalHabitatUnits(data);
     expect(result.totalHabitatUnits).toBe(225);
+});
+
+test("addTotalHabitatUnits - irreplaceable zeros total units", () => {
+    const data = {
+        irreplaceableHabitat: true,
+        requiredAction: "Compensation Not Required" as const,
+        area: 0.0765,
+        areaRetained: 0.0765,
+        areaEnhanced: 0,
+        bespokeCompensationAgreed: "No" as const,
+        baselineUnitsRetained: 0,
+        baselineUnitsEnhanced: 0,
+        distinctivenessScore: 4,
+        conditionScore: 3,
+        strategicSignificanceMultiplier: 1,
+    };
+
+    const result = addTotalHabitatUnits(data);
+    expect(result.totalHabitatUnits).toBe(0);
 });
 
 test("isValidIrreplaceable - non-irreplaceable habitats", () => {

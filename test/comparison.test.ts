@@ -2,7 +2,7 @@ import { describe, test, expect } from "bun:test"
 import * as v from 'valibot';
 import { EXCEL_FILES, expectCloseTo, testExcelFiles } from './helpers';
 import { getCellValue, getSheet } from '../src/parsers/excelHelpers';
-import { parseOffSiteHabitatBaselineRow, parseOffSiteHabitatCreationRow, parseOffSiteHabitatEnhancementRow, parseOffSiteHedgerowBaselineRow, parseOffSiteHedgerowCreationRow, parseOffSiteHedgerowEnhancementRow, parseOnSiteHabitatBaselineRow, parseOnSiteHabitatCreationRow, parseOnSiteHabitatEnhancementRow, parseOnSiteHedgerowBaselineRow, parseOnSiteHedgerowCreationRow, parseOnSiteHedgerowEnhancementRow } from "../src/parsers/rowParsers";
+import { parseOffSiteHabitatBaselineRow, parseOffSiteHabitatCreationRow, parseOffSiteHabitatEnhancementRow, parseOffSiteHedgerowBaselineRow, parseOffSiteHedgerowCreationRow, parseOffSiteHedgerowEnhancementRow, parseOnSiteHabitatBaselineRow, parseOnSiteHabitatCreationRow, parseOnSiteHabitatEnhancementRow, parseOnSiteHedgerowBaselineRow, parseOnSiteHedgerowCreationRow, parseOnSiteHedgerowEnhancementRow, parseOnSiteWatercourseBaselineRow, parseOnSiteWatercourseCreationRow, parseOnSiteWatercourseEnhancementRow, parseOffSiteWatercourseBaselineRow, parseOffSiteWatercourseCreationRow, parseOffSiteWatercourseEnhancementRow } from "../src/parsers/rowParsers";
 import { onSiteHabitatBaselineSchema } from "../src/onSite/habitatBaseline";
 import { onSiteHabitatCreationSchema } from "../src/onSite/habitatCreation";
 import { offSiteHabitatBaselineSchema } from "../src/offSite/habitatBaseline";
@@ -15,6 +15,12 @@ import { offSiteHedgerowCreationSchema } from "../src/offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema } from "../src/offSite/hedgerowEnhancement";
 import { onSiteHabitatEnhancementSchema } from "../src/onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema } from "../src/offSite/habitatEnhancement";
+import { onSiteWatercourseBaselineSchema } from "../src/onSite/watercourseBaseline";
+import { onSiteWatercourseCreationSchema } from "../src/onSite/watercourseCreation";
+import { onSiteWatercourseEnhancementSchema } from "../src/onSite/watercourseEnhancement";
+import { offSiteWatercourseBaselineSchema } from "../src/offSite/watercourseBaseline";
+import { offSiteWatercourseCreationSchema } from "../src/offSite/watercourseCreation";
+import { offSiteWatercourseEnhancementSchema } from "../src/offSite/watercourseEnhancement";
 import parseFile, { findAllDataRows } from "../src/parsers/parseFile";
 import { headlineResults } from "../src/headlineResults";
 import { tradingSummaries } from "../src/tradingSummaries";
@@ -1612,6 +1618,345 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                     console.error("  Difficulty Multiplier:", parsed.difficultyMultiplierApplied);
                     console.error("  Hedgerow Units Delivered With Spatial Risk:", parsed.hedgerowUnitsDeliveredWithSpatialRisk);
                     console.error("  Hedgerow Units Delivered:", parsed.hedgerowUnitsDelivered);
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("C-1 On-Site Watercourse Baseline", () => {
+        const sheet = getSheet(workbook, "C-1 On-Site WaterC' Baseline")!;
+        // E (4) = length input
+        const dataRows = findAllDataRows(sheet, 4, 9);
+
+        if (dataRows.length === 0) {
+            test.skip("no on-site watercourse baseline data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOnSiteWatercourseBaselineRow(sheet, dataRow);
+                const result = v.safeParse(onSiteWatercourseBaselineSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
+                // N(13) total units, V(21) units retained, W(22) units enhanced,
+                // Z(25) length lost, AA(26) units lost
+                const checks: Array<[number, keyof typeof parsed | string, any, string]> = [
+                    [5, 'distinctivenessScore', parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [7, 'conditionScore', parsed.conditionScore, "Condition Score"],
+                    [10, 'strategicSignificanceMultiplier', parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [13, 'totalWatercourseUnits', parsed.totalWatercourseUnits, "Total Watercourse Units"],
+                    [21, 'unitsRetained', parsed.unitsRetained, "Units Retained"],
+                    [22, 'unitsEnhanced', parsed.unitsEnhanced, "Units Enhanced"],
+                    [25, 'lengthLost', parsed.lengthLost, "Length Lost"],
+                    [26, 'unitsLost', parsed.unitsLost, "Units Lost"],
+                ];
+
+                try {
+                    for (const [col, , value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, , value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("C-2 On-Site Watercourse Creation", () => {
+        const sheet = getSheet(workbook, "C-2 On-Site WaterC' Creation")!;
+        // D (3) = length input
+        const dataRows = findAllDataRows(sheet, 3, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no on-site watercourse creation data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOnSiteWatercourseCreationRow(sheet, dataRow);
+                const result = v.safeParse(onSiteWatercourseCreationSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
+                // L(11) std TTT, P(15) final TTT, Q(16) temporal mult,
+                // U(20) difficulty mult, W(22) watercourse encroachment mult,
+                // Y(24) riparian encroachment mult, Z(25) units delivered
+                const checks: Array<[number, any, string]> = [
+                    [5, parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [7, parsed.conditionScore, "Condition Score"],
+                    [10, parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [11, parsed.standardTimeToTarget, "Standard Time to Target"],
+                    [15, parsed.finalTimeToTarget, "Final Time to Target"],
+                    [16, parsed.temporalMultiplier, "Temporal Multiplier"],
+                    [20, parsed.difficultyMultiplier, "Difficulty Multiplier"],
+                    [22, parsed.watercourseEncroachmentMultiplier, "Watercourse Encroachment Multiplier"],
+                    [24, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
+                    [25, parsed.unitsDelivered, "Units Delivered"],
+                ];
+
+                try {
+                    for (const [col, value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("C-3 On-Site Watercourse Enhancement", () => {
+        const sheet = getSheet(workbook, "C-3 On-Site WaterC' Enhancement")!;
+        const baselineSheet = getSheet(workbook, "C-1 On-Site WaterC' Baseline")!;
+        // B (1) = baseline ref (auto-populated VLOOKUP); use it for row detection
+        const dataRows = findAllDataRows(sheet, 1, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no on-site watercourse enhancement data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOnSiteWatercourseEnhancementRow(baselineSheet, sheet, dataRow);
+                const result = v.safeParse(onSiteWatercourseEnhancementSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // S(18) proposed distinct score, U(20) proposed condition score,
+                // X(23) strategic sig mult, Y(24) std TTT, AC(28) final TTT,
+                // AD(29) temporal mult, AH(33) difficulty mult applied,
+                // AJ(35) riparian encroachment mult, AL(37) both-banks encroachment mult,
+                // AM(38) final watercourse units delivered
+                const checks: Array<[number, any, string]> = [
+                    [18, parsed.distinctivenessScore, "Proposed Distinctiveness Score"],
+                    [20, parsed.conditionScore, "Proposed Condition Score"],
+                    [23, parsed.strategicSignificanceMultiplier, "Strategic Significance Multiplier"],
+                    [28, parsed.finalTimeToTargetCondition, "Final Time to Target Condition"],
+                    [29, parsed.temporalMultiplier, "Temporal Multiplier"],
+                    [33, parsed.difficultyMultiplierApplied, "Difficulty Multiplier Applied"],
+                    [35, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
+                    [37, parsed.watercourseEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
+                    [38, parsed.watercourseUnitsDelivered, "Watercourse Units Delivered"],
+                ];
+
+                try {
+                    for (const [col, value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("F-1 Off-Site Watercourse Baseline", () => {
+        const sheet = getSheet(workbook, "F-1 Off-Site WaterC' Baseline")!;
+        const dataRows = findAllDataRows(sheet, 4, 9);
+
+        if (dataRows.length === 0) {
+            test.skip("no off-site watercourse baseline data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOffSiteWatercourseBaselineRow(sheet, dataRow);
+                const result = v.safeParse(offSiteWatercourseBaselineSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
+                // N(13) totalSRM, Q(16) spatial risk mult, R(17) totalWatercourseUnits,
+                // V(21) unitsRetained, W(22) unitsEnhanced, AD(29) lengthLost, AE(30) unitsLost
+                const checks: Array<[number, any, string]> = [
+                    [5, parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [7, parsed.conditionScore, "Condition Score"],
+                    [10, parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [13, parsed.totalWatercourseUnitsSRM, "Total Watercourse Units (SRM)"],
+                    [16, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
+                    [17, parsed.totalWatercourseUnits, "Total Watercourse Units"],
+                    [21, parsed.unitsRetained, "Units Retained"],
+                    [22, parsed.unitsEnhanced, "Units Enhanced"],
+                    [29, parsed.lengthLost, "Length Lost"],
+                    [30, parsed.unitsLost, "Units Lost"],
+                ];
+
+                try {
+                    for (const [col, value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("F-2 Off-Site Watercourse Creation", () => {
+        const sheet = getSheet(workbook, "F-2 Off-Site WaterC' Creation")!;
+        const dataRows = findAllDataRows(sheet, 3, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no off-site watercourse creation data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOffSiteWatercourseCreationRow(sheet, dataRow);
+                const result = v.safeParse(offSiteWatercourseCreationSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
+                // L(11) std TTT, P(15) final TTT, Q(16) temporal mult,
+                // U(20) difficulty mult, W(22) watercourse encroachment mult,
+                // Y(24) riparian encroachment mult, Z(25) units delivered (without SRM)
+                const checks: Array<[number, any, string]> = [
+                    [5, parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [7, parsed.conditionScore, "Condition Score"],
+                    [10, parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [11, parsed.standardTimeToTarget, "Standard Time to Target"],
+                    [15, parsed.finalTimeToTarget, "Final Time to Target"],
+                    [16, parsed.temporalMultiplier, "Temporal Multiplier"],
+                    [20, parsed.difficultyMultiplier, "Difficulty Multiplier"],
+                    [22, parsed.watercourseEncroachmentMultiplier, "Watercourse Encroachment Multiplier"],
+                    [24, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
+                    [25, parsed.unitsDelivered, "Net Unit Change"],
+                ];
+
+                try {
+                    for (const [col, value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
+                    throw error;
+                }
+            });
+        });
+    });
+
+    describe("F-3 Off-Site Watercourse Enhancement", () => {
+        const sheet = getSheet(workbook, 'F-3 Off-Site WaterC Enhancement')!;
+        const baselineSheet = getSheet(workbook, "F-1 Off-Site WaterC' Baseline")!;
+        const dataRows = findAllDataRows(sheet, 1, 11);
+
+        if (dataRows.length === 0) {
+            test.skip("no off-site watercourse enhancement data in test file", () => { });
+            return;
+        }
+
+        dataRows.forEach((dataRow) => {
+            test(`row ${dataRow + 1} matches pipeline calculations`, () => {
+                const inputData = parseOffSiteWatercourseEnhancementRow(baselineSheet, sheet, dataRow);
+                const result = v.safeParse(offSiteWatercourseEnhancementSchema, inputData);
+                if (!result.success) {
+                    console.error(`Row ${dataRow + 1} - Input data:`, inputData);
+                    console.error(`Row ${dataRow + 1} - Validation errors:`, v.flatten(result.issues));
+                    throw new Error(`Pipeline validation failed for row ${dataRow + 1}`);
+                }
+                const parsed = result.output;
+
+                // S(18) proposed distinctiveness score, U(20) proposed condition score,
+                // X(23) strategic mult, AC(28) final TTT, AD(29) temporal mult,
+                // AH(33) difficulty mult applied, AJ(35) riparian mult,
+                // AL(37) both-banks mult, AM(38) units delivered (no SRM),
+                // AT(45) spatial risk mult, AU(46) units delivered (with SRM)
+                const checks: Array<[number, any, string]> = [
+                    [18, parsed.distinctivenessScore, "Proposed Distinctiveness Score"],
+                    [20, parsed.conditionScore, "Proposed Condition Score"],
+                    [23, parsed.strategicSignificanceMultiplier, "Strategic Significance Multiplier"],
+                    [28, parsed.finalTimeToTargetCondition, "Final Time to Target Condition"],
+                    [29, parsed.temporalMultiplier, "Temporal Multiplier"],
+                    [33, parsed.difficultyMultiplierApplied, "Difficulty Multiplier Applied"],
+                    [35, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
+                    [37, parsed.watercourseEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
+                    [38, parsed.watercourseUnitsDelivered, "Watercourse Units Delivered"],
+                    [45, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
+                    [46, parsed.watercourseUnitsDeliveredWithSpatialRisk, "Watercourse Units Delivered With Spatial Risk"],
+                ];
+
+                try {
+                    for (const [col, value, label] of checks) {
+                        const excel = getCellValue(sheet, dataRow, col);
+                        if (excel !== null && typeof excel === "number" && typeof value === "number") {
+                            expectCloseTo(value, excel, 0.0001, label);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`\nRow ${dataRow + 1} - FAILED`);
+                    console.error("Input data:", inputData);
+                    for (const [col, value, label] of checks) {
+                        console.error(`  ${label}: excel=${getCellValue(sheet, dataRow, col)} parsed=${value}`);
+                    }
                     throw error;
                 }
             });

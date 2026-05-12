@@ -128,6 +128,22 @@ test("enrichWithUnitsLost calculations", () => {
     }).unitsLost).toEqual(2)
 })
 
+test("irreplaceable habitats produce zero total habitat units", () => {
+    // Excel cell shows "Irreplaceable habitat - no units generated ⚠" → 0.
+    const parsed = v.parse(onSiteHabitatBaselineSchema, fixture({
+        broadHabitat: "Individual trees",
+        habitatType: "Rural tree",
+        area: 0.0765,
+        condition: "Good",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        areaRetained: 0.0765,
+        irreplaceableHabitat: true,
+    }))
+    expect(parsed.totalHabitatUnits).toEqual(0)
+    expect(parsed.baselineUnitsRetained).toEqual(0)
+    expect(parsed.unitsLost).toEqual(0)
+})
+
 test("irreplaceable habitats cannot lose any area", () => {
     const okay = fixture({
         broadHabitat: "Individual trees",

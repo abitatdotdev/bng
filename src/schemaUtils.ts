@@ -106,6 +106,7 @@ export const enrichWithCreationData = <Data extends { broadHabitat: BroadHabitat
 }
 
 export function addTotalHabitatUnits<Data extends {
+    irreplaceableHabitat: boolean,
     requiredAction: SuggestedTradingActions,
     area: number,
     areaRetained: number,
@@ -117,5 +118,11 @@ export function addTotalHabitatUnits<Data extends {
     conditionScore: number,
     strategicSignificanceMultiplier: number,
 }>(data: Data) {
+    // On-site Excel zeros total habitat units for irreplaceable habitats
+    // ("Irreplaceable habitat - no units generated ⚠"). Off-site has its own
+    // enrichment path that uses calculateTotalHabitatUnits's irreplaceable branch.
+    if (data.irreplaceableHabitat) {
+        return { ...data, totalHabitatUnits: 0 };
+    }
     return { ...data, ...calculateTotalHabitatUnits(data) };
 };
