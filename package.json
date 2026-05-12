@@ -41,7 +41,8 @@
     "build:node:cjs": "bun build src/index.ts --format cjs --target node --outfile dist/index.cjs",
     "build:browser:esm": "bun build src/browser.ts --format esm --target browser --outfile dist/browser/index.mjs",
     "build": "bun run clean && bun run build:types && bun run build:node && bun run build:node:cjs && bun run build:browser:esm",
-    "build:publish": "bun run build && bun publish && bun run clean"
+    "build:publish": "bun run build && bun publish && bun run clean",
+    "release": "bun pm version"
   },
   "dependencies": {
     "decimal.js": "^10.6.0",
