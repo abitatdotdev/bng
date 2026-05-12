@@ -1,6 +1,16 @@
 // Export the main parsing function
 export { parseFile, type ParseFileOptions } from './parseFile';
 
+// Streaming parser — yields rows incrementally; works in node, bun, browser, workers
+export {
+    parseFileStream,
+    type ParseFileStreamInput,
+    type ParseFileStreamOptions,
+    type StreamedRow,
+    type StreamedRowKind,
+} from './streaming/parseFileStream';
+export type { SheetView } from './excelHelpers';
+
 // Export unchecked schemas — same enrich/calculate transforms as the validated
 // schemas, but with all `v.check` business-logic guards removed. Use these
 // directly to compute unit values for a single row without rejecting it on

@@ -1,4 +1,6 @@
-import { read, readFile, utils, type ParsingOptions, type Sheet, type WorkBook, type WorkSheet } from "xlsx";
+import { read, readFile, type ParsingOptions, type WorkBook } from "xlsx";
+import { decodeCol } from "./cellRef";
+import { sheetJsView, type SheetView } from "./excelHelpers";
 import * as v from 'valibot';
 import {
     parseOnSiteHabitatBaselineRow,
@@ -263,11 +265,11 @@ function parseAllRows<Schema extends v.BaseSchema<any, any, any>, Input extends 
     workbook: WorkBook,
     spec: SheetSpec,
     schema: Schema,
-    parseRow: (sheet: Sheet, row: number) => Input,
+    parseRow: (sheet: SheetView, row: number) => Input,
     throwOnFailure: boolean = true,
 ): Output[] {
-    const sheet = getSheet(workbook, spec.name)!;
-    const detectionCol = utils.decode_col(spec.dataDetectionColumn);
+    const sheet = sheetJsView(getSheet(workbook, spec.name)!);
+    const detectionCol = decodeCol(spec.dataDetectionColumn);
 
     const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
     const results: Output[] = [];
@@ -294,12 +296,12 @@ function parseAllEnhancementRows<Schema extends v.BaseSchema<any, any, any>, Inp
     baselineSpec: SheetSpec,
     spec: SheetSpec,
     schema: Schema,
-    parseRow: (baselineSheet: Sheet, sheet: Sheet, row: number) => Input,
+    parseRow: (baselineSheet: SheetView, sheet: SheetView, row: number) => Input,
     throwOnFailure: boolean = true,
 ): Output[] {
-    const sheet = getSheet(workbook, spec.name)!;
-    const baselineSheet = getSheet(workbook, baselineSpec.name)!;
-    const detectionCol = utils.decode_col(spec.dataDetectionColumn);
+    const sheet = sheetJsView(getSheet(workbook, spec.name)!);
+    const baselineSheet = sheetJsView(getSheet(workbook, baselineSpec.name)!);
+    const detectionCol = decodeCol(spec.dataDetectionColumn);
 
     const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
     const results: Output[] = [];
@@ -329,7 +331,7 @@ const dataValueSchema = v.union([
 /**
  * Find all data rows in a sheet
  */
-export function findAllDataRows(sheet: WorkSheet, columnToCheckPresence: number, startRow: number = 10, maxRows: number = MAX_DATA_ROWS): number[] {
+export function findAllDataRows(sheet: SheetView, columnToCheckPresence: number, startRow: number = 10, maxRows: number = MAX_DATA_ROWS): number[] {
     const dataRows: number[] = [];
     let consecutiveEmpty = 0;
     for (let row = startRow; row < startRow + maxRows; row++) {

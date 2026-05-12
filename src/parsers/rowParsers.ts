@@ -1,5 +1,5 @@
-import type XLSX from 'xlsx'
-import { findRow, getCellValue, normalizeNumber, parseBoolean } from './excelHelpers';
+import { findRow, getCellValue, normalizeNumber, parseBoolean, type SheetView } from './excelHelpers';
+import { decodeCol } from './cellRef';
 import type { OnSiteHedgerowBaselineSchema } from '../onSite/hedgerowBaseline';
 import type { OnSiteHedgerowEnhancementSchema } from '../onSite/hedgerowEnhancement';
 import type { OnSiteWatercourseBaselineSchema } from '../onSite/watercourseBaseline';
@@ -18,7 +18,6 @@ import type { OnSiteHedgerowCreationSchema } from '../onSite/hedgerowCreation';
 import type { OffSiteHedgerowBaselineSchema } from '../offSite/hedgerowBaseline';
 import type { OffSiteHedgerowEnhancementSchema } from '../offSite/hedgerowEnhancement';
 import type { OffSiteHedgerowCreationSchema } from '../offSite/hedgerowCreation';
-import { utils } from 'xlsx';
 import {
     onSiteHabitatBaselineSpec,
     onSiteHabitatCreationSpec,
@@ -40,9 +39,9 @@ import {
     offSiteWatercourseEnhancementSpec,
 } from './columnMappings';
 
-const colIndex = (letter: string) => utils.decode_col(letter);
+const colIndex = (letter: string) => decodeCol(letter);
 
-export function parseOnSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatBaselineSchema {
+export function parseOnSiteHabitatBaselineRow(sheet: SheetView, dataRow: number): OnSiteHabitatBaselineSchema {
     const c = onSiteHabitatBaselineSpec.columns;
     return {
         broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
@@ -60,7 +59,7 @@ export function parseOnSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number
     };
 }
 
-export function parseOnSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatCreationSchema {
+export function parseOnSiteHabitatCreationRow(sheet: SheetView, dataRow: number): OnSiteHabitatCreationSchema {
     const c = onSiteHabitatCreationSpec.columns;
     return {
         broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
@@ -76,7 +75,7 @@ export function parseOnSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number
     };
 };
 
-export function parseOnSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatEnhancementSchema {
+export function parseOnSiteHabitatEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OnSiteHabitatEnhancementSchema {
     const c = onSiteHabitatEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(onSiteHabitatBaselineSpec.columns.ref.column), baselineRef);
@@ -98,7 +97,7 @@ export function parseOnSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, shee
 }
 
 
-export function parseOffSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatBaselineSchema {
+export function parseOffSiteHabitatBaselineRow(sheet: SheetView, dataRow: number): OffSiteHabitatBaselineSchema {
     const c = offSiteHabitatBaselineSpec.columns;
     return {
         broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
@@ -118,7 +117,7 @@ export function parseOffSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: numbe
     }
 };
 
-export function parseOffSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatCreationSchema {
+export function parseOffSiteHabitatCreationRow(sheet: SheetView, dataRow: number): OffSiteHabitatCreationSchema {
     const c = offSiteHabitatCreationSpec.columns;
     return {
         broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
@@ -137,7 +136,7 @@ export function parseOffSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: numbe
     };
 }
 
-export function parseOffSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatEnhancementSchema {
+export function parseOffSiteHabitatEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OffSiteHabitatEnhancementSchema {
     const c = offSiteHabitatEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(offSiteHabitatBaselineSpec.columns.ref.column), baselineRef);
@@ -159,7 +158,7 @@ export function parseOffSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, she
     }
 }
 
-export function parseOnSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowBaselineSchema {
+export function parseOnSiteHedgerowBaselineRow(sheet: SheetView, dataRow: number): OnSiteHedgerowBaselineSchema {
     const c = onSiteHedgerowBaselineSpec.columns;
     return {
         habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
@@ -174,7 +173,7 @@ export function parseOnSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: numbe
     }
 }
 
-export function parseOnSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowCreationSchema {
+export function parseOnSiteHedgerowCreationRow(sheet: SheetView, dataRow: number): OnSiteHedgerowCreationSchema {
     const c = onSiteHedgerowCreationSpec.columns;
     return {
         habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
@@ -189,7 +188,7 @@ export function parseOnSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: numbe
     };
 }
 
-export function parseOnSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowEnhancementSchema {
+export function parseOnSiteHedgerowEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OnSiteHedgerowEnhancementSchema {
     const c = onSiteHedgerowEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(onSiteHedgerowBaselineSpec.columns.ref.column), baselineRef);
@@ -209,7 +208,7 @@ export function parseOnSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, she
     }
 }
 
-export function parseOffSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowBaselineSchema {
+export function parseOffSiteHedgerowBaselineRow(sheet: SheetView, dataRow: number): OffSiteHedgerowBaselineSchema {
     const c = offSiteHedgerowBaselineSpec.columns;
     return {
         habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
@@ -226,7 +225,7 @@ export function parseOffSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: numb
     };
 }
 
-export function parseOffSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowEnhancementSchema {
+export function parseOffSiteHedgerowEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OffSiteHedgerowEnhancementSchema {
     const c = offSiteHedgerowEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(offSiteHedgerowBaselineSpec.columns.ref.column), baselineRef);
@@ -247,7 +246,7 @@ export function parseOffSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sh
     }
 }
 
-export function parseOffSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowCreationSchema {
+export function parseOffSiteHedgerowCreationRow(sheet: SheetView, dataRow: number): OffSiteHedgerowCreationSchema {
     const c = offSiteHedgerowCreationSpec.columns;
     return {
         habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
@@ -265,7 +264,7 @@ export function parseOffSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: numb
     };
 }
 
-export function parseOnSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseBaselineSchema {
+export function parseOnSiteWatercourseBaselineRow(sheet: SheetView, dataRow: number): OnSiteWatercourseBaselineSchema {
     const c = onSiteWatercourseBaselineSpec.columns;
     return {
         watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
@@ -283,7 +282,7 @@ export function parseOnSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: nu
     };
 }
 
-export function parseOnSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseCreationSchema {
+export function parseOnSiteWatercourseCreationRow(sheet: SheetView, dataRow: number): OnSiteWatercourseCreationSchema {
     const c = onSiteWatercourseCreationSpec.columns;
     return {
         watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
@@ -300,7 +299,7 @@ export function parseOnSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: nu
     };
 }
 
-export function parseOnSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseEnhancementSchema {
+export function parseOnSiteWatercourseEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OnSiteWatercourseEnhancementSchema {
     const c = onSiteWatercourseEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(onSiteWatercourseBaselineSpec.columns.ref.column), baselineRef);
@@ -324,7 +323,7 @@ export function parseOnSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet, 
 
 
 
-export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseBaselineSchema {
+export function parseOffSiteWatercourseBaselineRow(sheet: SheetView, dataRow: number): OffSiteWatercourseBaselineSchema {
     const c = offSiteWatercourseBaselineSpec.columns;
     return {
         watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
@@ -344,7 +343,7 @@ export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: n
     };
 }
 
-export function parseOffSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseCreationSchema {
+export function parseOffSiteWatercourseCreationRow(sheet: SheetView, dataRow: number): OffSiteWatercourseCreationSchema {
     const c = offSiteWatercourseCreationSpec.columns;
     return {
         watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
@@ -362,7 +361,7 @@ export function parseOffSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: n
     };
 }
 
-export function parseOffSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseEnhancementSchema {
+export function parseOffSiteWatercourseEnhancementRow(baselineSheet: SheetView, sheet: SheetView, dataRow: number): OffSiteWatercourseEnhancementSchema {
     const c = offSiteWatercourseEnhancementSpec.columns;
     const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
     const baselineRow = findRow(baselineSheet, colIndex(offSiteWatercourseBaselineSpec.columns.ref.column), baselineRef);
