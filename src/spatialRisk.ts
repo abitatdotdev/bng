@@ -26,3 +26,23 @@ const spatialRiskMultipliers: Record<SpatialRiskCategory, number> = {
 export function getSpatialRiskMultiplier(category: SpatialRiskCategory): number {
     return spatialRiskMultipliers[category];
 }
+
+const watercourseSpatialRiskCategories = [
+    "This metric is being used by an off-site provider",
+    "Within waterbody catchment",
+    "Outside waterbody catchment, but within operational catchment",
+    "Outside operational catchment",
+] as const;
+export const watercourseSpatialRiskCategorySchema = fuzzyPicklist(watercourseSpatialRiskCategories);
+export type WatercourseSpatialRiskCategory = v.InferOutput<typeof watercourseSpatialRiskCategorySchema>
+
+const watercourseSpatialRiskMultipliers: Record<WatercourseSpatialRiskCategory, number> = {
+    "This metric is being used by an off-site provider": 1,
+    "Within waterbody catchment": 1,
+    "Outside waterbody catchment, but within operational catchment": 0.75,
+    "Outside operational catchment": 0.5,
+}
+
+export function getWatercourseSpatialRiskMultiplier(category: WatercourseSpatialRiskCategory): number {
+    return watercourseSpatialRiskMultipliers[category];
+}

@@ -14,7 +14,7 @@ export function fixture(overrides: Partial<OffSiteWatercourseBaselineSchema> = {
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEncroachment: "No Encroachment",
         riparianEncroachment: "No Encroachment/ No Encroachment",
-        spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+        spatialRiskCategory: "Within waterbody catchment",
         lengthRetained: 1,
         lengthEnhanced: 0,
         bespokeCompensation: "No",
@@ -120,9 +120,9 @@ test("valid encroachment combinations", () => {
 
 test("valid spatial risk categories", () => {
     const spatialRiskCategories = [
-        "Compensation inside LPA boundary or NCA of impact site",
-        "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA",
-        "Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA",
+        "Within waterbody catchment",
+        "Outside waterbody catchment, but within operational catchment",
+        "Outside operational catchment",
     ] as const;
 
     spatialRiskCategories.forEach(category => {
@@ -151,7 +151,7 @@ test("full schema validation and calculation - Priority habitat with spatial ris
         strategicSignificance: "Formally identified in local strategy",
         watercourseEncroachment: "No Encroachment",
         riparianEncroachment: "No Encroachment/ No Encroachment",
-        spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+        spatialRiskCategory: "Within waterbody catchment",
         lengthRetained: 0.7,
         lengthEnhanced: 0.3,
     }));
@@ -183,7 +183,7 @@ test("full schema validation and calculation - with reduced spatial risk multipl
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEncroachment: "Minor",
         riparianEncroachment: "Moderate/ Minor",
-        spatialRiskCategory: "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA",
+        spatialRiskCategory: "Outside waterbody catchment, but within operational catchment",
         lengthRetained: 1.5,
         lengthEnhanced: 0,
     }));
@@ -216,7 +216,7 @@ test("full schema validation and calculation - lowest spatial risk multiplier", 
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEncroachment: "No Encroachment",
         riparianEncroachment: "No Encroachment/ No Encroachment",
-        spatialRiskCategory: "Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA",
+        spatialRiskCategory: "Outside operational catchment",
         lengthRetained: 0,
         lengthEnhanced: 0,
     }));

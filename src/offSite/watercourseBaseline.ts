@@ -4,8 +4,8 @@ import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
-import { spatialRiskCategorySchema } from '../spatialRisk';
-import { enrichWithSpatialRisk } from './common';
+import { watercourseSpatialRiskCategorySchema } from '../spatialRisk';
+import { enrichWithWatercourseSpatialRisk } from './common';
 import { Decimal } from '../decimal';
 import {
     enrichWithBaselineWatercourseData,
@@ -23,7 +23,7 @@ const inputSchema = v.object({
     strategicSignificance: strategicSignificanceSchema,
     watercourseEncroachment: watercourseEncroachmentSchema,
     riparianEncroachment: riparianEncroachmentSchema,
-    spatialRiskCategory: spatialRiskCategorySchema,
+    spatialRiskCategory: watercourseSpatialRiskCategorySchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
     bespokeCompensation: v.optional(fuzzyPicklist(["Yes", "No", "Pending"] as const), "No"),
@@ -57,7 +57,7 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
         "The selected condition is not possible for this watercourse type"
     ), ['condition']),
     // Enrich with spatial risk multiplier
-    v.transform(enrichWithSpatialRisk),
+    v.transform(enrichWithWatercourseSpatialRisk),
     // Check that off-site reference is provided when spatial risk is present
     v.forward(v.check(
         s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber),
@@ -79,7 +79,7 @@ export type OffSiteWatercourseBaseline = v.InferOutput<typeof offSiteWatercourse
 export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
     inputSchema,
     safeTransform(enrichWithBaselineWatercourseData),
-    safeTransform(enrichWithSpatialRisk),
+    safeTransform(enrichWithWatercourseSpatialRisk),
     safeTransform(enrichWithBaselineUnitsData),
     safeTransform(enrichWithTotalWatercourseUnitsSRM),
     safeTransform(enrichWithTotalWatercourseUnits),

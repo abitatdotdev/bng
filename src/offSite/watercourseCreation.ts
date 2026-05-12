@@ -5,7 +5,7 @@ import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
-import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
+import { watercourseSpatialRiskCategorySchema, getWatercourseSpatialRiskMultiplier } from '../spatialRisk';
 import { Decimal } from '../decimal';
 import {
     enrichWithCreationWatercourseData,
@@ -24,7 +24,7 @@ const inputSchema = v.object({
     delayInStarting: v.optional(v.number(), 0),
     watercourseEncroachment: watercourseEncroachmentSchema,
     riparianEncroachment: riparianEncroachmentSchema,
-    spatialRiskCategory: spatialRiskCategorySchema,
+    spatialRiskCategory: watercourseSpatialRiskCategorySchema,
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -37,7 +37,7 @@ const inputSchema = v.object({
 export function enrichWithSpatialRiskMultiplier<Data extends {
     spatialRiskCategory: string;
 }>(data: Data) {
-    const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
+    const spatialRiskMultiplier = getWatercourseSpatialRiskMultiplier(data.spatialRiskCategory as any);
 
     return {
         ...data,

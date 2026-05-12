@@ -14,7 +14,7 @@ function createBaseline(overrides: Partial<OffSiteWatercourseBaseline> = {}): Of
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         watercourseEncroachment: "No Encroachment",
         riparianEncroachment: "No Encroachment/ No Encroachment",
-        spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+        spatialRiskCategory: "Within waterbody catchment",
         lengthRetained: 0,
         lengthEnhanced: 0.5,
         bespokeCompensation: "No",
@@ -416,7 +416,7 @@ test("calculation of units with spatial risk multiplier", () => {
     const outsideBoundary = v.parse(offSiteWatercourseEnhancementSchema, fixture({
         baseline: {
             ...baseline,
-            spatialRiskCategory: "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA",
+            spatialRiskCategory: "Outside waterbody catchment, but within operational catchment",
 
         },
         watercourseType: "Priority habitat",

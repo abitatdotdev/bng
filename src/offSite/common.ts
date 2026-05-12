@@ -1,5 +1,5 @@
 import { Decimal } from '../decimal';
-import { getSpatialRiskMultiplier } from '../spatialRisk';
+import { getSpatialRiskMultiplier, getWatercourseSpatialRiskMultiplier } from '../spatialRisk';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 
 /**
@@ -87,6 +87,21 @@ export function enrichWithSpatialRisk<Data extends {
     spatialRiskCategory: string
 }>(data: Data) {
     const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
+
+    return {
+        ...data,
+        spatialRiskMultiplier
+    };
+}
+
+/**
+ * Enriches watercourse data with spatial risk multiplier using the
+ * watercourse-specific category list (catchment-based, not LPA/NCA).
+ */
+export function enrichWithWatercourseSpatialRisk<Data extends {
+    spatialRiskCategory: string
+}>(data: Data) {
+    const spatialRiskMultiplier = getWatercourseSpatialRiskMultiplier(data.spatialRiskCategory as any);
 
     return {
         ...data,

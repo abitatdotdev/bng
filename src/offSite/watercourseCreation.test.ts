@@ -16,7 +16,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             delayInStarting: 0,
             watercourseEncroachment: 'No Encroachment',
             riparianEncroachment: 'No Encroachment/ No Encroachment',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-001',
@@ -40,7 +40,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             delayInStarting: 3,
             watercourseEncroachment: 'No Encroachment',
             riparianEncroachment: 'No Encroachment/ No Encroachment',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-001',
@@ -59,7 +59,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             delayInStarting: 0,
             watercourseEncroachment: 'Full', // Should be N/A - Culvert
             riparianEncroachment: 'N/A - Culvert',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-002',
@@ -78,7 +78,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             delayInStarting: 0,
             watercourseEncroachment: 'N/A - Culvert',
             riparianEncroachment: 'N/A - Culvert',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-002',
@@ -99,7 +99,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             delayInStarting: 0,
             watercourseEncroachment: 'N/A - Culvert',
             riparianEncroachment: 'N/A - Culvert',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-003',
@@ -110,9 +110,9 @@ describe('offSiteWatercourseCreationSchema', () => {
 
     test('should accept various spatial risk categories', () => {
         const spatialRiskCategories = [
-            'Compensation inside LPA boundary or NCA of impact site',
-            'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA',
-            'Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA',
+            'Within waterbody catchment',
+            'Outside waterbody catchment, but within operational catchment',
+            'Outside operational catchment',
         ] as const;
 
         spatialRiskCategories.forEach(spatialRiskCategory => {
@@ -148,7 +148,7 @@ describe('full schema integration tests', () => {
             delayInStarting: 0,
             watercourseEncroachment: 'Minor',
             riparianEncroachment: 'Moderate/ Minor',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-004',
@@ -175,7 +175,7 @@ describe('full schema integration tests', () => {
             delayInStarting: 30,
             watercourseEncroachment: 'No Encroachment',
             riparianEncroachment: 'No Encroachment/ No Encroachment',
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site',
+            spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
             habitatReferenceNumber: 'WC-005',

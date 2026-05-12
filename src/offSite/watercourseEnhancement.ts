@@ -17,7 +17,7 @@ import {
     enrichEnhancementWithEncroachmentData,
     calculateEnhancementUnitsDelivered
 } from '../watercourses/shared';
-import { enrichWithSpatialRisk } from './common';
+import { enrichWithWatercourseSpatialRisk } from './common';
 import { Decimal } from '../decimal';
 
 
@@ -118,7 +118,7 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
 
     // Final calculations
     v.transform(calculateEnhancementUnitsDelivered),
-    v.transform(d => enrichWithSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory })),
+    v.transform(d => enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory })),
     v.transform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
 )
 
@@ -140,7 +140,7 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichEnhancementWithEncroachmentData),
     safeTransform(calculateEnhancementUnitsDelivered),
-    safeTransform(d => enrichWithSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory })),
+    safeTransform(d => enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory })),
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
 )
 
