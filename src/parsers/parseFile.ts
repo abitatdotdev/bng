@@ -1,4 +1,4 @@
-import { read, readFile, type ParsingOptions, type Sheet, type WorkBook, type WorkSheet } from "xlsx";
+import { read, readFile, utils, type ParsingOptions, type Sheet, type WorkBook, type WorkSheet } from "xlsx";
 import * as v from 'valibot';
 import {
     parseOnSiteHabitatBaselineRow,
@@ -40,6 +40,30 @@ import { onSiteWatercourseEnhancementSchema, onSiteWatercourseEnhancementUncheck
 import { offSiteWatercourseBaselineSchema, offSiteWatercourseBaselineUncheckedSchema } from "../offSite/watercourseBaseline";
 import { offSiteWatercourseCreationSchema, offSiteWatercourseCreationUncheckedSchema } from "../offSite/watercourseCreation";
 import { offSiteWatercourseEnhancementSchema, offSiteWatercourseEnhancementUncheckedSchema } from "../offSite/watercourseEnhancement";
+import {
+    allSheetSpecs,
+    formatValidationErrors,
+    offSiteHabitatBaselineSpec,
+    offSiteHabitatCreationSpec,
+    offSiteHabitatEnhancementSpec,
+    offSiteHedgerowBaselineSpec,
+    offSiteHedgerowCreationSpec,
+    offSiteHedgerowEnhancementSpec,
+    offSiteWatercourseBaselineSpec,
+    offSiteWatercourseCreationSpec,
+    offSiteWatercourseEnhancementSpec,
+    onSiteHabitatBaselineSpec,
+    onSiteHabitatCreationSpec,
+    onSiteHabitatEnhancementSpec,
+    onSiteHedgerowBaselineSpec,
+    onSiteHedgerowCreationSpec,
+    onSiteHedgerowEnhancementSpec,
+    onSiteWatercourseBaselineSpec,
+    onSiteWatercourseCreationSpec,
+    onSiteWatercourseEnhancementSpec,
+    validateWorkbookHeaders,
+    type SheetSpec,
+} from './columnMappings';
 
 const sheetsToGrab = [
     // 'Introduction',
@@ -54,24 +78,7 @@ const sheetsToGrab = [
     "Trading Summary WaterC's",
     // 'Off-site gain site summary',
     // 'Irreplaceable Habitats',
-    'A-1 On-Site Habitat Baseline',
-    'A-2 On-Site Habitat Creation',
-    'A-3 On-Site Habitat Enhancement',
-    'D-1 Off-Site Habitat Baseline',
-    'D-2 Off-Site Habitat Creation',
-    'D-3 Off-Site Habitat Enhancment',
-    'B-1 On-Site Hedge Baseline',
-    'B-2 On-Site Hedge Creation',
-    'B-3 On-Site Hedge Enhancement',
-    'E-1 Off-Site Hedge Baseline',
-    'E-2 Off-Site Hedge Creation',
-    'E-3 Off-Site Hedge Enhancement',
-    "C-1 On-Site WaterC' Baseline",
-    "C-2 On-Site WaterC' Creation",
-    "C-3 On-Site WaterC' Enhancement",
-    "F-1 Off-Site WaterC' Baseline",
-    "F-2 Off-Site WaterC' Creation",
-    'F-3 Off-Site WaterC Enhancement',
+    ...allSheetSpecs.map(s => s.name),
     'Unit shortfall calculations',
     // 'G-1 All Habitats',
     // 'G-2 Habitat groups',
@@ -103,11 +110,10 @@ const workbook =  parseFile("MY_BNG_METRIC.xlsm");
 // for in-memory files, like those in a website input field
 const workbook = parseFile(await file.arrayBuffer());
 ```
- * Throws an error when the metric version is unsupported.
+ * Throws an error when required sheets or column headers are missing/mismatched.
  */
 export function parseWorkbook(file: string | ArrayBuffer) {
     let workbook: WorkBook;
-
 
     if (typeof file === "string") {
         workbook = readFile(file, options);
@@ -115,9 +121,9 @@ export function parseWorkbook(file: string | ArrayBuffer) {
         workbook = read(file, options);
     }
 
-    const versionSheet = getSheet(workbook, "Version History");
-    if (!versionSheet) {
-        throw new Error("Not a valid version to compare against");
+    const validation = validateWorkbookHeaders(workbook);
+    if (validation.missingSheets.length > 0 || validation.mismatches.length > 0) {
+        throw new Error(`Unsupported metric layout:\n${formatValidationErrors(validation)}`);
     }
 
     return workbook
@@ -158,194 +164,29 @@ export function parseFile(file: string | ArrayBuffer, options: ParseFileOptions 
 
     const schemas = validate ? checkedSchemas : uncheckedSchemas;
 
-    // Parse all input sheets using shared parsers
-    // Using exact column indices and start rows from working comparison tests
-    const onSiteHabitatBaselines = parseAllRows(
-        workbook,
-        'A-1 On-Site Habitat Baseline',
-        schemas.onSiteHabitatBaseline,
-        4, // E column (broad habitat)
-        parseOnSiteHabitatBaselineRow,
-        undefined,
-        validate,
-    );
+    const onSiteHabitatBaselines = parseAllRows(workbook, onSiteHabitatBaselineSpec, schemas.onSiteHabitatBaseline, parseOnSiteHabitatBaselineRow, validate);
+    const onSiteHabitatCreations = parseAllRows(workbook, onSiteHabitatCreationSpec, schemas.onSiteHabitatCreation, parseOnSiteHabitatCreationRow, validate);
+    const onSiteHabitatEnhancements = parseAllEnhancementRows(workbook, onSiteHabitatBaselineSpec, onSiteHabitatEnhancementSpec, schemas.onSiteHabitatEnhancement, parseOnSiteHabitatEnhancementRow, validate);
 
-    const onSiteHabitatCreations = parseAllRows(
-        workbook,
-        'A-2 On-Site Habitat Creation',
-        schemas.onSiteHabitatCreation,
-        24, // Y column (habitat units delivered)
-        parseOnSiteHabitatCreationRow,
-        undefined,
-        validate,
-    );
+    const offSiteHabitatBaselines = parseAllRows(workbook, offSiteHabitatBaselineSpec, schemas.offSiteHabitatBaseline, parseOffSiteHabitatBaselineRow, validate);
+    const offSiteHabitatCreations = parseAllRows(workbook, offSiteHabitatCreationSpec, schemas.offSiteHabitatCreation, parseOffSiteHabitatCreationRow, validate);
+    const offSiteHabitatEnhancements = parseAllEnhancementRows(workbook, offSiteHabitatBaselineSpec, offSiteHabitatEnhancementSpec, schemas.offSiteHabitatEnhancement, parseOffSiteHabitatEnhancementRow, validate);
 
-    const onSiteHabitatEnhancements = parseAllEnhancementRows(
-        workbook,
-        'A-1 On-Site Habitat Baseline',
-        'A-3 On-Site Habitat Enhancement',
-        schemas.onSiteHabitatEnhancement,
-        4, // E column (baseline habitat ref)
-        parseOnSiteHabitatEnhancementRow,
-        11, // start on row 12
-        validate,
-    );
+    const onSiteHedgerowBaselines = parseAllRows(workbook, onSiteHedgerowBaselineSpec, schemas.onSiteHedgerowBaseline, parseOnSiteHedgerowBaselineRow, validate);
+    const onSiteHedgerowCreations = parseAllRows(workbook, onSiteHedgerowCreationSpec, schemas.onSiteHedgerowCreation, parseOnSiteHedgerowCreationRow, validate);
+    const onSiteHedgerowEnhancements = parseAllEnhancementRows(workbook, onSiteHedgerowBaselineSpec, onSiteHedgerowEnhancementSpec, schemas.onSiteHedgerowEnhancement, parseOnSiteHedgerowEnhancementRow, validate);
 
-    const offSiteHabitatBaselines = parseAllRows(
-        workbook,
-        'D-1 Off-Site Habitat Baseline',
-        schemas.offSiteHabitatBaseline,
-        4, // E column
-        parseOffSiteHabitatBaselineRow,
-        undefined,
-        validate,
-    );
+    const offSiteHedgerowBaselines = parseAllRows(workbook, offSiteHedgerowBaselineSpec, schemas.offSiteHedgerowBaseline, parseOffSiteHedgerowBaselineRow, validate);
+    const offSiteHedgerowCreations = parseAllRows(workbook, offSiteHedgerowCreationSpec, schemas.offSiteHedgerowCreation, parseOffSiteHedgerowCreationRow, validate);
+    const offSiteHedgerowEnhancements = parseAllEnhancementRows(workbook, offSiteHedgerowBaselineSpec, offSiteHedgerowEnhancementSpec, schemas.offSiteHedgerowEnhancement, parseOffSiteHedgerowEnhancementRow, validate);
 
-    const offSiteHabitatCreations = parseAllRows(
-        workbook,
-        'D-2 Off-Site Habitat Creation',
-        schemas.offSiteHabitatCreation,
-        3, // D column (from offSiteHabitatComparison.test.ts)
-        parseOffSiteHabitatCreationRow,
-        undefined,
-        validate,
-    );
+    const onSiteWatercourseBaselines = parseAllRows(workbook, onSiteWatercourseBaselineSpec, schemas.onSiteWatercourseBaseline, parseOnSiteWatercourseBaselineRow, validate);
+    const onSiteWatercourseCreations = parseAllRows(workbook, onSiteWatercourseCreationSpec, schemas.onSiteWatercourseCreation, parseOnSiteWatercourseCreationRow, validate);
+    const onSiteWatercourseEnhancements = parseAllEnhancementRows(workbook, onSiteWatercourseBaselineSpec, onSiteWatercourseEnhancementSpec, schemas.onSiteWatercourseEnhancement, parseOnSiteWatercourseEnhancementRow, validate);
 
-    const offSiteHabitatEnhancements = parseAllEnhancementRows(
-        workbook,
-        'D-1 Off-Site Habitat Baseline',
-        'D-3 Off-Site Habitat Enhancment',
-        schemas.offSiteHabitatEnhancement,
-        4, // E column
-        parseOffSiteHabitatEnhancementRow,
-        11, // starts on row 12
-        validate,
-    );
-
-
-    const onSiteHedgerowBaselines = parseAllRows(
-        workbook,
-        'B-1 On-Site Hedge Baseline',
-        schemas.onSiteHedgerowBaseline,
-        3, // D column (hedgerow type)
-        parseOnSiteHedgerowBaselineRow,
-        9, // Start at row 10 (array index 9)
-        validate,
-    );
-
-    const onSiteHedgerowCreations = parseAllRows(
-        workbook,
-        'B-2 On-Site Hedge Creation',
-        schemas.onSiteHedgerowCreation,
-        3, // D column (hedgerow type)
-        parseOnSiteHedgerowCreationRow,
-        11, // Start at row 12 (array index 11)
-        validate,
-    );
-
-    const onSiteHedgerowEnhancements = parseAllEnhancementRows(
-        workbook,
-        'B-1 On-Site Hedge Baseline',
-        'B-3 On-Site Hedge Enhancement',
-        schemas.onSiteHedgerowEnhancement,
-        1, // B column (baseline ref)
-        parseOnSiteHedgerowEnhancementRow,
-        11, // Start at row 12 (array index 11)
-        validate,
-    );
-
-    const offSiteHedgerowBaselines = parseAllRows(
-        workbook,
-        'E-1 Off-Site Hedge Baseline',
-        schemas.offSiteHedgerowBaseline,
-        3, // D column (hedgerow type)
-        parseOffSiteHedgerowBaselineRow,
-        9, // Start at row 10 (array index 9)
-        validate,
-    );
-
-    const offSiteHedgerowCreations = parseAllRows(
-        workbook,
-        'E-2 Off-Site Hedge Creation',
-        schemas.offSiteHedgerowCreation,
-        3, // D column (hedgerow type)
-        parseOffSiteHedgerowCreationRow,
-        11, // Start at row 12 (array index 11)
-        validate,
-    );
-
-    const offSiteHedgerowEnhancements = parseAllEnhancementRows(
-        workbook,
-        'E-1 Off-Site Hedge Baseline',
-        'E-3 Off-Site Hedge Enhancement',
-        schemas.offSiteHedgerowEnhancement,
-        1, // B column (baseline ref)
-        parseOffSiteHedgerowEnhancementRow,
-        11, // Start at row 12 (array index 11)
-        validate,
-    );
-
-    const onSiteWatercourseBaselines = parseAllRows(
-        workbook,
-        "C-1 On-Site WaterC' Baseline",
-        schemas.onSiteWatercourseBaseline,
-        4, // E column
-        parseOnSiteWatercourseBaselineRow,
-        9, // start at row 10
-        validate,
-    );
-
-    const onSiteWatercourseCreations = parseAllRows(
-        workbook,
-        "C-2 On-Site WaterC' Creation",
-        schemas.onSiteWatercourseCreation,
-        2, // C column
-        parseOnSiteWatercourseCreationRow,
-        11, // start at row 12
-        validate,
-    );
-
-    const onSiteWatercourseEnhancements = parseAllEnhancementRows(
-        workbook,
-        "C-1 On-Site WaterC' Baseline",
-        "C-3 On-Site WaterC' Enhancement",
-        schemas.onSiteWatercourseEnhancement,
-        13, // N column
-        parseOnSiteWatercourseEnhancementRow,
-        11, // start at row 12
-        validate,
-    );
-
-    const offSiteWatercourseBaselines = parseAllRows(
-        workbook,
-        "F-1 Off-Site WaterC' Baseline",
-        schemas.offSiteWatercourseBaseline,
-        4, // E column
-        parseOffSiteWatercourseBaselineRow,
-        9, // start at row 10
-        validate,
-    );
-
-    const offSiteWatercourseCreations = parseAllRows(
-        workbook,
-        "F-2 Off-Site WaterC' Creation",
-        schemas.offSiteWatercourseCreation,
-        2, // C column
-        parseOffSiteWatercourseCreationRow,
-        11, // start at row 12
-        validate,
-    );
-
-    const offSiteWatercourseEnhancements = parseAllEnhancementRows(
-        workbook,
-        "F-1 Off-Site WaterC' Baseline",
-        'F-3 Off-Site WaterC Enhancement',
-        schemas.offSiteWatercourseEnhancement,
-        41, // AP column
-        parseOffSiteWatercourseEnhancementRow,
-        11, // start at row 12
-        validate,
-    );
+    const offSiteWatercourseBaselines = parseAllRows(workbook, offSiteWatercourseBaselineSpec, schemas.offSiteWatercourseBaseline, parseOffSiteWatercourseBaselineRow, validate);
+    const offSiteWatercourseCreations = parseAllRows(workbook, offSiteWatercourseCreationSpec, schemas.offSiteWatercourseCreation, parseOffSiteWatercourseCreationRow, validate);
+    const offSiteWatercourseEnhancements = parseAllEnhancementRows(workbook, offSiteWatercourseBaselineSpec, offSiteWatercourseEnhancementSpec, schemas.offSiteWatercourseEnhancement, parseOffSiteWatercourseEnhancementRow, validate);
 
     // Create the input object
     const parsedRows: AllFeatures = {
@@ -418,19 +259,17 @@ const uncheckedSchemas = {
     offSiteWatercourseEnhancement: offSiteWatercourseEnhancementUncheckedSchema,
 } as const;
 
-// Helper function to parse all rows from a sheet
 function parseAllRows<Schema extends v.BaseSchema<any, any, any>, Input extends v.InferInput<Schema>, Output extends v.InferOutput<Schema>>(
     workbook: WorkBook,
-    sheetName: string,
+    spec: SheetSpec,
     schema: Schema,
-    columnToCheck: number,
     parseRow: (sheet: Sheet, row: number) => Input,
-    startRow: number = 10, // Most sheets have data starting at row 11 (0-indexed row 10)
     throwOnFailure: boolean = true,
 ): Output[] {
-    const sheet = getSheet(workbook, sheetName)!;
+    const sheet = getSheet(workbook, spec.name)!;
+    const detectionCol = utils.decode_col(spec.dataDetectionColumn);
 
-    const dataRows = findAllDataRows(sheet, columnToCheck, startRow);
+    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
     const results: Output[] = [];
 
     for (const row of dataRows) {
@@ -440,10 +279,10 @@ function parseAllRows<Schema extends v.BaseSchema<any, any, any>, Input extends 
         if (result.success) {
             results.push(result.output);
         } else if (throwOnFailure) {
-            console.error(`Error: parsing ${sheetName} row ${row}`, v.flatten(result.issues));
-            throw new Error(`Error: parsing ${sheetName} row ${row}`);
+            console.error(`Error: parsing ${spec.name} row ${row}`, v.flatten(result.issues));
+            throw new Error(`Error: parsing ${spec.name} row ${row}`);
         } else {
-            console.warn(`Skipping ${sheetName} row ${row}: input shape failed`, v.flatten(result.issues));
+            console.warn(`Skipping ${spec.name} row ${row}: input shape failed`, v.flatten(result.issues));
         }
     }
 
@@ -452,18 +291,17 @@ function parseAllRows<Schema extends v.BaseSchema<any, any, any>, Input extends 
 
 function parseAllEnhancementRows<Schema extends v.BaseSchema<any, any, any>, Input extends v.InferInput<Schema>, Output extends v.InferOutput<Schema>>(
     workbook: WorkBook,
-    baselineSheetName: string,
-    sheetName: string,
+    baselineSpec: SheetSpec,
+    spec: SheetSpec,
     schema: Schema,
-    columnToCheck: number,
     parseRow: (baselineSheet: Sheet, sheet: Sheet, row: number) => Input,
-    startRow: number = 10, // Most sheets have data starting at row 11 (0-indexed row 10)
     throwOnFailure: boolean = true,
 ): Output[] {
-    const sheet = getSheet(workbook, sheetName)!;
-    const baselineSheet = getSheet(workbook, baselineSheetName)!;
+    const sheet = getSheet(workbook, spec.name)!;
+    const baselineSheet = getSheet(workbook, baselineSpec.name)!;
+    const detectionCol = utils.decode_col(spec.dataDetectionColumn);
 
-    const dataRows = findAllDataRows(sheet, columnToCheck, startRow);
+    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
     const results: Output[] = [];
 
     for (const row of dataRows) {
@@ -473,10 +311,10 @@ function parseAllEnhancementRows<Schema extends v.BaseSchema<any, any, any>, Inp
         if (result.success) {
             results.push(result.output);
         } else if (throwOnFailure) {
-            console.error(`Error: parsing ${sheetName} row ${row}`, v.flatten(result.issues));
-            throw new Error(`Error: parsing ${sheetName} row ${row}`);
+            console.error(`Error: parsing ${spec.name} row ${row}`, v.flatten(result.issues));
+            throw new Error(`Error: parsing ${spec.name} row ${row}`);
         } else {
-            console.warn(`Skipping ${sheetName} row ${row}: input shape failed`, v.flatten(result.issues));
+            console.warn(`Skipping ${spec.name} row ${row}: input shape failed`, v.flatten(result.issues));
         }
     }
 

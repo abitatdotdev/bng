@@ -18,326 +18,367 @@ import type { OnSiteHedgerowCreationSchema } from '../onSite/hedgerowCreation';
 import type { OffSiteHedgerowBaselineSchema } from '../offSite/hedgerowBaseline';
 import type { OffSiteHedgerowEnhancementSchema } from '../offSite/hedgerowEnhancement';
 import type { OffSiteHedgerowCreationSchema } from '../offSite/hedgerowCreation';
+import { utils } from 'xlsx';
+import {
+    onSiteHabitatBaselineSpec,
+    onSiteHabitatCreationSpec,
+    onSiteHabitatEnhancementSpec,
+    offSiteHabitatBaselineSpec,
+    offSiteHabitatCreationSpec,
+    offSiteHabitatEnhancementSpec,
+    onSiteHedgerowBaselineSpec,
+    onSiteHedgerowCreationSpec,
+    onSiteHedgerowEnhancementSpec,
+    offSiteHedgerowBaselineSpec,
+    offSiteHedgerowCreationSpec,
+    offSiteHedgerowEnhancementSpec,
+    onSiteWatercourseBaselineSpec,
+    onSiteWatercourseCreationSpec,
+    onSiteWatercourseEnhancementSpec,
+    offSiteWatercourseBaselineSpec,
+    offSiteWatercourseCreationSpec,
+    offSiteWatercourseEnhancementSpec,
+} from './columnMappings';
+
+const colIndex = (letter: string) => utils.decode_col(letter);
 
 export function parseOnSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatBaselineSchema {
+    const c = onSiteHabitatBaselineSpec.columns;
     return {
-        broadHabitat: getCellValue(sheet, dataRow, "E"),
-        habitatType: getCellValue(sheet, dataRow, "F"),
-        irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, "G")),
-        area: normalizeNumber(getCellValue(sheet, dataRow, "H")),
-        condition: getCellValue(sheet, dataRow, "K"),
-        strategicSignificance: getCellValue(sheet, dataRow, "M"),
-        areaRetained: normalizeNumber(getCellValue(sheet, dataRow, "S")) || 0,
-        areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "T")) || 0,
-        bespokeCompensationAgreed: getCellValue(sheet, dataRow, "Y") || undefined,
-        userComments: String(getCellValue(sheet, dataRow, "Z") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AA") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AB") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, c.irreplaceableHabitat.column)),
+        area: normalizeNumber(getCellValue(sheet, dataRow, c.area.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        areaRetained: normalizeNumber(getCellValue(sheet, dataRow, c.areaRetained.column)) || 0,
+        areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.areaEnhanced.column)) || 0,
+        bespokeCompensationAgreed: getCellValue(sheet, dataRow, c.bespokeCompensationAgreed.column) || undefined,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 }
 
 export function parseOnSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatCreationSchema {
+    const c = onSiteHabitatCreationSpec.columns;
     return {
-        broadHabitat: getCellValue(sheet, dataRow, "D"),
-        habitatType: getCellValue(sheet, dataRow, "E"),
-        area: normalizeNumber(getCellValue(sheet, dataRow, "G")),
-        condition: getCellValue(sheet, dataRow, "J"),
-        strategicSignificance: getCellValue(sheet, dataRow, "L"),
-        habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
-        habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "Z") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AA") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AB") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        area: normalizeNumber(getCellValue(sheet, dataRow, c.area.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreationInAdvance.column)) || 0,
+        habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreationDelay.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 };
 
 export function parseOnSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteHabitatEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "E");
-    const baselineRow = findRow(baselineSheet, 3, baselineRef); // D
+    const c = onSiteHabitatEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(onSiteHabitatBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOnSiteHabitatBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        broadHabitat: getCellValue(sheet, dataRow, "Q"),
-        habitatType: getCellValue(sheet, dataRow, "R"),
-        condition: getCellValue(sheet, dataRow, "Y"),
-        strategicSignificance: getCellValue(sheet, dataRow, "AA"),
-        habitatEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "AE")) || 0,
-        habitatEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "AF")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "AO") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AP") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AQ") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatEnhancedInAdvance.column)) || 0,
+        habitatEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.habitatEnhancedDelay.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     }
 }
 
 
 export function parseOffSiteHabitatBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatBaselineSchema {
+    const c = offSiteHabitatBaselineSpec.columns;
     return {
-        broadHabitat: getCellValue(sheet, dataRow, "E"),
-        habitatType: getCellValue(sheet, dataRow, "F"),
-        irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, "G")),
-        area: normalizeNumber(getCellValue(sheet, dataRow, "H")),
-        condition: getCellValue(sheet, dataRow, "K"),
-        strategicSignificance: getCellValue(sheet, dataRow, "M"),
-        spatialRiskCategory: getCellValue(sheet, dataRow, "R") || "Low",
-        areaRetained: normalizeNumber(getCellValue(sheet, dataRow, "V")) || 0,
-        areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "W")) || 0,
-        bespokeCompensationAgreed: getCellValue(sheet, dataRow, "AB") || undefined,
-        userComments: getCellValue(sheet, dataRow, "AC") || undefined,
-        planningAuthorityComments: getCellValue(sheet, dataRow, "AD") || undefined,
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AE") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AF") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        irreplaceableHabitat: parseBoolean(getCellValue(sheet, dataRow, c.irreplaceableHabitat.column)),
+        area: normalizeNumber(getCellValue(sheet, dataRow, c.area.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column) || "Low",
+        areaRetained: normalizeNumber(getCellValue(sheet, dataRow, c.areaRetained.column)) || 0,
+        areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.areaEnhanced.column)) || 0,
+        bespokeCompensationAgreed: getCellValue(sheet, dataRow, c.bespokeCompensationAgreed.column) || undefined,
+        userComments: getCellValue(sheet, dataRow, c.userComments.column) || undefined,
+        planningAuthorityComments: getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || undefined,
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     }
 };
 
 export function parseOffSiteHabitatCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatCreationSchema {
+    const c = offSiteHabitatCreationSpec.columns;
     return {
-        broadHabitat: getCellValue(sheet, dataRow, "D"),
-        habitatType: getCellValue(sheet, dataRow, "E"),
-        area: normalizeNumber(getCellValue(sheet, dataRow, "G")),
-        condition: getCellValue(sheet, dataRow, "J"),
-        strategicSignificance: getCellValue(sheet, dataRow, "L"),
-        habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
-        habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
-        spatialRiskCategory: getCellValue(sheet, dataRow, "Y") || "Low",
-        userComments: String(getCellValue(sheet, dataRow, "AC") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AD") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AE") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AF") || ""),
-        baselineReferenceNumber: String(getCellValue(sheet, dataRow, "AG") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        area: normalizeNumber(getCellValue(sheet, dataRow, c.area.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatCreationInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreationInAdvance.column)) || 0,
+        habitatCreationDelay: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreationDelay.column)) || 0,
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column) || "Low",
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
+        baselineReferenceNumber: String(getCellValue(sheet, dataRow, c.baselineReferenceNumber.column) || ""),
     };
 }
 
 export function parseOffSiteHabitatEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteHabitatEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "E");
-    const baselineRow = findRow(baselineSheet, 3, baselineRef); // D
+    const c = offSiteHabitatEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(offSiteHabitatBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOffSiteHabitatBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        broadHabitat: getCellValue(sheet, dataRow, "Q"),
-        habitatType: getCellValue(sheet, dataRow, "R"),
-        condition: getCellValue(sheet, dataRow, "Y"),
-        strategicSignificance: getCellValue(sheet, dataRow, "AA"),
-        habitatEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "AE")) || 0,
-        habitatEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "AF")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "AR") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AS") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AT") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AU") || ""),
+        broadHabitat: getCellValue(sheet, dataRow, c.broadHabitat.column),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatEnhancedInAdvance.column)) || 0,
+        habitatEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.habitatEnhancedDelay.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     }
 }
 
 export function parseOnSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowBaselineSchema {
+    const c = onSiteHedgerowBaselineSpec.columns;
     return {
-        habitatType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "V") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "W") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "X") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, c.lengthRetained.column)) || 0,
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.lengthEnhanced.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     }
 }
 
 export function parseOnSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowCreationSchema {
+    const c = onSiteHedgerowCreationSpec.columns;
     return {
-        habitatType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        habitatCreatedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "N")) || 0,
-        delayInStartingHabitatCreation: normalizeNumber(getCellValue(sheet, dataRow, "O")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "X") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "Y") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "Z") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatCreatedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreatedInAdvance.column)) || 0,
+        delayInStartingHabitatCreation: normalizeNumber(getCellValue(sheet, dataRow, c.delayInStartingHabitatCreation.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 }
 
 export function parseOnSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteHedgerowEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "B");
-    const baselineRow = findRow(baselineSheet, 1, baselineRef); // B
+    const c = onSiteHedgerowEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(onSiteHedgerowBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOnSiteHedgerowBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        habitatType: getCellValue(sheet, dataRow, "M"),
-        condition: getCellValue(sheet, dataRow, "S"),
-        strategicSignificance: getCellValue(sheet, dataRow, "U"),
-        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "Y")) || 0,
-        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "Z")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "AI") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AJ") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AK") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.hedgerowEnhancedInAdvance.column)) || 0,
+        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.hedgerowEnhancedDelay.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     }
 }
 
 export function parseOffSiteHedgerowBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowBaselineSchema {
+    const c = offSiteHedgerowBaselineSpec.columns;
     return {
-        habitatType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        spatialRiskCategory: getCellValue(sheet, dataRow, "O") || undefined,
-        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, "S")) || 0,
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "T")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "Y") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "Z") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AA") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AB") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column) || undefined,
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, c.lengthRetained.column)) || 0,
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.lengthEnhanced.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     };
 }
 
 export function parseOffSiteHedgerowEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "B");
-    const baselineRow = findRow(baselineSheet, 1, baselineRef); // B
+    const c = offSiteHedgerowEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(offSiteHedgerowBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOffSiteHedgerowBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        habitatType: getCellValue(sheet, dataRow, "M"),
-        condition: getCellValue(sheet, dataRow, "S"),
-        strategicSignificance: getCellValue(sheet, dataRow, "U"),
-        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "Y")) || 0,
-        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "Z")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "AL") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AM") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AN") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AO") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        hedgerowEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.hedgerowEnhancedInAdvance.column)) || 0,
+        hedgerowEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.hedgerowEnhancedDelay.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     }
 }
 
 export function parseOffSiteHedgerowCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteHedgerowCreationSchema {
+    const c = offSiteHedgerowCreationSpec.columns;
     return {
-        habitatType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        spatialRiskCategory: getCellValue(sheet, dataRow, "M") || undefined,
-        habitatCreatedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "P")) || 0,
-        delayInStartingHabitatCreation: normalizeNumber(getCellValue(sheet, dataRow, "Q")) || 0,
-        userComments: String(getCellValue(sheet, dataRow, "AA") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AB") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AC") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AD") || ""),
-        baselineReferenceNumber: String(getCellValue(sheet, dataRow, "AE") || ""),
+        habitatType: getCellValue(sheet, dataRow, c.habitatType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column) || undefined,
+        habitatCreatedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.habitatCreatedInAdvance.column)) || 0,
+        delayInStartingHabitatCreation: normalizeNumber(getCellValue(sheet, dataRow, c.delayInStartingHabitatCreation.column)) || 0,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
+        baselineReferenceNumber: String(getCellValue(sheet, dataRow, c.baselineReferenceNumber.column) || ""),
     };
 }
 
 export function parseOnSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseBaselineSchema {
+    const c = onSiteWatercourseBaselineSpec.columns;
     return {
-        watercourseType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        watercourseEncroachment: getCellValue(sheet, dataRow, "M"),
-        riparianEncroachment: getCellValue(sheet, dataRow, "O"),
-        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, "U")) || 0,
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "V")) || 0,
-        bespokeCompensation: getCellValue(sheet, dataRow, "AA") || undefined,
-        userComments: String(getCellValue(sheet, dataRow, "AB") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AC") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AD") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        watercourseEncroachment: getCellValue(sheet, dataRow, c.watercourseEncroachment.column),
+        riparianEncroachment: getCellValue(sheet, dataRow, c.riparianEncroachment.column),
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, c.lengthRetained.column)) || 0,
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.lengthEnhanced.column)) || 0,
+        bespokeCompensation: getCellValue(sheet, dataRow, c.bespokeCompensation.column) || undefined,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 }
 
 export function parseOnSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseCreationSchema {
+    const c = onSiteWatercourseCreationSpec.columns;
     return {
-        watercourseType: getCellValue(sheet, dataRow, "C"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "D")),
-        condition: getCellValue(sheet, dataRow, "G"),
-        strategicSignificance: getCellValue(sheet, dataRow, "I"),
-        delayInStarting: getCellValue(sheet, dataRow, "N") || undefined,
-        watercourseEncroachment: getCellValue(sheet, dataRow, "V"),
-        riparianEncroachment: getCellValue(sheet, dataRow, "X"),
-        userComments: String(getCellValue(sheet, dataRow, "AA") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AB") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AC") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        delayInStarting: getCellValue(sheet, dataRow, c.delayInStarting.column) || undefined,
+        watercourseEncroachment: getCellValue(sheet, dataRow, c.watercourseEncroachment.column),
+        riparianEncroachment: getCellValue(sheet, dataRow, c.riparianEncroachment.column),
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 }
 
 export function parseOnSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OnSiteWatercourseEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "B");
-    const baselineRow = findRow(baselineSheet, 2, baselineRef); // C
+    const c = onSiteWatercourseEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(onSiteWatercourseBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOnSiteWatercourseBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        watercourseType: getCellValue(sheet, dataRow, "N"),
-        condition: getCellValue(sheet, dataRow, "T"),
-        strategicSignificance: getCellValue(sheet, dataRow, "V"),
-        watercourseEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "Z")) || 0,
-        watercourseEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "AA")) || 0,
-        watercourseEncroachment: String(getCellValue(sheet, dataRow, "AI") || ""),
-        riparianEncroachment: String(getCellValue(sheet, dataRow, "AK") || ""),
-        userComments: String(getCellValue(sheet, dataRow, "AN") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AO") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AP") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        watercourseEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.watercourseEnhancedInAdvance.column)) || 0,
+        watercourseEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.watercourseEnhancedDelay.column)) || 0,
+        watercourseEncroachment: String(getCellValue(sheet, dataRow, c.watercourseEncroachment.column) || ""),
+        riparianEncroachment: String(getCellValue(sheet, dataRow, c.riparianEncroachment.column) || ""),
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     }
 }
 
 
 
 export function parseOffSiteWatercourseBaselineRow(sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseBaselineSchema {
+    const c = offSiteWatercourseBaselineSpec.columns;
     return {
-        watercourseType: getCellValue(sheet, dataRow, "D"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "E")),
-        condition: getCellValue(sheet, dataRow, "H"),
-        strategicSignificance: getCellValue(sheet, dataRow, "J"),
-        watercourseEncroachment: getCellValue(sheet, dataRow, "M"),
-        riparianEncroachment: getCellValue(sheet, dataRow, "O"),
-        spatialRiskCategory: getCellValue(sheet, dataRow, "S"),
-        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, "X")) || 0,
-        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, "Y")) || 0,
-        bespokeCompensation: getCellValue(sheet, dataRow, "AD") || undefined,
-        userComments: String(getCellValue(sheet, dataRow, "AE") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AF") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AG") || ""),
-        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, "AH") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        watercourseEncroachment: getCellValue(sheet, dataRow, c.watercourseEncroachment.column),
+        riparianEncroachment: getCellValue(sheet, dataRow, c.riparianEncroachment.column),
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column),
+        lengthRetained: normalizeNumber(getCellValue(sheet, dataRow, c.lengthRetained.column)) || 0,
+        lengthEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.lengthEnhanced.column)) || 0,
+        bespokeCompensation: getCellValue(sheet, dataRow, c.bespokeCompensation.column) || undefined,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     };
 }
 
 export function parseOffSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseCreationSchema {
+    const c = offSiteWatercourseCreationSpec.columns;
     return {
-        watercourseType: getCellValue(sheet, dataRow, "C"),
-        length: normalizeNumber(getCellValue(sheet, dataRow, "D")),
-        condition: getCellValue(sheet, dataRow, "G"),
-        strategicSignificance: getCellValue(sheet, dataRow, "I"),
-        habitatCreatedInAdvance: getCellValue(sheet, dataRow, "M"),
-        delayInStarting: getCellValue(sheet, dataRow, "N") || undefined,
-        watercourseEncroachment: getCellValue(sheet, dataRow, "V"),
-        riparianEncroachment: getCellValue(sheet, dataRow, "X"),
-        spatialRiskCategory: getCellValue(sheet, dataRow, "Z"),
-        userComments: String(getCellValue(sheet, dataRow, "AD") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AE") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AF") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatCreatedInAdvance: getCellValue(sheet, dataRow, c.habitatCreatedInAdvance.column),
+        delayInStarting: getCellValue(sheet, dataRow, c.delayInStarting.column) || undefined,
+        watercourseEncroachment: getCellValue(sheet, dataRow, c.watercourseEncroachment.column),
+        riparianEncroachment: getCellValue(sheet, dataRow, c.riparianEncroachment.column),
+        spatialRiskCategory: getCellValue(sheet, dataRow, c.spatialRiskCategory.column),
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     };
 }
 
 export function parseOffSiteWatercourseEnhancementRow(baselineSheet: XLSX.Sheet, sheet: XLSX.Sheet, dataRow: number): OffSiteWatercourseEnhancementSchema {
-    const baselineRef = getCellValue(sheet, dataRow, "B");
-    const baselineRow = findRow(baselineSheet, 2, baselineRef); // C
+    const c = offSiteWatercourseEnhancementSpec.columns;
+    const baselineRef = getCellValue(sheet, dataRow, c.baselineRef.column);
+    const baselineRow = findRow(baselineSheet, colIndex(offSiteWatercourseBaselineSpec.columns.ref.column), baselineRef);
     if (!baselineRow) throw Error("Unable to parse baseline row from ref: " + baselineRef);
     const baselineData = parseOffSiteWatercourseBaselineRow(baselineSheet, baselineRow);
 
     return {
         baseline: baselineData,
-        watercourseType: getCellValue(sheet, dataRow, "N"),
-        condition: getCellValue(sheet, dataRow, "T"),
-        strategicSignificance: getCellValue(sheet, dataRow, "V"),
-        watercourseEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, "Z")) || 0,
-        watercourseEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, "AA")) || 0,
-        watercourseEncroachment: String(getCellValue(sheet, dataRow, "AI") || ""),
-        riparianEncroachment: String(getCellValue(sheet, dataRow, "AK") || ""),
-        userComments: String(getCellValue(sheet, dataRow, "AQ") || ""),
-        planningAuthorityComments: String(getCellValue(sheet, dataRow, "AR") || ""),
-        habitatReferenceNumber: String(getCellValue(sheet, dataRow, "AS") || ""),
+        watercourseType: getCellValue(sheet, dataRow, c.watercourseType.column),
+        condition: getCellValue(sheet, dataRow, c.condition.column),
+        strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        watercourseEnhancedInAdvance: normalizeNumber(getCellValue(sheet, dataRow, c.watercourseEnhancedInAdvance.column)) || 0,
+        watercourseEnhancedDelay: normalizeNumber(getCellValue(sheet, dataRow, c.watercourseEnhancedDelay.column)) || 0,
+        watercourseEncroachment: String(getCellValue(sheet, dataRow, c.watercourseEncroachment.column) || ""),
+        riparianEncroachment: String(getCellValue(sheet, dataRow, c.riparianEncroachment.column) || ""),
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
+        habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
     }
 }
