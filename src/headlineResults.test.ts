@@ -1579,5 +1579,33 @@ describe("headlineResults - combined calculations", () => {
         expect(result.totalNetPercentageChange.hedgerow).toBe(0);
         expect(result.totalNetPercentageChange.watercourse).toBe(0);
     });
+
+    test("netGainTarget option drives unit summary requirement and deficit", () => {
+        const input = emptyFixture({
+            onSiteHabitatBaselines: [
+                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+            ],
+        });
+
+        const result = headlineResults(input, emptyTradingSummary(), { netGainTarget: 0.2 });
+
+        // baseline 100, 20% target => required 120, post 100, change 0 => deficit 20
+        expect(result.habitatUnitSummary.baselineUnits).toBe(100);
+        expect(result.habitatUnitSummary.requiredUnits).toBe(120);
+        expect(result.habitatUnitSummary.unitDeficit).toBe(20);
+    });
+
+    test("netGainTarget defaults to 0.1 when not provided", () => {
+        const input = emptyFixture({
+            onSiteHabitatBaselines: [
+                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+            ],
+        });
+
+        const result = headlineResults(input, emptyTradingSummary());
+
+        expect(result.habitatUnitSummary.requiredUnits).toBe(110);
+        expect(result.habitatUnitSummary.unitDeficit).toBe(10);
+    });
 });
 

@@ -518,7 +518,7 @@ function unitSummary(baseline: number, postIntervention: number, change: number,
     return {
         target,
         baselineUnits: baseline,
-        requiredUnits: new Decimal(1.1).mul(baseline).toNumber(),
+        requiredUnits,
         unitDeficit: unitDeficitNormalised,
     }
 }
@@ -526,7 +526,9 @@ function unitSummary(baseline: number, postIntervention: number, change: number,
 /*
  * Calculates all of the fields from the 'Headline Results' sheet
  */
-export function headlineResults(features: AllFeatures, tradingSummaries: TradingSummaries) {
+export function headlineResults(features: AllFeatures, tradingSummaries: TradingSummaries, options: { netGainTarget?: number } = {}) {
+    const netGainTarget = options.netGainTarget ?? 0.1;
+    const target = new Decimal(1).plus(netGainTarget).toNumber();
     // On-site baseline
     const onSiteHabitatBaseline = calculateOnSiteHabitatBaseline(features.onSiteHabitatBaselines);
     const onSiteHedgerowBaseline = calculateOnSiteHedgerowBaseline(features.onSiteHedgerowBaselines);
@@ -673,9 +675,9 @@ export function headlineResults(features: AllFeatures, tradingSummaries: Trading
     )
 
     // Unit Summaries
-    const habitatUnitSummary = unitSummary(onSiteHabitatBaseline, onSiteHabitatPostIntervention, offSiteHabitatNetChange.units, offSiteHabitatNetChangeWithSRM)
-    const hedgerowUnitSummary = unitSummary(onSiteHedgerowBaseline, onSiteHedgerowPostIntervention, offSiteHedgerowNetChange.units, offSiteHedgerowNetChangeWithSRM)
-    const watercourseUnitSummary = unitSummary(onSiteWatercourseBaseline, onSiteWatercoursePostIntervention, offSiteWatercourseNetChange.units, offSiteWatercourseNetChangeWithSRM)
+    const habitatUnitSummary = unitSummary(onSiteHabitatBaseline, onSiteHabitatPostIntervention, offSiteHabitatNetChange.units, offSiteHabitatNetChangeWithSRM, target)
+    const hedgerowUnitSummary = unitSummary(onSiteHedgerowBaseline, onSiteHedgerowPostIntervention, offSiteHedgerowNetChange.units, offSiteHedgerowNetChangeWithSRM, target)
+    const watercourseUnitSummary = unitSummary(onSiteWatercourseBaseline, onSiteWatercoursePostIntervention, offSiteWatercourseNetChange.units, offSiteWatercourseNetChangeWithSRM, target)
 
     return {
         onSiteHabitatBaseline,
