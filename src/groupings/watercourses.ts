@@ -185,39 +185,39 @@ function calculateRetainedUnitsOffSite(inputData: AllFeatures, watercourse: Wate
 }
 function calculateProposedLengthCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
-        .offSiteWatercourseBaselines
-        .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.lengthLost).toNumber(), 0);
-}
-function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
-    return inputData
-        .offSiteWatercourseBaselines
-        .filter(baseline => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsLost).toNumber(), 0);
-}
-function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
-    return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => new Decimal(sum).plus(creation.length).toNumber(), 0);
 }
-function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
+function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseCreations
         .filter(creation => isWatercourse(creation, watercourse))
         .reduce((sum, creation) => new Decimal(sum).plus(creation.unitsDelivered).toNumber(), 0);
 }
-function calculateTotalProposedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
+function calculateProposedLengthEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.length).toNumber(), 0);
 }
-function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
+function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
     return inputData
         .offSiteWatercourseEnhancements
         .filter(enhancement => isWatercourse(enhancement, watercourse))
         .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.watercourseUnitsDelivered).toNumber(), 0);
+}
+function calculateTotalProposedLengthOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
+    return new Decimal(calculateRetainedLengthOffSite(inputData, watercourse))
+        .plus(calculateProposedLengthCreationOffSite(inputData, watercourse))
+        .plus(calculateProposedLengthEnhancementOffSite(inputData, watercourse))
+        .toNumber();
+}
+function calculateTotalProposedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): number {
+    return new Decimal(calculateRetainedUnitsOffSite(inputData, watercourse))
+        .plus(calculateProposedUnitsCreationOffSite(inputData, watercourse))
+        .plus(calculateProposedUnitsEnhancementOffSite(inputData, watercourse))
+        .toNumber();
 }
 function calculateOffSiteNetLengthChange(inputData: AllFeatures, watercourse: Watercourse): number {
     return new Decimal(calculateTotalProposedLengthOffSite(inputData, watercourse))

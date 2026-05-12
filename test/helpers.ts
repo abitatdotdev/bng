@@ -42,12 +42,6 @@ const exampleMetricsFileNames =
                     // even though per-row B-1/B-2/B-3 tests pass — older sheet decomposes the
                     // hedgerow calc into columns we don't read.
                     'Birmingham_2024_05528_PA.xlsm',
-
-                    // Remaining small (~0.08-unit) drift in watercourse shortfall and trading-rules
-                    // aggregate after C-2 "30+" handling fixed the bulk of the divergence (10→2
-                    // failures). The per-row C-2 calcs match Excel; the residual is a downstream
-                    // rounding issue in featureShortfall / trading-summary tier aggregation.
-                    'Wakefield_24_01787_FUL.xlsm',
                 ].includes(name)
             )
             .map(f => [`./test/metrics/${f}`])
