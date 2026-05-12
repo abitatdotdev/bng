@@ -83,6 +83,12 @@ Here's a simple example, outputting parsed files to the console.
 </html>
 ```
 
+### Streaming large files
+
+For large metric files where loading the whole workbook into memory is a
+problem, use `parseFileStream` instead — it yields rows incrementally so the
+consumer can batch them. See [docs/streaming-parser.md](./docs/streaming-parser.md).
+
 ### Skipping validation
 
 By default, `parseFile` rejects rows that fail any of the metric's
@@ -136,8 +142,7 @@ Typescript will provide type hints where possible.
 
 ## Documentation
 
-- [Excel Column Mappings](./docs/excel-column-mappings.md) - Human-readable reference for Excel sheet structures. The authoritative spec the library actually reads is [`src/parsers/columnMappings.ts`](./src/parsers/columnMappings.ts).
-- [Unit Shortfall Calculations](./docs/unit-shortfall-calculations.md) - How the unit shortfall sheet determines whether BNG targets are met, including tier shortfall logic and cross-sheet data flow
+- [Streaming parser](./docs/streaming-parser.md) - `parseFileStream` for memory-bounded, row-by-row parsing of large metric files.
 
 ## Testing
 
