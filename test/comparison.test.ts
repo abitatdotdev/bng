@@ -1,4 +1,5 @@
 import { describe, test, expect } from "bun:test"
+import XLSX from 'xlsx';
 import * as v from 'valibot';
 import { EXCEL_FILES, expectCloseTo, testExcelFiles } from './helpers';
 import { getCellValue, getSheet } from '../src/parsers/excelHelpers';
@@ -29,7 +30,12 @@ import { unitShortfall } from "../src/unitShortfall";
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     const parsed = parseFile(fileName);
     const trading = tradingSummaries(parsed);
-    const headline = headlineResults(parsed, trading);
+    // parseWorkbook doesn't load the 'Start' sheet, so re-read for F22 (configured net-gain target).
+    const fullWorkbook = XLSX.readFile(fileName, { sheets: ['Start'], cellFormula: false, cellHTML: false });
+    const startSheet = getSheet(fullWorkbook, 'Start');
+    const f22 = startSheet ? getCellValue(startSheet, 21, 5) : null; // F22 (0-indexed row 21, col 5)
+    const netGainTarget = typeof f22 === 'number' && f22 > 0 ? f22 : 0.1;
+    const headline = headlineResults(parsed, trading, { netGainTarget });
     const shortfall = unitShortfall(parsed, headline, trading);
 
     describe("Headline Results", () => {
@@ -523,7 +529,7 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 const parsed = result.output;
 
                 // Get calculated values from Excel
-                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // Calculated column indices (0-indexed) — input columns come from src/parsers/columnMappings.ts; output columns below are derived empirically from observed sheets:
                 // U (20): Area (hectares)
                 // X (23): Distinctiveness Score
                 // Z (25): Condition Score
@@ -632,7 +638,7 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 const parsed = result.output;
 
                 // Get calculated values from Excel
-                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // Calculated column indices (0-indexed) — input columns come from src/parsers/columnMappings.ts; output columns below are derived empirically from observed sheets:
                 // F (5): Distinctiveness
                 // G (6): Distinctiveness Score
                 // I (8): Condition Score
@@ -730,7 +736,7 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 const parsed = result.output;
 
                 // Get calculated values from Excel
-                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // Calculated column indices (0-indexed) — input columns come from src/parsers/columnMappings.ts; output columns below are derived empirically from observed sheets:
                 // G (6): Distinctiveness Score
                 // I (8): Condition Score
                 // L (11): Strategic Significance Multiplier
@@ -1168,7 +1174,7 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 const parsed = result.output;
 
                 // Get calculated values from Excel
-                // Calculated column indices (0-indexed) - see docs/excel-column-mappings.md:
+                // Calculated column indices (0-indexed) — input columns come from src/parsers/columnMappings.ts; output columns below are derived empirically from observed sheets:
                 // V (21): Area (hectares)
                 // X (23): Distinctiveness Score (proposed)
                 // Z (25): Condition Score (proposed)
@@ -1645,18 +1651,18 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 }
                 const parsed = result.output;
 
-                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
-                // N(13) total units, V(21) units retained, W(22) units enhanced,
-                // Z(25) length lost, AA(26) units lost
+                // G(6) distinct score, I(8) condition score, L(11) strategic mult,
+                // R(17) total units (incl encroachment), W(22) units retained,
+                // X(23) units enhanced, Y(24) length lost, Z(25) units lost
                 const checks: Array<[number, keyof typeof parsed | string, any, string]> = [
-                    [5, 'distinctivenessScore', parsed.distinctivenessScore, "Distinctiveness Score"],
-                    [7, 'conditionScore', parsed.conditionScore, "Condition Score"],
-                    [10, 'strategicSignificanceMultiplier', parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
-                    [13, 'totalWatercourseUnits', parsed.totalWatercourseUnits, "Total Watercourse Units"],
-                    [21, 'unitsRetained', parsed.unitsRetained, "Units Retained"],
-                    [22, 'unitsEnhanced', parsed.unitsEnhanced, "Units Enhanced"],
-                    [25, 'lengthLost', parsed.lengthLost, "Length Lost"],
-                    [26, 'unitsLost', parsed.unitsLost, "Units Lost"],
+                    [6, 'distinctivenessScore', parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [8, 'conditionScore', parsed.conditionScore, "Condition Score"],
+                    [11, 'strategicSignificanceMultiplier', parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [17, 'totalWatercourseUnits', parsed.totalWatercourseUnits, "Total Watercourse Units"],
+                    [22, 'unitsRetained', parsed.unitsRetained, "Units Retained"],
+                    [23, 'unitsEnhanced', parsed.unitsEnhanced, "Units Enhanced"],
+                    [24, 'lengthLost', parsed.lengthLost, "Length Lost"],
+                    [25, 'unitsLost', parsed.unitsLost, "Units Lost"],
                 ];
 
                 try {
@@ -1760,8 +1766,12 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 // S(18) proposed distinct score, U(20) proposed condition score,
                 // X(23) strategic sig mult, Y(24) std TTT, AC(28) final TTT,
                 // AD(29) temporal mult, AH(33) difficulty mult applied,
-                // AJ(35) riparian encroachment mult, AL(37) both-banks encroachment mult,
-                // AM(38) final watercourse units delivered
+                // AJ(35) single-bank riparian mult, AL(37) both-banks mult,
+                // AM(38) final watercourse units delivered.
+                // Schema's `watercourseEncroachmentMultiplier` is the mult of the
+                // `watercourseEncroachment` input (column AI single-bank); the
+                // `riparianEncroachmentMultiplier` is mult of `riparianEncroachment`
+                // (column AK both-banks). Naming is historical.
                 const checks: Array<[number, any, string]> = [
                     [18, parsed.distinctivenessScore, "Proposed Distinctiveness Score"],
                     [20, parsed.conditionScore, "Proposed Condition Score"],
@@ -1769,8 +1779,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                     [28, parsed.finalTimeToTargetCondition, "Final Time to Target Condition"],
                     [29, parsed.temporalMultiplier, "Temporal Multiplier"],
                     [33, parsed.difficultyMultiplierApplied, "Difficulty Multiplier Applied"],
-                    [35, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
-                    [37, parsed.watercourseEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
+                    [35, parsed.watercourseEncroachmentMultiplier, "Single-Bank Encroachment Multiplier"],
+                    [37, parsed.riparianEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
                     [38, parsed.watercourseUnitsDelivered, "Watercourse Units Delivered"],
                 ];
 
@@ -1813,20 +1823,20 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 }
                 const parsed = result.output;
 
-                // F(5) distinctiveness, H(7) condition score, K(10) strategic mult,
-                // N(13) totalSRM, Q(16) spatial risk mult, R(17) totalWatercourseUnits,
-                // V(21) unitsRetained, W(22) unitsEnhanced, AD(29) lengthLost, AE(30) unitsLost
+                // G(6) distinct score, I(8) condition score, L(11) strategic mult,
+                // R(17) total with SRM, T(19) spatial risk mult, U(20) total without SRM,
+                // Z(25) unitsRetained, AA(26) unitsEnhanced, AB(27) lengthLost, AC(28) unitsLost
                 const checks: Array<[number, any, string]> = [
-                    [5, parsed.distinctivenessScore, "Distinctiveness Score"],
-                    [7, parsed.conditionScore, "Condition Score"],
-                    [10, parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
-                    [13, parsed.totalWatercourseUnitsSRM, "Total Watercourse Units (SRM)"],
-                    [16, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
-                    [17, parsed.totalWatercourseUnits, "Total Watercourse Units"],
-                    [21, parsed.unitsRetained, "Units Retained"],
-                    [22, parsed.unitsEnhanced, "Units Enhanced"],
-                    [29, parsed.lengthLost, "Length Lost"],
-                    [30, parsed.unitsLost, "Units Lost"],
+                    [6, parsed.distinctivenessScore, "Distinctiveness Score"],
+                    [8, parsed.conditionScore, "Condition Score"],
+                    [11, parsed.strategicSignificanceMultiplier, "Strategic Multiplier"],
+                    [17, parsed.totalWatercourseUnitsSRM, "Total Watercourse Units (SRM)"],
+                    [19, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
+                    [20, parsed.totalWatercourseUnits, "Total Watercourse Units"],
+                    [25, parsed.unitsRetained, "Units Retained"],
+                    [26, parsed.unitsEnhanced, "Units Enhanced"],
+                    [27, parsed.lengthLost, "Length Lost"],
+                    [28, parsed.unitsLost, "Units Lost"],
                 ];
 
                 try {
@@ -1925,11 +1935,11 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 }
                 const parsed = result.output;
 
-                // S(18) proposed distinctiveness score, U(20) proposed condition score,
+                // S(18) proposed distinct score, U(20) proposed condition score,
                 // X(23) strategic mult, AC(28) final TTT, AD(29) temporal mult,
                 // AH(33) difficulty mult applied, AJ(35) riparian mult,
-                // AL(37) both-banks mult, AM(38) units delivered (no SRM),
-                // AT(45) spatial risk mult, AU(46) units delivered (with SRM)
+                // AL(37) both-banks mult, AN(39) spatial risk mult,
+                // AO(40) units delivered with SRM, AP(41) units delivered without SRM
                 const checks: Array<[number, any, string]> = [
                     [18, parsed.distinctivenessScore, "Proposed Distinctiveness Score"],
                     [20, parsed.conditionScore, "Proposed Condition Score"],
@@ -1937,11 +1947,11 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                     [28, parsed.finalTimeToTargetCondition, "Final Time to Target Condition"],
                     [29, parsed.temporalMultiplier, "Temporal Multiplier"],
                     [33, parsed.difficultyMultiplierApplied, "Difficulty Multiplier Applied"],
-                    [35, parsed.riparianEncroachmentMultiplier, "Riparian Encroachment Multiplier"],
-                    [37, parsed.watercourseEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
-                    [38, parsed.watercourseUnitsDelivered, "Watercourse Units Delivered"],
-                    [45, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
-                    [46, parsed.watercourseUnitsDeliveredWithSpatialRisk, "Watercourse Units Delivered With Spatial Risk"],
+                    [35, parsed.watercourseEncroachmentMultiplier, "Single-Bank Encroachment Multiplier"],
+                    [37, parsed.riparianEncroachmentMultiplier, "Both-Banks Encroachment Multiplier"],
+                    [39, parsed.spatialRiskMultiplier, "Spatial Risk Multiplier"],
+                    [40, parsed.watercourseUnitsDeliveredWithSpatialRisk, "Watercourse Units Delivered With Spatial Risk"],
+                    [41, parsed.watercourseUnitsDelivered, "Watercourse Units Delivered"],
                 ];
 
                 try {
