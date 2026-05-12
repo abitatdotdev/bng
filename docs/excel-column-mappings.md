@@ -1,5 +1,7 @@
 # Excel Column Mappings
 
+> **Authoritative source:** `src/parsers/columnMappings.ts`. The TypeScript spec is the source of truth for the columns this library reads and how it validates workbook layout. This document is a human-readable reference only — when it disagrees with the spec, the spec wins. Calculated/output columns documented here are not validated against the spec and may drift; verify against an actual workbook before relying on them.
+
 This document provides a reference for Excel sheet column mappings used in the BNG (Biodiversity Net Gain) metric calculations.
 
 Excel file: `examples/less-simple.xlsm`
@@ -76,11 +78,12 @@ Populated automatically.
 - `AQ` (42): Habitat reference number
 
 **Calculated/Output Columns:**
-- `S` (19): Distinctiveness change
-- `T` (20): Condition change
-- `U` (21): Area (hectares)
-- `V` (22): Distinctiveness
+- `T` (19): Distinctiveness change
+- `U` (20): Condition change
+- `V` (21): Area (hectares)
+- `W` (22): Distinctiveness (proposed category)
 - `X` (23): Score (for distinctiveness)
+- `Y` (24): Condition (proposed category)
 - `Z` (25): Score (for condition)
 - `AB` (27): Strategic signficance (category)
 - `AC` (28): Strategic signficance multiplier
@@ -229,36 +232,41 @@ Populated automatically.
 **Data row start:** Row 11 (0-indexed as row 10)
 
 **Input Columns:**
-- `B` (1): Ref - Reference/sequence number
-- `C` (2): Watercourse type - Type of watercourse (links to G-7 Watercourse Data)
-- `D` (3): Length (km) - Watercourse length in kilometers
-- `G` (6): Condition - Condition of watercourse (uses INDIRECT validation to AK column)
-- `I` (8): Strategic Significance - Strategic significance category
-- `T` (19): Length Retained (km)
-- `U` (20): Length Enhanced (km)
-- `W` (22): User Comments
-- `X` (23): Planning Authority Comments
-- `Y` (24): Habitat Reference Number
+- `C` (2): Ref - Reference/sequence number
+- `D` (3): Watercourse type - Type of watercourse (links to G-7 Watercourse Data)
+- `E` (4): Length (km) - Watercourse length in kilometers
+- `H` (7): Condition - Condition of watercourse (uses INDIRECT validation to AR column)
+- `J` (9): Strategic Significance - Strategic significance category
+- `M` (12): Watercourse encroachment - Extent of encroachment on watercourse
+- `O` (14): Riparian encroachment - Extent of encroachment for both banks
+- `U` (20): Length Retained (km)
+- `V` (21): Length Enhanced (km)
+- `AA` (26): Bespoke Compensation Agreed
+- `AB` (27): User Comments
+- `AC` (28): Planning Authority Comments
+- `AD` (29): Habitat Reference Number
 
 **Calculated/Output Columns:**
-- `E` (4): Distinctiveness - VLOOKUP from G-7 Watercourse Data
-- `F` (5): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
-- `H` (7): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
-- `J` (9): Strategic Significance Value - VLOOKUP from G-7 Watercourse Data
-- `K` (10): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
-- `L` (11): Required Action - Trading rules lookup
-- `N` (13): Total Watercourse Units - D × F × H × K
-- `V` (21): Units Retained - T × F × H × K
-- `W` (22): Units Enhanced - U × F × H × K
-- `Z` (25): Length Lost - D - T - U (with error checking)
-- `AA` (26): Units Lost - N - V - W (with error checking)
-- `AK` (36): Condition Group - INDEX/MATCH from G-7 Watercourse Data
+- `F` (5): Distinctiveness - VLOOKUP from G-7 Watercourse Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
+- `I` (8): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
+- `K` (10): Strategic Significance Category - Category label from G-7 Watercourse Data
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
+- `N` (13): Watercourse Encroachment Multiplier - VLOOKUP from G-7 Watercourse Data
+- `P` (15): Riparian Encroachment Multiplier - VLOOKUP from G-7 Watercourse Data
+- `Q` (16): Required Action - Trading rules lookup
+- `R` (17): Total Watercourse Units - Length × Distinctiveness Score × Condition Score × Strategic Multiplier × Encroachment multipliers
+- `W` (22): Units Retained - Length Retained × G × I × L × encroachment multipliers
+- `X` (23): Units Enhanced - Length Enhanced × G × I × L × encroachment multipliers
+- `Y` (24): Length Lost - E - U - V (with error checking)
+- `Z` (25): Units Lost - R - W - X (with error checking)
+- `AR` (43): Condition Group - INDEX/MATCH from G-7 Watercourse Data
 
 **Special Features:**
 - Uses Length (km) instead of Area (hectares)
-- Condition column (G) uses INDIRECT validation based on AK (Condition Group)
+- Condition column (H) uses INDIRECT validation based on AR (Condition Group)
 - Error checking in columns for lost length and units
-- Main calculation (N) multiplies: Length × Distinctiveness Score × Condition Score × Strategic Significance Multiplier
+- Main calculation (R) multiplies: Length × Distinctiveness Score × Condition Score × Strategic Significance Multiplier × Watercourse Encroachment Multiplier × Riparian Encroachment Multiplier
 
 ### C-2 On-Site Watercourse Creation
 **Header rows:** Multiple rows (10-11, 0-indexed as 9-10)
@@ -323,9 +331,10 @@ Populated automatically from C-1 via VLOOKUP.
 - `G` (6): Baseline condition category
 - `H` (7): Baseline condition score
 - `I` (8): Baseline strategic significance category
-- `J` (9): Baseline strategic significance score
-- `K` (10): Baseline habitat units
+- `J` (9): Strategic significance (category label)
+- `K` (10): Baseline strategic significance score
 - `L` (11): Required Action to Meet Trading Rules
+- `M` (12): Baseline habitat units
 
 **Input Columns:**
 - `N` (13): Proposed habitat - User input for enhanced watercourse type
@@ -333,40 +342,37 @@ Populated automatically from C-1 via VLOOKUP.
 - `V` (21): Strategic significance - User input for strategic significance
 - `Z` (25): Watercourse enhanced in advance (years)
 - `AA` (26): Delay in starting watercourse enhancement (years)
-- `AI` (34): Extent of encroachment (riparian) - Encroachment on riparian area
-- `AK` (36): Extent of encroachment (both banks) - Encroachment on both sides
+- `AI` (34): Watercourse encroachment (single-bank) - Extent of encroachment
+- `AK` (36): Riparian encroachment (both banks) - Extent of encroachment for both banks
 - `AN` (39): User Comments
+- `AO` (40): Planning Authority Comments
+- `AP` (41): Habitat Reference Number
 
 **Calculated/Output Columns:**
 - `O` (14): Distinctiveness movement - Shows baseline → proposed distinctiveness change with validation
 - `P` (15): Condition movement - Shows baseline → proposed condition change with validation
-- `Q` (16): Proposed habitat reference - VLOOKUP to get proposed habitat system reference
+- `Q` (16): Length (km) - Proposed habitat length (visible)
 - `R` (17): Proposed distinctiveness category - VLOOKUP from G-7 Watercourse Data
 - `S` (18): Proposed distinctiveness score - VLOOKUP from G-7 Watercourse Data
 - `U` (20): Proposed condition score - INDEX/MATCH lookup for proposed condition
-- `V` (22): Baseline strategic significance category - From baseline
-- `W` (23): Baseline strategic significance score - From baseline lookup
-- `X` (24): Strategic significance multiplier - VLOOKUP from G-7 Watercourse Data (for proposed habitat)
-- `Y` (25): Standard time to target condition (years) - INDEX/MATCH from enhancement matrix (baseline condition → proposed condition)
-- `Z` (26): Habitat enhanced in advance (years) - User input field for early enhancement
-- `AA` (27): Delay in starting enhancement (years) - User input field for delayed enhancement
-- `AB` (28): Standard or adjusted time to target condition - Status message validating temporal inputs
-- `AC` (29): Final time to target condition (years) - Adjusted for advance/delay, capped at 30+
-- `AD` (30): Final time to target multiplier - Temporal multiplier from G-4
-- `AE` (31): Standard difficulty of enhancement - VLOOKUP from G-7 Watercourse Data
-- `AF` (32): Applied difficulty multiplier - Status message for difficulty adjustment
-- `AG` (33): Final difficulty of enhancement - Conditional difficulty selection
-- `AH` (34): Difficulty multiplier applied - Numeric multiplier from G-3
-- `AI` (35): Extent of encroachment (riparian) - User input field (validation dropdown)
-- `AJ` (36): Riparian encroachment multiplier - VLOOKUP from G-7 Watercourse Data
-- `AK` (37): Extent of encroachment (both banks) - User input field (validation dropdown)
-- `AL` (38): Both-banks encroachment multiplier - VLOOKUP from G-7 Watercourse Data
-- `AM` (39): Final watercourse units delivered - Complex calculation (see formula below)
+- `W` (22): Strategic significance category - From G-7 Watercourse Data
+- `X` (23): Strategic significance multiplier - VLOOKUP from G-7 Watercourse Data
+- `Y` (24): Standard time to target condition (years) - INDEX/MATCH from enhancement matrix (baseline condition → proposed condition)
+- `AB` (27): Standard or adjusted time to target condition - Status message validating temporal inputs
+- `AC` (28): Final time to target condition (years) - Adjusted for advance/delay, capped at 30+
+- `AD` (29): Final time to target multiplier - Temporal multiplier from G-4
+- `AE` (30): Standard difficulty of enhancement - VLOOKUP from G-7 Watercourse Data
+- `AF` (31): Applied difficulty multiplier - Status message for difficulty adjustment
+- `AG` (32): Final difficulty of enhancement - Conditional difficulty selection
+- `AH` (33): Difficulty multiplier applied - Numeric multiplier from G-3
+- `AJ` (35): Watercourse (single-bank) encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `AL` (37): Riparian (both-banks) encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `AM` (38): Final watercourse units delivered - Complex calculation (see formula below)
 
 **Validation Rules:**
 - `T` (19): Proposed Condition - INDIRECT validation based on AV (Condition Group) for proposed habitat type
-- `AI` (34): Riparian Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
-- `AK` (36): Both-Banks Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
+- `AI` (34): Watercourse (single-bank) Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
+- `AK` (36): Riparian (both-banks) Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
 
 **Key Formulas:**
 
@@ -427,43 +433,48 @@ The standard time to target condition (Y) uses an enhancement matrix lookup:
 **TypeScript module:** `src/offSite/watercourseBaseline.ts`
 
 **Input Columns:**
-- `B` (1): Ref - Reference/sequence number
-- `C` (2): Watercourse type - Type of watercourse (links to G-7 Watercourse Data)
-- `D` (3): Length (km) - Watercourse length in kilometers
-- `G` (6): Condition - Condition of watercourse (uses INDIRECT validation to AO column)
-- `I` (8): Strategic Significance - Strategic significance category
-- `M` (12): Spatial Risk Category - **Off-site only feature**
-- `T` (19): Length Retained (km)
-- `U` (20): Length Enhanced (km)
-- `Z` (25): User Comments
-- `AA` (26): Planning Authority Comments
-- `AB` (27): Habitat Reference Number
-- `AC` (28): Off-site Reference Number - **Required when spatial risk is set**
+- `C` (2): Ref - Reference/sequence number
+- `D` (3): Watercourse type - Type of watercourse (links to G-7 Watercourse Data)
+- `E` (4): Length (km) - Watercourse length in kilometers
+- `H` (7): Condition - Condition of watercourse (uses INDIRECT validation to AK column)
+- `J` (9): Strategic Significance - Strategic significance category
+- `M` (12): Watercourse encroachment - Extent of encroachment on watercourse
+- `O` (14): Riparian encroachment - Extent of encroachment for both banks
+- `S` (18): Spatial Risk Category - **Off-site only feature**
+- `X` (23): Length Retained (km)
+- `Y` (24): Length Enhanced (km)
+- `AD` (29): Bespoke Compensation Agreed
+- `AE` (30): User Comments
+- `AF` (31): Planning Authority Comments
+- `AG` (32): Habitat Reference Number
+- `AH` (33): Off-site Reference Number - **Required when spatial risk is set**
 
 **Calculated/Output Columns:**
-- `E` (4): Distinctiveness - VLOOKUP from G-7 Watercourse Data
-- `F` (5): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
-- `H` (7): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
-- `J` (9): Strategic Significance Value - VLOOKUP from G-7 Watercourse Data
-- `K` (10): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
-- `L` (11): Required Action - Trading rules lookup
-- `N` (13): Total Watercourse Units SRM - D × F × H × K × Q (with spatial risk)
-- `Q` (16): Spatial Risk Multiplier - VLOOKUP from spatial risk table, default 1.0
-- `R` (17): Total Watercourse Units - D × F × H × K (baseline, without spatial risk)
-- `V` (21): Units Retained - T × F × H × K
-- `W` (22): Units Enhanced - U × F × H × K
-- `AD` (29): Length Lost - D - T - U (with error checking)
-- `AE` (30): Units Lost - R - V - W (based on baseline units, not SRM)
-- `AO` (40): Condition Group - INDEX/MATCH from G-7 Watercourse Data
+- `F` (5): Distinctiveness - VLOOKUP from G-7 Watercourse Data
+- `G` (6): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
+- `I` (8): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
+- `K` (10): Strategic Significance Category - Category label from G-7 Watercourse Data
+- `L` (11): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
+- `N` (13): Watercourse Encroachment Multiplier - VLOOKUP from G-7 Watercourse Data
+- `P` (15): Riparian Encroachment Multiplier - VLOOKUP from G-7 Watercourse Data
+- `Q` (16): Required Action - Trading rules lookup
+- `R` (17): Total Watercourse Units (SRM) - includes spatial risk multiplier
+- `T` (19): Spatial Risk Multiplier - VLOOKUP from spatial risk table, default 1.0
+- `U` (20): Total Watercourse Units - baseline units without spatial risk multiplier
+- `Z` (25): Units Retained - Length Retained × Distinctiveness × Condition × Strategic × encroachment multipliers
+- `AA` (26): Units Enhanced - Length Enhanced × Distinctiveness × Condition × Strategic × encroachment multipliers
+- `AB` (27): Length Lost - E - X - Y (with error checking)
+- `AC` (28): Units Lost - U - Z - AA (based on baseline units, not SRM)
+- `AK` (36): Condition Group - INDEX/MATCH from G-7 Watercourse Data
 
 **Special Features:**
-- **Spatial risk multiplier** (Column M input, Column Q calculated) - unique to off-site
-- Two unit calculations: with SRM (Column N) and baseline (Column R)
-- Units lost based on baseline units (R), not SRM units (N)
+- **Spatial risk multiplier** (Column S input, Column T calculated) - unique to off-site
+- Two unit calculations: with SRM (Column R) and baseline (Column U)
+- Units lost based on baseline units (U), not SRM units (R)
 - Off-site reference required when spatial risk category is set
 - Error checking: "Off-site reference required ▲", "Check data ⚠", "Error in Lengths △"
 - Uses Length (km) instead of Area (hectares)
-- Condition column (G) uses INDIRECT validation based on AO (Condition Group)
+- Condition column (H) uses INDIRECT validation based on AK (Condition Group)
 
 **Differences from On-Site (C-1):**
 - Includes spatial risk category and multiplier applied to unit calculations
@@ -486,19 +497,19 @@ The standard time to target condition (Y) uses an enhancement matrix lookup:
 - `M` (12): Habitat created in advance (years)
 - `N` (13): Delay in starting habitat creation (years)
 - `V` (21): Watercourse encroachment - Extent of encroachment on watercourse
-- `X` (23): Riparian encroachment - Extent of encroachment on riparian area
-- `AA` (26): User Comments
-- `AB` (27): Planning Authority Comments
-- `AC` (28): Habitat Reference Number
-- `AD` (29): Spatial Risk Category - **Off-site only feature** (informational, NOT applied in unit calculation)
-- `AE` (30): Off-site Reference
-- `AF` (31): Baseline Reference
+- `X` (23): Riparian encroachment - Extent of encroachment for both banks
+- `Z` (25): Spatial Risk Category - **Off-site only feature**
+- `AD` (29): User Comments
+- `AE` (30): Planning Authority Comments
+- `AF` (31): Habitat Reference Number
+- `AG` (32): Off-site Reference
+- `AH` (33): Baseline Reference
 
 **Calculated/Output Columns:**
 - `E` (4): Distinctiveness - VLOOKUP from G-7 Watercourse Data
 - `F` (5): Distinctiveness Score - VLOOKUP from G-7 Watercourse Data
 - `H` (7): Condition Score - INDEX/MATCH lookup from G-7 Watercourse Data
-- `J` (9): Strategic Significance Value - VLOOKUP from G-7 Watercourse Data
+- `J` (9): Strategic Significance Category - From G-7 Watercourse Data
 - `K` (10): Strategic Significance Multiplier - Multiplier from G-7 Watercourse Data
 - `L` (11): Standard Time to Target Condition (years) - INDEX/MATCH from G-7 Watercourse Data
 - `O` (14): Standard or adjusted time to target condition - Status message
@@ -510,18 +521,19 @@ The standard time to target condition (Y) uses an enhancement matrix lookup:
 - `U` (20): Difficulty multiplier applied - Numeric multiplier from G-3
 - `W` (22): Watercourse encroachment multiplier - VLOOKUP from G-7 Watercourse Data
 - `Y` (24): Riparian encroachment multiplier - VLOOKUP from G-7 Watercourse Data
-- `Z` (25): Net Unit Change - Final net unit change (WITHOUT spatial risk multiplier)
+- `AA` (26): Spatial Risk Multiplier - VLOOKUP from spatial risk table (informational; not applied to net unit change)
+- `AB` (27): River units delivered (inc SRM) - Units including spatial risk multiplier
+- `AC` (28): Watercourse units delivered - Net Unit Change WITHOUT spatial risk multiplier
 - `AL` (37): Condition Group - INDEX/MATCH from G-7 Watercourse Data
 
 **Special Features:**
-- Spatial risk category included for reference but NOT applied in net unit change calculations
-- Single unit calculation (Z) that excludes spatial risk multiplier
+- Spatial risk category included for reference but NOT applied to the net unit change used by the library (the `unitsDelivered` schema output corresponds to the value without spatial risk)
 - Temporal adjustment logic for habitat created in advance or delayed (0-30+ years)
 - Difficulty multiplier logic: special case for ditch in "Fairly Poor" or "Fairly Good" condition created in advance (uses "Low" difficulty)
 - Encroachment multipliers vary: watercourse range from 0.25-1, riparian range from 0.67-1
 - Condition column (G) uses INDIRECT validation based on AL (Condition Group)
 - Error checking with status messages: "Not possible ▲", "Spatial Data Missing ⚠", "Check Data ⚠"
-- Main calculation (Z) multiplies all factors: Length × Distinctiveness Score × Condition Score × Strategic Significance Multiplier × Temporal Multiplier × Difficulty Multiplier × Watercourse Encroachment Multiplier × Riparian Encroachment Multiplier
+- Main calculation multiplies all factors: Length × Distinctiveness Score × Condition Score × Strategic Significance Multiplier × Temporal Multiplier × Difficulty Multiplier × Watercourse Encroachment Multiplier × Riparian Encroachment Multiplier
 
 **Differences from On-Site (C-2):**
 - Includes spatial risk category field for reference only
@@ -537,7 +549,7 @@ The standard time to target condition (Y) uses an enhancement matrix lookup:
 
 **Baseline Reference Columns:**
 Populated automatically from F-1 via reference lookup.
-- `B` (1): Baseline ref - Reference to baseline record (links to F-1 AC column)
+- `B` (1): Baseline ref - Reference to baseline record (links to F-1 record)
 - `C` (2): Baseline habitat - Watercourse type from baseline (lookup from F-1)
 - `D` (3): Length (km) - Watercourse length from baseline
 - `E` (4): Baseline distinctiveness band
@@ -545,60 +557,56 @@ Populated automatically from F-1 via reference lookup.
 - `G` (6): Baseline condition category
 - `H` (7): Baseline condition score
 - `I` (8): Baseline strategic significance category
-- `J` (9): Baseline strategic significance score
-- `K` (10): Baseline habitat units
+- `J` (9): Strategic significance (category label)
+- `K` (10): Baseline strategic significance score
 - `L` (11): Required Action to Meet Trading Rules
+- `M` (12): Baseline habitat units
 
 **Input Columns:**
 - `N` (13): Proposed habitat - User input for enhanced watercourse type
-- `T` (19): Condition - User input for proposed condition (uses INDIRECT validation to AW column)
+- `T` (19): Condition - User input for proposed condition (uses INDIRECT validation to AY column)
 - `V` (21): Strategic significance - User input for strategic significance
 - `Z` (25): Watercourse enhanced in advance (years)
 - `AA` (26): Delay in starting watercourse enhancement (years)
-- `AI` (34): Extent of encroachment (riparian) - Encroachment on riparian area
-- `AK` (36): Extent of encroachment (both banks) - Encroachment on both sides
-- `AP` (39): User Comments
-- `AQ` (40): Off-site Reference Number
-- `AR` (41): Habitat Reference Number
+- `AI` (34): Watercourse encroachment (single-bank) - Extent of encroachment
+- `AK` (36): Riparian encroachment (both banks) - Extent of encroachment for both banks
+- `AQ` (42): User Comments
+- `AR` (43): Planning Authority Comments
+- `AS` (44): Habitat Reference Number
+- `AT` (45): Off-site Reference Number
 
 **Calculated/Output Columns:**
 - `O` (14): Distinctiveness movement - Shows baseline → proposed distinctiveness change with validation
 - `P` (15): Condition movement - Shows baseline → proposed condition change with validation
-- `Q` (16): Proposed habitat reference - VLOOKUP to get proposed habitat system reference
+- `Q` (16): Length (km) - Proposed habitat length (visible)
 - `R` (17): Proposed distinctiveness category - VLOOKUP from G-7 Watercourse Data
 - `S` (18): Proposed distinctiveness score - VLOOKUP from G-7 Watercourse Data
 - `U` (20): Proposed condition score - INDEX/MATCH lookup for proposed condition
-- `V` (22): Baseline strategic significance category - From baseline
-- `W` (23): Baseline strategic significance score - From baseline lookup
-- `X` (24): Strategic significance multiplier - VLOOKUP from G-7 Watercourse Data (for proposed habitat)
-- `Y` (25): Standard time to target condition (years) - INDEX/MATCH from enhancement matrix (baseline condition → proposed condition)
-- `Z` (26): Watercourse enhanced in advance (years) - User input field for early enhancement
-- `AA` (27): Delay in starting enhancement (years) - User input field for delayed enhancement
-- `AB` (28): Standard or adjusted time to target condition - Status message validating temporal inputs
-- `AC` (29): Final time to target condition (years) - Adjusted for advance/delay, capped at 30+
-- `AD` (30): Final time to target multiplier - Temporal multiplier from G-4
-- `AE` (31): Standard difficulty of enhancement - VLOOKUP from G-7 Watercourse Data
-- `AF` (32): Applied difficulty multiplier - Status message for difficulty adjustment
-- `AG` (33): Final difficulty of enhancement - Conditional difficulty selection
-- `AH` (34): Difficulty multiplier applied - Numeric multiplier from G-3
-- `AI` (35): Extent of encroachment (riparian) - User input field (validation dropdown)
-- `AJ` (36): Riparian encroachment multiplier - VLOOKUP from G-7 Watercourse Data
-- `AK` (37): Extent of encroachment (both banks) - User input field (validation dropdown)
-- `AL` (38): Both-banks encroachment multiplier - VLOOKUP from G-7 Watercourse Data
-- `AM` (39): Final watercourse units delivered - Delta method calculation (WITHOUT spatial risk)
-- `AS` (44): Spatial risk category - From baseline F-1 record
-- `AT` (45): Spatial risk multiplier - VLOOKUP from spatial risk table
-- `AU` (46): Watercourse units delivered (inc SRM) - Final units with spatial risk multiplier
-- `AV` (47): Watercourse units delivered - Final units without spatial risk multiplier
+- `W` (22): Strategic significance category - From G-7 Watercourse Data
+- `X` (23): Strategic significance multiplier - VLOOKUP from G-7 Watercourse Data (for proposed habitat)
+- `Y` (24): Standard time to target condition (years) - INDEX/MATCH from enhancement matrix (baseline condition → proposed condition)
+- `AB` (27): Standard or adjusted time to target condition - Status message validating temporal inputs
+- `AC` (28): Final time to target condition (years) - Adjusted for advance/delay, capped at 30+
+- `AD` (29): Final time to target multiplier - Temporal multiplier from G-4
+- `AE` (30): Standard difficulty of enhancement - VLOOKUP from G-7 Watercourse Data
+- `AF` (31): Applied difficulty multiplier - Status message for difficulty adjustment
+- `AG` (32): Final difficulty of enhancement - Conditional difficulty selection
+- `AH` (33): Difficulty multiplier applied - Numeric multiplier from G-3
+- `AJ` (35): Watercourse (single-bank) encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `AL` (37): Riparian (both-banks) encroachment multiplier - VLOOKUP from G-7 Watercourse Data
+- `AM` (38): Spatial risk category - From baseline F-1 record
+- `AN` (39): Spatial risk multiplier - VLOOKUP from spatial risk table
+- `AO` (40): Watercourse units delivered (inc SRM) - Final units with spatial risk multiplier
+- `AP` (41): Watercourse units delivered - Final units without spatial risk multiplier
 
 **Validation Rules:**
-- `T` (19): Proposed Condition - INDIRECT validation based on AW (Condition Group) for proposed habitat type
-- `AI` (34): Riparian Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
-- `AK` (36): Both-Banks Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
+- `T` (19): Proposed Condition - INDIRECT validation based on Condition Group for proposed habitat type
+- `AI` (34): Watercourse (single-bank) Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
+- `AK` (36): Riparian (both-banks) Encroachment - IF(N="Culvert", "N/A - Culvert", list of encroachment levels)
 
 **Key Formulas:**
 
-The final units calculation (AM) uses delta method:
+The final units calculation uses delta method:
 ```
 (((proposed_ref*proposed_score*proposed_cond) - (baseline_len*baseline_score*baseline_cond))
   * (difficulty_multiplier * temporal_multiplier)
@@ -607,8 +615,8 @@ The final units calculation (AM) uses delta method:
 ```
 
 Then applies spatial risk:
-- Column AU: AM × AT (with spatial risk multiplier)
-- Column AV: AM (without spatial risk multiplier)
+- Column AO (40): units delivered × spatial risk multiplier (with SRM)
+- Column AP (41): units delivered (without spatial risk multiplier)
 
 **Special Features:**
 - References baseline data from F-1 using baseline ref (column B)
@@ -624,8 +632,8 @@ Then applies spatial risk:
   - Both-banks encroachment (AK, AL)
 - Encroachment multipliers vary by watercourse type and extent
 - Special handling for Culverts: must use "N/A - Culvert" for all encroachment fields
-- **Spatial risk multiplier** (Column AS input from F-1, Column AT calculated) - unique to off-site
-- Two unit calculations: with SRM (Column AU) and without (Column AV)
+- **Spatial risk multiplier** (Column AM from F-1, Column AN calculated) - unique to off-site
+- Two unit calculations: with SRM (Column AO) and without (Column AP)
 - Off-site reference field may be set
 - Error checking: "Not possible ▲", "Error - Not like for like ▲", "Error - Can not reduce condition ▲"
 - Net unit calculation uses delta method similar to C-3

@@ -136,7 +136,7 @@ Typescript will provide type hints where possible.
 
 ## Documentation
 
-- [Excel Column Mappings](./docs/excel-column-mappings.md) - Reference guide for Excel sheet structures and column mappings used in comparison tests
+- [Excel Column Mappings](./docs/excel-column-mappings.md) - Human-readable reference for Excel sheet structures. The authoritative spec the library actually reads is [`src/parsers/columnMappings.ts`](./src/parsers/columnMappings.ts).
 - [Unit Shortfall Calculations](./docs/unit-shortfall-calculations.md) - How the unit shortfall sheet determines whether BNG targets are met, including tier shortfall logic and cross-sheet data flow
 
 ## Testing

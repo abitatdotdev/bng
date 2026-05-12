@@ -22,7 +22,7 @@ If no arguments are given, produce a high-level summary of all sheets in `exampl
 
 1. **Use the excel-file-analyzer agent** (`@agent-excel-file-analyzer`) for all spreadsheet reads. Never use raw bash or the excel MCP tools directly.
 
-2. **Reference the column mappings** in `docs/excel-column-mappings.md` before reading any sheet. This tells you:
+2. **Reference the column mappings** in `src/parsers/columnMappings.ts` (the authoritative spec) before reading any sheet. `docs/excel-column-mappings.md` is a human-readable companion but may lag behind the spec. The spec tells you:
    - Which row headers and data rows start on
    - Which columns are inputs vs calculated outputs
    - Sheet-specific quirks (typos in names, special cases)
