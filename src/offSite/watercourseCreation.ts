@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
+import { freeTextSchema, lengthSchema, safeTransform, yearsSchema } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
@@ -20,8 +20,8 @@ const inputSchema = v.object({
     length: lengthSchema,
     condition: watercourseConditionSchema,
     strategicSignificance: strategicSignificanceSchema,
-    habitatCreatedInAdvance: v.optional(v.number(), 0),
-    delayInStarting: v.optional(v.number(), 0),
+    habitatCreatedInAdvance: v.optional(yearsSchema, 0),
+    delayInStarting: v.optional(yearsSchema, 0),
     watercourseEncroachment: watercourseEncroachmentSchema,
     riparianEncroachment: riparianEncroachmentSchema,
     spatialRiskCategory: watercourseSpatialRiskCategorySchema,
@@ -74,7 +74,10 @@ export const offSiteWatercourseCreationSchema = v.pipe(
     v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
     // Validate temporal inputs - can't have both advance and delay
     v.check(
-        s => !(s.habitatCreatedInAdvance > 0 && s.delayInStarting > 0),
+        s => !(
+            (typeof s.habitatCreatedInAdvance === "string" || s.habitatCreatedInAdvance > 0)
+            && (typeof s.delayInStarting === "string" || s.delayInStarting > 0)
+        ),
         "Cannot have both habitat created in advance and delay in starting"
     ),
     // Enrich with watercourse data

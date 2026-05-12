@@ -235,20 +235,24 @@ export function enrichWithCreationWatercourseData<Data extends {
 export function calculateTemporalAdjustments<Data extends {
     watercourseType: WatercourseLabel;
     condition: WatercourseCondition;
-    habitatCreatedInAdvance: number;
-    delayInStarting: number;
+    habitatCreatedInAdvance: number | "30+";
+    delayInStarting: number | "30+";
     standardTimeToTarget: number;
 }>(data: Data) {
+    // "30+" picklist entries are treated as 30 years for arithmetic.
+    const habitatCreatedInAdvance = data.habitatCreatedInAdvance === "30+" ? 30 : data.habitatCreatedInAdvance;
+    const delayInStarting = data.delayInStarting === "30+" ? 30 : data.delayInStarting;
+
     const standardOrAdjustedTimeToTargetCondition =
-        (data.standardTimeToTarget <= data.habitatCreatedInAdvance && data.delayInStarting === 0)
+        (data.standardTimeToTarget <= habitatCreatedInAdvance && delayInStarting === 0)
             ? "Check details - Is there evidence that habitat has reached target condition? ⚠" as const
-            : data.habitatCreatedInAdvance > 0
+            : habitatCreatedInAdvance > 0
                 ? "Check details - Is there evidence habitat creation started/in place? ⚠" as const
-                : data.delayInStarting > 0
+                : delayInStarting > 0
                     ? "Check details- Delay in starting habitat in required condition? ⚠" as const
                     : "Standard time to target condition applied" as const;
 
-    let finalTimeToTarget = new Decimal(data.standardTimeToTarget).plus(data.delayInStarting).minus(data.habitatCreatedInAdvance).toNumber();
+    let finalTimeToTarget = new Decimal(data.standardTimeToTarget).plus(delayInStarting).minus(habitatCreatedInAdvance).toNumber();
 
     if (finalTimeToTarget > 30) {
         finalTimeToTarget = 30;
@@ -289,8 +293,8 @@ export function lookupTemporalMultiplierFromFinalTime<Data extends {
 export function enrichWithTemporalData<Data extends {
     watercourseType: WatercourseLabel;
     condition: WatercourseCondition;
-    habitatCreatedInAdvance: number;
-    delayInStarting: number;
+    habitatCreatedInAdvance: number | "30+";
+    delayInStarting: number | "30+";
     standardTimeToTarget: number;
 }>(data: Data) {
     return lookupTemporalMultiplierFromFinalTime(calculateTemporalAdjustments(data));
@@ -308,8 +312,9 @@ export function calculateDifficultyData(input: {
     standardOrAdjustedTimeToTargetCondition: ReturnType<typeof calculateTemporalAdjustments>['standardOrAdjustedTimeToTargetCondition'],
     standardTimeToTarget: ReturnType<typeof enrichWithCreationWatercourseData>['standardTimeToTarget'],
     standardDifficulty: ReturnType<typeof enrichWithCreationWatercourseData>['standardDifficulty'],
-    habitatCreatedInAdvance: number;
+    habitatCreatedInAdvance: number | "30+";
 }) {
+    const habitatCreatedInAdvance = input.habitatCreatedInAdvance === "30+" ? 30 : input.habitatCreatedInAdvance;
     const standardDifficultyOfCreation = input.standardDifficulty;
     const appliedDifficulty =
         input.standardOrAdjustedTimeToTargetCondition === "Check details - Is there evidence that habitat has reached target condition? ⚠"
@@ -318,11 +323,11 @@ export function calculateDifficultyData(input: {
 
     const finalDifficultyOfCreation =
         (appliedDifficulty === "Standard difficulty applied"
-            && (typeof input.standardTimeToTarget === "number" && input.standardTimeToTarget > input.habitatCreatedInAdvance))
+            && (typeof input.standardTimeToTarget === "number" && input.standardTimeToTarget > habitatCreatedInAdvance))
             ? standardDifficultyOfCreation
             : (appliedDifficulty === "Low Difficulty - only applicable if all habitat created before losses ⚠"
                 && (typeof input.standardTimeToTarget === "number"
-                    && input.habitatCreatedInAdvance >= input.standardTimeToTarget))
+                    && habitatCreatedInAdvance >= input.standardTimeToTarget))
                 ? "Low"
                 : standardDifficultyOfCreation;
 
@@ -340,7 +345,7 @@ export function enrichWithDifficultyData<Data extends {
     standardTimeToTarget: ReturnType<typeof enrichWithCreationWatercourseData>['standardTimeToTarget'],
     standardDifficulty: ReturnType<typeof enrichWithCreationWatercourseData>['standardDifficulty'],
     isDitchFairlyCategory: boolean;
-    habitatCreatedInAdvance: number;
+    habitatCreatedInAdvance: number | "30+";
 }>(data: Data) {
     return { ...data, ...calculateDifficultyData(data) };
 }

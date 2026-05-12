@@ -282,6 +282,7 @@ export const onSiteWatercourseCreationSpec = {
         length: { column: 'D', header: 'Length (km)' },
         condition: { column: 'G', header: 'Condition' },
         strategicSignificance: { column: 'I', header: 'Strategic significance' },
+        habitatCreatedInAdvance: { column: 'M', header: 'Habitat created in advance' },
         delayInStarting: { column: 'N', header: 'Delay in starting habitat creation' },
         watercourseEncroachment: { column: 'V', header: 'Extent of encroachment' },
         riparianEncroachment: { column: 'X', header: 'Extent of encroachment for both banks' },

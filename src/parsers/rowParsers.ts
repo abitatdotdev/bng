@@ -290,6 +290,7 @@ export function parseOnSiteWatercourseCreationRow(sheet: XLSX.Sheet, dataRow: nu
         length: normalizeNumber(getCellValue(sheet, dataRow, c.length.column)),
         condition: getCellValue(sheet, dataRow, c.condition.column),
         strategicSignificance: getCellValue(sheet, dataRow, c.strategicSignificance.column),
+        habitatCreatedInAdvance: getCellValue(sheet, dataRow, c.habitatCreatedInAdvance.column),
         delayInStarting: getCellValue(sheet, dataRow, c.delayInStarting.column) || undefined,
         watercourseEncroachment: getCellValue(sheet, dataRow, c.watercourseEncroachment.column),
         riparianEncroachment: getCellValue(sheet, dataRow, c.riparianEncroachment.column),
