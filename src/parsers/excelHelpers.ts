@@ -100,6 +100,15 @@ export function normalizeNumber(value: any): number {
 }
 
 /**
+ * Normalise a years cell. Returns a non-negative integer or the literal "30+",
+ * defaulting to 0 for empty/non-numeric cells.
+ */
+export function normalizeYears(value: any): number | "30+" {
+    if (typeof value === "string" && value.trim() === "30+") return "30+";
+    return normalizeNumber(value);
+}
+
+/**
  * Find a specific row in a sheet by matching a value in a given column
  */
 export function findRow(sheet: SheetView | XLSX.WorkSheet, columnToCheckPresence: number, value: unknown, maxRows: number = MAX_DATA_ROWS): number | null {
