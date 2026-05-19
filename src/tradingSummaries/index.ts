@@ -3,7 +3,7 @@ import { habitatTradingSummary } from './habitats';
 import { hedgerowTradingSummary } from './hedgerows';
 import { watercourseTradingSummary } from './watercourses';
 
-export { habitatTradingSummary } from './habitats';
+export { habitatTradingSummary, cumulativeBroadHabitatChange } from './habitats';
 export { hedgerowTradingSummary } from './hedgerows';
 export { watercourseTradingSummary } from './watercourses';
 

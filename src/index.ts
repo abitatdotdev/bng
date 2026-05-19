@@ -3,6 +3,7 @@ export * from './headlineResults';
 export * from './tradingSummaries';
 export * from './unitShortfall';
 export * from './groupings';
+export type { DistinctivenessCategory } from './distinctivenessCategories';
 
 import { allHabitats } from './habitats';
 import { allHedgerows } from './hedgerows';

@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { habitatTradingSummary } from "./habitats";
+import { cumulativeBroadHabitatChange, habitatTradingSummary } from "./habitats";
 import { type AllFeatures } from "../features";
 
 function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
@@ -223,5 +223,30 @@ describe("habitatTradingSummary", () => {
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
         });
+    });
+});
+
+describe("cumulativeBroadHabitatChange", () => {
+    test("returns zero for broads with habitats at the requested distinctiveness when no features present", () => {
+        const result = cumulativeBroadHabitatChange(emptyFixture(), "High");
+        // Grassland has at least one habitat type at High distinctiveness
+        // (e.g. Traditional orchards) so the key is populated with 0.
+        expect(result.Grassland).toBe(0);
+    });
+
+    test("groups per-broad unit change at the requested distinctiveness category", () => {
+        const input = emptyFixture({
+            onSiteHabitatBaselines: [
+                { broadHabitat: "Grassland", habitatType: "Traditional orchards", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+            ],
+            onSiteHabitatCreations: [
+                { broadHabitat: "Grassland", habitatType: "Traditional orchards", habitatUnitsDelivered: 4, area: 4 } as any,
+            ],
+        });
+        const high = cumulativeBroadHabitatChange(input, "High");
+        expect(high.Grassland).toBe(-6);
+        // A Grassland-only loss leaves Medium tier unchanged.
+        const medium = cumulativeBroadHabitatChange(input, "Medium");
+        expect(medium.Grassland ?? 0).toBe(0);
     });
 });
