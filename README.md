@@ -16,6 +16,13 @@ The aims of this library are:
 On its own, this library doesn't do much.
 However, by building on top of this library, we can power the next wave of BNG tooling.
 
+## Abitat Finder
+
+If you have a statutory metric and need to source off-site biodiversity units,
+use [abitat finder](https://intel.abitat.dev/finder). Submit your metric and
+see every registered habitat bank in England that matches your deficit — built
+by the team behind this library. No account required.
+
 
 ## Community contributions
 
