@@ -52,7 +52,8 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@valibot/to-json-schema": "^1.7.0"
   },
   "peerDependencies": {
     "typescript": "^5"
