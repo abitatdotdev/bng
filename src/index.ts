@@ -3,6 +3,8 @@ export * from './headlineResults';
 export * from './tradingSummaries';
 export * from './unitShortfall';
 export * from './groupings';
+export * from './temporalMultipliers';
+export * from './watercourseEnhancementTemporalMatrix';
 export type { DistinctivenessCategory } from './distinctivenessCategories';
 
 import { allHabitats } from './habitats';
