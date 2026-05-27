@@ -50,56 +50,69 @@ const jsonSchema = toJsonSchema(catalog, {
     target: 'draft-2020-12',
 });
 
-type AnySchema = {
+type AnyAction = {
+    kind?: string;
     type?: string;
+    title?: string;
+    description?: string;
     options?: readonly string[];
-    pipe?: readonly AnySchema[];
-    entries?: Record<string, AnySchema>;
-    wrapped?: AnySchema;
-    default?: unknown;
+    pipe?: readonly AnyAction[];
+    entries?: Record<string, AnyAction>;
+    wrapped?: AnyAction;
 };
 
-// Find the innermost picklist options reachable from a schema (descends through
-// pipes and optional wrappers). Returns null if no picklist is present.
-function findPicklistOptions(schema: AnySchema | undefined): readonly string[] | null {
-    if (!schema) return null;
-    if (schema.type === 'picklist' && schema.options) return schema.options;
-    if (schema.type === 'optional' && schema.wrapped) return findPicklistOptions(schema.wrapped);
-    if (schema.pipe) {
-        for (let i = schema.pipe.length - 1; i >= 0; i--) {
-            const found = findPicklistOptions(schema.pipe[i]);
-            if (found) return found;
-        }
+type PropMeta = {
+    enum?: readonly string[];
+    title?: string;
+    description?: string;
+};
+
+// Walk into a schema collecting picklist options and metadata (title/description),
+// descending through pipes and optional wrappers.
+function collectMeta(schema: AnyAction | undefined, meta: PropMeta = {}): PropMeta {
+    if (!schema) return meta;
+    if (schema.kind === 'metadata' && schema.type === 'title' && !meta.title) {
+        meta.title = schema.title;
     }
-    return null;
+    if (schema.kind === 'metadata' && schema.type === 'description' && !meta.description) {
+        meta.description = schema.description;
+    }
+    if (schema.type === 'picklist' && schema.options && !meta.enum) {
+        meta.enum = schema.options;
+    }
+    if (schema.type === 'optional' && schema.wrapped) collectMeta(schema.wrapped, meta);
+    if (schema.pipe) for (const item of schema.pipe) collectMeta(item, meta);
+    return meta;
 }
 
 // Walk a valibot object schema (possibly wrapped in pipes/optionals) and yield
-// [propertyName, picklistOptions] for each property whose value is a picklist.
-function* picklistPropsOf(
-    schema: AnySchema | undefined,
-): Generator<[string, readonly string[]]> {
+// [propertyName, collectedMetadata] for each property.
+function* propsOf(
+    schema: AnyAction | undefined,
+): Generator<[string, PropMeta]> {
     if (!schema) return;
     if (schema.type === 'object' && schema.entries) {
         for (const [name, entry] of Object.entries(schema.entries)) {
-            const opts = findPicklistOptions(entry);
-            if (opts) yield [name, opts];
+            yield [name, collectMeta(entry)];
         }
         return;
     }
     if (schema.pipe) {
-        for (const item of schema.pipe) yield* picklistPropsOf(item);
+        for (const item of schema.pipe) yield* propsOf(item);
     }
 }
 
-const defs = (jsonSchema as { properties?: Record<string, { properties?: Record<string, { enum?: readonly string[] }> }> }).properties ?? {};
+const defs = (jsonSchema as { properties?: Record<string, { properties?: Record<string, PropMeta> }> }).properties ?? {};
 
 for (const [name, valibotSchema] of Object.entries(schemas)) {
     const defEntry = defs[name];
     if (!defEntry?.properties) continue;
-    for (const [propName, options] of picklistPropsOf(valibotSchema as unknown as AnySchema)) {
+    for (const [propName, meta] of propsOf(valibotSchema as unknown as AnyAction)) {
         const prop = defEntry.properties[propName];
-        if (prop) prop.enum = [...options];
+        if (!prop) continue;
+        if (meta.enum && !prop.enum) prop.enum = [...meta.enum];
+        if (meta.title && !prop.title) prop.title = meta.title;
+        if (meta.description && !prop.description) prop.description = meta.description;
     }
 }
 

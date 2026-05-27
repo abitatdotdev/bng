@@ -11,6 +11,10 @@ const conditions = [
     "N/A - Other",
 ] as const;
 
-export const conditionSchema = fuzzyPicklist(conditions);
+export const conditionSchema = v.pipe(
+    fuzzyPicklist(conditions),
+    v.title('Habitat condition'),
+    v.description('Outcome of the condition assessment for the habitat parcel.'),
+);
 export type Condition = v.InferOutput<typeof conditionSchema>
 

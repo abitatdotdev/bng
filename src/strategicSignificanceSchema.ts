@@ -17,8 +17,10 @@ const strategicSignificance = [
 ] as const;
 export type StrategicSignificance = typeof strategicSignificance[number];
 
-export const strategicSignificanceSchema = fuzzyPicklist(
-    strategicSignificance.map(s => s.description),
+export const strategicSignificanceSchema = v.pipe(
+    fuzzyPicklist(strategicSignificance.map(s => s.description)),
+    v.title('Strategic significance'),
+    v.description('Whether the habitat parcel is formally identified in a local strategy.'),
 );
 export type StrategicSignificanceDescription = v.InferOutput<typeof strategicSignificanceSchema>
 

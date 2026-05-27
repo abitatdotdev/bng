@@ -20,5 +20,9 @@ const broadHabitats = [
     "",
 ] as const;
 
-export const broadHabitatSchema = fuzzyPicklist(broadHabitats);
+export const broadHabitatSchema = v.pipe(
+    fuzzyPicklist(broadHabitats),
+    v.title('Broad habitat'),
+    v.description('The broad category for the habitat.'),
+);
 export type BroadHabitat = v.InferOutput<typeof broadHabitatSchema>;

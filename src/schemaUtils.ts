@@ -23,24 +23,31 @@ export function safeTransform<I, O>(fn: (input: I) => O) {
 
 export const areaSchema = v.pipe(
     v.number(),
-    v.toMinValue(0),
+    v.minValue(0),
+    v.title('Area'),
+    v.description('Habitat parcel area in hectares.'),
 )
 
 // Length schema for hedgerows and watercourses (in kilometers)
 export const lengthSchema = v.pipe(
     v.number(),
-    v.toMinValue(0),
+    v.minValue(0),
+    v.title('Length'),
+    v.description('Hedgerow or watercourse length in kilometres.'),
 );
 
-export const freeTextSchema = v.optional(v.string());
+export const freeTextSchema = v.optional(v.pipe(
+    v.string(),
+    v.description('Free-text field; not used in calculations.'),
+));
 
 export const yearsSchema =
     v.union([
         v.pipe(
             v.number(),
             v.integer(),
-            v.toMinValue(0),
-            v.toMaxValue(30),
+            v.minValue(0),
+            v.maxValue(30),
         ),
         v.literal("30+")
     ])
