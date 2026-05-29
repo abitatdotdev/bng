@@ -21,6 +21,7 @@ import { offSiteWatercourseBaselineSchema } from '../src/offSite/watercourseBase
 import { offSiteWatercourseCreationSchema } from '../src/offSite/watercourseCreation';
 import { offSiteWatercourseEnhancementSchema } from '../src/offSite/watercourseEnhancement';
 
+export function buildInputsJsonSchema() {
 const schemas = {
     onSiteHabitatBaseline: onSiteHabitatBaselineSchema,
     onSiteHabitatCreation: onSiteHabitatCreationSchema,
@@ -121,15 +122,18 @@ const { $schema, properties = {} } = jsonSchema as {
     properties?: Record<string, unknown>;
 };
 
-const output = {
-    $schema,
-    $id: 'https://abitat.dev/schemas/bng/inputs.json',
-    title: '@abitat/bng input schemas',
-    description: 'Input shapes for every BNG parcel schema. Reference any entry via `#/$defs/<name>`.',
-    $defs: properties,
-};
+    return {
+        $schema,
+        $id: 'https://abitatdotdev.github.io/bng/inputs.json',
+        title: 'BNG Metric Input Schema',
+        description: 'Input shapes for every BNG parcel schema. Reference any entry via `#/$defs/<name>`.',
+        $defs: properties,
+    };
+}
 
-await Bun.write(
-    'dist/schemas/inputs.json',
-    JSON.stringify(output, null, 2) + '\n',
-);
+if (import.meta.main) {
+    await Bun.write(
+        'dist/schemas/inputs.json',
+        JSON.stringify(buildInputsJsonSchema(), null, 2) + '\n',
+    );
+}

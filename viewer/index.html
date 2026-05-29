@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>BNG Metric Schema</title>
+    <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css" />
+    <style>
+        html,
+        body,
+        #root {
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root">Loading…</div>
+    <script type="module">
+        const [schema, overview] = await Promise.all([
+            fetch('./inputs.json').then((r) => r.json()),
+            fetch('./overview.md').then((r) => (r.ok ? r.text() : '')),
+        ]);
+
+        // Strip the draft 2020-12 $schema marker (Elements/OpenAPI 3.1 doesn't need it on nested schemas)
+        // and rehome $defs under components.schemas. Rewrite internal #/$defs/* refs accordingly.
+        const defs = schema.$defs ?? {};
+        const rewriteRefs = (node) => {
+            if (Array.isArray(node)) return node.map(rewriteRefs);
+            if (node && typeof node === 'object') {
+                const out = {};
+                for (const [k, v] of Object.entries(node)) {
+                    if (k === '$ref' && typeof v === 'string' && v.startsWith('#/$defs/')) {
+                        out[k] = v.replace('#/$defs/', '#/components/schemas/');
+                    } else {
+                        out[k] = rewriteRefs(v);
+                    }
+                }
+                return out;
+            }
+            return node;
+        };
+
+        const schemas = rewriteRefs(defs);
+
+        const openapi = {
+            openapi: '3.1.0',
+            info: {
+                title: schema.title ?? 'BNG Metric Schema',
+                version: '0.14.3',
+                description: overview || schema.description || '',
+            },
+            paths: {},
+            components: {schemas},
+            // Elements uses tags to group items in the sidebar
+            tags: Object.keys(schemas).map((name) => ({name})),
+        };
+
+        await customElements.whenDefined('elements-api');
+        const el = document.createElement('elements-api');
+        el.setAttribute('router', 'hash');
+        el.setAttribute('layout', 'sidebar');
+        el.setAttribute('apiDescriptionDocument', JSON.stringify(openapi));
+        const root = document.getElementById('root');
+        root.replaceWith(el);
+    </script>
+</body>
+
+</html>
