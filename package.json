@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/abitatdotdev/bng.git"
   },
-  "license": "LGPL-3.0",
+  "license": "SEE LICENSE IN LICENSE.md",
   "author": "Matt Williams <matt@abitat.dev>",
   "type": "module",
   "main": "./dist/index.cjs",
