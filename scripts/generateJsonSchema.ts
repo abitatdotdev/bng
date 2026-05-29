@@ -1,6 +1,8 @@
 import * as v from 'valibot';
 import { toJsonSchema } from '@valibot/to-json-schema';
 
+import pkg from '../package.json' with { type: 'json' };
+
 import { onSiteHabitatBaselineSchema } from '../src/onSite/habitatBaseline';
 import { onSiteHabitatCreationSchema } from '../src/onSite/habitatCreation';
 import { onSiteHabitatEnhancementSchema } from '../src/onSite/habitatEnhancement';
@@ -127,6 +129,7 @@ const { $schema, properties = {} } = jsonSchema as {
         $id: 'https://abitatdotdev.github.io/bng/inputs.json',
         title: 'BNG Metric Input Schema',
         description: 'Input shapes for every BNG parcel schema. Reference any entry via `#/$defs/<name>`.',
+        version: pkg.version,
         $defs: properties,
     };
 }
