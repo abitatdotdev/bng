@@ -27,3 +27,10 @@ For example, `offSiteHedgerowEnhancement` is the input for enhancing an existing
 ## Source
 
 See the project README and `docs/` directory for calculation details and worked examples.
+
+## License
+
+- **The schema** (this document, `inputs.json`) is dedicated to the **public domain under CC0 1.0** — adopt, extend, and redistribute freely, including commercially, with no attribution required.
+- **The library** that generates and validates against it is **dual-licensed**: free for noncommercial use (charities, education, environmental protection organisations, government) under the PolyForm Noncommercial License 1.0.0; commercial use requires a separate license from abitat (<hello@abitat.dev>).
+
+Full terms: [license.md](./license.md).
