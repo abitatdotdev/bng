@@ -315,22 +315,16 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
             const baseline = data._baselineHedgerow;
             const proposed = allHedgerows[data.habitatType];
 
-            // V.High/High: Same hedgerow required (like for like)
-            if (['V.High', 'High'].includes(baseline.distinctivenessCategory)) {
+            // Mirror the DEFRA workbook (column O on E-3 / B-3): the only
+            // distinctiveness rejection is High→High with mismatched labels.
+            // Otherwise require same-or-better distinctiveness.
+            if (
+                baseline.distinctivenessCategory === 'High' &&
+                proposed.distinctivenessCategory === 'High'
+            ) {
                 return baseline.label === proposed.label;
             }
-
-            // Medium: Same distinctiveness or higher
-            if (baseline.distinctivenessCategory === 'Medium') {
-                return proposed.distinctivenessScore >= baseline.distinctivenessScore;
-            }
-
-            // Low: Same distinctiveness or better
-            if (baseline.distinctivenessCategory === 'Low') {
-                return proposed.distinctivenessScore >= baseline.distinctivenessScore;
-            }
-
-            return true;
+            return proposed.distinctivenessScore >= baseline.distinctivenessScore;
         },
         "Trading rules not satisfied - hedgerow distinctiveness mismatch"
     ),

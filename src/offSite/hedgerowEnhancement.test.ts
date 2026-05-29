@@ -175,7 +175,7 @@ test("temporal adjustment validation - cannot have both advance and delay", () =
     ).success).toBeFalse();
 });
 
-test("trading rules - V.High and High distinctiveness require like for like", () => {
+test("trading rules - V.High baseline rejects lower-distinctiveness proposed", () => {
     const baseline = createBaseline({
         habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch",
         distinctivenessScore: 8,
@@ -184,17 +184,52 @@ test("trading rules - V.High and High distinctiveness require like for like", ()
         conditionScore: 1,
     });
 
-    // Should succeed with same habitat
+    // Same habitat is fine
     expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
         baseline,
         habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch",
         condition: "Moderate"
     })).success).toBeTrue();
 
-    // Should fail with different habitat
+    // Downgrade to High distinctiveness is rejected
     expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
         baseline,
         habitatType: "Species-rich native hedgerow with trees",
+        condition: "Moderate"
+    })).success).toBeFalse();
+});
+
+test("trading rules - High baseline allows upgrade to V.High proposed", () => {
+    // Mirrors DEFRA workbook column O: only "High - High" with mismatched
+    // labels is rejected. A High baseline upgraded to a V.High variant
+    // (e.g. Native → Species-rich) must pass.
+    const baseline = createBaseline({
+        habitatType: "Native hedgerow with trees - associated with bank or ditch",
+        distinctivenessScore: 6,
+        distinctiveness: "High",
+        condition: "Poor",
+        conditionScore: 1,
+    });
+
+    expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
+        baseline,
+        habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch",
+        condition: "Moderate"
+    })).success).toBeTrue();
+});
+
+test("trading rules - High baseline rejects different-label High proposed", () => {
+    const baseline = createBaseline({
+        habitatType: "Native hedgerow with trees - associated with bank or ditch",
+        distinctivenessScore: 6,
+        distinctiveness: "High",
+        condition: "Poor",
+        conditionScore: 1,
+    });
+
+    expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
+        baseline,
+        habitatType: "Species-rich native hedgerow - associated with bank or ditch",
         condition: "Moderate"
     })).success).toBeFalse();
 });
