@@ -3,13 +3,23 @@
 > [!NOTE]
 > This repository is a work in progress. Reach out to hello@abitat.dev to contribute.
 
-The code here provides a source-available, dual-licensed version of the
+The code here provides an implementation of the
 [statutory biodiversity metric calculation tool](https://www.gov.uk/government/publications/statutory-biodiversity-metric-tools-and-guides)
 published by [DEFRA](https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs).
-Noncommercial use — including by charities, educational institutions,
-environmental protection organisations, and government — is free under the
-[PolyForm Noncommercial License 1.0.0](./LICENSE.md). Commercial use
-requires a separate license from abitat (<hello@abitat.dev>).
+
+**Licensing** ([full terms](./LICENSE.md)):
+
+- The **JSON Schema** published at
+  <https://abitatdotdev.github.io/bng/inputs.json> is dedicated to the
+  **public domain under CC0 1.0** — anyone, including commercial
+  entities, may adopt and build on it as a shared standard with no
+  restrictions.
+- The **library source code** is **dual-licensed**: free for
+  noncommercial use (including charities, education, environmental
+  protection organisations, and government) under the
+  [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0);
+  commercial use requires a separate license from abitat
+  (<hello@abitat.dev>).
 
 The aims of this library are:
 * directly mirror the existing spreadsheet calculation tool

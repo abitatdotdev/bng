@@ -1,8 +1,27 @@
 # License
 
-This project is **dual-licensed**.
+This project distinguishes between **the schema** (a public standard) and
+**the library** (the JavaScript implementation). They are licensed
+separately.
 
-## Noncommercial use — PolyForm Noncommercial License 1.0.0
+## The schema — CC0 1.0 (public domain)
+
+The JSON Schema document(s) produced by this library — including the
+artefact published at `dist/schemas/inputs.json` and at
+<https://abitatdotdev.github.io/bng/inputs.json> — are dedicated to the
+**public domain** under
+[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
+Anyone, including commercial entities, may use, adopt, redistribute, and
+build on the schema without restriction or attribution requirement.
+
+The schema is intended to be adopted as a common standard by the BNG
+working group and the wider ecosystem.
+
+## The library — dual-licensed
+
+The JavaScript source code in this repository is **dual-licensed**.
+
+### Noncommercial use — PolyForm Noncommercial License 1.0.0
 
 For any noncommercial purpose — including use by charitable organisations,
 educational institutions, public research bodies, environmental protection
@@ -10,10 +29,10 @@ organisations, and government institutions (as detailed in the license
 below) — this software is made available free of charge under the
 **PolyForm Noncommercial License 1.0.0**, the full text of which follows.
 
-## Commercial use — separate license from abitat
+### Commercial use — separate license from abitat
 
-For any commercial use, a separate license must be agreed with abitat.
-Contact <hello@abitat.dev> to discuss terms.
+For any commercial use of the library source code, a separate license must
+be agreed with abitat. Contact <hello@abitat.dev> to discuss terms.
 
 ---
 

@@ -2,7 +2,7 @@ import { buildInputsJsonSchema } from './generateJsonSchema';
 
 const SRC = 'viewer';
 const OUT = 'site';
-const STATIC_FILES = ['index.html', 'overview.md'];
+const STATIC_FILES = ['index.html', 'overview.md', 'license.md'];
 
 await Bun.write(
     `${OUT}/inputs.json`,
