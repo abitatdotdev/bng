@@ -5,6 +5,7 @@ export * from './unitShortfall';
 export * from './groupings';
 export * from './temporalMultipliers';
 export * from './watercourseEnhancementTemporalMatrix';
+export * from './operatorHelpers';
 export type { DistinctivenessCategory } from './distinctivenessCategories';
 
 import { allHabitats } from './habitats';
