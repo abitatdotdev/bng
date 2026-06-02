@@ -12,6 +12,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
@@ -33,6 +38,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
@@ -56,6 +66,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
@@ -79,6 +94,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
@@ -102,6 +122,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
@@ -127,6 +152,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
@@ -152,6 +182,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 10,
@@ -178,6 +213,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
@@ -203,6 +243,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
@@ -227,6 +272,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': 5,
@@ -256,6 +306,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
@@ -282,6 +337,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 5,
             'Moderate': 20,
@@ -307,6 +367,11 @@ export const allHedgerows = {
         technicalDifficultyCreationMultiplier: difficulty['Low'],
         technicalDifficultyEnhancement: 'Low',
         technicalDifficultyEnhancementMultiplier: difficulty['Low'],
+        conditions: {
+            'Good': 3,
+            'Moderate': 2,
+            'Poor': 1,
+        },
         yearsToTargetConditionViaCreation: {
             'Poor': 1,
             'Moderate': undefined,

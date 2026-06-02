@@ -7,6 +7,13 @@ export * from './temporalMultipliers';
 export * from './watercourseEnhancementTemporalMatrix';
 export * from './operatorHelpers';
 export type { DistinctivenessCategory } from './distinctivenessCategories';
+export {
+    getSpatialRiskMultiplier,
+    getWatercourseSpatialRiskMultiplier,
+    type SpatialRiskCategory,
+    type WatercourseSpatialRiskCategory,
+} from './spatialRisk';
+export { getStrategicSignificance } from './strategicSignificanceSchema';
 
 import { allHabitats } from './habitats';
 import { allHedgerows } from './hedgerows';

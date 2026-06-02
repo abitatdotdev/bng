@@ -248,6 +248,14 @@ export const allHedgerows = {
         code += `        technicalDifficultyEnhancement: ${hedgerow.technicalDifficultyEnhancement ? `'${escapeString(hedgerow.technicalDifficultyEnhancement)}'` : 'null'},\n`;
         code += `        technicalDifficultyEnhancementMultiplier: ${hedgerow.technicalDifficultyEnhancement ? `difficulty['${escapeString(hedgerow.technicalDifficultyEnhancement)}']` : '1'},\n`;
 
+        // Per-condition score map (mirrors shape of allHabitats / allWatercourses).
+        // Hedgerows use the simplified statutory scoring: Good=3, Moderate=2, Poor=1.
+        code += `        conditions: {\n`;
+        code += `            'Good': 3,\n`;
+        code += `            'Moderate': 2,\n`;
+        code += `            'Poor': 1,\n`;
+        code += `        },\n`;
+
         // Creation temporal data
         if (Object.keys(hedgerow.yearsToTargetConditionViaCreation).length > 0) {
             code += `        yearsToTargetConditionViaCreation: {\n`;
@@ -294,7 +302,8 @@ export const allHedgerows = {
         }
     });
 
-    code += `
+    code += `} as const;
+
 export type HedgerowMap = typeof allHedgerows;
 type HedgerowMapLabel = keyof HedgerowMap;
 export type Hedgerow = HedgerowMap[HedgerowMapLabel];

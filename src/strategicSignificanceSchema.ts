@@ -24,6 +24,14 @@ export const strategicSignificanceSchema = v.pipe(
 );
 export type StrategicSignificanceDescription = v.InferOutput<typeof strategicSignificanceSchema>
 
-export const getStrategicSignificance = (desc: v.InferInput<typeof strategicSignificanceSchema>) => {
-    return strategicSignificance.find(s => s.description === desc)!;
+const strategicSignificanceByDescription: Record<StrategicSignificanceDescription, StrategicSignificance> =
+    Object.fromEntries(strategicSignificance.map(s => [s.description, s])) as Record<
+        StrategicSignificanceDescription,
+        StrategicSignificance
+    >;
+
+export const getStrategicSignificance = (
+    desc: StrategicSignificanceDescription,
+): StrategicSignificance => {
+    return strategicSignificanceByDescription[desc];
 }
