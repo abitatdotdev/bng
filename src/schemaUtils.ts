@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { habitatByBroadAndType, type Habitat } from './habitats';
+import { habitatByBroadAndType, habitatByType, type Habitat } from './habitats';
 import { type BroadHabitat } from './broadHabitats';
 import { type BaselineHabitatType, type CreationHabitatType, type EnhancedHabitatType } from './habitatTypes';
 import type { Condition } from './conditions';
@@ -83,7 +83,15 @@ type EnrichedHabitatData = {
 }
 
 export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType, strategicSignificance: StrategicSignificanceDescription, irreplaceableHabitat?: boolean }>(data: Data): Data & EnrichedHabitatData => {
-    const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
+    let habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType);
+    if (!habitat) {
+        const fallback = habitatByType(data.habitatType);
+        if (fallback) {
+            console.warn(`Habitat lookup: "${data.broadHabitat}" + "${data.habitatType}" mismatch, falling back to type-only (-> "${fallback.broadHabitat}")`);
+            habitat = fallback;
+        }
+    }
+    if (!habitat) throw new Error(`Unknown habitat: ${data.broadHabitat} / ${data.habitatType}`);
 
     return {
         ...data,
@@ -102,7 +110,15 @@ export const enrichWithHabitatData = <Data extends { broadHabitat: BroadHabitat,
 }
 
 export const enrichWithCreationData = <Data extends { broadHabitat: BroadHabitat; habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType; condition: string; }>(data: Data) => {
-    const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
+    let habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType);
+    if (!habitat) {
+        const fallback = habitatByType(data.habitatType);
+        if (fallback) {
+            console.warn(`Habitat lookup: "${data.broadHabitat}" + "${data.habitatType}" mismatch, falling back to type-only (-> "${fallback.broadHabitat}")`);
+            habitat = fallback;
+        }
+    }
+    if (!habitat) throw new Error(`Unknown habitat: ${data.broadHabitat} / ${data.habitatType}`);
 
     return {
         ...data,

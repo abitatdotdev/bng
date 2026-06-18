@@ -8301,6 +8301,9 @@ export function habitatByLabel(label: HabitatLabel): Habitat | undefined {
 export function habitatByBroadAndType(broadHabitat: BroadHabitat, habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): Habitat | undefined {
     return Object.values(allHabitats).find(h => isHabitat({ broadHabitat, habitatType }, h));
 }
+export function habitatByType(habitatType: BaselineHabitatType | CreationHabitatType | EnhancedHabitatType): Habitat | undefined {
+    return Object.values(allHabitats).find(h => h.type === habitatType);
+}
 export function isHabitat<T extends { broadHabitat: string, habitatType: string }>(x: T, habitat: Habitat) {
     return x.broadHabitat === habitat.broadHabitat && x.habitatType === habitat.type;
 }

@@ -1,5 +1,11 @@
-import { expect, test } from "bun:test";
-import { addTotalHabitatUnits, isValidIrreplaceable } from "./schemaUtils";
+import { afterEach, expect, spyOn, test } from "bun:test";
+import { addTotalHabitatUnits, enrichWithCreationData, enrichWithHabitatData, isValidIrreplaceable } from "./schemaUtils";
+
+let warnSpy: ReturnType<typeof spyOn<Console, "warn">> | undefined;
+afterEach(() => {
+    warnSpy?.mockRestore();
+    warnSpy = undefined;
+});
 
 test("addTotalHabitatUnits - bespoke required and compensation agreed", () => {
     const data = {
@@ -95,4 +101,60 @@ test("isValidIrreplaceable - invalid habitat combinations", () => {
 test("isValidIrreplaceable - individual trees urban tree", () => {
     expect(isValidIrreplaceable("Individual trees", "Urban tree", true)).toBe(true);
     expect(isValidIrreplaceable("Individual trees", "Urban tree", false)).toBe(true);
+});
+
+test("enrichWithHabitatData - falls back to type-only lookup on broad/type mismatch", () => {
+    warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+
+    const data = {
+        broadHabitat: "Heathland and shrub" as const,
+        habitatType: "Introduced shrub" as const,
+        condition: "Condition Assessment N/A" as const,
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy" as const,
+        irreplaceableHabitat: false,
+    };
+
+    const result = enrichWithHabitatData(data);
+
+    expect(result.broadHabitat).toBe("Heathland and shrub");
+    expect(result._habitat.broadHabitat).toBe("Urban");
+    expect(result._habitat.type).toBe("Introduced shrub");
+    expect(result.distinctivenessScore).toBe(2);
+    expect(result.conditionScore).toBe(1);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const warnMsg = String(warnSpy.mock.calls[0]?.[0] ?? "");
+    expect(warnMsg).toContain("Heathland and shrub");
+    expect(warnMsg).toContain("Introduced shrub");
+});
+
+test("enrichWithHabitatData - throws on totally unknown type", () => {
+    warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() =>
+        enrichWithHabitatData({
+            broadHabitat: "Heathland and shrub" as const,
+            // @ts-expect-error intentionally invalid
+            habitatType: "Definitely not a real habitat type",
+            condition: "Condition Assessment N/A",
+            strategicSignificance: "Area/compensation not in local strategy/ no local strategy" as const,
+            irreplaceableHabitat: false,
+        })
+    ).toThrow(/Unknown habitat/);
+});
+
+test("enrichWithCreationData - falls back to type-only lookup on broad/type mismatch", () => {
+    warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+
+    const result = enrichWithCreationData({
+        broadHabitat: "Heathland and shrub" as const,
+        habitatType: "Introduced shrub" as const,
+        condition: "Condition Assessment N/A",
+    });
+
+    expect(result.broadHabitat).toBe("Heathland and shrub");
+    expect(result.timeToTargetCondition).toBe(1);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const warnMsg = String(warnSpy.mock.calls[0]?.[0] ?? "");
+    expect(warnMsg).toContain("Heathland and shrub");
+    expect(warnMsg).toContain("Introduced shrub");
 });
