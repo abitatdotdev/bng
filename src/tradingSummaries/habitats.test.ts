@@ -161,6 +161,23 @@ describe("habitatTradingSummary", () => {
             });
             expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
         });
+
+        test.only("medium surpluses cross-broad net towards overall tier success", () => {
+            // Medium Grassland loses 10 units
+            // Medium Shrub gains 11 units
+            // Medium satisfied
+            const input = emptyFixture({
+                onSiteHabitatCreations: [
+                    { broadHabitat: "Grassland", habitatType: "Other lowland acid grassland", habitatUnitsDelivered: 10, area: 1 } as any,
+                    { broadHabitat: "Heathland and Shrub", habitatType: "Blackthorn scrub", habitatUnitsDelivered: 21, area: 1 } as any,
+                ],
+                onSiteHabitatBaselines: [
+                    { broadHabitat: "Grassland", habitatType: "Other lowland acid grassland", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                ],
+            });
+            console.info(habitatTradingSummary(input));
+            expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
+        });
     });
 
     describe("lowSatisfied", () => {
