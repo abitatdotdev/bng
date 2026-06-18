@@ -19,20 +19,24 @@ export function calculateBaselineUnits(input: {
     strategicSignificanceMultiplier: number;
     broadHabitat?: string;
 }) {
+    const distinctivenessScore = input.distinctivenessScore ?? 0;
+    const conditionScore = input.conditionScore ?? 0;
+    const strategicSignificanceMultiplier = input.strategicSignificanceMultiplier ?? 0;
+
     const baselineUnitsRetained = input.irreplaceableHabitat
         ? 0
         : new Decimal(input.areaRetained)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
+            .mul(distinctivenessScore)
+            .mul(conditionScore)
+            .mul(strategicSignificanceMultiplier)
             .toNumber();
 
     const baselineUnitsEnhanced = (input.broadHabitat === "Individual trees" && input.areaEnhanced > 0 && input.irreplaceableHabitat)
         ? 0
         : new Decimal(input.areaEnhanced)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
+            .mul(distinctivenessScore)
+            .mul(conditionScore)
+            .mul(strategicSignificanceMultiplier)
             .toNumber();
 
     const areaHabitatLost = new Decimal(input.area)
@@ -91,14 +95,18 @@ export function calculateTotalHabitatUnits(input: {
     const hasEnhancement = input.areaEnhanced > 0;
     const hasBiodiversityGain = hasRetention || hasEnhancement;
 
+    const distinctivenessScore = input.distinctivenessScore ?? 0;
+    const conditionScore = input.conditionScore ?? 0;
+    const strategicSignificanceMultiplier = input.strategicSignificanceMultiplier ?? 0;
+
     let totalHabitatUnits: number = 0;
 
     if (input.irreplaceableHabitat) {
         totalHabitatUnits = new Decimal(input.areaRetained)
             .plus(input.areaEnhanced)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
+            .mul(distinctivenessScore)
+            .mul(conditionScore)
+            .mul(strategicSignificanceMultiplier)
             .toNumber();
     } else if (bespokeRequired && !hasBiodiversityGain && input.bespokeCompensationAgreed === "Yes") {
         totalHabitatUnits = 0;
@@ -106,9 +114,9 @@ export function calculateTotalHabitatUnits(input: {
         totalHabitatUnits = new Decimal(input.baselineUnitsRetained).plus(input.baselineUnitsEnhanced).toNumber();
     } else {
         totalHabitatUnits = new Decimal(input.area)
-            .mul(input.distinctivenessScore)
-            .mul(input.conditionScore)
-            .mul(input.strategicSignificanceMultiplier)
+            .mul(distinctivenessScore)
+            .mul(conditionScore)
+            .mul(strategicSignificanceMultiplier)
             .toNumber();
     }
 
