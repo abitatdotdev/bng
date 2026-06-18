@@ -162,7 +162,7 @@ describe("habitatTradingSummary", () => {
             expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
         });
 
-        test.only("medium surpluses cross-broad net towards overall tier success", () => {
+        test("medium surpluses cross-broad net towards overall tier success", () => {
             // Medium Grassland loses 10 units
             // Medium Shrub gains 11 units
             // Medium satisfied
