@@ -129,8 +129,10 @@ describe("standardYearsToTarget", () => {
         ).toBe(5);
     });
 
-    test("disqualified ('Not Possible ▲') → 0", () => {
+    test("disqualified ('Not Possible ▲') passes through the sentinel", () => {
         // Cropland habitats have 'Not Possible ▲' for every target condition.
+        // The helper now returns the raw sentinel so callers can route it
+        // through lookupTemporalMultiplier instead of collapsing to 0.
         expect(
             standardYearsToTarget(
                 "Cropland - Arable field margins cultivated annually",
@@ -138,7 +140,33 @@ describe("standardYearsToTarget", () => {
                 "Good",
                 "creation",
             ),
-        ).toBe(0);
+        ).toBe("Not Possible ▲");
+    });
+
+    test("habitat enhancement: Lowland mixed deciduous woodland Poor → Good = '30+'", () => {
+        // Regression: previously returned 0 because the lookup value is a
+        // string sentinel, which silently collapsed enhancement scoring to
+        // creation-form arithmetic in downstream consumers.
+        expect(
+            standardYearsToTarget(
+                "Woodland and forest - Lowland mixed deciduous woodland",
+                "Poor",
+                "Good",
+                "enhancement",
+            ),
+        ).toBe("30+");
+    });
+
+    test("habitat enhancement: 'Not Possible ▲' sentinel passes through", () => {
+        // Cropland enhancement Poor → Good is 'Not Possible ▲'.
+        expect(
+            standardYearsToTarget(
+                "Cropland - Arable field margins cultivated annually",
+                "Poor",
+                "Good",
+                "enhancement",
+            ),
+        ).toBe("Not Possible ▲");
     });
 
     test("unknown habitat label → 0", () => {

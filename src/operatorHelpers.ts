@@ -80,7 +80,8 @@ export function strategicSignificanceMultiplier(
 
 // --- standardYearsToTarget ----------------------------------------------------
 
-const isNumber = (v: unknown): v is number => typeof v === 'number';
+const isNumberOrString = (v: unknown): v is number | string =>
+    typeof v === 'number' || typeof v === 'string';
 
 type HabitatLabel = keyof typeof allHabitats;
 type HedgerowLabel = keyof typeof allHedgerows;
@@ -101,17 +102,22 @@ type WatercourseLabel = keyof typeof allWatercourses;
  *  - `'distinctiveness'` — for hedgerow/watercourse only: `targetCondition`
  *    is the destination habitat label, not a condition.
  *
- * Returns `0` for any disqualified or missing-input case (unknown habitat,
- * `"Not Possible ▲"`, `"30+"`, mis-typed pathway). Callers that need to
- * distinguish "impossible" from "instant" should check upstream — this
- * helper is a safe, single-line getter for the *expected years* number.
+ * Returns the raw value from the underlying data table:
+ *  - a `number` for a real year count,
+ *  - a string sentinel like `"30+"` or `"Not Possible ▲"` where the metric
+ *    expresses an out-of-band case,
+ *  - `0` only for truly unknown inputs (label not in any family, mis-typed
+ *    pathway, or missing required `currentCondition`).
+ *
+ * Callers that need a temporal multiplier should route the result through
+ * {@link lookupTemporalMultiplier}, which understands the string sentinels.
  */
 export function standardYearsToTarget(
     habitatLabel: string,
     currentCondition: string | null | undefined,
     targetCondition: string,
     role: 'creation' | 'enhancement' | 'distinctiveness',
-): number {
+): number | string {
     // Try each family in turn — labels are unique across families.
     const habitat = (allHabitats as Record<string, unknown>)[habitatLabel] as
         | (typeof allHabitats)[HabitatLabel]
@@ -128,14 +134,14 @@ export function standardYearsToTarget(
     if (role === 'creation') {
         if (habitat) {
             const v = (habitat.temporalMultipliers as Record<string, unknown>)[targetCondition];
-            return isNumber(v) ? v : 0;
+            return isNumberOrString(v) ? v : 0;
         }
         const map =
             (hedgerow?.yearsToTargetConditionViaCreation as Record<string, unknown> | null | undefined) ??
             (watercourse?.yearsToTargetConditionViaCreation as Record<string, unknown> | null | undefined);
         if (!map) return 0;
         const v = map[targetCondition];
-        return isNumber(v) ? v : 0;
+        return isNumberOrString(v) ? v : 0;
     }
 
     if (role === 'enhancement') {
@@ -143,14 +149,14 @@ export function standardYearsToTarget(
         if (habitat) {
             const key = `${currentCondition} - ${targetCondition}`;
             const v = (habitat.enhancementTemporalMultipliers as Record<string, unknown>)[key];
-            return isNumber(v) ? v : 0;
+            return isNumberOrString(v) ? v : 0;
         }
         const map = (hedgerow as { yearsToTargetConditionViaEnhancement?: Record<string, unknown> } | undefined)
             ?.yearsToTargetConditionViaEnhancement;
         if (!map) return 0;
         const key = `${currentCondition} to ${targetCondition}`;
         const v = map[key];
-        return isNumber(v) ? v : 0;
+        return isNumberOrString(v) ? v : 0;
     }
 
     // role === 'distinctiveness' — hedgerow/watercourse only; targetCondition
@@ -160,5 +166,5 @@ export function standardYearsToTarget(
             ?.yearsToTargetConditionViaDistinctiveness ?? null;
     if (!distMap) return 0;
     const v = distMap[targetCondition];
-    return isNumber(v) ? v : 0;
+    return isNumberOrString(v) ? v : 0;
 }
