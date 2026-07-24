@@ -1,6 +1,17 @@
 // Export the main parsing function
 export { parseFile, type ParseFileOptions } from './parseFile';
 
+// Stateless JSON → AllFeatures assembler — the serverless counterpart to
+// `parseFile`. Same schemas, but sourced from plain input arrays and
+// collecting issues instead of throwing.
+export {
+    featuresFromInput,
+    type BngInput,
+    type InputIssue,
+    type FeaturesFromInputOptions,
+    type FeaturesFromInputResult,
+} from './featuresFromInput';
+
 // Streaming parser — yields rows incrementally; works in node, bun, browser, workers
 export {
     parseFileStream,
