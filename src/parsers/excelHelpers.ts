@@ -8,6 +8,15 @@ import { decodeCol } from './cellRef';
 export const MAX_DATA_ROWS = 200;
 
 /**
+ * Rightmost column to process in Excel sheets. The furthest right any sheet
+ * spec reads is AU (`D-3 Off-Site Habitat Enhancment.offSiteReferenceNumber`);
+ * BZ leaves room for a metric version to add columns. Metric sheets carry
+ * stray formatted cells out to XFD, so an open-ended range costs a lot of
+ * memory for cells no parser reads.
+ */
+export const MAX_DATA_COLUMN = 'BZ';
+
+/**
  * Backend-agnostic view onto a sheet. Implementations only have to return
  * the cell value at a given (row, col) — letter or 0-indexed integer for col.
  */
@@ -33,7 +42,7 @@ function sheetJsData(sheet: XLSX.WorkSheet): any[][] {
             {
                 header: 1,
                 raw: true,
-                range: `A1:ZZ${MAX_DATA_ROWS}`,
+                range: `A1:${MAX_DATA_COLUMN}${MAX_DATA_ROWS}`,
             },
         ) as any[][];
         sheetDataCache.set(sheet, data);
