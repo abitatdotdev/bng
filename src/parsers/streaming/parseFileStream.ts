@@ -194,6 +194,17 @@ const PIPELINE: readonly PipelineEntry[] = [
     { tag: 'enhancement', kind: 'offSiteWatercourseEnhancement', spec: offSiteWatercourseEnhancementSpec, baselineSpec: offSiteWatercourseBaselineSpec, parseRow: parseOffSiteWatercourseEnhancementRow, checked: offSiteWatercourseEnhancementSchema, unchecked: offSiteWatercourseEnhancementUncheckedSchema },
 ];
 
+/** Sheet name → rightmost column index any spec reads from it. */
+const maxColByName = new Map<string, number>(
+    (allSheetSpecs as readonly SheetSpec[]).map(spec => [
+        spec.name,
+        Math.max(
+            decodeCol(spec.dataDetectionColumn),
+            ...Object.values(spec.columns).map(c => decodeCol(c.column)),
+        ),
+    ]),
+);
+
 export function parseFileStream(
     input: ParseFileStreamInput,
     options: ParseFileStreamOptions = {},
@@ -225,6 +236,11 @@ async function* iterate(input: ParseFileStreamInput, validate: boolean, signal?:
     /**
      * `maxRow` bounds how many rows are retained. Bounded views are never cached
      * — they'd be missing the data rows a later caller expects.
+     *
+     * Columns are always bounded by the rightmost one the sheet's spec names —
+     * a metric sheet can carry stray cells out to column XFD, and no row parser
+     * looks past its own spec (enhancement rows read the baseline sheet only
+     * through the baseline spec's columns).
      */
     const loadView = (name: string, maxRow?: number): SheetView => {
         const cached = viewCache.get(name);
@@ -233,7 +249,7 @@ async function* iterate(input: ParseFileStreamInput, validate: boolean, signal?:
         if (!path) throw new Error(`xlsx: sheet "${name}" not found`);
         const xml = takeWorksheet(path);
         if (xml == null) throw new Error(`xlsx: worksheet entry "${path}" missing or already consumed`);
-        const rows = parseWorksheet(xml, sharedStrings, maxRow);
+        const rows = parseWorksheet(xml, sharedStrings, maxRow, maxColByName.get(name));
         const view = sheetViewFromRows(rows);
         if (maxRow === undefined) viewCache.set(name, view);
         return view;

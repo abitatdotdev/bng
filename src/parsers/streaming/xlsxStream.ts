@@ -76,11 +76,13 @@ export function parseWorkbookIndex(workbookXml: string, relsXml: string): Workbo
  * Parse an xlsx worksheet XML into a sparse {row → {col → value}} map.
  * Only rows up to MAX_DATA_ROWS + a small header buffer are retained.
  *
- * Stops scanning at the first row past `maxRow`, so the tail of a long sheet is
- * never touched. `<row>` elements are emitted in ascending order by every xlsx
- * writer; a row out of order past the cap would be skipped rather than misread.
+ * Stops scanning at the first row past `maxRow`, and at the first cell past
+ * `maxCol`, so neither the tail of a long sheet nor the right-hand side of a
+ * wide one is touched. `<row>` and `<c>` elements are emitted in ascending
+ * order by every xlsx writer; one out of order past the cap would be skipped
+ * rather than misread.
  */
-export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MAX_DATA_ROWS + 20): SheetRows {
+export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MAX_DATA_ROWS + 20, maxCol = Infinity): SheetRows {
     const rows: SheetRows = new Map();
     const rowRe = /<row\b([^>]*)>([\s\S]*?)<\/row>/g;
     const cellRe = /<c\b([^/>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
@@ -101,6 +103,7 @@ export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MA
             const refMatch = /\br="([A-Z]+)\d+"/.exec(attrs);
             if (!refMatch) continue;
             const col = decodeCol(refMatch[1]!);
+            if (col > maxCol) break;
             const t = /\bt="([^"]*)"/.exec(attrs)?.[1] ?? 'n';
 
             let value: CellValue = null;
