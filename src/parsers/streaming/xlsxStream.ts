@@ -75,6 +75,10 @@ export function parseWorkbookIndex(workbookXml: string, relsXml: string): Workbo
 /**
  * Parse an xlsx worksheet XML into a sparse {row → {col → value}} map.
  * Only rows up to MAX_DATA_ROWS + a small header buffer are retained.
+ *
+ * Stops scanning at the first row past `maxRow`, so the tail of a long sheet is
+ * never touched. `<row>` elements are emitted in ascending order by every xlsx
+ * writer; a row out of order past the cap would be skipped rather than misread.
  */
 export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MAX_DATA_ROWS + 20): SheetRows {
     const rows: SheetRows = new Map();
@@ -85,7 +89,7 @@ export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MA
         const rowAttrMatch = /\br="(\d+)"/.exec(rm[1]!);
         if (!rowAttrMatch) continue;
         const rowIdx = Number(rowAttrMatch[1]) - 1;
-        if (rowIdx >= maxRow) continue;
+        if (rowIdx >= maxRow) break;
 
         const inner = rm[2]!;
         const cells = new Map<number, CellValue>();
@@ -171,13 +175,14 @@ export async function toUint8Array(input: ParseFileStreamInput): Promise<Uint8Ar
 }
 
 /**
- * Two-pass loader:
+ * Lazy loader:
  *  1. Decompress workbook.xml + rels to discover which worksheet entries we actually need.
- *  2. Decompress only the needed worksheets (plus sharedStrings.xml).
+ *  2. Decompress sharedStrings.xml eagerly (every sheet needs it).
+ *  3. Decompress worksheets one at a time, on demand.
  *
- * Returns a function `takeWorksheet(path)` that returns and *removes* a sheet's
- * decompressed XML — the caller is expected to parse and drop it before
- * requesting the next, so peak memory stays bounded by a single sheet's XML.
+ * `takeWorksheet(path)` inflates a single worksheet and returns its XML without
+ * retaining it, so peak memory stays bounded by one sheet's XML. Calling it
+ * again for the same path re-inflates.
  */
 export function loadWorkbookEntries(data: Uint8Array, neededSheetPaths: (workbookXml: string, relsXml: string) => Set<string>): {
     workbookXml: string;
@@ -197,29 +202,19 @@ export function loadWorkbookEntries(data: Uint8Array, neededSheetPaths: (workboo
 
     const needed = neededSheetPaths(workbookXml, relsXml);
 
-    // Pass 2: only sharedStrings + the worksheets we need
-    const entries = unzipSync(data, {
-        filter: (f) => f.name === 'xl/sharedStrings.xml' || needed.has(f.name),
-    });
-
-    const sharedStringsBytes = entries['xl/sharedStrings.xml'];
+    // Pass 2: sharedStrings only — every sheet needs it.
+    const shared = unzipSync(data, { filter: (f) => f.name === 'xl/sharedStrings.xml' });
+    const sharedStringsBytes = shared['xl/sharedStrings.xml'];
     const sharedStrings = sharedStringsBytes ? parseSharedStrings(strFromU8(sharedStringsBytes)) : [];
-
-    const sheetBytes = new Map<string, Uint8Array>();
-    for (const path of needed) {
-        const bytes = entries[path];
-        if (bytes) sheetBytes.set(path, bytes);
-    }
 
     return {
         workbookXml,
         relsXml,
         sharedStrings,
         takeWorksheet(path) {
-            const bytes = sheetBytes.get(path);
-            if (!bytes) return undefined;
-            sheetBytes.delete(path);
-            return strFromU8(bytes);
+            if (!needed.has(path)) return undefined;
+            const entry = unzipSync(data, { filter: (f) => f.name === path })[path];
+            return entry ? strFromU8(entry) : undefined;
         },
     };
 }

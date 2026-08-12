@@ -222,27 +222,40 @@ async function* iterate(input: ParseFileStreamInput, validate: boolean, signal?:
     const sheetPath = nameToPath!;
 
     const viewCache = new Map<string, SheetView>();
-    const loadView = (name: string): SheetView => {
+    /**
+     * `maxRow` bounds how many rows are retained. Bounded views are never cached
+     * — they'd be missing the data rows a later caller expects.
+     */
+    const loadView = (name: string, maxRow?: number): SheetView => {
         const cached = viewCache.get(name);
-        if (cached) return cached;
+        if (cached && maxRow === undefined) return cached;
         const path = sheetPath.get(name);
         if (!path) throw new Error(`xlsx: sheet "${name}" not found`);
         const xml = takeWorksheet(path);
         if (xml == null) throw new Error(`xlsx: worksheet entry "${path}" missing or already consumed`);
-        const rows = parseWorksheet(xml, sharedStrings);
+        const rows = parseWorksheet(xml, sharedStrings, maxRow);
         const view = sheetViewFromRows(rows);
-        viewCache.set(name, view);
+        if (maxRow === undefined) viewCache.set(name, view);
         return view;
     };
     const dropView = (name: string) => viewCache.delete(name);
 
-    // Header validation — match parseWorkbook's eager check.
+    // Header validation — match parseWorkbook's eager check. Sheets are loaded
+    // one at a time, header rows only, so peak memory doesn't scale with the
+    // sheet count and the data rows aren't parsed twice.
     {
-        const views = new Map<string, SheetView>();
-        for (const spec of allSheetSpecs) views.set(spec.name, loadView(spec.name));
-        const result = validateHeaders(views, allSheetSpecs);
-        if (result.missingSheets.length > 0 || result.mismatches.length > 0) {
-            throw new Error(`Unsupported metric layout:\n${formatValidationErrors(result)}`);
+        const missingSheets: string[] = [];
+        const mismatches: HeaderMismatch[] = [];
+        for (const spec of allSheetSpecs as readonly SheetSpec[]) {
+            if (!sheetPath.has(spec.name)) { missingSheets.push(spec.name); continue; }
+            const headerRows = spec.headerRows ?? [spec.startRow - 3, spec.startRow - 2, spec.startRow - 1];
+            const view = loadView(spec.name, Math.max(...headerRows) + 1);
+            const result = validateHeaders(new Map([[spec.name, view]]), [spec]);
+            missingSheets.push(...result.missingSheets);
+            mismatches.push(...result.mismatches);
+        }
+        if (missingSheets.length > 0 || mismatches.length > 0) {
+            throw new Error(`Unsupported metric layout:\n${formatValidationErrors({ missingSheets, mismatches })}`);
         }
     }
 

@@ -91,7 +91,7 @@ async function ingest(buffer: ArrayBuffer, db: Kysely<DB>) {
 | | `parseFile` | `parseFileStream` |
 |---|---|---|
 | Return shape | `AllFeatures` (sync) | `AsyncIterable<StreamedRow>` |
-| Memory | grows with file size | grows with batch size |
+| Memory | grows with file size | bounded by the largest single sheet |
 | Use when | you need the full materialised object (calculations, headline results, trading summaries) | you only need rows for ingest / bulk insert / row-by-row processing |
 
 `parseFile` is unchanged and remains the right choice for downstream calculations that need `AllFeatures` in one shot.
