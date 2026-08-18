@@ -169,6 +169,29 @@ describe("standardYearsToTarget", () => {
         ).toBe("Not Possible ▲");
     });
 
+    test("watercourse enhancement: Ditches Poor → Moderate = 4", () => {
+        expect(standardYearsToTarget("Ditches", "Poor", "Moderate", "enhancement")).toBe(4);
+    });
+
+    test("watercourse enhancement: pathway matrix is shared across types", () => {
+        // No watercourse type carries its own enhancement table — the times
+        // come from the condition pathway alone, so every type agrees.
+        for (const label of ["Priority habitat", "Other rivers and streams", "Canals", "Culvert"]) {
+            expect(standardYearsToTarget(label, "Poor", "Moderate", "enhancement")).toBe(4);
+        }
+        expect(standardYearsToTarget("Ditches", "Moderate", "Good", "enhancement")).toBe(4);
+        expect(standardYearsToTarget("Ditches", "Poor", "Good", "enhancement")).toBe(8);
+        expect(standardYearsToTarget("Ditches", "Good", "Good", "enhancement")).toBe(1);
+    });
+
+    test("watercourse enhancement: downgrade pathway is not possible", () => {
+        // "Good to Moderate" is 'N/A' in the matrix — normalise to the same
+        // sentinel the habitat tables use so callers short-circuit on it.
+        expect(standardYearsToTarget("Ditches", "Good", "Moderate", "enhancement")).toBe(
+            "Not Possible ▲",
+        );
+    });
+
     test("unknown habitat label → 0", () => {
         expect(standardYearsToTarget("Nonsense habitat", null, "Good", "creation")).toBe(0);
     });

@@ -8,6 +8,7 @@ import { getStrategicSignificance } from './strategicSignificanceSchema';
 import { allHabitats } from './habitats';
 import { allHedgerows } from './hedgerows';
 import { allWatercourses } from './watercourses';
+import { watercourseEnhancementTemporalMatrix } from './watercourseEnhancementTemporalMatrix';
 
 export type StandardDifficulty = keyof typeof difficulty;
 
@@ -150,6 +151,17 @@ export function standardYearsToTarget(
             const key = `${currentCondition} - ${targetCondition}`;
             const v = (habitat.enhancementTemporalMultipliers as Record<string, unknown>)[key];
             return isNumberOrString(v) ? v : 0;
+        }
+        if (watercourse) {
+            // Watercourse enhancement times are NOT held per type — DEFRA keys
+            // them off the condition pathway alone, in one shared matrix. This
+            // is the same table `calculateEnhancementTimeToTarget`
+            // (src/watercourses/shared.ts) drives the full row pipeline from.
+            const v = watercourseEnhancementTemporalMatrix[
+                `${currentCondition} to ${targetCondition}`
+            ];
+            if (v === undefined || v === 'N/A') return 'Not Possible ▲';
+            return v;
         }
         const map = (hedgerow as { yearsToTargetConditionViaEnhancement?: Record<string, unknown> } | undefined)
             ?.yearsToTargetConditionViaEnhancement;
