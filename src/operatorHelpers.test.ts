@@ -5,6 +5,7 @@ import {
     strategicSignificanceMultiplier,
 } from "./operatorHelpers";
 import { difficulty } from "./difficulty";
+import { allHedgerows } from "./hedgerows";
 
 describe("calculateDifficultyMultiplier", () => {
     test("baseline role → neutral", () => {
@@ -167,6 +168,53 @@ describe("standardYearsToTarget", () => {
                 "enhancement",
             ),
         ).toBe("Not Possible ▲");
+    });
+
+    test("watercourse creation: Ditches → Moderate = 5, from the shared condition table", () => {
+        // Regression: this read the per-type `yearsToTargetConditionViaCreation`
+        // (Ditches → Moderate = 2), which is not the table the metric uses.
+        // The 3-year gap reads downstream as a phantom "created in advance"
+        // credit — it inflates the temporal multiplier from 0.965^5 to
+        // 0.965^2, over-valuing the stock by 11.3%.
+        expect(standardYearsToTarget("Ditches", null, "Moderate", "creation")).toBe(5);
+    });
+
+    test("watercourse creation: condition table is shared across types", () => {
+        // No watercourse type carries its own creation table — the times come
+        // from the target condition alone, so every type agrees. Mirrors the
+        // enhancement case below.
+        for (const label of [
+            "Priority habitat",
+            "Other rivers and streams",
+            "Ditches",
+            "Canals",
+            "Culvert",
+        ]) {
+            expect(standardYearsToTarget(label, null, "Moderate", "creation")).toBe(5);
+        }
+    });
+
+    test("watercourse creation: every condition matches the metric's table", () => {
+        // `yearsToTargetCondition` in src/watercourseCondition.ts — the same
+        // table `enrichWithCreationWatercourseData` drives the row pipeline from.
+        const expected = {
+            "Good": 10,
+            "Fairly Good": 8,
+            "Moderate": 5,
+            "Fairly Poor": 2,
+            "Poor": 1,
+        } as const;
+        for (const [condition, years] of Object.entries(expected)) {
+            expect(standardYearsToTarget("Ditches", null, condition, "creation")).toBe(years);
+        }
+    });
+
+    test("hedgerow creation still reads its own per-type table", () => {
+        // Hedgerows genuinely DO hold creation times per type — the
+        // watercourse fix must not divert them to the watercourse table.
+        expect(
+            standardYearsToTarget("Native hedgerow", null, "Moderate", "creation"),
+        ).toBe(allHedgerows["Native hedgerow"].yearsToTargetConditionViaCreation["Moderate"]);
     });
 
     test("watercourse enhancement: Ditches Poor → Moderate = 4", () => {

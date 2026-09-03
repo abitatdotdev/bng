@@ -9,6 +9,7 @@ import { allHabitats } from './habitats';
 import { allHedgerows } from './hedgerows';
 import { allWatercourses } from './watercourses';
 import { watercourseEnhancementTemporalMatrix } from './watercourseEnhancementTemporalMatrix';
+import { yearsToTargetCondition } from './watercourseCondition';
 
 export type StandardDifficulty = keyof typeof difficulty;
 
@@ -137,9 +138,22 @@ export function standardYearsToTarget(
             const v = (habitat.temporalMultipliers as Record<string, unknown>)[targetCondition];
             return isNumberOrString(v) ? v : 0;
         }
-        const map =
-            (hedgerow?.yearsToTargetConditionViaCreation as Record<string, unknown> | null | undefined) ??
-            (watercourse?.yearsToTargetConditionViaCreation as Record<string, unknown> | null | undefined);
+        if (watercourse) {
+            // Watercourse creation times are NOT held per type — DEFRA keys
+            // them off the target condition alone, in one shared table. This
+            // is the same table `enrichWithCreationWatercourseData`
+            // (src/watercourses/shared.ts) drives the full row pipeline from.
+            // The per-type `yearsToTargetConditionViaCreation` on the
+            // watercourse entries disagrees with it (at Moderate: Priority
+            // habitat 8, Ditches 2, Canals 1, vs the metric's 5) and is not
+            // what the metric uses.
+            const v = (yearsToTargetCondition as Record<string, unknown>)[targetCondition];
+            return isNumberOrString(v) ? v : 0;
+        }
+        const map = hedgerow?.yearsToTargetConditionViaCreation as
+            | Record<string, unknown>
+            | null
+            | undefined;
         if (!map) return 0;
         const v = map[targetCondition];
         return isNumberOrString(v) ? v : 0;
