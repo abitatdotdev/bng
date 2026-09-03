@@ -75,22 +75,17 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         data => {
             const baselineCondition = data._baselineCondition as number;
             const proposedCondition = data.conditionScore as number;
-            const baselineD = data._baselineWatercourse.distinctivenessScore;
-            const proposedD = data.distinctivenessScore;
 
-            // Cannot reduce condition
+            // Cannot reduce condition. Condition-neutral rows are valid for
+            // watercourses: encroachment and strategic significance are uplift
+            // levers that area and hedgerow habitats do not have.
             if (proposedCondition < baselineCondition) {
                 return false;
             }
 
-            // If same condition, must have distinctiveness upgrade
-            if (proposedCondition === baselineCondition) {
-                return proposedD > baselineD;
-            }
-
             return true;
         },
-        "Enhancement must improve condition or distinctiveness"
+        "Enhancement cannot reduce condition"
     ),
 
     // Validate encroachment consistency with watercourse type

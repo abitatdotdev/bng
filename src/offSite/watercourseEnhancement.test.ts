@@ -105,7 +105,7 @@ test("cannot reduce condition", () => {
     }));
     expect(result.success).toBeFalse();
     if (!result.success) {
-        expect(result.issues[0].message).toContain("Enhancement must improve");
+        expect(result.issues[0].message).toContain("Enhancement cannot reduce condition");
     }
 });
 
@@ -284,7 +284,7 @@ test("enhancement with 30+ year delay caps to 30+", () => {
     }
 });
 
-test("same condition requires distinctiveness upgrade", () => {
+test("same condition and distinctiveness is allowed - uplift can come from encroachment", () => {
     const baseline = createBaseline({
         watercourseType: "Ditches",
         condition: "Moderate",
@@ -293,16 +293,12 @@ test("same condition requires distinctiveness upgrade", () => {
         distinctiveness: "Medium",
     });
 
-    // Try to enhance with same condition and same distinctiveness - should fail
     const result1 = v.safeParse(offSiteWatercourseEnhancementSchema, fixture({
         baseline,
         watercourseType: "Ditches", // Same distinctiveness
         condition: "Moderate", // Same condition
     }));
-    expect(result1.success).toBeFalse();
-    if (!result1.success) {
-        expect(result1.issues[0].message).toContain("Enhancement must improve");
-    }
+    expect(result1.success).toBeTrue();
 
     // Same condition but with distinctiveness upgrade - should succeed
     const result2 = v.safeParse(offSiteWatercourseEnhancementSchema, fixture({
