@@ -35,9 +35,19 @@ type ValuesByWatercourse = {
     }
 }
 
+const watercourseLabels = Object.keys(allWatercourses) as WatercourseLabel[];
+
+const valuesByWatercourseCache = new WeakMap<AllFeatures, ValuesByWatercourse>();
+
+/**
+ * Calculate values per watercourse type.
+ * NOTE: input data must not be mutated - results are cached per input object identity.
+ */
 export const valuesByWatercourse = (inputData: AllFeatures): ValuesByWatercourse => {
-    const watercourseLabels = Object.keys(allWatercourses) as WatercourseLabel[];
-    return typeSafeObjectFromEntries(
+    const cached = valuesByWatercourseCache.get(inputData);
+    if (cached) return cached;
+
+    const results = typeSafeObjectFromEntries(
         watercourseLabels.map(label => {
             const watercourse = watercourseByLabel(label)!;
 
@@ -75,6 +85,9 @@ export const valuesByWatercourse = (inputData: AllFeatures): ValuesByWatercourse
                 },
             ]
         }))
+
+    valuesByWatercourseCache.set(inputData, results);
+    return results;
 }
 
 function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, watercourse: Watercourse): number {

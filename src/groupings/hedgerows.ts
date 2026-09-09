@@ -35,9 +35,19 @@ type ValuesByHedgerow = {
     }
 }
 
+const hedgerowLabels = Object.keys(allHedgerows) as HedgerowLabel[];
+
+const valuesByHedgerowCache = new WeakMap<AllFeatures, ValuesByHedgerow>();
+
+/**
+ * Calculate values per hedgerow type.
+ * NOTE: input data must not be mutated - results are cached per input object identity.
+ */
 export const valuesByHedgerow = (inputData: AllFeatures): ValuesByHedgerow => {
-    const hedgerowLabels = Object.keys(allHedgerows) as HedgerowLabel[];
-    return typeSafeObjectFromEntries(
+    const cached = valuesByHedgerowCache.get(inputData);
+    if (cached) return cached;
+
+    const results = typeSafeObjectFromEntries(
         hedgerowLabels.map(label => {
             const hedgerow = hedgerowByLabel(label)!;
 
@@ -75,6 +85,9 @@ export const valuesByHedgerow = (inputData: AllFeatures): ValuesByHedgerow => {
                 },
             ]
         }))
+
+    valuesByHedgerowCache.set(inputData, results);
+    return results;
 }
 
 function calculateExistingLengthBaselineOnSite(inputData: AllFeatures, hedgerow: Hedgerow): number {
