@@ -157,7 +157,8 @@ describe('featuresFromInput', () => {
         const fromFile = parseFile(EXAMPLE, { validate: false });
 
         test('assembled AllFeatures is identical', () => {
-            expect(fromJson).toEqual(fromFile);
+            const { startPage: _startPage, ...fileFeatures } = fromFile;
+            expect(fromJson).toEqual(fileFeatures);
         });
 
         test('headlineResults / tradingSummaries / unitShortfall agree', () => {

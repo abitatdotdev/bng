@@ -1595,6 +1595,20 @@ describe("headlineResults - combined calculations", () => {
         expect(result.habitatUnitSummary.unitDeficit).toBe(20);
     });
 
+    test("uses the parsed Start page net-gain target", () => {
+        const input = emptyFixture({
+            startPage: { netGainTarget: 0.2 },
+            onSiteHabitatBaselines: [
+                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+            ],
+        } as Partial<AllFeatures> & { startPage: { netGainTarget: number } });
+
+        const result = headlineResults(input, emptyTradingSummary());
+
+        expect(result.habitatUnitSummary.requiredUnits).toBe(120);
+        expect(result.habitatUnitSummary.unitDeficit).toBe(20);
+    });
+
     test("netGainTarget defaults to 0.1 when not provided", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
@@ -1608,4 +1622,3 @@ describe("headlineResults - combined calculations", () => {
         expect(result.habitatUnitSummary.unitDeficit).toBe(10);
     });
 });
-

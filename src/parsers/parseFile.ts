@@ -33,7 +33,6 @@ import { onSiteHedgerowEnhancementSchema, onSiteHedgerowEnhancementUncheckedSche
 import { offSiteHedgerowBaselineSchema, offSiteHedgerowBaselineUncheckedSchema } from "../offSite/hedgerowBaseline";
 import { offSiteHedgerowCreationSchema, offSiteHedgerowCreationUncheckedSchema } from "../offSite/hedgerowCreation";
 import { offSiteHedgerowEnhancementSchema, offSiteHedgerowEnhancementUncheckedSchema } from "../offSite/hedgerowEnhancement";
-import { type AllFeatures } from '../features';
 import { onSiteHabitatEnhancementSchema, onSiteHabitatEnhancementUncheckedSchema } from "../onSite/habitatEnhancement";
 import { offSiteHabitatEnhancementSchema, offSiteHabitatEnhancementUncheckedSchema } from "../offSite/habitatEnhancement";
 import { onSiteWatercourseBaselineSchema, onSiteWatercourseBaselineUncheckedSchema } from "../onSite/watercourseBaseline";
@@ -66,10 +65,12 @@ import {
     validateWorkbookHeaders,
     type SheetSpec,
 } from './columnMappings';
+import { parseStartPage } from './startPage';
+import type { ParsedFile } from '../features';
 
 const sheetsToGrab = [
     // 'Introduction',
-    // 'Start',
+    'Start',
     // 'Main Menu',
     // 'Unit shortfall summary',
     // 'Results',
@@ -124,6 +125,7 @@ export function parseWorkbook(file: string | ArrayBuffer) {
     }
 
     const validation = validateWorkbookHeaders(workbook);
+    if (!getSheet(workbook, 'Start')) validation.missingSheets.unshift('Start');
     if (validation.missingSheets.length > 0 || validation.mismatches.length > 0) {
         throw new Error(`Unsupported metric layout:\n${formatValidationErrors(validation)}`);
     }
@@ -160,7 +162,7 @@ export interface ParseFileOptions {
     validate?: boolean;
 }
 
-export function parseFile(file: string | ArrayBuffer, options: ParseFileOptions = {}): AllFeatures {
+export function parseFile(file: string | ArrayBuffer, options: ParseFileOptions = {}): ParsedFile {
     const validate = options.validate !== false;
     const workbook = parseWorkbook(file);
 
@@ -191,7 +193,8 @@ export function parseFile(file: string | ArrayBuffer, options: ParseFileOptions 
     const offSiteWatercourseEnhancements = parseAllEnhancementRows(workbook, offSiteWatercourseBaselineSpec, offSiteWatercourseEnhancementSpec, schemas.offSiteWatercourseEnhancement, parseOffSiteWatercourseEnhancementRow, validate);
 
     // Create the input object
-    const parsedRows: AllFeatures = {
+    const parsedRows: ParsedFile = {
+        startPage: parseStartPage(getSheet(workbook, 'Start')!),
         onSiteHabitatBaselines,
         onSiteHabitatCreations,
         onSiteHabitatEnhancements,

@@ -1,5 +1,7 @@
 // Export the main parsing function
 export { parseFile, type ParseFileOptions } from './parseFile';
+export { parseStartPage, type StartPage } from './startPage';
+export type { AllFeatures, ParsedFile } from '../features';
 
 // Stateless JSON → AllFeatures assembler — the serverless counterpart to
 // `parseFile`. Same schemas, but sourced from plain input arrays and
@@ -115,4 +117,3 @@ export type { OffSiteHedgerowEnhancementSchema, OffSiteHedgerowEnhancement } fro
 export type { OffSiteWatercourseBaselineSchema, OffSiteWatercourseBaseline } from '../offSite/watercourseBaseline';
 export type { OffSiteWatercourseCreationSchema, OffSiteWatercourseCreation } from '../offSite/watercourseCreation';
 export type { OffSiteWatercourseEnhancementSchema, OffSiteWatercourseEnhancement } from '../offSite/watercourseEnhancement';
-

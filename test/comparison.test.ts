@@ -1,5 +1,4 @@
 import { describe, test, expect } from "bun:test"
-import XLSX from 'xlsx';
 import * as v from 'valibot';
 import { EXCEL_FILES, expectCloseTo, testExcelFiles } from './helpers';
 import { getCellValue, getSheet } from '../src/parsers/excelHelpers';
@@ -30,12 +29,7 @@ import { unitShortfall } from "../src/unitShortfall";
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     const parsed = parseFile(fileName);
     const trading = tradingSummaries(parsed);
-    // parseWorkbook doesn't load the 'Start' sheet, so re-read for F22 (configured net-gain target).
-    const fullWorkbook = XLSX.readFile(fileName, { sheets: ['Start'], cellFormula: false, cellHTML: false });
-    const startSheet = getSheet(fullWorkbook, 'Start');
-    const f22 = startSheet ? getCellValue(startSheet, 21, 5) : null; // F22 (0-indexed row 21, col 5)
-    const netGainTarget = typeof f22 === 'number' && f22 > 0 ? f22 : 0.1;
-    const headline = headlineResults(parsed, trading, { netGainTarget });
+    const headline = headlineResults(parsed, trading);
     const shortfall = unitShortfall(parsed, headline, trading);
 
     describe("Headline Results", () => {

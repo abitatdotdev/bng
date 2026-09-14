@@ -552,8 +552,8 @@ function unitSummaryD(baselineD: Decimal, postInterventionD: Decimal, changeD: D
 /*
  * Calculates all of the fields from the 'Headline Results' sheet
  */
-export function headlineResults(features: AllFeatures, tradingSummaries: TradingSummaries, options: { netGainTarget?: number } = {}) {
-    const netGainTarget = options.netGainTarget ?? 0.1;
+export function headlineResults(features: AllFeatures & { startPage?: { netGainTarget?: number } }, tradingSummaries: TradingSummaries, options: { netGainTarget?: number } = {}) {
+    const netGainTarget = options.netGainTarget ?? features.startPage?.netGainTarget ?? 0.1;
     const targetD = new Decimal(1).plus(netGainTarget);
 
     // On-site baselines (Decimal)

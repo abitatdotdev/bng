@@ -17,6 +17,7 @@ import type { onSiteHedgerowEnhancementSchema } from './onSite/hedgerowEnhanceme
 import type { onSiteWatercourseBaselineSchema } from './onSite/watercourseBaseline';
 import type { onSiteWatercourseCreationSchema } from './onSite/watercourseCreation';
 import type { onSiteWatercourseEnhancementSchema } from './onSite/watercourseEnhancement';
+import type { StartPage } from './parsers/startPage';
 
 export type AllFeatures = {
     // On-site Habitats (A-1, A-2, A-3)
@@ -50,3 +51,7 @@ export type AllFeatures = {
     offSiteWatercourseEnhancements: v.InferOutput<typeof offSiteWatercourseEnhancementSchema>[];
 };
 
+/** The complete result returned by the workbook file parser. */
+export type ParsedFile = AllFeatures & {
+    startPage: StartPage;
+};

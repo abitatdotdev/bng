@@ -65,8 +65,9 @@ describe('parseFileStream', () => {
 
     test('streamed rows accumulate to the same AllFeatures as parseFile', async () => {
         const eager = parseFile(fileData.buffer.slice(fileData.byteOffset, fileData.byteOffset + fileData.byteLength) as ArrayBuffer);
+        const { startPage: _startPage, ...eagerFeatures } = eager;
         const streamed = await accumulate(fileData);
-        expect(streamed).toEqual(eager as AllFeatures);
+        expect(streamed).toEqual(eagerFeatures as AllFeatures);
     });
 
     test('accepts a ReadableStream input', async () => {

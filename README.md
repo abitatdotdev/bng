@@ -66,10 +66,11 @@ import { parseFile, headlineResults, tradingSummaries } from '@abitat/bng';
 // in server environments, where you have access to the local filesystem
 // you can pass a string representing the path to the file
 const parsedSheet = parseFile('./my_metric.xlsm');
-const tradingSums = tradingSummaries(parsedRows);
-const headlineResults = headlineResults(parsedRows, tradingSums);
+const tradingSums = tradingSummaries(parsedSheet);
+const results = headlineResults(parsedSheet, tradingSums);
 
-console.log(headlineResults);
+console.log(parsedSheet.startPage); // Project metadata from Start!F11:F22
+console.log(results); // Uses startPage.netGainTarget automatically
 ```
 
 ### Browser
