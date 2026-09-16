@@ -7,6 +7,15 @@ import { cumulativeBroadHabitatChange } from './tradingSummaries/habitats';
 import { type TradingSummaries } from './tradingSummaries';
 import type { BroadHabitat } from './broadHabitats';
 
+const ZERO = new Decimal(0);
+
+function sumMatchingD(values: (number | Decimal)[], matches: (value: Decimal) => boolean): Decimal {
+    return values.reduce((sum, value) => {
+        const decimal = new Decimal(value);
+        return matches(decimal) ? sum.plus(decimal) : sum;
+    }, ZERO);
+}
+
 
 /**
  * Checks if there are very high distinctiveness losses
@@ -44,20 +53,26 @@ function hasVeryHighLosses(tradingSummaries: TradingSummaries): boolean {
  * )
  */
 export function featureShortfall(finalLosses: number, deficit: number, requiredGap: number): number {
+    return featureShortfallD(
+        new Decimal(finalLosses), new Decimal(deficit), new Decimal(requiredGap)
+    ).toNumber();
+}
+
+function featureShortfallD(finalLosses: Decimal, deficit: Decimal, requiredGap: Decimal): Decimal {
     // NOTE: weird formulas are there to match the original excel style
-    if (-finalLosses < deficit) {
+    if (finalLosses.neg().lt(deficit)) {
         return deficit;
     }
 
-    if (deficit <= 0) {
-        return -finalLosses;
+    if (deficit.lte(ZERO)) {
+        return finalLosses.neg();
     }
 
-    if (deficit >= requiredGap) {
-        return -finalLosses;
+    if (deficit.gte(requiredGap)) {
+        return finalLosses.neg();
     }
 
-    return new Decimal(-finalLosses).plus(deficit).toNumber();
+    return finalLosses.neg().plus(deficit);
 }
 
 /**
@@ -161,47 +176,62 @@ export function a1BalancingShortfall(
     shortfalls: { a2: number; a3: number; a4: number; a5: number; },
     details: ReturnType<typeof buildTierDetail>
 ): number {
-    const a2ToA5Shortfalls = new Decimal(shortfalls.a2)
+    return a1BalancingShortfallD(
+        headline,
+        {
+            a2: new Decimal(shortfalls.a2),
+            a3: new Decimal(shortfalls.a3),
+            a4: new Decimal(shortfalls.a4),
+            a5: new Decimal(shortfalls.a5),
+        },
+        details
+    ).toNumber();
+}
+
+/** Decimal implementation; the exported function preserves the number API. */
+function a1BalancingShortfallD(
+    headline: HeadlineResults,
+    shortfalls: { a2: Decimal; a3: Decimal; a4: Decimal; a5: Decimal; },
+    details: ReturnType<typeof buildTierDetail>
+): Decimal {
+    const a2ToA5Shortfalls = shortfalls.a2
         .plus(shortfalls.a3)
         .plus(shortfalls.a4)
-        .plus(shortfalls.a5)
-        .toNumber();
+        .plus(shortfalls.a5);
     const allA1Losses = new Decimal(details.high.a1.lossesInTier)
         .plus(details.medium.a1.finalLosses)
-        .plus(details.low.a1.finalLosses)
-        .toNumber();
-    const habitatUnitDeficit = headline.habitatUnitSummary.unitDeficit;
+        .plus(details.low.a1.finalLosses);
+    const habitatUnitDeficit = new Decimal(headline.habitatUnitSummary.unitDeficit);
     const unitGap = new Decimal(headline.habitatUnitSummary.requiredUnits)
-        .minus(headline.habitatUnitSummary.baselineUnits)
-        .toNumber();
+        .minus(headline.habitatUnitSummary.baselineUnits);
 
     // NOTE: the following formulas are a bit weird,
     // but they match the excel formulas as closely as possible.
-    const a2ToA5MinusA1 = new Decimal(a2ToA5Shortfalls).minus(allA1Losses).toNumber();
+    const a2ToA5MinusA1 = a2ToA5Shortfalls.minus(allA1Losses);
 
-    if (a2ToA5MinusA1 >= habitatUnitDeficit) {
-        return -allA1Losses;
+    if (a2ToA5MinusA1.gte(habitatUnitDeficit)) {
+        return allA1Losses.neg();
     }
 
-    if (a2ToA5MinusA1 >= habitatUnitDeficit - unitGap) {
+    if (a2ToA5MinusA1.gte(habitatUnitDeficit.minus(unitGap))) {
         // -allA1Losses + habitatUnitDeficit - a2ToA5Shortfalls + allA1Losses
         // simplifies to: habitatUnitDeficit - a2ToA5Shortfalls
-        return new Decimal(habitatUnitDeficit).minus(a2ToA5Shortfalls).toNumber();
+        return habitatUnitDeficit.minus(a2ToA5Shortfalls);
     }
 
-    if (habitatUnitDeficit <= 0) {
-        return -allA1Losses;
+    if (habitatUnitDeficit.lte(ZERO)) {
+        return allA1Losses.neg();
     }
 
-    if (a2ToA5MinusA1 < habitatUnitDeficit) {
-        return new Decimal(habitatUnitDeficit).minus(a2ToA5Shortfalls).toNumber();
+    if (a2ToA5MinusA1.lt(habitatUnitDeficit)) {
+        return habitatUnitDeficit.minus(a2ToA5Shortfalls);
     }
 
-    if (habitatUnitDeficit >= unitGap) {
-        return new Decimal(-allA1Losses).plus(unitGap).toNumber();
+    if (habitatUnitDeficit.gte(unitGap)) {
+        return allA1Losses.neg().plus(unitGap);
     }
 
-    return new Decimal(-allA1Losses).plus(habitatUnitDeficit).toNumber();
+    return allA1Losses.neg().plus(habitatUnitDeficit);
 }
 
 /**
@@ -212,22 +242,25 @@ function habitatTierShortfall(
     headlineResults: HeadlineResults,
     details: ReturnType<typeof buildTierDetail>
 ): { a5: number; a4: number; a3: number; a2: number; a1: number } {
-    const a5 = new Decimal(details.high.a5.lossesInTier).neg().toNumber();
-    const a4 = new Decimal(details.high.a4.lossesInTier).plus(details.medium.a4.finalLosses).neg().toNumber();
-    const a3 = new Decimal(details.high.a3.lossesInTier).neg().toNumber();
-    const a2 = new Decimal(details.high.a2.lossesInTier).plus(details.medium.a2.finalLosses).neg().toNumber();
+    const a5 = new Decimal(details.high.a5.lossesInTier).neg();
+    const a4 = new Decimal(details.high.a4.lossesInTier).plus(details.medium.a4.finalLosses).neg();
+    const a3 = new Decimal(details.high.a3.lossesInTier).neg();
+    const a2 = new Decimal(details.high.a2.lossesInTier).plus(details.medium.a2.finalLosses).neg();
 
     const shortfalls = { a2, a3, a4, a5 }
 
-    const a1 = a1BalancingShortfall(headlineResults, shortfalls, details);
+    const a1 = a1BalancingShortfallD(headlineResults, shortfalls, details);
 
-    return { a1, a2, a3, a4, a5 };
+    return {
+        a1: a1.toNumber(), a2: a2.toNumber(), a3: a3.toNumber(),
+        a4: a4.toNumber(), a5: a5.toNumber(),
+    };
 }
 
 function highTierDetail(features: AllFeatures, habitats: HabitatLabel[]) {
     const byHabitat = valuesByHabitat(features);
     const unitChange = habitats.map(label => byHabitat[label as HabitatLabel].unitChangeIncludingOffSite)
-    const lossesInTier = unitChange.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const lossesInTier = sumMatchingD(unitChange, value => value.lt(ZERO)).toNumber();
     return {
         unitChange,
         lossesInTier,
@@ -239,10 +272,10 @@ function mediumTierDetail(features: AllFeatures) {
     const cumulativeChanges = cumulativeBroadHabitatChange(features, "Medium");
 
     // calculate broad habitat and unit gain available
-    const a1HabitatGroups: [BroadHabitat, number][] = [
+    const a1HabitatGroups: [BroadHabitat, Decimal][] = [
         [
             "Cropland",
-            0,
+            ZERO,
         ],
         [
             "Grassland",
@@ -257,10 +290,10 @@ function mediumTierDetail(features: AllFeatures) {
                 "Grassland - Lowland dry acid grassland",
                 "Grassland - Lowland meadows",
                 "Grassland - Upland hay meadows",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
         [
             "Heathland and shrub",
@@ -271,23 +304,23 @@ function mediumTierDetail(features: AllFeatures) {
                 "Heathland and shrub - Upland heathland",
                 // second set of labels 'Trading Summary Area Habitats'!F16
                 "Heathland and shrub - Mountain heaths and willow scrub"
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
         [
             "Urban",
             ([
                 "Urban - Open mosaic habitats on previously developed land",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
-        ["Individual trees", 0],
+        ["Individual trees", ZERO],
     ]
-    const a2HabitatGroups: [BroadHabitat, number][] = [
+    const a2HabitatGroups: [BroadHabitat, Decimal][] = [
         [
             "Woodland and forest",
             ([
@@ -302,10 +335,10 @@ function mediumTierDetail(features: AllFeatures) {
                 "Woodland and forest - Wet woodland",
                 // second set of labels 'Trading Summary Area Habitats'!F27
                 "Woodland and forest - Wood-pasture and parkland",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
         [
             "Intertidal sediment",
@@ -330,13 +363,13 @@ function mediumTierDetail(features: AllFeatures) {
                 "Rocky shore - Low energy littoral rock - on peat, clay or chalk",
                 "Rocky shore - Features of littoral rock - on peat, clay or chalk",
                 "Intertidal sediment - Littoral seagrass on peat, clay or chalk",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
     ]
-    const a4HabitatGroups: [BroadHabitat, number][] = [
+    const a4HabitatGroups: [BroadHabitat, Decimal][] = [
         [
             "Lakes",
             ([
@@ -350,10 +383,10 @@ function mediumTierDetail(features: AllFeatures) {
                 "Lakes - Temporary lakes ponds and pools (H3170)",
                 // second set of labels 'Trading Summary Area Habitats'!F17
                 "Lakes - Aquifer fed naturally fluctuating water bodies",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
         [
             "Sparsely vegetated land",
@@ -366,10 +399,10 @@ function mediumTierDetail(features: AllFeatures) {
                 // second set of labels 'Trading Summary Area Habitats'!F18:19
                 "Sparsely vegetated land - Calaminarian grasslands",
                 "Sparsely vegetated land - Limestone pavement",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
         [
             "Wetland",
@@ -384,57 +417,49 @@ function mediumTierDetail(features: AllFeatures) {
                 "Wetland - Oceanic valley mire[1] (D2.1)",
                 "Wetland - Purple moor grass and rush pastures",
                 "Wetland - Transition mires and quaking bogs (H7140)",
-            ] satisfies HabitatLabel[]).reduce((sum, label) => {
+            ] satisfies HabitatLabel[]).reduce((sum: Decimal, label) => {
                 const value = byHabitat[label as HabitatLabel].unitChangeIncludingOffSite;
-                return value > 0 ? new Decimal(sum).plus(value).toNumber() : sum;
-            }, 0),
+                return new Decimal(value).gt(ZERO) ? sum.plus(value) : sum;
+            }, ZERO),
         ],
     ]
 
     const a1Rule1 = a1HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
-
-        return remainingAvailableAfterRule1
+        return unitGainAvailable.plus(lossesRequiringOffset);
     })
     const a2Rule1 = a2HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
-
-        return remainingAvailableAfterRule1
+        return unitGainAvailable.plus(lossesRequiringOffset);
     })
     const a4Rule1 = a4HabitatGroups.map(([broadHabitat, unitGainAvailable]) => {
         const lossesRequiringOffset = cumulativeChanges[broadHabitat] < 0 ? cumulativeChanges[broadHabitat] : 0;
-        const remainingAvailableAfterRule1 = new Decimal(unitGainAvailable).plus(lossesRequiringOffset).toNumber();
-
-        return remainingAvailableAfterRule1
+        return unitGainAvailable.plus(lossesRequiringOffset);
     })
-    const rule1Sum = [a1Rule1, a2Rule1, a4Rule1].flat().reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const rule1Sum = sumMatchingD([a1Rule1, a2Rule1, a4Rule1].flat(), value => value.gt(ZERO));
 
-    const a1Rule2 = a1Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
-    const a2Rule2 = a2Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
-    const a4Rule2 = new Decimal(
-        a4Rule1.reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
-    ).plus(rule1Sum).toNumber();
-    const rule2Sum = [a1Rule2, a2Rule2, a4Rule2].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const a1Rule2 = sumMatchingD(a1Rule1, value => value.lt(ZERO));
+    const a2Rule2 = sumMatchingD(a2Rule1, value => value.lt(ZERO));
+    const a4Rule2 = sumMatchingD(a4Rule1, value => value.lt(ZERO)).plus(rule1Sum);
+    const rule2Sum = sumMatchingD([a1Rule2, a2Rule2, a4Rule2], value => value.gt(ZERO));
 
-    const a1Rule3 = [a1Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
-    const a2Rule3 = new Decimal([a2Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)).plus(rule2Sum).toNumber();
-    const a4Rule3 = [a4Rule2].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
-    const rule3Sum = [a1Rule3, a2Rule3, a4Rule3].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    const a1Rule3 = sumMatchingD([a1Rule2], value => value.lt(ZERO));
+    const a2Rule3 = sumMatchingD([a2Rule2], value => value.lt(ZERO)).plus(rule2Sum);
+    const a4Rule3 = sumMatchingD([a4Rule2], value => value.lt(ZERO));
+    const rule3Sum = sumMatchingD([a1Rule3, a2Rule3, a4Rule3], value => value.gt(ZERO));
 
-    const a1Rule4 = new Decimal(a1Rule3).plus(rule3Sum).toNumber();
-    const a2Rule4 = a2Rule3 < 0 ? a2Rule3 : 0;
-    const a4Rule4 = a4Rule3 < 0 ? a4Rule3 : 0;
+    const a1Rule4 = a1Rule3.plus(rule3Sum);
+    const a2Rule4 = a2Rule3.lt(ZERO) ? a2Rule3 : ZERO;
+    const a4Rule4 = a4Rule3.lt(ZERO) ? a4Rule3 : ZERO;
 
-    const a1FinalLosses = a1Rule4 < 0 ? a1Rule4 : 0;
-    const a2FinalLosses = a2Rule4 < 0 ? a2Rule4 : 0;
-    const a4FinalLosses = a4Rule4 < 0 ? a4Rule4 : 0;
+    const a1FinalLosses = a1Rule4.lt(ZERO) ? a1Rule4 : ZERO;
+    const a2FinalLosses = a2Rule4.lt(ZERO) ? a2Rule4 : ZERO;
+    const a4FinalLosses = a4Rule4.lt(ZERO) ? a4Rule4 : ZERO;
 
     return {
-        a1: { rule1: a1Rule1, rule2: a1Rule2, rule3: a1Rule3, rule4: a1Rule4, finalLosses: a1FinalLosses },
-        a2: { rule1: a2Rule1, rule2: a2Rule2, rule3: a2Rule3, rule4: a2Rule4, finalLosses: a2FinalLosses },
-        a4: { rule1: a4Rule1, rule2: a4Rule2, rule3: a4Rule3, rule4: a4Rule4, finalLosses: a4FinalLosses },
+        a1: { rule1: a1Rule1.map(value => value.toNumber()), rule2: a1Rule2.toNumber(), rule3: a1Rule3.toNumber(), rule4: a1Rule4.toNumber(), finalLosses: a1FinalLosses.toNumber() },
+        a2: { rule1: a2Rule1.map(value => value.toNumber()), rule2: a2Rule2.toNumber(), rule3: a2Rule3.toNumber(), rule4: a2Rule4.toNumber(), finalLosses: a2FinalLosses.toNumber() },
+        a4: { rule1: a4Rule1.map(value => value.toNumber()), rule2: a4Rule2.toNumber(), rule3: a4Rule3.toNumber(), rule4: a4Rule4.toNumber(), finalLosses: a4FinalLosses.toNumber() },
     }
 }
 
@@ -442,14 +467,20 @@ function lowTierDetail(tradingSummaries: TradingSummaries, mediumTier: ReturnTyp
     const netUnitChange = tradingSummaries.habitats.details.low.netChangeInUnits;
     const unitChangeFollowingOffset = new Decimal(netUnitChange < 0 ? netUnitChange : 0)
         .plus(tradingSummaries.habitats.details.medium.unitsAvailableToOffsetDownwards)
-        .toNumber();
-    const unitsRemainingAfterRule5 = new Decimal(unitChangeFollowingOffset)
-        .plus([mediumTier.a1.rule4, mediumTier.a2.rule4, mediumTier.a4.rule4].reduce((sum: number, num: number) => num > 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0))
-        .toNumber();
-    const finalLosses = unitsRemainingAfterRule5 < 0 ? unitsRemainingAfterRule5 : 0;
+    const unitsRemainingAfterRule5 = unitChangeFollowingOffset
+        .plus(sumMatchingD(
+            [mediumTier.a1.rule4, mediumTier.a2.rule4, mediumTier.a4.rule4],
+            value => value.gt(ZERO)
+        ));
+    const finalLosses = unitsRemainingAfterRule5.lt(ZERO) ? unitsRemainingAfterRule5 : ZERO;
 
     return {
-        a1: { netUnitChange, unitChangeFollowingOffset, unitsRemainingAfterRule5, finalLosses },
+        a1: {
+            netUnitChange,
+            unitChangeFollowingOffset: unitChangeFollowingOffset.toNumber(),
+            unitsRemainingAfterRule5: unitsRemainingAfterRule5.toNumber(),
+            finalLosses: finalLosses.toNumber(),
+        },
     }
 }
 
@@ -460,7 +491,10 @@ function hedgerowDetail(tradingSummaries: TradingSummaries) {
         tradingSummaries.hedgerows.details.medium.cumulativeSurplus,
         tradingSummaries.hedgerows.details.low.cumulativeSurplus,
         tradingSummaries.hedgerows.details.vLow.cumulativeSurplus,
-    ].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    ].reduce((sum, num) => {
+        const value = new Decimal(num);
+        return value.lt(ZERO) ? sum.plus(value) : sum;
+    }, ZERO).toNumber();
 
     return {
         finalLosses,
@@ -473,7 +507,10 @@ function watercourseDetail(tradingSummaries: TradingSummaries) {
         tradingSummaries.watercourses.details.high.remainingLosses,
         tradingSummaries.watercourses.details.medium.remainingLosses,
         tradingSummaries.watercourses.details.low.cumulativeSurplus,
-    ].reduce((sum: number, num: number) => num < 0 ? new Decimal(sum).plus(num).toNumber() : sum, 0)
+    ].reduce((sum, num) => {
+        const value = new Decimal(num);
+        return value.lt(ZERO) ? sum.plus(value) : sum;
+    }, ZERO).toNumber();
 
     return {
         finalLosses,
@@ -578,16 +615,18 @@ export function unitShortfall(features: AllFeatures, headline: HeadlineResults, 
     // Calculate habitat tier shortfalls (A5-A1)
     const habitatShortfalls = habitatTierShortfall(headline, tierDetail);
 
-    const hedgerowShortfall = featureShortfall(
-        tierDetail.hedgerows.finalLosses,
-        headline.hedgerowUnitSummary.unitDeficit,
-        new Decimal(headline.hedgerowUnitSummary.requiredUnits).minus(headline.hedgerowUnitSummary.baselineUnits).toNumber()
+    const hedgerowShortfall = featureShortfallD(
+        new Decimal(tierDetail.hedgerows.finalLosses),
+        new Decimal(headline.hedgerowUnitSummary.unitDeficit),
+        new Decimal(headline.hedgerowUnitSummary.requiredUnits)
+            .minus(headline.hedgerowUnitSummary.baselineUnits)
     );
 
-    const watercourseShortfall = featureShortfall(
-        tierDetail.watercourses.finalLosses,
-        headline.watercourseUnitSummary.unitDeficit,
-        new Decimal(headline.watercourseUnitSummary.requiredUnits).minus(headline.watercourseUnitSummary.baselineUnits).toNumber()
+    const watercourseShortfall = featureShortfallD(
+        new Decimal(tierDetail.watercourses.finalLosses),
+        new Decimal(headline.watercourseUnitSummary.unitDeficit),
+        new Decimal(headline.watercourseUnitSummary.requiredUnits)
+            .minus(headline.watercourseUnitSummary.baselineUnits)
     );
 
     return {
@@ -616,12 +655,12 @@ export function unitShortfall(features: AllFeatures, headline: HeadlineResults, 
                 },
             },
             hedgerows: {
-                shortfall: hedgerowShortfall,
-                srmShortfall: new Decimal(hedgerowShortfall).mul(2).toNumber(), // SRM application: * 2
+                shortfall: hedgerowShortfall.toNumber(),
+                srmShortfall: hedgerowShortfall.mul(2).toNumber(), // SRM application: * 2
             },
             watercourses: {
-                shortfall: watercourseShortfall,
-                srmShortfall: new Decimal(watercourseShortfall).mul(2).toNumber(), // SRM application: * 2
+                shortfall: watercourseShortfall.toNumber(),
+                srmShortfall: watercourseShortfall.mul(2).toNumber(), // SRM application: * 2
             },
         },
         tierDetail,

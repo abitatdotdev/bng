@@ -41,6 +41,7 @@ type ValuesByHabitat = {
 }
 
 const habitatLabels = Object.keys(allHabitats) as HabitatLabel[];
+const ZERO = new Decimal(0);
 
 const valuesByHabitatCache = new WeakMap<AllFeatures, ValuesByHabitat>();
 
@@ -101,61 +102,61 @@ function calculateExistingAreaBaselineOnSite(inputData: AllFeatures, habitat: Ha
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.area).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.area), ZERO).toNumber();
 }
 function calculateExistingUnitsBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalHabitatUnits).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.totalHabitatUnits), ZERO).toNumber();
 }
 function calculateExistingAreaRetainedOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.areaRetained).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.areaRetained), ZERO).toNumber();
 }
 function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.baselineUnitsRetained).plus(baseline.vhdhBespokeCompensationUnits).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.baselineUnitsRetained).plus(baseline.vhdhBespokeCompensationUnits), ZERO).toNumber();
 }
 function calculateExistingAreaLostOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.areaHabitatLost).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.areaHabitatLost), ZERO).toNumber();
 }
 function calculateExistingUnitsLostBaselineOnSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.unitsLost).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.unitsLost), ZERO).toNumber();
 }
 function calculateProposedAreaCreationOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
-        .reduce((sum, creation) => new Decimal(sum).plus(creation.area).toNumber(), 0);
+        .reduce((sum, creation) => sum.plus(creation.area), ZERO).toNumber();
 }
 function calculateProposedUnitsCreationOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
-        .reduce((sum, creation) => new Decimal(sum).plus(creation.habitatUnitsDelivered).toNumber(), 0);
+        .reduce((sum, creation) => sum.plus(creation.habitatUnitsDelivered), ZERO).toNumber();
 }
 function calculateProposedAreaEnhancementOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
-        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.area).toNumber(), 0);
+        .reduce((sum, enhancement) => sum.plus(enhancement.area), ZERO).toNumber();
 }
 function calculateProposedUnitsEnhancementOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .onSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
-        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.habitatUnitsDelivered).toNumber(), 0);
+        .reduce((sum, enhancement) => sum.plus(enhancement.habitatUnitsDelivered), ZERO).toNumber();
 }
 function calculateTotalProposedAreaOnSitePostDevelopment(inputData: AllFeatures, habitat: Habitat): number {
     return new Decimal(calculateExistingAreaRetainedOnSite(inputData, habitat))
@@ -183,49 +184,49 @@ function calculateExistingAreaOffSite(inputData: AllFeatures, habitat: Habitat):
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.area).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.area), ZERO).toNumber();
 }
 function calculateExistingUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.totalHabitatUnits).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.totalHabitatUnits), ZERO).toNumber();
 }
 function calculateRetainedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.areaRetained).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.areaRetained), ZERO).toNumber();
 }
 function calculateRetainedUnitsOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatBaselines
         .filter(baseline => isHabitat(baseline, habitat))
-        .reduce((sum, baseline) => new Decimal(sum).plus(baseline.baselineUnitsRetained).plus(baseline.vhdhBespokeCompensationUnits).toNumber(), 0);
+        .reduce((sum, baseline) => sum.plus(baseline.baselineUnitsRetained).plus(baseline.vhdhBespokeCompensationUnits), ZERO).toNumber();
 }
 function calculateProposedAreaCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
-        .reduce((sum, creation) => new Decimal(sum).plus(creation.area).toNumber(), 0);
+        .reduce((sum, creation) => sum.plus(creation.area), ZERO).toNumber();
 }
 function calculateProposedUnitsCreationOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatCreations
         .filter(creation => isHabitat(creation, habitat))
-        .reduce((sum, creation) => new Decimal(sum).plus(creation.habitatUnitsDelivered).toNumber(), 0);
+        .reduce((sum, creation) => sum.plus(creation.habitatUnitsDelivered), ZERO).toNumber();
 }
 function calculateProposedAreaEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
-        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.area).toNumber(), 0);
+        .reduce((sum, enhancement) => sum.plus(enhancement.area), ZERO).toNumber();
 }
 function calculateProposedUnitsEnhancementOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return inputData
         .offSiteHabitatEnhancements
         .filter(enhancement => isHabitat(enhancement, habitat))
-        .reduce((sum, enhancement) => new Decimal(sum).plus(enhancement.habitatUnitsDelivered).toNumber(), 0);
+        .reduce((sum, enhancement) => sum.plus(enhancement.habitatUnitsDelivered), ZERO).toNumber();
 }
 function calculateTotalProposedAreaOffSite(inputData: AllFeatures, habitat: Habitat): number {
     return new Decimal(calculateRetainedAreaOffSite(inputData, habitat))

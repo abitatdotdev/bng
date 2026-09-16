@@ -3,153 +3,50 @@ import { type AllFeatures } from "../features";
 import { valuesByHedgerow } from "../groupings";
 import { allHedgerows, type HedgerowLabel } from "../hedgerows";
 
-function onSiteUnitChange(features: AllFeatures, label: HedgerowLabel) {
-    const { netUnitChangeOnSite } = valuesByHedgerow(features)[label]!
-    return netUnitChangeOnSite;
-}
+const ZERO = new Decimal(0);
+const sumD = (values: number[]) => values.reduce((sum, value) => sum.plus(value), ZERO);
 
-function offSiteUnitChange(features: AllFeatures, label: HedgerowLabel) {
-    const { offSiteNetUnitChange } = valuesByHedgerow(features)[label]!
-    return offSiteNetUnitChange;
-}
-
-function projectWideUnitChange(features: AllFeatures, label: HedgerowLabel) {
-    const { overallUnitChange } = valuesByHedgerow(features)[label]!
-    return overallUnitChange;
-}
-
-/**
-  * Here we depart from the spreadsheet to make the function signatures more similar
-  * and retain the possibility of simple programming paradigms later.
-  *
-  * Rather than calculate this in one hit for each group, we're choosing to calculate
-  * it for each row and then sum them later.
-  *
-  * To calculate cells K12, K40, K88 - sum this over all habitats in the group
-  */
-function unitsAvailableToOffsetDownwards(features: AllFeatures, label: HedgerowLabel) {
-    const change = projectWideUnitChange(features, label);
-    return change > 0 ? change : 0;
-}
-
-
-function unitsAvailableToOffsetUpwards(features: AllFeatures, label: HedgerowLabel) {
-    const change = projectWideUnitChange(features, label);
-    return change < 0 ? change : 0;
-}
-
-// This and unitsAvailableToOffsetUpwards are computationally the same things,
-// though when you're at v.high distinctiveness there is nowhere to offset to upwards.
+function projectWideUnitChange(features: AllFeatures, label: HedgerowLabel) { return valuesByHedgerow(features)[label]!.overallUnitChange; }
+function labelsFor(category: "V.High" | "High" | "Medium" | "Low" | "V.Low") { return Object.values(allHedgerows).filter(h => h.distinctivenessCategory === category).map(h => h.label); }
+function unitsAvailableToOffsetDownwards(features: AllFeatures, label: HedgerowLabel) { const change = projectWideUnitChange(features, label); return change > 0 ? change : 0; }
+function unitsAvailableToOffsetUpwards(features: AllFeatures, label: HedgerowLabel) { const change = projectWideUnitChange(features, label); return change < 0 ? change : 0; }
 const remainingLosses = unitsAvailableToOffsetUpwards;
 
-function veryHighDistinctivenessSummary(features: AllFeatures) {
-    const labels = Object.values(allHedgerows)
-        .filter(h => h.distinctivenessCategory === "V.High")
-        .map(f => f.label);
-
-    return {
-        unitsAvailableToOffsetDownwards:
-            labels
-                .map(label => unitsAvailableToOffsetDownwards(features, label))
-                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
-        remainingLosses:
-            labels
-                .map(label => remainingLosses(features, label))
-                .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0),
-    }
+function veryHighDistinctivenessSummaryD(features: AllFeatures) {
+    const labels = labelsFor("V.High");
+    return { unitsAvailableToOffsetDownwards: sumD(labels.map(label => unitsAvailableToOffsetDownwards(features, label))), remainingLosses: sumD(labels.map(label => remainingLosses(features, label))) };
 }
-
-function highDistinctivenessSummary(features: AllFeatures) {
-    const labels = Object.values(allHedgerows)
-        .filter(h => h.distinctivenessCategory === "High")
-        .map(f => f.label);
-
-    const availableDownwards = labels
-        .map(label => unitsAvailableToOffsetDownwards(features, label))
-        .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0);
-    const availableUpwards = labels
-        .map(label => unitsAvailableToOffsetUpwards(features, label))
-        .reduce((acc: number, num: number) => new Decimal(acc).plus(num).toNumber(), 0)
-
-    const vHighAvailable = veryHighDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
-    const surplusUnitsMinusDeficit = new Decimal(vHighAvailable).plus(availableUpwards).toNumber();
-
-    return {
-        unitsAvailableToOffsetDownwards: availableDownwards,
-        unitsAvailableToOffsetUpwards: availableUpwards,
-        surplusUnitsMinusDeficit,
-    }
+function highDistinctivenessSummaryD(features: AllFeatures) {
+    const labels = labelsFor("High");
+    const availableDownwards = sumD(labels.map(label => unitsAvailableToOffsetDownwards(features, label)));
+    const availableUpwards = sumD(labels.map(label => unitsAvailableToOffsetUpwards(features, label)));
+    return { unitsAvailableToOffsetDownwards: availableDownwards, unitsAvailableToOffsetUpwards: availableUpwards, surplusUnitsMinusDeficit: veryHighDistinctivenessSummaryD(features).unitsAvailableToOffsetDownwards.plus(availableUpwards) };
 }
-
-function mediumDistinctivenessSummary(features: AllFeatures) {
-    const labels = Object.values(allHedgerows)
-        .filter(h => h.distinctivenessCategory === "Medium")
-        .map(f => f.label);
-
-    const highAvailable = highDistinctivenessSummary(features).unitsAvailableToOffsetDownwards;
-    const highSurplus = Decimal.max(highDistinctivenessSummary(features).surplusUnitsMinusDeficit, 0).toNumber();
-    const unitsAvailableFromUpwards = new Decimal(highAvailable).plus(highSurplus).toNumber();
-
-    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0);
-
-    const cumulativeSurplus = new Decimal(netChangeInUnits).plus(unitsAvailableFromUpwards).toNumber();
-
-    return {
-        unitsAvailableToOffsetUpwards: unitsAvailableFromUpwards,
-        netChangeInUnits,
-        cumulativeSurplus,
-    }
+function mediumDistinctivenessSummaryD(features: AllFeatures) {
+    const high = highDistinctivenessSummaryD(features);
+    const unitsAvailableFromUpwards = high.unitsAvailableToOffsetDownwards.plus(Decimal.max(high.surplusUnitsMinusDeficit, ZERO));
+    const netChangeInUnits = sumD(labelsFor("Medium").map(label => projectWideUnitChange(features, label)));
+    return { unitsAvailableToOffsetUpwards: unitsAvailableFromUpwards, netChangeInUnits, cumulativeSurplus: netChangeInUnits.plus(unitsAvailableFromUpwards) };
 }
-
-function lowDistinctivenessSummary(features: AllFeatures) {
-    const labels = Object.values(allHedgerows)
-        .filter(h => h.distinctivenessCategory === "Low")
-        .map(f => f.label);
-
-    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0);
-
-    const mediumSurplus = mediumDistinctivenessSummary(features).cumulativeSurplus;
-    const cumulativeSurplus = mediumSurplus > 0 ? new Decimal(netChangeInUnits).plus(mediumSurplus).toNumber() : netChangeInUnits;
-
-    return {
-        netChangeInUnits,
-        cumulativeSurplus,
-    }
+function lowDistinctivenessSummaryD(features: AllFeatures) {
+    const netChangeInUnits = sumD(labelsFor("Low").map(label => projectWideUnitChange(features, label)));
+    const mediumSurplus = mediumDistinctivenessSummaryD(features).cumulativeSurplus;
+    return { netChangeInUnits, cumulativeSurplus: mediumSurplus.gt(0) ? netChangeInUnits.plus(mediumSurplus) : netChangeInUnits };
 }
-
-function veryLowDistinctivenessSummary(features: AllFeatures) {
-    const labels = Object.values(allHedgerows)
-        .filter(h => h.distinctivenessCategory === "V.Low")
-        .map(f => f.label);
-
-    const netChangeInUnits = labels.map(l => projectWideUnitChange(features, l)).reduce((sum: number, num: number) => new Decimal(sum).plus(num).toNumber(), 0);
-
-    const lowSurplus = lowDistinctivenessSummary(features).cumulativeSurplus;
-    const cumulativeSurplus = lowSurplus > 0 ? new Decimal(netChangeInUnits).plus(lowSurplus).toNumber() : netChangeInUnits;
-
-    return {
-        netChangeInUnits,
-        cumulativeSurplus,
-    }
+function veryLowDistinctivenessSummaryD(features: AllFeatures) {
+    const netChangeInUnits = sumD(labelsFor("V.Low").map(label => projectWideUnitChange(features, label)));
+    const lowSurplus = lowDistinctivenessSummaryD(features).cumulativeSurplus;
+    return { netChangeInUnits, cumulativeSurplus: lowSurplus.gt(0) ? netChangeInUnits.plus(lowSurplus) : netChangeInUnits };
 }
 
 export function hedgerowTradingSummary(features: AllFeatures) {
+    const detailsD = { vHigh: veryHighDistinctivenessSummaryD(features), high: highDistinctivenessSummaryD(features), medium: mediumDistinctivenessSummaryD(features), low: lowDistinctivenessSummaryD(features), vLow: veryLowDistinctivenessSummaryD(features) };
     const details = {
-        vHigh: veryHighDistinctivenessSummary(features),
-        high: highDistinctivenessSummary(features),
-        medium: mediumDistinctivenessSummary(features),
-        low: lowDistinctivenessSummary(features),
-        vLow: veryLowDistinctivenessSummary(features),
-    }
-
-    return {
-        details,
-        vHighSatisfied: details.vHigh.remainingLosses >= 0,
-        highSatisfied: new Decimal(details.vHigh.unitsAvailableToOffsetDownwards)
-            .plus(details.high.unitsAvailableToOffsetUpwards)
-            .greaterThanOrEqualTo(0),
-        mediumSatisfied: details.medium.cumulativeSurplus >= 0,
-        lowSatisfied: details.low.cumulativeSurplus >= 0,
-        vLowSatisfied: details.vLow.cumulativeSurplus >= 0,
-    }
+        vHigh: { unitsAvailableToOffsetDownwards: detailsD.vHigh.unitsAvailableToOffsetDownwards.toNumber(), remainingLosses: detailsD.vHigh.remainingLosses.toNumber() },
+        high: { unitsAvailableToOffsetDownwards: detailsD.high.unitsAvailableToOffsetDownwards.toNumber(), unitsAvailableToOffsetUpwards: detailsD.high.unitsAvailableToOffsetUpwards.toNumber(), surplusUnitsMinusDeficit: detailsD.high.surplusUnitsMinusDeficit.toNumber() },
+        medium: { unitsAvailableToOffsetUpwards: detailsD.medium.unitsAvailableToOffsetUpwards.toNumber(), netChangeInUnits: detailsD.medium.netChangeInUnits.toNumber(), cumulativeSurplus: detailsD.medium.cumulativeSurplus.toNumber() },
+        low: { netChangeInUnits: detailsD.low.netChangeInUnits.toNumber(), cumulativeSurplus: detailsD.low.cumulativeSurplus.toNumber() },
+        vLow: { netChangeInUnits: detailsD.vLow.netChangeInUnits.toNumber(), cumulativeSurplus: detailsD.vLow.cumulativeSurplus.toNumber() },
+    };
+    return { details, vHighSatisfied: detailsD.vHigh.remainingLosses.gte(0), highSatisfied: detailsD.vHigh.unitsAvailableToOffsetDownwards.plus(detailsD.high.unitsAvailableToOffsetUpwards).gte(0), mediumSatisfied: detailsD.medium.cumulativeSurplus.gte(0), lowSatisfied: detailsD.low.cumulativeSurplus.gte(0), vLowSatisfied: detailsD.vLow.cumulativeSurplus.gte(0) };
 }
