@@ -10,7 +10,7 @@ import type { BroadHabitat } from './broadHabitats';
 const ZERO = new Decimal(0);
 
 function sumMatchingD(values: (number | Decimal)[], matches: (value: Decimal) => boolean): Decimal {
-    return values.reduce((sum, value) => {
+    return values.reduce((sum: Decimal, value) => {
         const decimal = new Decimal(value);
         return matches(decimal) ? sum.plus(decimal) : sum;
     }, ZERO);
