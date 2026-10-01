@@ -274,7 +274,7 @@ function parseAllRows<Schema extends v.BaseSchema<any, any, any>, Input extends 
     const sheet = sheetJsView(getSheet(workbook, spec.name)!);
     const detectionCol = decodeCol(spec.dataDetectionColumn);
 
-    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
+    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow, spec.endRow - spec.startRow);
     const results: Output[] = [];
 
     for (const row of dataRows) {
@@ -306,7 +306,7 @@ function parseAllEnhancementRows<Schema extends v.BaseSchema<any, any, any>, Inp
     const baselineSheet = sheetJsView(getSheet(workbook, baselineSpec.name)!);
     const detectionCol = decodeCol(spec.dataDetectionColumn);
 
-    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow);
+    const dataRows = findAllDataRows(sheet, detectionCol, spec.startRow, spec.endRow - spec.startRow);
     const results: Output[] = [];
 
     for (const row of dataRows) {
@@ -336,16 +336,11 @@ const dataValueSchema = v.union([
  */
 export function findAllDataRows(sheet: SheetView, columnToCheckPresence: number, startRow: number = 10, maxRows: number = MAX_DATA_ROWS): number[] {
     const dataRows: number[] = [];
-    let consecutiveEmpty = 0;
     for (let row = startRow; row < startRow + maxRows; row++) {
         const value = getCellValue(sheet, row, columnToCheckPresence);
         const parsed = v.safeParse(dataValueSchema, value);
         if (parsed.success && parsed.output !== "Broad Habitat") {
             dataRows.push(row);
-            consecutiveEmpty = 0;
-        } else {
-            consecutiveEmpty++;
-            if (consecutiveEmpty > 10) break; // Stop after 10 empty rows
         }
     }
     return dataRows;

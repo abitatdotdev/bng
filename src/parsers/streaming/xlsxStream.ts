@@ -74,7 +74,7 @@ export function parseWorkbookIndex(workbookXml: string, relsXml: string): Workbo
 
 /**
  * Parse an xlsx worksheet XML into a sparse {row → {col → value}} map.
- * Only rows up to MAX_DATA_ROWS + a small header buffer are retained.
+ * Only rows up to MAX_DATA_ROWS are retained.
  *
  * Stops scanning at the first row past `maxRow`, and at the first cell past
  * `maxCol`, so neither the tail of a long sheet nor the right-hand side of a
@@ -82,7 +82,7 @@ export function parseWorkbookIndex(workbookXml: string, relsXml: string): Workbo
  * order by every xlsx writer; one out of order past the cap would be skipped
  * rather than misread.
  */
-export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MAX_DATA_ROWS + 20, maxCol = Infinity): SheetRows {
+export function parseWorksheet(xml: string, sharedStrings: string[], maxRow = MAX_DATA_ROWS, maxCol = Infinity): SheetRows {
     const rows: SheetRows = new Map();
     const rowRe = /<row\b([^>]*)>([\s\S]*?)<\/row>/g;
     const cellRe = /<c\b([^/>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;

@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { offSiteHedgerowCreationSchema, type OffSiteHedgerowCreationSchema } from "./hedgerowCreation";
 import * as v from 'valibot';
 
@@ -130,8 +130,8 @@ test("calculates temporal data - advance exceeds standard time", () => {
     }));
 
     expect(result.standardTimeToTargetCondition).toBe(12);
-    expect(result.finalTimeToTargetCondition).toBe(-3);
-    expect(result.temporalMultiplier).toBe(""); // Negative time not in lookup table
+    expect(result.finalTimeToTargetCondition).toBe(0);
+    expect(result.temporalMultiplier).toBe(1);
 })
 
 test("calculates temporal data - 30+ standard time", () => {
@@ -156,8 +156,8 @@ test("calculates temporal data - 30+ with advance brings it under 30", () => {
     }));
 
     expect(result.standardTimeToTargetCondition).toBe("30+");
-    expect(result.finalTimeToTargetCondition).toBe(26);
-    expect(result.temporalMultiplier).toBe(0.396013642);
+    expect(result.finalTimeToTargetCondition).toBe(25);
+    expect(result.temporalMultiplier).toBe(0.4103768311);
 })
 
 test("calculates difficulty data - standard case", () => {
@@ -318,3 +318,42 @@ test("full schema validation - Native hedgerow - associated with bank or ditch",
     expect(result.hedgerowUnitsDelivered).toBeCloseTo(baseUnits, 5);
     expect(result.hedgerowUnitsDeliveredWithSpatialRisk).toBeCloseTo(baseUnits * 0.5, 5);
 })
+
+
+describe('creation time adjustments', () => {
+    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+    const schema = offSiteHedgerowCreationSchema;
+    for (const [delay, time, units] of [[24, 29, 1.4234823228], [25, 30, 1.3736604416], [26, '30+', 1.2791869444]] as const) {
+        test(`applies the ${time}-year temporal adjustment after a ${delay}-year delay`, () => {
+            const result = v.parse(schema, {
+                habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+                delayInStartingHabitatCreation: delay,
+                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+            });
+            expect(result.finalTimeToTargetCondition).toBe(time);
+            expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
+        });
+    }
+    test('advance beyond standard time delivers the undiscounted units', () => {
+        const result = v.parse(schema, {
+            habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+            habitatCreatedInAdvance: 10,
+            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+        });
+        expect(result.finalTimeToTargetCondition).toBe(0);
+        expect(result.temporalMultiplier).toBe(1);
+        expect(result.hedgerowUnitsDelivered).toBe(4);
+    });
+    for (const [advance, time, units] of [[0, '30+', 1.9187804166], [1, 29, 2.1352234842], ['30+', 0, 6]] as const) {
+        test(`adjusts a 30+ year target for ${advance} years of advance creation`, () => {
+            const result = v.parse(schema, {
+                habitatType: 'Line of trees', length: 1, condition: 'Good', strategicSignificance,
+                habitatCreatedInAdvance: advance,
+                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+            });
+            expect(result.standardTimeToTargetCondition).toBe('30+');
+            expect(result.finalTimeToTargetCondition).toBe(time);
+            expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
+        });
+    }
+});

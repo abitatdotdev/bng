@@ -1,0 +1,1554 @@
+{
+  "SheetNames": [
+    "Start",
+    "Version History",
+    "A-1 On-Site Habitat Baseline",
+    "A-2 On-Site Habitat Creation",
+    "A-3 On-Site Habitat Enhancement",
+    "D-1 Off-Site Habitat Baseline",
+    "D-2 Off-Site Habitat Creation",
+    "D-3 Off-Site Habitat Enhancment",
+    "B-1 On-Site Hedge Baseline",
+    "B-2 On-Site Hedge Creation",
+    "B-3 On-Site Hedge Enhancement",
+    "E-1 Off-Site Hedge Baseline",
+    "E-2 Off-Site Hedge Creation",
+    "E-3 Off-Site Hedge Enhancement",
+    "C-1 On-Site WaterC' Baseline",
+    "C-2 On-Site WaterC' Creation",
+    "C-3 On-Site WaterC' Enhancement",
+    "F-1 Off-Site WaterC' Baseline",
+    "F-2 Off-Site WaterC' Creation",
+    "F-3 Off-Site WaterC Enhancement"
+  ],
+  "Sheets": {
+    "Start": {
+      "D8": {
+        "t": "n",
+        "v": 4.1
+      },
+      "E8": {
+        "t": "s",
+        "v": "'Completed by' and 'Date of metric completion' fields must be filled in ▲",
+        "f": "IF(OR(F16=\"\",F17=\"\"), \"'Completed by' and 'Date of metric completion' fields must be filled in ▲\",\"\")"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Project details"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Planning authority:"
+      },
+      "D12": {
+        "t": "s",
+        "v": "Project name:"
+      },
+      "D13": {
+        "t": "s",
+        "v": "Applicant:"
+      },
+      "D14": {
+        "t": "s",
+        "v": "Application type:"
+      },
+      "D15": {
+        "t": "s",
+        "v": "Planning application reference:"
+      },
+      "D16": {
+        "t": "s",
+        "v": "Completed by:"
+      },
+      "D17": {
+        "t": "s",
+        "v": "Date of metric completion:"
+      },
+      "D18": {
+        "t": "s",
+        "v": "Reviewer:"
+      },
+      "D19": {
+        "t": "s",
+        "v": "Calculation iteration:"
+      },
+      "D20": {
+        "t": "s",
+        "v": "Planning authority reviewer:"
+      },
+      "D21": {
+        "t": "s",
+        "v": "Date of planning authority review:"
+      },
+      "D22": {
+        "t": "s",
+        "v": "Target % net gain:"
+      },
+      "F22": {
+        "t": "n",
+        "v": 0.1
+      },
+      "D23": {
+        "t": "s",
+        "v": "Irreplaceable habitat present at baseline:"
+      },
+      "F23": {
+        "t": "s",
+        "v": "No ✓",
+        "f": "IF(AND('Irreplaceable Habitats'!K32=0,'Irreplaceable Habitats'!K65=0,'Irreplaceable Habitats'!AP65=0,'Irreplaceable Habitats'!AP32=0),\"No ✓\",\"Yes ⚠\")"
+      },
+      "D24": {
+        "t": "s",
+        "v": "Total site area - including irreplaceable habitat area (hectares):"
+      },
+      "F24": {
+        "t": "n",
+        "v": 0,
+        "f": "'A-1 On-Site Habitat Baseline'!H260"
+      },
+      "I24": {
+        "t": "s",
+        "v": "Irreplaceable habitat site area (hectares):"
+      },
+      "J24": {
+        "t": "n",
+        "v": 0,
+        "f": "'Irreplaceable Habitats'!K33"
+      },
+      "D25": {
+        "t": "s",
+        "v": "Total off-site area - including irreplaceable habitat area (hectares):"
+      },
+      "F25": {
+        "t": "s",
+        "v": "N/A",
+        "f": "IF('D-1 Off-Site Habitat Baseline'!H261=0, \"N/A\", 'D-1 Off-Site Habitat Baseline'!H261)"
+      },
+      "I25": {
+        "t": "s",
+        "v": "Irreplaceable habitat area off-site (hectares):"
+      },
+      "J25": {
+        "t": "s",
+        "v": "N/A",
+        "f": "IF('Irreplaceable Habitats'!K66=0, \"N/A\", 'Irreplaceable Habitats'!K66)"
+      },
+      "D27": {
+        "t": "s",
+        "v": "Contains deviations from the statutory metric - this must be agreed with consenting body"
+      },
+      "D29": {
+        "t": "s",
+        "v": "Cell style conventions"
+      },
+      "D30": {
+        "t": "s",
+        "v": "⚠"
+      },
+      "F30": {
+        "t": "s",
+        "v": "Attention required"
+      },
+      "D31": {
+        "t": "s",
+        "v": "▲"
+      },
+      "F31": {
+        "t": "s",
+        "v": "Input error/rules and principles not met"
+      },
+      "F32": {
+        "t": "s",
+        "v": "Use of this cell is not appropriate"
+      },
+      "F33": {
+        "t": "s",
+        "v": "Enter data"
+      },
+      "F34": {
+        "t": "s",
+        "v": "Automatic lookup"
+      },
+      "F35": {
+        "t": "s",
+        "v": "Result"
+      },
+      "D55": {
+        "t": "s",
+        "v": "On-site baseline map reference number"
+      },
+      "I55": {
+        "t": "s",
+        "v": "On-site post-intervention map reference number"
+      },
+      "D66": {
+        "t": "s",
+        "v": "Off-site baseline map reference number"
+      },
+      "I66": {
+        "t": "s",
+        "v": "Off-site post-intervention reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "Version History": {
+      "B3": {
+        "t": "s",
+        "v": "Version"
+      },
+      "C3": {
+        "t": "s",
+        "v": "Changes made"
+      },
+      "D3": {
+        "t": "s",
+        "v": "Date released"
+      },
+      "B4": {
+        "t": "s",
+        "v": "Version 1.0.0"
+      },
+      "C4": {
+        "t": "s",
+        "v": " Initial statutory version"
+      },
+      "D4": {
+        "t": "s",
+        "v": "29th November 2023"
+      },
+      "B5": {
+        "t": "s",
+        "v": "Version 1.0.1"
+      },
+      "C5": {
+        "t": "s",
+        "v": "Amended to fix an error in the irreplaceable habitats dropdown and minor changes to the working of the tool such as ensuring the rows auto populate correctly and cells adjust their height so error messages can be read"
+      },
+      "D5": {
+        "t": "s",
+        "v": "15th December 2023"
+      },
+      "B6": {
+        "t": "s",
+        "v": "Version 1.0.2"
+      },
+      "C6": {
+        "t": "s",
+        "v": "Updated to correct some labelling errors, minor formula errors and expand width of columns"
+      },
+      "D6": {
+        "t": "s",
+        "v": "12th February 2024"
+      },
+      "B7": {
+        "t": "s",
+        "v": "Version 1.0.3"
+      },
+      "C7": {
+        "t": "s",
+        "v": "Minor formatting errors corrected to ensure text is visible and flags appear correctly, version history sheet added."
+      },
+      "D7": {
+        "t": "s",
+        "v": "23rd July 2024"
+      },
+      "B8": {
+        "t": "s",
+        "v": "Version 1.0.4"
+      },
+      "C8": {
+        "t": "s",
+        "v": "Tab names – Unit Shortfall changed to Credits\r\nFormula Correction in Tab D2 – Column V\r\nFormula Correction in Headline Results B19 and M7, correcting a typo in cell output\r\nCorrections to UKHab codes in tab G1\r\nAmended habitat definitions and codes in tab G1\r\nCorrections to cell references in tab G2\r\nMinor Changes to the layout of Area Habitat Trading Summary\r\nCorrections to the Credits tiers of Littoral Sea Grass and Lowland Beech and YewMinor formatting corrections\r\nChange of ‘Habitats’ to ‘Area Habitats’ where appropriate\r\nChange to enhancement rules for IH ‘Other Woodland’ with changes to formula in columns T and U of A3 and D3"
+      },
+      "D8": {
+        "t": "s",
+        "v": "3rd July 2025"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-1 On-Site Habitat Baseline": {
+      "E9": {
+        "t": "s",
+        "v": "Existing area habitats"
+      },
+      "K9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH or irreplaceable habitat"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D10": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "E10": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "F10": {
+        "t": "s",
+        "v": " Habitat Type"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Irreplaceable habitat"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "K10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Area retained"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Area enhanced"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AB10": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-2 On-Site Habitat Creation": {
+      "D8": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "D9": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "G9": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "J9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Habitat units delivered"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P10": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AB10": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-3 On-Site Habitat Enhancement": {
+      "Q9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Proposed Habitat (Broad habitat pre-populated but can be overridden)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AO10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Proposed Broad Habitat"
+      },
+      "R11": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years) "
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AP11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AQ11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-1 Off-Site Habitat Baseline": {
+      "E9": {
+        "t": "s",
+        "v": "Existing area habitats"
+      },
+      "K9": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "R9": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH or irreplaceable habitat"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D10": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "E10": {
+        "t": "s",
+        "v": "Broad habitat"
+      },
+      "F10": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Irreplaceable habitat"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "K10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "R10": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Area retained"
+      },
+      "W10": {
+        "t": "s",
+        "v": "Area enhanced"
+      },
+      "AC10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AE10": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AF10": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-2 Off-Site Habitat Creation": {
+      "D8": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "D9": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "G9": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "J9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "L10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P10": {
+        "t": "s",
+        "v": "Habitat created in advance (years) "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "AC10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AE10": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AF10": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "AG10": {
+        "t": "s",
+        "v": "Baseline Ref"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-3 Off-Site Habitat Enhancment": {
+      "Q9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Proposed Habitat (Broad habitat pre-populated but can be overridden)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AR10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Proposed Broad Habitat"
+      },
+      "R11": {
+        "t": "s",
+        "v": "Proposed Habitat"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AR11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AS11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AT11": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AU11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-1 On-Site Hedge Baseline": {
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "Q9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "V9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "W9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "X9": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-2 On-Site Hedge Creation": {
+      "D10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "O11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "X11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-3 On-Site Hedge Enhancement": {
+      "M9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "S11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AJ11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-1 Off-Site Hedge Baseline": {
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "Y8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "S9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "T9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AA9": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-2 Off-Site Hedge Creation": {
+      "D10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M10": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "P11": {
+        "t": "s",
+        "v": "Habitat created in advance (years) "
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AB11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AC11": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AD11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-3 Off-Site Hedge Enhancement": {
+      "M9": {
+        "t": "s",
+        "v": "Change in distinctiveness and condition"
+      },
+      "M10": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AL10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "S11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AL11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AM11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AN11": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-1 On-Site WaterC' Baseline": {
+      "C8": {
+        "t": "s",
+        "v": "Existing watercourse type"
+      },
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M8": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AA8": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH"
+      },
+      "AB8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "U9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "V9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "User Comments"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AD9": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-2 On-Site WaterC' Creation": {
+      "C10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "I10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C11": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "G11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "V11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "X11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AB11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AC11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "C12": {
+        "t": "s",
+        "v": "Ditches"
+      },
+      "D12": {
+        "t": "n",
+        "v": 1
+      },
+      "G12": {
+        "t": "s",
+        "v": "Moderate"
+      },
+      "I12": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "M12": {
+        "t": "n",
+        "v": 0
+      },
+      "N12": {
+        "t": "s",
+        "v": "30+"
+      },
+      "P12": {
+        "t": "s",
+        "v": "30+",
+        "f": "IF(O12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\",IF(L12=\"\",\"\",IF(M12=\"30+\",0,IF(N12=\"30+\",\"30+\",IF(L12+N12>30,\"30+ \",IF(L12+N12-M12>0,L12+N12-M12,IF(L12-M12<0,0,L12+N12-M12)))))))"
+      },
+      "V12": {
+        "t": "s",
+        "v": "No Encroachment"
+      },
+      "X12": {
+        "t": "s",
+        "v": "No Encroachment/ No Encroachment"
+      },
+      "Z12": {
+        "t": "n",
+        "v": 1.714110505496,
+        "f": "IFERROR(IF(C12=\"\",\"\",D12*F12*H12*K12*Q12*U12*Y12*W12),\"\")"
+      },
+      "AC12": {
+        "t": "s",
+        "v": "water-creation"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-3 On-Site WaterC' Enhancement": {
+      "N9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "N10": {
+        "t": "s",
+        "v": "Proposed habitat\r\n"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Habitat condition"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "AK10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AN10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "T11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "V11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AN11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AP11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-1 Off-Site WaterC' Baseline": {
+      "C8": {
+        "t": "s",
+        "v": "Existing watercourse type"
+      },
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M8": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "S8": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AD8": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH"
+      },
+      "AE8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "S9": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "X9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "AE9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AF9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AG9": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AH9": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-2 Off-Site WaterC' Creation": {
+      "C10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C11": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "G11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "V11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "X11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "AD11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-3 Off-Site WaterC Enhancement": {
+      "N9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "N10": {
+        "t": "s",
+        "v": "Proposed habitat \r\n"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Habitat condition"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "AK10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AP10": {
+        "t": "s",
+        "v": "Watercourse units delivered"
+      },
+      "AQ10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "T11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "V11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AQ11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AR11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AS11": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "!ref": "A1:BZ260"
+    }
+  }
+}

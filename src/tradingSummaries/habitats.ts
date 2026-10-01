@@ -22,7 +22,11 @@ function cumulativeBroadHabitatChangeD(features: AllFeatures, distinctivenessCat
     return Object.values(allHabitats)
         .filter(h => h.distinctivenessCategory === distinctivenessCategory)
         .reduce((changes, habitat) => {
-            changes[habitat.broadHabitat] = (changes[habitat.broadHabitat] ?? ZERO).plus(projectWideUnitChange(features, habitat.label));
+            // Trading Summary G113 = SUM(F113:F115): medium intertidal
+            // sediment and IGGI share one balance before sign splitting.
+            const group = distinctivenessCategory === "Medium" && habitat.broadHabitat === "Intertidal hard structures"
+                ? "Intertidal sediment" : habitat.broadHabitat;
+            changes[group] = (changes[group] ?? ZERO).plus(projectWideUnitChange(features, habitat.label));
             return changes;
         }, {} as Partial<Record<BroadHabitat, Decimal>>);
 }

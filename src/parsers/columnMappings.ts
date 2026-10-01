@@ -7,6 +7,8 @@ export type SheetSpec<Cols extends Record<string, ColumnSpec> = Record<string, C
     name: string;
     /** 0-indexed row at which data begins. */
     startRow: number;
+    /** Exclusive 0-indexed end of the input range, before the totals row. */
+    endRow: number;
     /** Column letter used by `findAllDataRows` to detect non-empty rows. */
     dataDetectionColumn: string;
     /**
@@ -23,6 +25,7 @@ const defaultHeaderRows = (startRow: number) => [startRow - 3, startRow - 2, sta
 export const onSiteHabitatBaselineSpec = {
     name: 'A-1 On-Site Habitat Baseline',
     startRow: 10,
+    endRow: 258,
     dataDetectionColumn: 'E',
     columns: {
         ref: { column: 'D', header: 'Ref' },
@@ -44,6 +47,7 @@ export const onSiteHabitatBaselineSpec = {
 export const onSiteHabitatCreationSpec = {
     name: 'A-2 On-Site Habitat Creation',
     startRow: 10,
+    endRow: 256,
     dataDetectionColumn: 'Y',
     columns: {
         broadHabitat: { column: 'D', header: 'Broad Habitat' },
@@ -62,6 +66,7 @@ export const onSiteHabitatCreationSpec = {
 export const onSiteHabitatEnhancementSpec = {
     name: 'A-3 On-Site Habitat Enhancement',
     startRow: 11,
+    endRow: 257,
     dataDetectionColumn: 'E',
     columns: {
         baselineRef: { column: 'E', header: 'Baseline ref' },
@@ -80,6 +85,7 @@ export const onSiteHabitatEnhancementSpec = {
 export const offSiteHabitatBaselineSpec = {
     name: 'D-1 Off-Site Habitat Baseline',
     startRow: 10,
+    endRow: 258,
     dataDetectionColumn: 'E',
     columns: {
         ref: { column: 'D', header: 'Ref' },
@@ -103,6 +109,7 @@ export const offSiteHabitatBaselineSpec = {
 export const offSiteHabitatCreationSpec = {
     name: 'D-2 Off-Site Habitat Creation',
     startRow: 10,
+    endRow: 256,
     dataDetectionColumn: 'D',
     columns: {
         broadHabitat: { column: 'D', header: 'Broad Habitat' },
@@ -124,6 +131,7 @@ export const offSiteHabitatCreationSpec = {
 export const offSiteHabitatEnhancementSpec = {
     name: 'D-3 Off-Site Habitat Enhancment',
     startRow: 11,
+    endRow: 258,
     dataDetectionColumn: 'E',
     columns: {
         baselineRef: { column: 'E', header: 'Baseline ref' },
@@ -143,6 +151,7 @@ export const offSiteHabitatEnhancementSpec = {
 export const onSiteHedgerowBaselineSpec = {
     name: 'B-1 On-Site Hedge Baseline',
     startRow: 9,
+    endRow: 257,
     dataDetectionColumn: 'D',
     columns: {
         ref: { column: 'B', header: 'Ref' },
@@ -161,6 +170,7 @@ export const onSiteHedgerowBaselineSpec = {
 export const onSiteHedgerowCreationSpec = {
     name: 'B-2 On-Site Hedge Creation',
     startRow: 11,
+    endRow: 259,
     dataDetectionColumn: 'D',
     columns: {
         habitatType: { column: 'D', header: 'Habitat type' },
@@ -178,6 +188,7 @@ export const onSiteHedgerowCreationSpec = {
 export const onSiteHedgerowEnhancementSpec = {
     name: 'B-3 On-Site Hedge Enhancement',
     startRow: 11,
+    endRow: 257,
     dataDetectionColumn: 'B',
     columns: {
         baselineRef: { column: 'B', header: 'Baseline ref' },
@@ -195,6 +206,7 @@ export const onSiteHedgerowEnhancementSpec = {
 export const offSiteHedgerowBaselineSpec = {
     name: 'E-1 Off-Site Hedge Baseline',
     startRow: 9,
+    endRow: 257,
     dataDetectionColumn: 'D',
     columns: {
         ref: { column: 'B', header: 'Ref' },
@@ -215,6 +227,7 @@ export const offSiteHedgerowBaselineSpec = {
 export const offSiteHedgerowCreationSpec = {
     name: 'E-2 Off-Site Hedge Creation',
     startRow: 11,
+    endRow: 259,
     dataDetectionColumn: 'D',
     columns: {
         habitatType: { column: 'D', header: 'Habitat type' },
@@ -235,6 +248,7 @@ export const offSiteHedgerowCreationSpec = {
 export const offSiteHedgerowEnhancementSpec = {
     name: 'E-3 Off-Site Hedge Enhancement',
     startRow: 11,
+    endRow: 257,
     dataDetectionColumn: 'B',
     columns: {
         baselineRef: { column: 'B', header: 'Baseline ref' },
@@ -253,6 +267,7 @@ export const offSiteHedgerowEnhancementSpec = {
 export const onSiteWatercourseBaselineSpec = {
     name: "C-1 On-Site WaterC' Baseline",
     startRow: 9,
+    endRow: 257,
     dataDetectionColumn: 'E',
     // Bespoke compensation header lives in row 7 on this sheet — widen the window.
     headerRows: [6, 7, 8],
@@ -276,6 +291,7 @@ export const onSiteWatercourseBaselineSpec = {
 export const onSiteWatercourseCreationSpec = {
     name: "C-2 On-Site WaterC' Creation",
     startRow: 11,
+    endRow: 259,
     dataDetectionColumn: 'C',
     columns: {
         watercourseType: { column: 'C', header: 'Watercourse type' },
@@ -295,6 +311,7 @@ export const onSiteWatercourseCreationSpec = {
 export const onSiteWatercourseEnhancementSpec = {
     name: "C-3 On-Site WaterC' Enhancement",
     startRow: 11,
+    endRow: 257,
     dataDetectionColumn: 'N',
     columns: {
         baselineRef: { column: 'B', header: 'Baseline ref' },
@@ -314,6 +331,7 @@ export const onSiteWatercourseEnhancementSpec = {
 export const offSiteWatercourseBaselineSpec = {
     name: "F-1 Off-Site WaterC' Baseline",
     startRow: 9,
+    endRow: 257,
     dataDetectionColumn: 'E',
     // Bespoke compensation header lives in row 7 on this sheet — widen the window.
     headerRows: [6, 7, 8],
@@ -339,6 +357,7 @@ export const offSiteWatercourseBaselineSpec = {
 export const offSiteWatercourseCreationSpec = {
     name: "F-2 Off-Site WaterC' Creation",
     startRow: 11,
+    endRow: 259,
     dataDetectionColumn: 'C',
     columns: {
         watercourseType: { column: 'C', header: 'Watercourse type' },
@@ -359,6 +378,7 @@ export const offSiteWatercourseCreationSpec = {
 export const offSiteWatercourseEnhancementSpec = {
     name: 'F-3 Off-Site WaterC Enhancement',
     startRow: 11,
+    endRow: 257,
     dataDetectionColumn: 'AP',
     columns: {
         baselineRef: { column: 'B', header: 'Baseline ref' },

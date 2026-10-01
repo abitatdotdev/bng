@@ -3,9 +3,9 @@ import { Decimal } from '../decimal';
 import { decodeCol } from './cellRef';
 
 /**
- * Maximum number of rows to process in Excel sheets
+ * Maximum physical row read (includes all input ranges and their totals)
  */
-export const MAX_DATA_ROWS = 200;
+export const MAX_DATA_ROWS = 260;
 
 /**
  * Rightmost column to process in Excel sheets. The furthest right any sheet

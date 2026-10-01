@@ -17,7 +17,7 @@ import {
     type WatercourseEncroachment,
     type RiparianEncroachment
 } from '../watercourseEncroachment';
-import { getTemporalMultiplier, lookupTemporalMultiplier } from '../temporalMultipliers';
+import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 import { watercourseEnhancementTemporalMatrix } from '../watercourseEnhancementTemporalMatrix';
@@ -239,7 +239,7 @@ export function calculateTemporalAdjustments<Data extends {
     delayInStarting: number | "30+";
     standardTimeToTarget: number;
 }>(data: Data) {
-    // "30+" picklist entries are treated as 30 years for arithmetic.
+    // Status messages use numeric years; the final-time branches preserve sentinels.
     const habitatCreatedInAdvance = data.habitatCreatedInAdvance === "30+" ? 30 : data.habitatCreatedInAdvance;
     const delayInStarting = data.delayInStarting === "30+" ? 30 : data.delayInStarting;
 
@@ -252,15 +252,12 @@ export function calculateTemporalAdjustments<Data extends {
                     ? "Check details- Delay in starting habitat in required condition? ⚠" as const
                     : "Standard time to target condition applied" as const;
 
-    let finalTimeToTarget = new Decimal(data.standardTimeToTarget).plus(delayInStarting).minus(habitatCreatedInAdvance).toNumber();
-
-    if (finalTimeToTarget > 30) {
-        finalTimeToTarget = 30;
-    }
-
-    if (finalTimeToTarget < 0) {
-        finalTimeToTarget = 0;
-    }
+    const delayedTime = new Decimal(data.standardTimeToTarget).plus(delayInStarting);
+    const finalTimeToTarget: number | "30+" = data.habitatCreatedInAdvance === "30+"
+        ? 0
+        : data.delayInStarting === "30+" || delayedTime.gt(30)
+            ? "30+"
+            : Decimal.max(0, delayedTime.minus(habitatCreatedInAdvance)).toNumber();
 
     const isDitchFairlyCategory = data.watercourseType === 'Ditches' &&
         (data.condition === 'Fairly Poor' || data.condition === 'Fairly Good');
@@ -277,9 +274,10 @@ export function calculateTemporalAdjustments<Data extends {
  * Lookup: attaches temporalMultiplier from finalTimeToTarget.
  */
 export function lookupTemporalMultiplierFromFinalTime<Data extends {
-    finalTimeToTarget: number;
+    finalTimeToTarget: number | "30+";
 }>(data: Data) {
-    const temporalMultiplier = getTemporalMultiplier(data.finalTimeToTarget as any) as number;
+    const value = lookupTemporalMultiplier(data.finalTimeToTarget);
+    const temporalMultiplier = typeof value === "number" ? value : 0;
 
     return {
         ...data,

@@ -1,0 +1,315 @@
+{
+  "metricVersion": "4.1",
+  "templateSha256": "e862898c7666bb933aaebbdf43808378a8ecef09bf6795d1b5401d724cb77368",
+  "cases": [
+    {
+      "id": "mixed-onsite-interventions",
+      "description": "combines retained, created and enhanced habitat, hedgerow and watercourse units",
+      "sourceCase": "all-onsite-controls",
+      "sourceSha256": "d27b25a9920699650cea4db4870dd21dcc3409435491219ee1a907f91b8a7f83",
+      "fixtureSha256": "ed014c718322371e98c3ba8ad604e4549b46a90b8c5af0c2cdbcf5b0e29cce30",
+      "comparisons": [
+        {
+          "sheet": "A-1 On-Site Habitat Baseline",
+          "cell": "Q11",
+          "libraryPath": "features.onSiteHabitatBaselines.0.totalHabitatUnits",
+          "excelValue": 4,
+          "excelFormula": "IFERROR(IF(AND(F11<>\"\", G11=\"\"), \"Confirm irreplaceable habitat status ▲\", (IF(AND(E11=\"Individual trees\",T11>0, G11=\"Yes\"), \"Error - you cannot enhance irreplaceable individual trees ▲\", (IF(AND(U11=\"Irreplaceable habitat - no units generated ⚠\",(S11+T11)<H11, OR(Y11=\"No\", Y11=\"\")),\"Any Loss Unacceptable ⚠\", (IF(U11=\"Irreplaceable habitat - no units generated ⚠\", T11*J11*L11*O11, IF(AND(P11='G-1 All Habitats'!$X$9, AC11>0, S11<=0, T11<=0, OR(Y11=\"No\", Y11=\"\")),\"Any Loss Unacceptable ⚠\", IF(AND(P11='G-1 All Habitats'!$X$9, AC11>0, S11<=0, T11<=0, Y11=\"Yes\"), 0, (IF(AND(P11='G-1 All Habitats'!$X$9,(S11+T11)<H11, OR(Y11=\"No\", Y11=\"\")),\"Any Loss Unacceptable ⚠\", (IF(P11=\"\",\"\",IF(AND(P11='G-1 All Habitats'!$X$9,T11>0),U11+V11,IF(AND(P11='G-1 All Habitats'!$X$9,S11>0),U11+V11,H11*J11*L11*O11))))))))))))))),\"Check Data ▲\")"
+        },
+        {
+          "sheet": "A-2 On-Site Habitat Creation",
+          "cell": "Y11",
+          "libraryPath": "features.onSiteHabitatCreations.0.habitatUnitsDelivered",
+          "excelValue": 1.6736574012,
+          "excelFormula": "IFERROR(G11*I11*K11*N11*T11*X11,\"\")"
+        },
+        {
+          "sheet": "A-3 On-Site Habitat Enhancement",
+          "cell": "AN12",
+          "libraryPath": "features.onSiteHabitatEnhancements.0.habitatUnitsDelivered",
+          "excelValue": 3.4005645483999998,
+          "excelFormula": "IFERROR(IF(N12=\"Error - you cannot enhance irreplaceable individual trees ▲\", \"Error - you cannot enhance irreplaceable individual trees ▲\", IF(K12>Z12, ((((V12*X12*Z12)-(V12*I12*Z12))*(AM12*AI12))+(V12*I12*Z12))*(AC12), ((((V12*X12*Z12)-(V12*I12*K12))*(AM12*AI12))+(V12*I12*K12))*(AC12))),\"\")"
+        },
+        {
+          "sheet": "B-1 On-Site Hedge Baseline",
+          "cell": "N10",
+          "libraryPath": "features.onSiteHedgerowBaselines.0.totalHedgerowUnits",
+          "excelValue": 2,
+          "excelFormula": "IFERROR(IF(OR(K10=\"Check data ⚠\",I10=\"Check data ⚠\",R10=\"Error in lengths ▲\"), \"Check data ▲\", (E10*G10*I10*L10)),\"\")"
+        },
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "W12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.hedgerowUnitsDelivered",
+          "excelValue": 0.8368287006,
+          "excelFormula": "IFERROR(E12*G12*I12*L12*R12*V12,\"\")"
+        },
+        {
+          "sheet": "B-3 On-Site Hedge Enhancement",
+          "cell": "AH12",
+          "libraryPath": "features.onSiteHedgerowEnhancements.0.hedgerowUnitsDelivered",
+          "excelValue": 1.898632125,
+          "excelFormula": "IFERROR(IF(K12=\"Check data ⚠\", \"Check data ⚠\", (IF(OR(M12=\"\",S12=\"\",U12=\"\"),\"\",(((((P12*R12*T12)-(P12*F12*H12))*(AG12*AC12))+(P12*F12*H12))*(W12))))),\"\")"
+        },
+        {
+          "sheet": "C-1 On-Site WaterC' Baseline",
+          "cell": "R10",
+          "libraryPath": "features.onSiteWatercourseBaselines.0.totalWatercourseUnits",
+          "excelValue": 4,
+          "excelFormula": "IFERROR(IF(AND(U10>0, V10>0, U10+V10>E10), \"Split retained and enhanced into separate entries ▲\", IF(OR(K10=\"Check data ⚠\",I10=\"Check data ⚠\"), \"Check data ▲\", E10*G10*I10*L10*N10*P10)),\" \")"
+        },
+        {
+          "sheet": "C-2 On-Site WaterC' Creation",
+          "cell": "Z12",
+          "libraryPath": "features.onSiteWatercourseCreations.0.unitsDelivered",
+          "excelValue": 1.1213504588040002,
+          "excelFormula": "IFERROR(IF(C12=\"\",\"\",D12*F12*H12*K12*Q12*U12*Y12*W12),\"\")"
+        },
+        {
+          "sheet": "C-3 On-Site WaterC' Enhancement",
+          "cell": "AM12",
+          "libraryPath": "features.onSiteWatercourseEnhancements.0.watercourseUnitsDelivered",
+          "excelValue": 3.7343600012,
+          "excelFormula": "IFERROR(IF(C12=\"\",\"\",IF(AND(N12<>\"\",M12=\"\"),\"Check Data ⚠\", IF(Q12>D12,((((Q12*S12*U12)-(D12*F12*H12))*(AH12*AD12))+(D12*F12*H12))*(AL12*X12*AJ12),((((Q12*S12*U12)-(Q12*F12*H12))*(AH12*AD12))+(Q12*F12*H12))*(AL12*X12*AJ12)))),\"\")"
+        },
+        {
+          "sheet": "Headline Results",
+          "cell": "H12",
+          "libraryPath": "headline.onSiteHabitatPostIntervention",
+          "excelValue": 6.0742219496,
+          "excelFormula": "IFERROR('A-2 On-Site Habitat Creation'!Y257+'A-3 On-Site Habitat Enhancement'!AN258+'A-1 On-Site Habitat Baseline'!U259+'A-1 On-Site Habitat Baseline'!AT259,\"Check Data ⚠\")"
+        },
+        {
+          "sheet": "Headline Results",
+          "cell": "H13",
+          "libraryPath": "headline.onSiteHedgerowPostIntervention",
+          "excelValue": 3.2354608256,
+          "excelFormula": "IFERROR('B-2 On-Site Hedge Creation'!W260+'B-3 On-Site Hedge Enhancement'!AH258+'B-1 On-Site Hedge Baseline'!R258,\"Check Data⚠\")"
+        },
+        {
+          "sheet": "Headline Results",
+          "cell": "H14",
+          "libraryPath": "headline.onSiteWatercoursePostIntervention",
+          "excelValue": 5.8557104600039995,
+          "excelFormula": "IFERROR('C-2 On-Site WaterC'' Creation'!Z260 + 'C-3 On-Site WaterC'' Enhancement'!AM258+'C-1 On-Site WaterC'' Baseline'!W258+'C-1 On-Site WaterC'' Baseline'!AT258,\"Check Data ⚠\")"
+        }
+      ]
+    },
+    {
+      "id": "established-hedgerow-creation",
+      "description": "delivers undiscounted hedgerow units when advance creation exceeds the target time",
+      "sourceCase": "hedgerow-over-advance",
+      "sourceSha256": "2b41b74406ccadbc65319cb82f2cd0e94c0825b50a418ab0d55ea4a8ca761edf",
+      "fixtureSha256": "a9a0548e3cd02403831e30dd30da338452e9830f42a2ff4061fd2fb16c9b02e6",
+      "comparisons": [
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "Q12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.finalTimeToTargetCondition",
+          "excelValue": 0,
+          "excelFormula": "IF(M12=\"\",\"\",IF(P12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\", IF(M12=\"Not possible ▲\", \"Check Data ⚠\", IF(OR(N12=\"30+\",N12=\"Habitat already in target condition\"),0,IF(O12=\"30+\",\"30+\",IF(AND(M12=\"30+\",OR(N12=\"\",N12=0)),\"30+\",IF(AND(M12=\"30+\",N12>0),30-N12,IF(M12+O12>30,\"30+\",IF(M12+O12-N12>0,M12+O12-N12,IF(M12-N12<0,0,M12+O12-N12))))))))))"
+        },
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "W12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.hedgerowUnitsDelivered",
+          "excelValue": 4,
+          "excelFormula": "IFERROR(E12*G12*I12*L12*R12*V12,\"\")"
+        }
+      ]
+    },
+    {
+      "id": "hedgerow-created-at-thirty-years",
+      "description": "uses the 30-year multiplier for hedgerow creation with a 25-year delay",
+      "sourceCase": "hedgerow-exactly-30",
+      "sourceSha256": "7ccbb408c36ffb7af2e7754926b7fe506ab7e939ebe1c4ac7f255ac547541280",
+      "fixtureSha256": "965fa2288f9ea5116a11a6f8e0b1d77c170af1d58aafca616ac153e01ca243a2",
+      "comparisons": [
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "Q12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.finalTimeToTargetCondition",
+          "excelValue": 30,
+          "excelFormula": "IF(M12=\"\",\"\",IF(P12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\", IF(M12=\"Not possible ▲\", \"Check Data ⚠\", IF(OR(N12=\"30+\",N12=\"Habitat already in target condition\"),0,IF(O12=\"30+\",\"30+\",IF(AND(M12=\"30+\",OR(N12=\"\",N12=0)),\"30+\",IF(AND(M12=\"30+\",N12>0),30-N12,IF(M12+O12>30,\"30+\",IF(M12+O12-N12>0,M12+O12-N12,IF(M12-N12<0,0,M12+O12-N12))))))))))"
+        },
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "W12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.hedgerowUnitsDelivered",
+          "excelValue": 1.3736604416,
+          "excelFormula": "IFERROR(E12*G12*I12*L12*R12*V12,\"\")"
+        }
+      ]
+    },
+    {
+      "id": "advanced-tree-line-creation",
+      "description": "reduces a 30+ year tree-line target to 29 years after one year of advance creation",
+      "sourceCase": "hedgerow-standard-30-plus",
+      "sourceSha256": "b5c9f4e1de94530ec07cea4769e868f182feee57e0dcaa42e71f0e9e11a96635",
+      "fixtureSha256": "557f0362f9d2a1df5d87091167bf1d4a6ffa6eb881fd048bb6feb409645a2013",
+      "comparisons": [
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "Q12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.finalTimeToTargetCondition",
+          "excelValue": 29,
+          "excelFormula": "IF(M12=\"\",\"\",IF(P12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\", IF(M12=\"Not possible ▲\", \"Check Data ⚠\", IF(OR(N12=\"30+\",N12=\"Habitat already in target condition\"),0,IF(O12=\"30+\",\"30+\",IF(AND(M12=\"30+\",OR(N12=\"\",N12=0)),\"30+\",IF(AND(M12=\"30+\",N12>0),30-N12,IF(M12+O12>30,\"30+\",IF(M12+O12-N12>0,M12+O12-N12,IF(M12-N12<0,0,M12+O12-N12))))))))))"
+        },
+        {
+          "sheet": "B-2 On-Site Hedge Creation",
+          "cell": "W12",
+          "libraryPath": "features.onSiteHedgerowCreations.0.hedgerowUnitsDelivered",
+          "excelValue": 2.1352234842,
+          "excelFormula": "IFERROR(E12*G12*I12*L12*R12*V12,\"\")"
+        }
+      ]
+    },
+    {
+      "id": "delayed-hedgerow-enhancement",
+      "description": "preserves the temporal adjustment for hedgerow enhancement delayed over 30 years",
+      "sourceCase": "hedgerow-enhancement-30-plus",
+      "sourceSha256": "cf105a08dd19fa6ff1e5c8433e5059bdd5b0b3739481e2f9f8f55caf145dded5",
+      "fixtureSha256": "b5576da361c4e641efa1eac0583bc6b4983fd276f925a0270441409c3c31c990",
+      "comparisons": [
+        {
+          "sheet": "B-3 On-Site Hedge Enhancement",
+          "cell": "AB12",
+          "libraryPath": "features.onSiteHedgerowEnhancements.0.finalTimeToTargetCondition",
+          "excelValue": "30+",
+          "excelFormula": "IF(X12=\"\",\"\",IF(AA12=\"Check Data ⚠\",\"Check Data ⚠\",IF(Y12=\"30+\",0, IF(X12=\"Not possible ▲\", \"Check Data ⚠\", IF(Z12=\"30+\",\"30+\",IF(X12+Z12>30,\"30+\",IF(AA12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\",IF(X12+Z12-Y12>0,X12+Z12-Y12,IF(X12-Y12<=0,0,)))))))))"
+        },
+        {
+          "sheet": "B-3 On-Site Hedge Enhancement",
+          "cell": "AH12",
+          "libraryPath": "features.onSiteHedgerowEnhancements.0.hedgerowUnitsDelivered",
+          "excelValue": 2.6395934722,
+          "excelFormula": "IFERROR(IF(K12=\"Check data ⚠\", \"Check data ⚠\", (IF(OR(M12=\"\",S12=\"\",U12=\"\"),\"\",(((((P12*R12*T12)-(P12*F12*H12))*(AG12*AC12))+(P12*F12*H12))*(W12))))),\"\")"
+        }
+      ]
+    },
+    {
+      "id": "delayed-watercourse-creation",
+      "description": "uses the over-30-year multiplier for delayed watercourse creation",
+      "sourceCase": "watercourse-creation-30-plus",
+      "sourceSha256": "e928d6613bff31551e8e3e35f70fb971b8e906dcc0a02c5b3c5e9e6a3cc69321",
+      "fixtureSha256": "e188d79537549b404708ca889d853d561e16f27cd7e28a022cbb23b785957dbb",
+      "comparisons": [
+        {
+          "sheet": "C-2 On-Site WaterC' Creation",
+          "cell": "P12",
+          "libraryPath": "features.onSiteWatercourseCreations.0.finalTimeToTarget",
+          "excelValue": "30+",
+          "excelFormula": "IF(O12=\"Error -both advance and delayed habitat creation ▲\",\"Check Data ⚠\",IF(L12=\"\",\"\",IF(M12=\"30+\",0,IF(N12=\"30+\",\"30+\",IF(L12+N12>30,\"30+ \",IF(L12+N12-M12>0,L12+N12-M12,IF(L12-M12<0,0,L12+N12-M12)))))))"
+        },
+        {
+          "sheet": "C-2 On-Site WaterC' Creation",
+          "cell": "Z12",
+          "libraryPath": "features.onSiteWatercourseCreations.0.unitsDelivered",
+          "excelValue": 1.714110505496,
+          "excelFormula": "IFERROR(IF(C12=\"\",\"\",D12*F12*H12*K12*Q12*U12*Y12*W12),\"\")"
+        }
+      ]
+    },
+    {
+      "id": "onsite-priority-watercourse-compensation",
+      "description": "includes bespoke compensation for lost on-site priority watercourse units",
+      "sourceCase": "onsite-watercourse-compensation",
+      "sourceSha256": "0f5f7cb27e79bd4483f325ce61464538ae9150627ca54df8fcdbcce195651ce1",
+      "fixtureSha256": "176ecac537ffdca677ce27f906481cfac2942d50cfa1ab8e74f570e48c36bab8",
+      "comparisons": [
+        {
+          "sheet": "C-1 On-Site WaterC' Baseline",
+          "cell": "AT10",
+          "libraryPath": "features.onSiteWatercourseBaselines.0.vhdhBespokeCompensationUnits",
+          "excelValue": 8,
+          "excelFormula": "IF(AND(OR(AA10=\"Yes\",AA10=\"Pending\"),Q10='G-7 WaterC'' Data'!$G$4),R10-W10-X10,\"\")"
+        },
+        {
+          "sheet": "Headline Results",
+          "cell": "H14",
+          "libraryPath": "headline.onSiteWatercoursePostIntervention",
+          "excelValue": 16,
+          "excelFormula": "IFERROR('C-2 On-Site WaterC'' Creation'!Z260 + 'C-3 On-Site WaterC'' Enhancement'!AM258+'C-1 On-Site WaterC'' Baseline'!W258+'C-1 On-Site WaterC'' Baseline'!AT258,\"Check Data ⚠\")"
+        }
+      ]
+    },
+    {
+      "id": "offsite-priority-watercourse-compensation",
+      "description": "includes bespoke compensation for lost off-site priority watercourse units",
+      "sourceCase": "offsite-watercourse-compensation",
+      "sourceSha256": "428b521c802d46b02f94ef60db71adfd0f75728f99d05590c85e9a56648821c9",
+      "fixtureSha256": "febb639f0ee960487cb96b3e06e2d48402a6b780277874ccc0d8355295ca829f",
+      "comparisons": [
+        {
+          "sheet": "Headline Results",
+          "cell": "H26",
+          "libraryPath": "headline.offSiteWatercoursePostIntervention",
+          "excelValue": 16,
+          "excelFormula": "IFERROR('F-1 Off-Site WaterC'' Baseline'!Z258+'F-2 Off-Site WaterC'' Creation'!AC260+'F-3 Off-Site WaterC Enhancement'!AP258+'F-1 Off-Site WaterC'' Baseline'!AT258,\"Check Data ⚠\")"
+        }
+      ]
+    },
+    {
+      "id": "offsite-habitat-loss",
+      "description": "keeps off-site habitat losses in combined net unit change",
+      "sourceCase": "negative-offsite-change",
+      "sourceSha256": "b2f37af09651d27329140298dfe1f2ff385172f2a89c7128c3fa83633869a4cd",
+      "fixtureSha256": "f6952e2e6ebe8488a81c62d79b4c18bc95c81d01c2066eefee2d1bb598c186f4",
+      "comparisons": [
+        {
+          "sheet": "Headline Results",
+          "cell": "H41",
+          "libraryPath": "headline.totalSRMDeductions.habitat",
+          "excelValue": "0.00",
+          "excelFormula": "IFERROR(H28-H32, \"0.00\")"
+        },
+        {
+          "sheet": "Headline Results",
+          "cell": "H47",
+          "libraryPath": "headline.totalNetUnitChange.habitat",
+          "excelValue": 4.694629604799999,
+          "excelFormula": "IFERROR(IF(H32=\"N/A\",(H12-H8)+(H28),(H12-H8)+(H32)),\"Check Data ⚠\")"
+        }
+      ]
+    },
+    {
+      "id": "intertidal-habitat-replacement",
+      "description": "allows intertidal hard structures to offset medium intertidal sediment losses",
+      "sourceCase": "intertidal-medium-trading",
+      "sourceSha256": "b8c6bd3d4c75be70ee9cf09d641852273d0c4df7e199f8bc79d8783859320ed0",
+      "fixtureSha256": "96b68e94b30c92facb03eda65794bdd7caf238d54e86a072c8244e8da5a9c6ae",
+      "comparisons": [
+        {
+          "sheet": "Trading Summary Area Habitats",
+          "cell": "K89",
+          "libraryPath": "trading.habitats.details.medium.unitsAvailableToOffsetUpwards",
+          "excelValue": 0,
+          "excelFormula": "SUMIF(G89:G115,\"<0\")"
+        },
+        {
+          "sheet": "Trading Summary Area Habitats",
+          "cell": "G7",
+          "libraryPath": "trading.habitats.mediumSatisfied",
+          "excelValue": "Yes ✓",
+          "excelFormula": "IF(K40+K12+K89<0,\"No ▲\",\"Yes ✓\")"
+        }
+      ]
+    },
+    {
+      "id": "retained-hedgerows",
+      "description": "reads all 192 retained hedgerows including entries beyond row 200",
+      "sourceCase": "parser-row-201",
+      "sourceSha256": "adf78593a049924b03c97f9cf43d001b6715d2aa13a2b902243665c156a910e9",
+      "fixtureSha256": "636ddecb19dbcb38a6ed43fab4e240ef629531d688bb06c34d35e0ea0f35745d",
+      "comparisons": [
+        {
+          "sheet": "Headline Results",
+          "cell": "H9",
+          "libraryPath": "headline.onSiteHedgerowBaseline",
+          "excelValue": 384,
+          "excelFormula": "IFERROR('B-1 On-Site Hedge Baseline'!N258,\"Check Data ⚠\")"
+        }
+      ]
+    }
+  ]
+}

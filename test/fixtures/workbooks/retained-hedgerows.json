@@ -1,0 +1,7661 @@
+{
+  "SheetNames": [
+    "Start",
+    "Version History",
+    "A-1 On-Site Habitat Baseline",
+    "A-2 On-Site Habitat Creation",
+    "A-3 On-Site Habitat Enhancement",
+    "D-1 Off-Site Habitat Baseline",
+    "D-2 Off-Site Habitat Creation",
+    "D-3 Off-Site Habitat Enhancment",
+    "B-1 On-Site Hedge Baseline",
+    "B-2 On-Site Hedge Creation",
+    "B-3 On-Site Hedge Enhancement",
+    "E-1 Off-Site Hedge Baseline",
+    "E-2 Off-Site Hedge Creation",
+    "E-3 Off-Site Hedge Enhancement",
+    "C-1 On-Site WaterC' Baseline",
+    "C-2 On-Site WaterC' Creation",
+    "C-3 On-Site WaterC' Enhancement",
+    "F-1 Off-Site WaterC' Baseline",
+    "F-2 Off-Site WaterC' Creation",
+    "F-3 Off-Site WaterC Enhancement",
+    "Headline Results"
+  ],
+  "Sheets": {
+    "Start": {
+      "D8": {
+        "t": "n",
+        "v": 4.1
+      },
+      "E8": {
+        "t": "s",
+        "v": "'Completed by' and 'Date of metric completion' fields must be filled in ▲",
+        "f": "IF(OR(F16=\"\",F17=\"\"), \"'Completed by' and 'Date of metric completion' fields must be filled in ▲\",\"\")"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Project details"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Planning authority:"
+      },
+      "D12": {
+        "t": "s",
+        "v": "Project name:"
+      },
+      "D13": {
+        "t": "s",
+        "v": "Applicant:"
+      },
+      "D14": {
+        "t": "s",
+        "v": "Application type:"
+      },
+      "D15": {
+        "t": "s",
+        "v": "Planning application reference:"
+      },
+      "D16": {
+        "t": "s",
+        "v": "Completed by:"
+      },
+      "D17": {
+        "t": "s",
+        "v": "Date of metric completion:"
+      },
+      "D18": {
+        "t": "s",
+        "v": "Reviewer:"
+      },
+      "D19": {
+        "t": "s",
+        "v": "Calculation iteration:"
+      },
+      "D20": {
+        "t": "s",
+        "v": "Planning authority reviewer:"
+      },
+      "D21": {
+        "t": "s",
+        "v": "Date of planning authority review:"
+      },
+      "D22": {
+        "t": "s",
+        "v": "Target % net gain:"
+      },
+      "F22": {
+        "t": "n",
+        "v": 0.1
+      },
+      "D23": {
+        "t": "s",
+        "v": "Irreplaceable habitat present at baseline:"
+      },
+      "F23": {
+        "t": "s",
+        "v": "No ✓",
+        "f": "IF(AND('Irreplaceable Habitats'!K32=0,'Irreplaceable Habitats'!K65=0,'Irreplaceable Habitats'!AP65=0,'Irreplaceable Habitats'!AP32=0),\"No ✓\",\"Yes ⚠\")"
+      },
+      "D24": {
+        "t": "s",
+        "v": "Total site area - including irreplaceable habitat area (hectares):"
+      },
+      "F24": {
+        "t": "n",
+        "v": 0,
+        "f": "'A-1 On-Site Habitat Baseline'!H260"
+      },
+      "I24": {
+        "t": "s",
+        "v": "Irreplaceable habitat site area (hectares):"
+      },
+      "J24": {
+        "t": "n",
+        "v": 0,
+        "f": "'Irreplaceable Habitats'!K33"
+      },
+      "D25": {
+        "t": "s",
+        "v": "Total off-site area - including irreplaceable habitat area (hectares):"
+      },
+      "F25": {
+        "t": "s",
+        "v": "N/A",
+        "f": "IF('D-1 Off-Site Habitat Baseline'!H261=0, \"N/A\", 'D-1 Off-Site Habitat Baseline'!H261)"
+      },
+      "I25": {
+        "t": "s",
+        "v": "Irreplaceable habitat area off-site (hectares):"
+      },
+      "J25": {
+        "t": "s",
+        "v": "N/A",
+        "f": "IF('Irreplaceable Habitats'!K66=0, \"N/A\", 'Irreplaceable Habitats'!K66)"
+      },
+      "D27": {
+        "t": "s",
+        "v": "Contains deviations from the statutory metric - this must be agreed with consenting body"
+      },
+      "D29": {
+        "t": "s",
+        "v": "Cell style conventions"
+      },
+      "D30": {
+        "t": "s",
+        "v": "⚠"
+      },
+      "F30": {
+        "t": "s",
+        "v": "Attention required"
+      },
+      "D31": {
+        "t": "s",
+        "v": "▲"
+      },
+      "F31": {
+        "t": "s",
+        "v": "Input error/rules and principles not met"
+      },
+      "F32": {
+        "t": "s",
+        "v": "Use of this cell is not appropriate"
+      },
+      "F33": {
+        "t": "s",
+        "v": "Enter data"
+      },
+      "F34": {
+        "t": "s",
+        "v": "Automatic lookup"
+      },
+      "F35": {
+        "t": "s",
+        "v": "Result"
+      },
+      "D55": {
+        "t": "s",
+        "v": "On-site baseline map reference number"
+      },
+      "I55": {
+        "t": "s",
+        "v": "On-site post-intervention map reference number"
+      },
+      "D66": {
+        "t": "s",
+        "v": "Off-site baseline map reference number"
+      },
+      "I66": {
+        "t": "s",
+        "v": "Off-site post-intervention reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "Version History": {
+      "B3": {
+        "t": "s",
+        "v": "Version"
+      },
+      "C3": {
+        "t": "s",
+        "v": "Changes made"
+      },
+      "D3": {
+        "t": "s",
+        "v": "Date released"
+      },
+      "B4": {
+        "t": "s",
+        "v": "Version 1.0.0"
+      },
+      "C4": {
+        "t": "s",
+        "v": " Initial statutory version"
+      },
+      "D4": {
+        "t": "s",
+        "v": "29th November 2023"
+      },
+      "B5": {
+        "t": "s",
+        "v": "Version 1.0.1"
+      },
+      "C5": {
+        "t": "s",
+        "v": "Amended to fix an error in the irreplaceable habitats dropdown and minor changes to the working of the tool such as ensuring the rows auto populate correctly and cells adjust their height so error messages can be read"
+      },
+      "D5": {
+        "t": "s",
+        "v": "15th December 2023"
+      },
+      "B6": {
+        "t": "s",
+        "v": "Version 1.0.2"
+      },
+      "C6": {
+        "t": "s",
+        "v": "Updated to correct some labelling errors, minor formula errors and expand width of columns"
+      },
+      "D6": {
+        "t": "s",
+        "v": "12th February 2024"
+      },
+      "B7": {
+        "t": "s",
+        "v": "Version 1.0.3"
+      },
+      "C7": {
+        "t": "s",
+        "v": "Minor formatting errors corrected to ensure text is visible and flags appear correctly, version history sheet added."
+      },
+      "D7": {
+        "t": "s",
+        "v": "23rd July 2024"
+      },
+      "B8": {
+        "t": "s",
+        "v": "Version 1.0.4"
+      },
+      "C8": {
+        "t": "s",
+        "v": "Tab names – Unit Shortfall changed to Credits\r\nFormula Correction in Tab D2 – Column V\r\nFormula Correction in Headline Results B19 and M7, correcting a typo in cell output\r\nCorrections to UKHab codes in tab G1\r\nAmended habitat definitions and codes in tab G1\r\nCorrections to cell references in tab G2\r\nMinor Changes to the layout of Area Habitat Trading Summary\r\nCorrections to the Credits tiers of Littoral Sea Grass and Lowland Beech and YewMinor formatting corrections\r\nChange of ‘Habitats’ to ‘Area Habitats’ where appropriate\r\nChange to enhancement rules for IH ‘Other Woodland’ with changes to formula in columns T and U of A3 and D3"
+      },
+      "D8": {
+        "t": "s",
+        "v": "3rd July 2025"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-1 On-Site Habitat Baseline": {
+      "E9": {
+        "t": "s",
+        "v": "Existing area habitats"
+      },
+      "K9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH or irreplaceable habitat"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D10": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "E10": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "F10": {
+        "t": "s",
+        "v": " Habitat Type"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Irreplaceable habitat"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "K10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Area retained"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Area enhanced"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AB10": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-2 On-Site Habitat Creation": {
+      "D8": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "D9": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "G9": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "J9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Habitat units delivered"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P10": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AB10": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "A-3 On-Site Habitat Enhancement": {
+      "Q9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Proposed Habitat (Broad habitat pre-populated but can be overridden)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AO10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Proposed Broad Habitat"
+      },
+      "R11": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years) "
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AP11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AQ11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-1 Off-Site Habitat Baseline": {
+      "E9": {
+        "t": "s",
+        "v": "Existing area habitats"
+      },
+      "K9": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "R9": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH or irreplaceable habitat"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D10": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "E10": {
+        "t": "s",
+        "v": "Broad habitat"
+      },
+      "F10": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Irreplaceable habitat"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "K10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "R10": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Area retained"
+      },
+      "W10": {
+        "t": "s",
+        "v": "Area enhanced"
+      },
+      "AC10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AE10": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AF10": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-2 Off-Site Habitat Creation": {
+      "D8": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "D9": {
+        "t": "s",
+        "v": "Broad Habitat"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "G9": {
+        "t": "s",
+        "v": "Area (hectares)"
+      },
+      "J9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "L9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "L10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P10": {
+        "t": "s",
+        "v": "Habitat created in advance (years) "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "AC10": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AE10": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AF10": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "AG10": {
+        "t": "s",
+        "v": "Baseline Ref"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "D-3 Off-Site Habitat Enhancment": {
+      "Q9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "Q10": {
+        "t": "s",
+        "v": "Proposed Habitat (Broad habitat pre-populated but can be overridden)"
+      },
+      "Y10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AR10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Proposed Broad Habitat"
+      },
+      "R11": {
+        "t": "s",
+        "v": "Proposed Habitat"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AR11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AS11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AT11": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AU11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-1 On-Site Hedge Baseline": {
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "P9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "Q9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "V9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "W9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "X9": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "B10": {
+        "t": "n",
+        "v": 1
+      },
+      "D10": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E10": {
+        "t": "n",
+        "v": 1
+      },
+      "H10": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P10": {
+        "t": "n",
+        "v": 1
+      },
+      "Q10": {
+        "t": "n",
+        "v": 0
+      },
+      "X10": {
+        "t": "s",
+        "v": "baseline-1"
+      },
+      "B11": {
+        "t": "n",
+        "v": 2
+      },
+      "D11": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E11": {
+        "t": "n",
+        "v": 1
+      },
+      "H11": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J11": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P11": {
+        "t": "n",
+        "v": 1
+      },
+      "Q11": {
+        "t": "n",
+        "v": 0
+      },
+      "X11": {
+        "t": "s",
+        "v": "baseline-2"
+      },
+      "B12": {
+        "t": "n",
+        "v": 3
+      },
+      "D12": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E12": {
+        "t": "n",
+        "v": 1
+      },
+      "H12": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J12": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P12": {
+        "t": "n",
+        "v": 1
+      },
+      "Q12": {
+        "t": "n",
+        "v": 0
+      },
+      "X12": {
+        "t": "s",
+        "v": "baseline-3"
+      },
+      "B13": {
+        "t": "n",
+        "v": 4
+      },
+      "D13": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E13": {
+        "t": "n",
+        "v": 1
+      },
+      "H13": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J13": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P13": {
+        "t": "n",
+        "v": 1
+      },
+      "Q13": {
+        "t": "n",
+        "v": 0
+      },
+      "X13": {
+        "t": "s",
+        "v": "baseline-4"
+      },
+      "B14": {
+        "t": "n",
+        "v": 5
+      },
+      "D14": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E14": {
+        "t": "n",
+        "v": 1
+      },
+      "H14": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J14": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P14": {
+        "t": "n",
+        "v": 1
+      },
+      "Q14": {
+        "t": "n",
+        "v": 0
+      },
+      "X14": {
+        "t": "s",
+        "v": "baseline-5"
+      },
+      "B15": {
+        "t": "n",
+        "v": 6
+      },
+      "D15": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E15": {
+        "t": "n",
+        "v": 1
+      },
+      "H15": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J15": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P15": {
+        "t": "n",
+        "v": 1
+      },
+      "Q15": {
+        "t": "n",
+        "v": 0
+      },
+      "X15": {
+        "t": "s",
+        "v": "baseline-6"
+      },
+      "B16": {
+        "t": "n",
+        "v": 7
+      },
+      "D16": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E16": {
+        "t": "n",
+        "v": 1
+      },
+      "H16": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J16": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P16": {
+        "t": "n",
+        "v": 1
+      },
+      "Q16": {
+        "t": "n",
+        "v": 0
+      },
+      "X16": {
+        "t": "s",
+        "v": "baseline-7"
+      },
+      "B17": {
+        "t": "n",
+        "v": 8
+      },
+      "D17": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E17": {
+        "t": "n",
+        "v": 1
+      },
+      "H17": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J17": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P17": {
+        "t": "n",
+        "v": 1
+      },
+      "Q17": {
+        "t": "n",
+        "v": 0
+      },
+      "X17": {
+        "t": "s",
+        "v": "baseline-8"
+      },
+      "B18": {
+        "t": "n",
+        "v": 9
+      },
+      "D18": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E18": {
+        "t": "n",
+        "v": 1
+      },
+      "H18": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J18": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P18": {
+        "t": "n",
+        "v": 1
+      },
+      "Q18": {
+        "t": "n",
+        "v": 0
+      },
+      "X18": {
+        "t": "s",
+        "v": "baseline-9"
+      },
+      "B19": {
+        "t": "n",
+        "v": 10
+      },
+      "D19": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E19": {
+        "t": "n",
+        "v": 1
+      },
+      "H19": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J19": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P19": {
+        "t": "n",
+        "v": 1
+      },
+      "Q19": {
+        "t": "n",
+        "v": 0
+      },
+      "X19": {
+        "t": "s",
+        "v": "baseline-10"
+      },
+      "B20": {
+        "t": "n",
+        "v": 11
+      },
+      "D20": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E20": {
+        "t": "n",
+        "v": 1
+      },
+      "H20": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J20": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P20": {
+        "t": "n",
+        "v": 1
+      },
+      "Q20": {
+        "t": "n",
+        "v": 0
+      },
+      "X20": {
+        "t": "s",
+        "v": "baseline-11"
+      },
+      "B21": {
+        "t": "n",
+        "v": 12
+      },
+      "D21": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E21": {
+        "t": "n",
+        "v": 1
+      },
+      "H21": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J21": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P21": {
+        "t": "n",
+        "v": 1
+      },
+      "Q21": {
+        "t": "n",
+        "v": 0
+      },
+      "X21": {
+        "t": "s",
+        "v": "baseline-12"
+      },
+      "B22": {
+        "t": "n",
+        "v": 13
+      },
+      "D22": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E22": {
+        "t": "n",
+        "v": 1
+      },
+      "H22": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J22": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P22": {
+        "t": "n",
+        "v": 1
+      },
+      "Q22": {
+        "t": "n",
+        "v": 0
+      },
+      "X22": {
+        "t": "s",
+        "v": "baseline-13"
+      },
+      "B23": {
+        "t": "n",
+        "v": 14
+      },
+      "D23": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E23": {
+        "t": "n",
+        "v": 1
+      },
+      "H23": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J23": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P23": {
+        "t": "n",
+        "v": 1
+      },
+      "Q23": {
+        "t": "n",
+        "v": 0
+      },
+      "X23": {
+        "t": "s",
+        "v": "baseline-14"
+      },
+      "B24": {
+        "t": "n",
+        "v": 15
+      },
+      "D24": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E24": {
+        "t": "n",
+        "v": 1
+      },
+      "H24": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J24": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P24": {
+        "t": "n",
+        "v": 1
+      },
+      "Q24": {
+        "t": "n",
+        "v": 0
+      },
+      "X24": {
+        "t": "s",
+        "v": "baseline-15"
+      },
+      "B25": {
+        "t": "n",
+        "v": 16
+      },
+      "D25": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E25": {
+        "t": "n",
+        "v": 1
+      },
+      "H25": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J25": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P25": {
+        "t": "n",
+        "v": 1
+      },
+      "Q25": {
+        "t": "n",
+        "v": 0
+      },
+      "X25": {
+        "t": "s",
+        "v": "baseline-16"
+      },
+      "B26": {
+        "t": "n",
+        "v": 17
+      },
+      "D26": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E26": {
+        "t": "n",
+        "v": 1
+      },
+      "H26": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J26": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P26": {
+        "t": "n",
+        "v": 1
+      },
+      "Q26": {
+        "t": "n",
+        "v": 0
+      },
+      "X26": {
+        "t": "s",
+        "v": "baseline-17"
+      },
+      "B27": {
+        "t": "n",
+        "v": 18
+      },
+      "D27": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E27": {
+        "t": "n",
+        "v": 1
+      },
+      "H27": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J27": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P27": {
+        "t": "n",
+        "v": 1
+      },
+      "Q27": {
+        "t": "n",
+        "v": 0
+      },
+      "X27": {
+        "t": "s",
+        "v": "baseline-18"
+      },
+      "B28": {
+        "t": "n",
+        "v": 19
+      },
+      "D28": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E28": {
+        "t": "n",
+        "v": 1
+      },
+      "H28": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J28": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P28": {
+        "t": "n",
+        "v": 1
+      },
+      "Q28": {
+        "t": "n",
+        "v": 0
+      },
+      "X28": {
+        "t": "s",
+        "v": "baseline-19"
+      },
+      "B29": {
+        "t": "n",
+        "v": 20
+      },
+      "D29": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E29": {
+        "t": "n",
+        "v": 1
+      },
+      "H29": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J29": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P29": {
+        "t": "n",
+        "v": 1
+      },
+      "Q29": {
+        "t": "n",
+        "v": 0
+      },
+      "X29": {
+        "t": "s",
+        "v": "baseline-20"
+      },
+      "B30": {
+        "t": "n",
+        "v": 21
+      },
+      "D30": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E30": {
+        "t": "n",
+        "v": 1
+      },
+      "H30": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J30": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P30": {
+        "t": "n",
+        "v": 1
+      },
+      "Q30": {
+        "t": "n",
+        "v": 0
+      },
+      "X30": {
+        "t": "s",
+        "v": "baseline-21"
+      },
+      "B31": {
+        "t": "n",
+        "v": 22
+      },
+      "D31": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E31": {
+        "t": "n",
+        "v": 1
+      },
+      "H31": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J31": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P31": {
+        "t": "n",
+        "v": 1
+      },
+      "Q31": {
+        "t": "n",
+        "v": 0
+      },
+      "X31": {
+        "t": "s",
+        "v": "baseline-22"
+      },
+      "B32": {
+        "t": "n",
+        "v": 23
+      },
+      "D32": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E32": {
+        "t": "n",
+        "v": 1
+      },
+      "H32": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J32": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P32": {
+        "t": "n",
+        "v": 1
+      },
+      "Q32": {
+        "t": "n",
+        "v": 0
+      },
+      "X32": {
+        "t": "s",
+        "v": "baseline-23"
+      },
+      "B33": {
+        "t": "n",
+        "v": 24
+      },
+      "D33": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E33": {
+        "t": "n",
+        "v": 1
+      },
+      "H33": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J33": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P33": {
+        "t": "n",
+        "v": 1
+      },
+      "Q33": {
+        "t": "n",
+        "v": 0
+      },
+      "X33": {
+        "t": "s",
+        "v": "baseline-24"
+      },
+      "B34": {
+        "t": "n",
+        "v": 25
+      },
+      "D34": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E34": {
+        "t": "n",
+        "v": 1
+      },
+      "H34": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J34": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P34": {
+        "t": "n",
+        "v": 1
+      },
+      "Q34": {
+        "t": "n",
+        "v": 0
+      },
+      "X34": {
+        "t": "s",
+        "v": "baseline-25"
+      },
+      "B35": {
+        "t": "n",
+        "v": 26
+      },
+      "D35": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E35": {
+        "t": "n",
+        "v": 1
+      },
+      "H35": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J35": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P35": {
+        "t": "n",
+        "v": 1
+      },
+      "Q35": {
+        "t": "n",
+        "v": 0
+      },
+      "X35": {
+        "t": "s",
+        "v": "baseline-26"
+      },
+      "B36": {
+        "t": "n",
+        "v": 27
+      },
+      "D36": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E36": {
+        "t": "n",
+        "v": 1
+      },
+      "H36": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J36": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P36": {
+        "t": "n",
+        "v": 1
+      },
+      "Q36": {
+        "t": "n",
+        "v": 0
+      },
+      "X36": {
+        "t": "s",
+        "v": "baseline-27"
+      },
+      "B37": {
+        "t": "n",
+        "v": 28
+      },
+      "D37": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E37": {
+        "t": "n",
+        "v": 1
+      },
+      "H37": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J37": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P37": {
+        "t": "n",
+        "v": 1
+      },
+      "Q37": {
+        "t": "n",
+        "v": 0
+      },
+      "X37": {
+        "t": "s",
+        "v": "baseline-28"
+      },
+      "B38": {
+        "t": "n",
+        "v": 29
+      },
+      "D38": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E38": {
+        "t": "n",
+        "v": 1
+      },
+      "H38": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J38": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P38": {
+        "t": "n",
+        "v": 1
+      },
+      "Q38": {
+        "t": "n",
+        "v": 0
+      },
+      "X38": {
+        "t": "s",
+        "v": "baseline-29"
+      },
+      "B39": {
+        "t": "n",
+        "v": 30
+      },
+      "D39": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E39": {
+        "t": "n",
+        "v": 1
+      },
+      "H39": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J39": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P39": {
+        "t": "n",
+        "v": 1
+      },
+      "Q39": {
+        "t": "n",
+        "v": 0
+      },
+      "X39": {
+        "t": "s",
+        "v": "baseline-30"
+      },
+      "B40": {
+        "t": "n",
+        "v": 31
+      },
+      "D40": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E40": {
+        "t": "n",
+        "v": 1
+      },
+      "H40": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J40": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P40": {
+        "t": "n",
+        "v": 1
+      },
+      "Q40": {
+        "t": "n",
+        "v": 0
+      },
+      "X40": {
+        "t": "s",
+        "v": "baseline-31"
+      },
+      "B41": {
+        "t": "n",
+        "v": 32
+      },
+      "D41": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E41": {
+        "t": "n",
+        "v": 1
+      },
+      "H41": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J41": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P41": {
+        "t": "n",
+        "v": 1
+      },
+      "Q41": {
+        "t": "n",
+        "v": 0
+      },
+      "X41": {
+        "t": "s",
+        "v": "baseline-32"
+      },
+      "B42": {
+        "t": "n",
+        "v": 33
+      },
+      "D42": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E42": {
+        "t": "n",
+        "v": 1
+      },
+      "H42": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J42": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P42": {
+        "t": "n",
+        "v": 1
+      },
+      "Q42": {
+        "t": "n",
+        "v": 0
+      },
+      "X42": {
+        "t": "s",
+        "v": "baseline-33"
+      },
+      "B43": {
+        "t": "n",
+        "v": 34
+      },
+      "D43": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E43": {
+        "t": "n",
+        "v": 1
+      },
+      "H43": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J43": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P43": {
+        "t": "n",
+        "v": 1
+      },
+      "Q43": {
+        "t": "n",
+        "v": 0
+      },
+      "X43": {
+        "t": "s",
+        "v": "baseline-34"
+      },
+      "B44": {
+        "t": "n",
+        "v": 35
+      },
+      "D44": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E44": {
+        "t": "n",
+        "v": 1
+      },
+      "H44": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J44": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P44": {
+        "t": "n",
+        "v": 1
+      },
+      "Q44": {
+        "t": "n",
+        "v": 0
+      },
+      "X44": {
+        "t": "s",
+        "v": "baseline-35"
+      },
+      "B45": {
+        "t": "n",
+        "v": 36
+      },
+      "D45": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E45": {
+        "t": "n",
+        "v": 1
+      },
+      "H45": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J45": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P45": {
+        "t": "n",
+        "v": 1
+      },
+      "Q45": {
+        "t": "n",
+        "v": 0
+      },
+      "X45": {
+        "t": "s",
+        "v": "baseline-36"
+      },
+      "B46": {
+        "t": "n",
+        "v": 37
+      },
+      "D46": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E46": {
+        "t": "n",
+        "v": 1
+      },
+      "H46": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J46": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P46": {
+        "t": "n",
+        "v": 1
+      },
+      "Q46": {
+        "t": "n",
+        "v": 0
+      },
+      "X46": {
+        "t": "s",
+        "v": "baseline-37"
+      },
+      "B47": {
+        "t": "n",
+        "v": 38
+      },
+      "D47": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E47": {
+        "t": "n",
+        "v": 1
+      },
+      "H47": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J47": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P47": {
+        "t": "n",
+        "v": 1
+      },
+      "Q47": {
+        "t": "n",
+        "v": 0
+      },
+      "X47": {
+        "t": "s",
+        "v": "baseline-38"
+      },
+      "B48": {
+        "t": "n",
+        "v": 39
+      },
+      "D48": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E48": {
+        "t": "n",
+        "v": 1
+      },
+      "H48": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J48": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P48": {
+        "t": "n",
+        "v": 1
+      },
+      "Q48": {
+        "t": "n",
+        "v": 0
+      },
+      "X48": {
+        "t": "s",
+        "v": "baseline-39"
+      },
+      "B49": {
+        "t": "n",
+        "v": 40
+      },
+      "D49": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E49": {
+        "t": "n",
+        "v": 1
+      },
+      "H49": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J49": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P49": {
+        "t": "n",
+        "v": 1
+      },
+      "Q49": {
+        "t": "n",
+        "v": 0
+      },
+      "X49": {
+        "t": "s",
+        "v": "baseline-40"
+      },
+      "B50": {
+        "t": "n",
+        "v": 41
+      },
+      "D50": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E50": {
+        "t": "n",
+        "v": 1
+      },
+      "H50": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J50": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P50": {
+        "t": "n",
+        "v": 1
+      },
+      "Q50": {
+        "t": "n",
+        "v": 0
+      },
+      "X50": {
+        "t": "s",
+        "v": "baseline-41"
+      },
+      "B51": {
+        "t": "n",
+        "v": 42
+      },
+      "D51": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E51": {
+        "t": "n",
+        "v": 1
+      },
+      "H51": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J51": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P51": {
+        "t": "n",
+        "v": 1
+      },
+      "Q51": {
+        "t": "n",
+        "v": 0
+      },
+      "X51": {
+        "t": "s",
+        "v": "baseline-42"
+      },
+      "B52": {
+        "t": "n",
+        "v": 43
+      },
+      "D52": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E52": {
+        "t": "n",
+        "v": 1
+      },
+      "H52": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J52": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P52": {
+        "t": "n",
+        "v": 1
+      },
+      "Q52": {
+        "t": "n",
+        "v": 0
+      },
+      "X52": {
+        "t": "s",
+        "v": "baseline-43"
+      },
+      "B53": {
+        "t": "n",
+        "v": 44
+      },
+      "D53": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E53": {
+        "t": "n",
+        "v": 1
+      },
+      "H53": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J53": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P53": {
+        "t": "n",
+        "v": 1
+      },
+      "Q53": {
+        "t": "n",
+        "v": 0
+      },
+      "X53": {
+        "t": "s",
+        "v": "baseline-44"
+      },
+      "B54": {
+        "t": "n",
+        "v": 45
+      },
+      "D54": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E54": {
+        "t": "n",
+        "v": 1
+      },
+      "H54": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J54": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P54": {
+        "t": "n",
+        "v": 1
+      },
+      "Q54": {
+        "t": "n",
+        "v": 0
+      },
+      "X54": {
+        "t": "s",
+        "v": "baseline-45"
+      },
+      "B55": {
+        "t": "n",
+        "v": 46
+      },
+      "D55": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E55": {
+        "t": "n",
+        "v": 1
+      },
+      "H55": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J55": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P55": {
+        "t": "n",
+        "v": 1
+      },
+      "Q55": {
+        "t": "n",
+        "v": 0
+      },
+      "X55": {
+        "t": "s",
+        "v": "baseline-46"
+      },
+      "B56": {
+        "t": "n",
+        "v": 47
+      },
+      "D56": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E56": {
+        "t": "n",
+        "v": 1
+      },
+      "H56": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J56": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P56": {
+        "t": "n",
+        "v": 1
+      },
+      "Q56": {
+        "t": "n",
+        "v": 0
+      },
+      "X56": {
+        "t": "s",
+        "v": "baseline-47"
+      },
+      "B57": {
+        "t": "n",
+        "v": 48
+      },
+      "D57": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E57": {
+        "t": "n",
+        "v": 1
+      },
+      "H57": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J57": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P57": {
+        "t": "n",
+        "v": 1
+      },
+      "Q57": {
+        "t": "n",
+        "v": 0
+      },
+      "X57": {
+        "t": "s",
+        "v": "baseline-48"
+      },
+      "B58": {
+        "t": "n",
+        "v": 49
+      },
+      "D58": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E58": {
+        "t": "n",
+        "v": 1
+      },
+      "H58": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J58": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P58": {
+        "t": "n",
+        "v": 1
+      },
+      "Q58": {
+        "t": "n",
+        "v": 0
+      },
+      "X58": {
+        "t": "s",
+        "v": "baseline-49"
+      },
+      "B59": {
+        "t": "n",
+        "v": 50
+      },
+      "D59": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E59": {
+        "t": "n",
+        "v": 1
+      },
+      "H59": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J59": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P59": {
+        "t": "n",
+        "v": 1
+      },
+      "Q59": {
+        "t": "n",
+        "v": 0
+      },
+      "X59": {
+        "t": "s",
+        "v": "baseline-50"
+      },
+      "B60": {
+        "t": "n",
+        "v": 51
+      },
+      "D60": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E60": {
+        "t": "n",
+        "v": 1
+      },
+      "H60": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J60": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P60": {
+        "t": "n",
+        "v": 1
+      },
+      "Q60": {
+        "t": "n",
+        "v": 0
+      },
+      "X60": {
+        "t": "s",
+        "v": "baseline-51"
+      },
+      "B61": {
+        "t": "n",
+        "v": 52
+      },
+      "D61": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E61": {
+        "t": "n",
+        "v": 1
+      },
+      "H61": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J61": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P61": {
+        "t": "n",
+        "v": 1
+      },
+      "Q61": {
+        "t": "n",
+        "v": 0
+      },
+      "X61": {
+        "t": "s",
+        "v": "baseline-52"
+      },
+      "B62": {
+        "t": "n",
+        "v": 53
+      },
+      "D62": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E62": {
+        "t": "n",
+        "v": 1
+      },
+      "H62": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J62": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P62": {
+        "t": "n",
+        "v": 1
+      },
+      "Q62": {
+        "t": "n",
+        "v": 0
+      },
+      "X62": {
+        "t": "s",
+        "v": "baseline-53"
+      },
+      "B63": {
+        "t": "n",
+        "v": 54
+      },
+      "D63": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E63": {
+        "t": "n",
+        "v": 1
+      },
+      "H63": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J63": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P63": {
+        "t": "n",
+        "v": 1
+      },
+      "Q63": {
+        "t": "n",
+        "v": 0
+      },
+      "X63": {
+        "t": "s",
+        "v": "baseline-54"
+      },
+      "B64": {
+        "t": "n",
+        "v": 55
+      },
+      "D64": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E64": {
+        "t": "n",
+        "v": 1
+      },
+      "H64": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J64": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P64": {
+        "t": "n",
+        "v": 1
+      },
+      "Q64": {
+        "t": "n",
+        "v": 0
+      },
+      "X64": {
+        "t": "s",
+        "v": "baseline-55"
+      },
+      "B65": {
+        "t": "n",
+        "v": 56
+      },
+      "D65": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E65": {
+        "t": "n",
+        "v": 1
+      },
+      "H65": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J65": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P65": {
+        "t": "n",
+        "v": 1
+      },
+      "Q65": {
+        "t": "n",
+        "v": 0
+      },
+      "X65": {
+        "t": "s",
+        "v": "baseline-56"
+      },
+      "B66": {
+        "t": "n",
+        "v": 57
+      },
+      "D66": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E66": {
+        "t": "n",
+        "v": 1
+      },
+      "H66": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J66": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P66": {
+        "t": "n",
+        "v": 1
+      },
+      "Q66": {
+        "t": "n",
+        "v": 0
+      },
+      "X66": {
+        "t": "s",
+        "v": "baseline-57"
+      },
+      "B67": {
+        "t": "n",
+        "v": 58
+      },
+      "D67": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E67": {
+        "t": "n",
+        "v": 1
+      },
+      "H67": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J67": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P67": {
+        "t": "n",
+        "v": 1
+      },
+      "Q67": {
+        "t": "n",
+        "v": 0
+      },
+      "X67": {
+        "t": "s",
+        "v": "baseline-58"
+      },
+      "B68": {
+        "t": "n",
+        "v": 59
+      },
+      "D68": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E68": {
+        "t": "n",
+        "v": 1
+      },
+      "H68": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J68": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P68": {
+        "t": "n",
+        "v": 1
+      },
+      "Q68": {
+        "t": "n",
+        "v": 0
+      },
+      "X68": {
+        "t": "s",
+        "v": "baseline-59"
+      },
+      "B69": {
+        "t": "n",
+        "v": 60
+      },
+      "D69": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E69": {
+        "t": "n",
+        "v": 1
+      },
+      "H69": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J69": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P69": {
+        "t": "n",
+        "v": 1
+      },
+      "Q69": {
+        "t": "n",
+        "v": 0
+      },
+      "X69": {
+        "t": "s",
+        "v": "baseline-60"
+      },
+      "B70": {
+        "t": "n",
+        "v": 61
+      },
+      "D70": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E70": {
+        "t": "n",
+        "v": 1
+      },
+      "H70": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J70": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P70": {
+        "t": "n",
+        "v": 1
+      },
+      "Q70": {
+        "t": "n",
+        "v": 0
+      },
+      "X70": {
+        "t": "s",
+        "v": "baseline-61"
+      },
+      "B71": {
+        "t": "n",
+        "v": 62
+      },
+      "D71": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E71": {
+        "t": "n",
+        "v": 1
+      },
+      "H71": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J71": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P71": {
+        "t": "n",
+        "v": 1
+      },
+      "Q71": {
+        "t": "n",
+        "v": 0
+      },
+      "X71": {
+        "t": "s",
+        "v": "baseline-62"
+      },
+      "B72": {
+        "t": "n",
+        "v": 63
+      },
+      "D72": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E72": {
+        "t": "n",
+        "v": 1
+      },
+      "H72": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J72": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P72": {
+        "t": "n",
+        "v": 1
+      },
+      "Q72": {
+        "t": "n",
+        "v": 0
+      },
+      "X72": {
+        "t": "s",
+        "v": "baseline-63"
+      },
+      "B73": {
+        "t": "n",
+        "v": 64
+      },
+      "D73": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E73": {
+        "t": "n",
+        "v": 1
+      },
+      "H73": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J73": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P73": {
+        "t": "n",
+        "v": 1
+      },
+      "Q73": {
+        "t": "n",
+        "v": 0
+      },
+      "X73": {
+        "t": "s",
+        "v": "baseline-64"
+      },
+      "B74": {
+        "t": "n",
+        "v": 65
+      },
+      "D74": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E74": {
+        "t": "n",
+        "v": 1
+      },
+      "H74": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J74": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P74": {
+        "t": "n",
+        "v": 1
+      },
+      "Q74": {
+        "t": "n",
+        "v": 0
+      },
+      "X74": {
+        "t": "s",
+        "v": "baseline-65"
+      },
+      "B75": {
+        "t": "n",
+        "v": 66
+      },
+      "D75": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E75": {
+        "t": "n",
+        "v": 1
+      },
+      "H75": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J75": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P75": {
+        "t": "n",
+        "v": 1
+      },
+      "Q75": {
+        "t": "n",
+        "v": 0
+      },
+      "X75": {
+        "t": "s",
+        "v": "baseline-66"
+      },
+      "B76": {
+        "t": "n",
+        "v": 67
+      },
+      "D76": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E76": {
+        "t": "n",
+        "v": 1
+      },
+      "H76": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J76": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P76": {
+        "t": "n",
+        "v": 1
+      },
+      "Q76": {
+        "t": "n",
+        "v": 0
+      },
+      "X76": {
+        "t": "s",
+        "v": "baseline-67"
+      },
+      "B77": {
+        "t": "n",
+        "v": 68
+      },
+      "D77": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E77": {
+        "t": "n",
+        "v": 1
+      },
+      "H77": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J77": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P77": {
+        "t": "n",
+        "v": 1
+      },
+      "Q77": {
+        "t": "n",
+        "v": 0
+      },
+      "X77": {
+        "t": "s",
+        "v": "baseline-68"
+      },
+      "B78": {
+        "t": "n",
+        "v": 69
+      },
+      "D78": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E78": {
+        "t": "n",
+        "v": 1
+      },
+      "H78": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J78": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P78": {
+        "t": "n",
+        "v": 1
+      },
+      "Q78": {
+        "t": "n",
+        "v": 0
+      },
+      "X78": {
+        "t": "s",
+        "v": "baseline-69"
+      },
+      "B79": {
+        "t": "n",
+        "v": 70
+      },
+      "D79": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E79": {
+        "t": "n",
+        "v": 1
+      },
+      "H79": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J79": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P79": {
+        "t": "n",
+        "v": 1
+      },
+      "Q79": {
+        "t": "n",
+        "v": 0
+      },
+      "X79": {
+        "t": "s",
+        "v": "baseline-70"
+      },
+      "B80": {
+        "t": "n",
+        "v": 71
+      },
+      "D80": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E80": {
+        "t": "n",
+        "v": 1
+      },
+      "H80": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J80": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P80": {
+        "t": "n",
+        "v": 1
+      },
+      "Q80": {
+        "t": "n",
+        "v": 0
+      },
+      "X80": {
+        "t": "s",
+        "v": "baseline-71"
+      },
+      "B81": {
+        "t": "n",
+        "v": 72
+      },
+      "D81": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E81": {
+        "t": "n",
+        "v": 1
+      },
+      "H81": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J81": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P81": {
+        "t": "n",
+        "v": 1
+      },
+      "Q81": {
+        "t": "n",
+        "v": 0
+      },
+      "X81": {
+        "t": "s",
+        "v": "baseline-72"
+      },
+      "B82": {
+        "t": "n",
+        "v": 73
+      },
+      "D82": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E82": {
+        "t": "n",
+        "v": 1
+      },
+      "H82": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J82": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P82": {
+        "t": "n",
+        "v": 1
+      },
+      "Q82": {
+        "t": "n",
+        "v": 0
+      },
+      "X82": {
+        "t": "s",
+        "v": "baseline-73"
+      },
+      "B83": {
+        "t": "n",
+        "v": 74
+      },
+      "D83": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E83": {
+        "t": "n",
+        "v": 1
+      },
+      "H83": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J83": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P83": {
+        "t": "n",
+        "v": 1
+      },
+      "Q83": {
+        "t": "n",
+        "v": 0
+      },
+      "X83": {
+        "t": "s",
+        "v": "baseline-74"
+      },
+      "B84": {
+        "t": "n",
+        "v": 75
+      },
+      "D84": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E84": {
+        "t": "n",
+        "v": 1
+      },
+      "H84": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J84": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P84": {
+        "t": "n",
+        "v": 1
+      },
+      "Q84": {
+        "t": "n",
+        "v": 0
+      },
+      "X84": {
+        "t": "s",
+        "v": "baseline-75"
+      },
+      "B85": {
+        "t": "n",
+        "v": 76
+      },
+      "D85": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E85": {
+        "t": "n",
+        "v": 1
+      },
+      "H85": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J85": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P85": {
+        "t": "n",
+        "v": 1
+      },
+      "Q85": {
+        "t": "n",
+        "v": 0
+      },
+      "X85": {
+        "t": "s",
+        "v": "baseline-76"
+      },
+      "B86": {
+        "t": "n",
+        "v": 77
+      },
+      "D86": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E86": {
+        "t": "n",
+        "v": 1
+      },
+      "H86": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J86": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P86": {
+        "t": "n",
+        "v": 1
+      },
+      "Q86": {
+        "t": "n",
+        "v": 0
+      },
+      "X86": {
+        "t": "s",
+        "v": "baseline-77"
+      },
+      "B87": {
+        "t": "n",
+        "v": 78
+      },
+      "D87": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E87": {
+        "t": "n",
+        "v": 1
+      },
+      "H87": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J87": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P87": {
+        "t": "n",
+        "v": 1
+      },
+      "Q87": {
+        "t": "n",
+        "v": 0
+      },
+      "X87": {
+        "t": "s",
+        "v": "baseline-78"
+      },
+      "B88": {
+        "t": "n",
+        "v": 79
+      },
+      "D88": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E88": {
+        "t": "n",
+        "v": 1
+      },
+      "H88": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J88": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P88": {
+        "t": "n",
+        "v": 1
+      },
+      "Q88": {
+        "t": "n",
+        "v": 0
+      },
+      "X88": {
+        "t": "s",
+        "v": "baseline-79"
+      },
+      "B89": {
+        "t": "n",
+        "v": 80
+      },
+      "D89": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E89": {
+        "t": "n",
+        "v": 1
+      },
+      "H89": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J89": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P89": {
+        "t": "n",
+        "v": 1
+      },
+      "Q89": {
+        "t": "n",
+        "v": 0
+      },
+      "X89": {
+        "t": "s",
+        "v": "baseline-80"
+      },
+      "B90": {
+        "t": "n",
+        "v": 81
+      },
+      "D90": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E90": {
+        "t": "n",
+        "v": 1
+      },
+      "H90": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J90": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P90": {
+        "t": "n",
+        "v": 1
+      },
+      "Q90": {
+        "t": "n",
+        "v": 0
+      },
+      "X90": {
+        "t": "s",
+        "v": "baseline-81"
+      },
+      "B91": {
+        "t": "n",
+        "v": 82
+      },
+      "D91": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E91": {
+        "t": "n",
+        "v": 1
+      },
+      "H91": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J91": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P91": {
+        "t": "n",
+        "v": 1
+      },
+      "Q91": {
+        "t": "n",
+        "v": 0
+      },
+      "X91": {
+        "t": "s",
+        "v": "baseline-82"
+      },
+      "B92": {
+        "t": "n",
+        "v": 83
+      },
+      "D92": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E92": {
+        "t": "n",
+        "v": 1
+      },
+      "H92": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J92": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P92": {
+        "t": "n",
+        "v": 1
+      },
+      "Q92": {
+        "t": "n",
+        "v": 0
+      },
+      "X92": {
+        "t": "s",
+        "v": "baseline-83"
+      },
+      "B93": {
+        "t": "n",
+        "v": 84
+      },
+      "D93": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E93": {
+        "t": "n",
+        "v": 1
+      },
+      "H93": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J93": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P93": {
+        "t": "n",
+        "v": 1
+      },
+      "Q93": {
+        "t": "n",
+        "v": 0
+      },
+      "X93": {
+        "t": "s",
+        "v": "baseline-84"
+      },
+      "B94": {
+        "t": "n",
+        "v": 85
+      },
+      "D94": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E94": {
+        "t": "n",
+        "v": 1
+      },
+      "H94": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J94": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P94": {
+        "t": "n",
+        "v": 1
+      },
+      "Q94": {
+        "t": "n",
+        "v": 0
+      },
+      "X94": {
+        "t": "s",
+        "v": "baseline-85"
+      },
+      "B95": {
+        "t": "n",
+        "v": 86
+      },
+      "D95": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E95": {
+        "t": "n",
+        "v": 1
+      },
+      "H95": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J95": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P95": {
+        "t": "n",
+        "v": 1
+      },
+      "Q95": {
+        "t": "n",
+        "v": 0
+      },
+      "X95": {
+        "t": "s",
+        "v": "baseline-86"
+      },
+      "B96": {
+        "t": "n",
+        "v": 87
+      },
+      "D96": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E96": {
+        "t": "n",
+        "v": 1
+      },
+      "H96": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J96": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P96": {
+        "t": "n",
+        "v": 1
+      },
+      "Q96": {
+        "t": "n",
+        "v": 0
+      },
+      "X96": {
+        "t": "s",
+        "v": "baseline-87"
+      },
+      "B97": {
+        "t": "n",
+        "v": 88
+      },
+      "D97": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E97": {
+        "t": "n",
+        "v": 1
+      },
+      "H97": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J97": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P97": {
+        "t": "n",
+        "v": 1
+      },
+      "Q97": {
+        "t": "n",
+        "v": 0
+      },
+      "X97": {
+        "t": "s",
+        "v": "baseline-88"
+      },
+      "B98": {
+        "t": "n",
+        "v": 89
+      },
+      "D98": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E98": {
+        "t": "n",
+        "v": 1
+      },
+      "H98": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J98": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P98": {
+        "t": "n",
+        "v": 1
+      },
+      "Q98": {
+        "t": "n",
+        "v": 0
+      },
+      "X98": {
+        "t": "s",
+        "v": "baseline-89"
+      },
+      "B99": {
+        "t": "n",
+        "v": 90
+      },
+      "D99": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E99": {
+        "t": "n",
+        "v": 1
+      },
+      "H99": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J99": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P99": {
+        "t": "n",
+        "v": 1
+      },
+      "Q99": {
+        "t": "n",
+        "v": 0
+      },
+      "X99": {
+        "t": "s",
+        "v": "baseline-90"
+      },
+      "B100": {
+        "t": "n",
+        "v": 91
+      },
+      "D100": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E100": {
+        "t": "n",
+        "v": 1
+      },
+      "H100": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J100": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P100": {
+        "t": "n",
+        "v": 1
+      },
+      "Q100": {
+        "t": "n",
+        "v": 0
+      },
+      "X100": {
+        "t": "s",
+        "v": "baseline-91"
+      },
+      "B101": {
+        "t": "n",
+        "v": 92
+      },
+      "D101": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E101": {
+        "t": "n",
+        "v": 1
+      },
+      "H101": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J101": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P101": {
+        "t": "n",
+        "v": 1
+      },
+      "Q101": {
+        "t": "n",
+        "v": 0
+      },
+      "X101": {
+        "t": "s",
+        "v": "baseline-92"
+      },
+      "B102": {
+        "t": "n",
+        "v": 93
+      },
+      "D102": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E102": {
+        "t": "n",
+        "v": 1
+      },
+      "H102": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J102": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P102": {
+        "t": "n",
+        "v": 1
+      },
+      "Q102": {
+        "t": "n",
+        "v": 0
+      },
+      "X102": {
+        "t": "s",
+        "v": "baseline-93"
+      },
+      "B103": {
+        "t": "n",
+        "v": 94
+      },
+      "D103": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E103": {
+        "t": "n",
+        "v": 1
+      },
+      "H103": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J103": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P103": {
+        "t": "n",
+        "v": 1
+      },
+      "Q103": {
+        "t": "n",
+        "v": 0
+      },
+      "X103": {
+        "t": "s",
+        "v": "baseline-94"
+      },
+      "B104": {
+        "t": "n",
+        "v": 95
+      },
+      "D104": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E104": {
+        "t": "n",
+        "v": 1
+      },
+      "H104": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J104": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P104": {
+        "t": "n",
+        "v": 1
+      },
+      "Q104": {
+        "t": "n",
+        "v": 0
+      },
+      "X104": {
+        "t": "s",
+        "v": "baseline-95"
+      },
+      "B105": {
+        "t": "n",
+        "v": 96
+      },
+      "D105": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E105": {
+        "t": "n",
+        "v": 1
+      },
+      "H105": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J105": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P105": {
+        "t": "n",
+        "v": 1
+      },
+      "Q105": {
+        "t": "n",
+        "v": 0
+      },
+      "X105": {
+        "t": "s",
+        "v": "baseline-96"
+      },
+      "B106": {
+        "t": "n",
+        "v": 97
+      },
+      "D106": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E106": {
+        "t": "n",
+        "v": 1
+      },
+      "H106": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J106": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P106": {
+        "t": "n",
+        "v": 1
+      },
+      "Q106": {
+        "t": "n",
+        "v": 0
+      },
+      "X106": {
+        "t": "s",
+        "v": "baseline-97"
+      },
+      "B107": {
+        "t": "n",
+        "v": 98
+      },
+      "D107": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E107": {
+        "t": "n",
+        "v": 1
+      },
+      "H107": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J107": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P107": {
+        "t": "n",
+        "v": 1
+      },
+      "Q107": {
+        "t": "n",
+        "v": 0
+      },
+      "X107": {
+        "t": "s",
+        "v": "baseline-98"
+      },
+      "B108": {
+        "t": "n",
+        "v": 99
+      },
+      "D108": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E108": {
+        "t": "n",
+        "v": 1
+      },
+      "H108": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J108": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P108": {
+        "t": "n",
+        "v": 1
+      },
+      "Q108": {
+        "t": "n",
+        "v": 0
+      },
+      "X108": {
+        "t": "s",
+        "v": "baseline-99"
+      },
+      "B109": {
+        "t": "n",
+        "v": 100
+      },
+      "D109": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E109": {
+        "t": "n",
+        "v": 1
+      },
+      "H109": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J109": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P109": {
+        "t": "n",
+        "v": 1
+      },
+      "Q109": {
+        "t": "n",
+        "v": 0
+      },
+      "X109": {
+        "t": "s",
+        "v": "baseline-100"
+      },
+      "B110": {
+        "t": "n",
+        "v": 101
+      },
+      "D110": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E110": {
+        "t": "n",
+        "v": 1
+      },
+      "H110": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J110": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P110": {
+        "t": "n",
+        "v": 1
+      },
+      "Q110": {
+        "t": "n",
+        "v": 0
+      },
+      "X110": {
+        "t": "s",
+        "v": "baseline-101"
+      },
+      "B111": {
+        "t": "n",
+        "v": 102
+      },
+      "D111": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E111": {
+        "t": "n",
+        "v": 1
+      },
+      "H111": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J111": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P111": {
+        "t": "n",
+        "v": 1
+      },
+      "Q111": {
+        "t": "n",
+        "v": 0
+      },
+      "X111": {
+        "t": "s",
+        "v": "baseline-102"
+      },
+      "B112": {
+        "t": "n",
+        "v": 103
+      },
+      "D112": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E112": {
+        "t": "n",
+        "v": 1
+      },
+      "H112": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J112": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P112": {
+        "t": "n",
+        "v": 1
+      },
+      "Q112": {
+        "t": "n",
+        "v": 0
+      },
+      "X112": {
+        "t": "s",
+        "v": "baseline-103"
+      },
+      "B113": {
+        "t": "n",
+        "v": 104
+      },
+      "D113": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E113": {
+        "t": "n",
+        "v": 1
+      },
+      "H113": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J113": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P113": {
+        "t": "n",
+        "v": 1
+      },
+      "Q113": {
+        "t": "n",
+        "v": 0
+      },
+      "X113": {
+        "t": "s",
+        "v": "baseline-104"
+      },
+      "B114": {
+        "t": "n",
+        "v": 105
+      },
+      "D114": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E114": {
+        "t": "n",
+        "v": 1
+      },
+      "H114": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J114": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P114": {
+        "t": "n",
+        "v": 1
+      },
+      "Q114": {
+        "t": "n",
+        "v": 0
+      },
+      "X114": {
+        "t": "s",
+        "v": "baseline-105"
+      },
+      "B115": {
+        "t": "n",
+        "v": 106
+      },
+      "D115": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E115": {
+        "t": "n",
+        "v": 1
+      },
+      "H115": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J115": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P115": {
+        "t": "n",
+        "v": 1
+      },
+      "Q115": {
+        "t": "n",
+        "v": 0
+      },
+      "X115": {
+        "t": "s",
+        "v": "baseline-106"
+      },
+      "B116": {
+        "t": "n",
+        "v": 107
+      },
+      "D116": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E116": {
+        "t": "n",
+        "v": 1
+      },
+      "H116": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J116": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P116": {
+        "t": "n",
+        "v": 1
+      },
+      "Q116": {
+        "t": "n",
+        "v": 0
+      },
+      "X116": {
+        "t": "s",
+        "v": "baseline-107"
+      },
+      "B117": {
+        "t": "n",
+        "v": 108
+      },
+      "D117": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E117": {
+        "t": "n",
+        "v": 1
+      },
+      "H117": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J117": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P117": {
+        "t": "n",
+        "v": 1
+      },
+      "Q117": {
+        "t": "n",
+        "v": 0
+      },
+      "X117": {
+        "t": "s",
+        "v": "baseline-108"
+      },
+      "B118": {
+        "t": "n",
+        "v": 109
+      },
+      "D118": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E118": {
+        "t": "n",
+        "v": 1
+      },
+      "H118": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J118": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P118": {
+        "t": "n",
+        "v": 1
+      },
+      "Q118": {
+        "t": "n",
+        "v": 0
+      },
+      "X118": {
+        "t": "s",
+        "v": "baseline-109"
+      },
+      "B119": {
+        "t": "n",
+        "v": 110
+      },
+      "D119": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E119": {
+        "t": "n",
+        "v": 1
+      },
+      "H119": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J119": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P119": {
+        "t": "n",
+        "v": 1
+      },
+      "Q119": {
+        "t": "n",
+        "v": 0
+      },
+      "X119": {
+        "t": "s",
+        "v": "baseline-110"
+      },
+      "B120": {
+        "t": "n",
+        "v": 111
+      },
+      "D120": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E120": {
+        "t": "n",
+        "v": 1
+      },
+      "H120": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J120": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P120": {
+        "t": "n",
+        "v": 1
+      },
+      "Q120": {
+        "t": "n",
+        "v": 0
+      },
+      "X120": {
+        "t": "s",
+        "v": "baseline-111"
+      },
+      "B121": {
+        "t": "n",
+        "v": 112
+      },
+      "D121": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E121": {
+        "t": "n",
+        "v": 1
+      },
+      "H121": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J121": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P121": {
+        "t": "n",
+        "v": 1
+      },
+      "Q121": {
+        "t": "n",
+        "v": 0
+      },
+      "X121": {
+        "t": "s",
+        "v": "baseline-112"
+      },
+      "B122": {
+        "t": "n",
+        "v": 113
+      },
+      "D122": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E122": {
+        "t": "n",
+        "v": 1
+      },
+      "H122": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J122": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P122": {
+        "t": "n",
+        "v": 1
+      },
+      "Q122": {
+        "t": "n",
+        "v": 0
+      },
+      "X122": {
+        "t": "s",
+        "v": "baseline-113"
+      },
+      "B123": {
+        "t": "n",
+        "v": 114
+      },
+      "D123": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E123": {
+        "t": "n",
+        "v": 1
+      },
+      "H123": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J123": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P123": {
+        "t": "n",
+        "v": 1
+      },
+      "Q123": {
+        "t": "n",
+        "v": 0
+      },
+      "X123": {
+        "t": "s",
+        "v": "baseline-114"
+      },
+      "B124": {
+        "t": "n",
+        "v": 115
+      },
+      "D124": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E124": {
+        "t": "n",
+        "v": 1
+      },
+      "H124": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J124": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P124": {
+        "t": "n",
+        "v": 1
+      },
+      "Q124": {
+        "t": "n",
+        "v": 0
+      },
+      "X124": {
+        "t": "s",
+        "v": "baseline-115"
+      },
+      "B125": {
+        "t": "n",
+        "v": 116
+      },
+      "D125": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E125": {
+        "t": "n",
+        "v": 1
+      },
+      "H125": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J125": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P125": {
+        "t": "n",
+        "v": 1
+      },
+      "Q125": {
+        "t": "n",
+        "v": 0
+      },
+      "X125": {
+        "t": "s",
+        "v": "baseline-116"
+      },
+      "B126": {
+        "t": "n",
+        "v": 117
+      },
+      "D126": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E126": {
+        "t": "n",
+        "v": 1
+      },
+      "H126": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J126": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P126": {
+        "t": "n",
+        "v": 1
+      },
+      "Q126": {
+        "t": "n",
+        "v": 0
+      },
+      "X126": {
+        "t": "s",
+        "v": "baseline-117"
+      },
+      "B127": {
+        "t": "n",
+        "v": 118
+      },
+      "D127": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E127": {
+        "t": "n",
+        "v": 1
+      },
+      "H127": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J127": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P127": {
+        "t": "n",
+        "v": 1
+      },
+      "Q127": {
+        "t": "n",
+        "v": 0
+      },
+      "X127": {
+        "t": "s",
+        "v": "baseline-118"
+      },
+      "B128": {
+        "t": "n",
+        "v": 119
+      },
+      "D128": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E128": {
+        "t": "n",
+        "v": 1
+      },
+      "H128": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J128": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P128": {
+        "t": "n",
+        "v": 1
+      },
+      "Q128": {
+        "t": "n",
+        "v": 0
+      },
+      "X128": {
+        "t": "s",
+        "v": "baseline-119"
+      },
+      "B129": {
+        "t": "n",
+        "v": 120
+      },
+      "D129": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E129": {
+        "t": "n",
+        "v": 1
+      },
+      "H129": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J129": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P129": {
+        "t": "n",
+        "v": 1
+      },
+      "Q129": {
+        "t": "n",
+        "v": 0
+      },
+      "X129": {
+        "t": "s",
+        "v": "baseline-120"
+      },
+      "B130": {
+        "t": "n",
+        "v": 121
+      },
+      "D130": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E130": {
+        "t": "n",
+        "v": 1
+      },
+      "H130": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J130": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P130": {
+        "t": "n",
+        "v": 1
+      },
+      "Q130": {
+        "t": "n",
+        "v": 0
+      },
+      "X130": {
+        "t": "s",
+        "v": "baseline-121"
+      },
+      "B131": {
+        "t": "n",
+        "v": 122
+      },
+      "D131": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E131": {
+        "t": "n",
+        "v": 1
+      },
+      "H131": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J131": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P131": {
+        "t": "n",
+        "v": 1
+      },
+      "Q131": {
+        "t": "n",
+        "v": 0
+      },
+      "X131": {
+        "t": "s",
+        "v": "baseline-122"
+      },
+      "B132": {
+        "t": "n",
+        "v": 123
+      },
+      "D132": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E132": {
+        "t": "n",
+        "v": 1
+      },
+      "H132": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J132": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P132": {
+        "t": "n",
+        "v": 1
+      },
+      "Q132": {
+        "t": "n",
+        "v": 0
+      },
+      "X132": {
+        "t": "s",
+        "v": "baseline-123"
+      },
+      "B133": {
+        "t": "n",
+        "v": 124
+      },
+      "D133": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E133": {
+        "t": "n",
+        "v": 1
+      },
+      "H133": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J133": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P133": {
+        "t": "n",
+        "v": 1
+      },
+      "Q133": {
+        "t": "n",
+        "v": 0
+      },
+      "X133": {
+        "t": "s",
+        "v": "baseline-124"
+      },
+      "B134": {
+        "t": "n",
+        "v": 125
+      },
+      "D134": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E134": {
+        "t": "n",
+        "v": 1
+      },
+      "H134": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J134": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P134": {
+        "t": "n",
+        "v": 1
+      },
+      "Q134": {
+        "t": "n",
+        "v": 0
+      },
+      "X134": {
+        "t": "s",
+        "v": "baseline-125"
+      },
+      "B135": {
+        "t": "n",
+        "v": 126
+      },
+      "D135": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E135": {
+        "t": "n",
+        "v": 1
+      },
+      "H135": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J135": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P135": {
+        "t": "n",
+        "v": 1
+      },
+      "Q135": {
+        "t": "n",
+        "v": 0
+      },
+      "X135": {
+        "t": "s",
+        "v": "baseline-126"
+      },
+      "B136": {
+        "t": "n",
+        "v": 127
+      },
+      "D136": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E136": {
+        "t": "n",
+        "v": 1
+      },
+      "H136": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J136": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P136": {
+        "t": "n",
+        "v": 1
+      },
+      "Q136": {
+        "t": "n",
+        "v": 0
+      },
+      "X136": {
+        "t": "s",
+        "v": "baseline-127"
+      },
+      "B137": {
+        "t": "n",
+        "v": 128
+      },
+      "D137": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E137": {
+        "t": "n",
+        "v": 1
+      },
+      "H137": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J137": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P137": {
+        "t": "n",
+        "v": 1
+      },
+      "Q137": {
+        "t": "n",
+        "v": 0
+      },
+      "X137": {
+        "t": "s",
+        "v": "baseline-128"
+      },
+      "B138": {
+        "t": "n",
+        "v": 129
+      },
+      "D138": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E138": {
+        "t": "n",
+        "v": 1
+      },
+      "H138": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J138": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P138": {
+        "t": "n",
+        "v": 1
+      },
+      "Q138": {
+        "t": "n",
+        "v": 0
+      },
+      "X138": {
+        "t": "s",
+        "v": "baseline-129"
+      },
+      "B139": {
+        "t": "n",
+        "v": 130
+      },
+      "D139": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E139": {
+        "t": "n",
+        "v": 1
+      },
+      "H139": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J139": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P139": {
+        "t": "n",
+        "v": 1
+      },
+      "Q139": {
+        "t": "n",
+        "v": 0
+      },
+      "X139": {
+        "t": "s",
+        "v": "baseline-130"
+      },
+      "B140": {
+        "t": "n",
+        "v": 131
+      },
+      "D140": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E140": {
+        "t": "n",
+        "v": 1
+      },
+      "H140": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J140": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P140": {
+        "t": "n",
+        "v": 1
+      },
+      "Q140": {
+        "t": "n",
+        "v": 0
+      },
+      "X140": {
+        "t": "s",
+        "v": "baseline-131"
+      },
+      "B141": {
+        "t": "n",
+        "v": 132
+      },
+      "D141": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E141": {
+        "t": "n",
+        "v": 1
+      },
+      "H141": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J141": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P141": {
+        "t": "n",
+        "v": 1
+      },
+      "Q141": {
+        "t": "n",
+        "v": 0
+      },
+      "X141": {
+        "t": "s",
+        "v": "baseline-132"
+      },
+      "B142": {
+        "t": "n",
+        "v": 133
+      },
+      "D142": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E142": {
+        "t": "n",
+        "v": 1
+      },
+      "H142": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J142": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P142": {
+        "t": "n",
+        "v": 1
+      },
+      "Q142": {
+        "t": "n",
+        "v": 0
+      },
+      "X142": {
+        "t": "s",
+        "v": "baseline-133"
+      },
+      "B143": {
+        "t": "n",
+        "v": 134
+      },
+      "D143": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E143": {
+        "t": "n",
+        "v": 1
+      },
+      "H143": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J143": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P143": {
+        "t": "n",
+        "v": 1
+      },
+      "Q143": {
+        "t": "n",
+        "v": 0
+      },
+      "X143": {
+        "t": "s",
+        "v": "baseline-134"
+      },
+      "B144": {
+        "t": "n",
+        "v": 135
+      },
+      "D144": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E144": {
+        "t": "n",
+        "v": 1
+      },
+      "H144": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J144": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P144": {
+        "t": "n",
+        "v": 1
+      },
+      "Q144": {
+        "t": "n",
+        "v": 0
+      },
+      "X144": {
+        "t": "s",
+        "v": "baseline-135"
+      },
+      "B145": {
+        "t": "n",
+        "v": 136
+      },
+      "D145": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E145": {
+        "t": "n",
+        "v": 1
+      },
+      "H145": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J145": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P145": {
+        "t": "n",
+        "v": 1
+      },
+      "Q145": {
+        "t": "n",
+        "v": 0
+      },
+      "X145": {
+        "t": "s",
+        "v": "baseline-136"
+      },
+      "B146": {
+        "t": "n",
+        "v": 137
+      },
+      "D146": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E146": {
+        "t": "n",
+        "v": 1
+      },
+      "H146": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J146": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P146": {
+        "t": "n",
+        "v": 1
+      },
+      "Q146": {
+        "t": "n",
+        "v": 0
+      },
+      "X146": {
+        "t": "s",
+        "v": "baseline-137"
+      },
+      "B147": {
+        "t": "n",
+        "v": 138
+      },
+      "D147": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E147": {
+        "t": "n",
+        "v": 1
+      },
+      "H147": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J147": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P147": {
+        "t": "n",
+        "v": 1
+      },
+      "Q147": {
+        "t": "n",
+        "v": 0
+      },
+      "X147": {
+        "t": "s",
+        "v": "baseline-138"
+      },
+      "B148": {
+        "t": "n",
+        "v": 139
+      },
+      "D148": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E148": {
+        "t": "n",
+        "v": 1
+      },
+      "H148": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J148": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P148": {
+        "t": "n",
+        "v": 1
+      },
+      "Q148": {
+        "t": "n",
+        "v": 0
+      },
+      "X148": {
+        "t": "s",
+        "v": "baseline-139"
+      },
+      "B149": {
+        "t": "n",
+        "v": 140
+      },
+      "D149": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E149": {
+        "t": "n",
+        "v": 1
+      },
+      "H149": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J149": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P149": {
+        "t": "n",
+        "v": 1
+      },
+      "Q149": {
+        "t": "n",
+        "v": 0
+      },
+      "X149": {
+        "t": "s",
+        "v": "baseline-140"
+      },
+      "B150": {
+        "t": "n",
+        "v": 141
+      },
+      "D150": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E150": {
+        "t": "n",
+        "v": 1
+      },
+      "H150": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J150": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P150": {
+        "t": "n",
+        "v": 1
+      },
+      "Q150": {
+        "t": "n",
+        "v": 0
+      },
+      "X150": {
+        "t": "s",
+        "v": "baseline-141"
+      },
+      "B151": {
+        "t": "n",
+        "v": 142
+      },
+      "D151": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E151": {
+        "t": "n",
+        "v": 1
+      },
+      "H151": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J151": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P151": {
+        "t": "n",
+        "v": 1
+      },
+      "Q151": {
+        "t": "n",
+        "v": 0
+      },
+      "X151": {
+        "t": "s",
+        "v": "baseline-142"
+      },
+      "B152": {
+        "t": "n",
+        "v": 143
+      },
+      "D152": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E152": {
+        "t": "n",
+        "v": 1
+      },
+      "H152": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J152": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P152": {
+        "t": "n",
+        "v": 1
+      },
+      "Q152": {
+        "t": "n",
+        "v": 0
+      },
+      "X152": {
+        "t": "s",
+        "v": "baseline-143"
+      },
+      "B153": {
+        "t": "n",
+        "v": 144
+      },
+      "D153": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E153": {
+        "t": "n",
+        "v": 1
+      },
+      "H153": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J153": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P153": {
+        "t": "n",
+        "v": 1
+      },
+      "Q153": {
+        "t": "n",
+        "v": 0
+      },
+      "X153": {
+        "t": "s",
+        "v": "baseline-144"
+      },
+      "B154": {
+        "t": "n",
+        "v": 145
+      },
+      "D154": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E154": {
+        "t": "n",
+        "v": 1
+      },
+      "H154": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J154": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P154": {
+        "t": "n",
+        "v": 1
+      },
+      "Q154": {
+        "t": "n",
+        "v": 0
+      },
+      "X154": {
+        "t": "s",
+        "v": "baseline-145"
+      },
+      "B155": {
+        "t": "n",
+        "v": 146
+      },
+      "D155": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E155": {
+        "t": "n",
+        "v": 1
+      },
+      "H155": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J155": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P155": {
+        "t": "n",
+        "v": 1
+      },
+      "Q155": {
+        "t": "n",
+        "v": 0
+      },
+      "X155": {
+        "t": "s",
+        "v": "baseline-146"
+      },
+      "B156": {
+        "t": "n",
+        "v": 147
+      },
+      "D156": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E156": {
+        "t": "n",
+        "v": 1
+      },
+      "H156": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J156": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P156": {
+        "t": "n",
+        "v": 1
+      },
+      "Q156": {
+        "t": "n",
+        "v": 0
+      },
+      "X156": {
+        "t": "s",
+        "v": "baseline-147"
+      },
+      "B157": {
+        "t": "n",
+        "v": 148
+      },
+      "D157": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E157": {
+        "t": "n",
+        "v": 1
+      },
+      "H157": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J157": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P157": {
+        "t": "n",
+        "v": 1
+      },
+      "Q157": {
+        "t": "n",
+        "v": 0
+      },
+      "X157": {
+        "t": "s",
+        "v": "baseline-148"
+      },
+      "B158": {
+        "t": "n",
+        "v": 149
+      },
+      "D158": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E158": {
+        "t": "n",
+        "v": 1
+      },
+      "H158": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J158": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P158": {
+        "t": "n",
+        "v": 1
+      },
+      "Q158": {
+        "t": "n",
+        "v": 0
+      },
+      "X158": {
+        "t": "s",
+        "v": "baseline-149"
+      },
+      "B159": {
+        "t": "n",
+        "v": 150
+      },
+      "D159": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E159": {
+        "t": "n",
+        "v": 1
+      },
+      "H159": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J159": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P159": {
+        "t": "n",
+        "v": 1
+      },
+      "Q159": {
+        "t": "n",
+        "v": 0
+      },
+      "X159": {
+        "t": "s",
+        "v": "baseline-150"
+      },
+      "B160": {
+        "t": "n",
+        "v": 151
+      },
+      "D160": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E160": {
+        "t": "n",
+        "v": 1
+      },
+      "H160": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J160": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P160": {
+        "t": "n",
+        "v": 1
+      },
+      "Q160": {
+        "t": "n",
+        "v": 0
+      },
+      "X160": {
+        "t": "s",
+        "v": "baseline-151"
+      },
+      "B161": {
+        "t": "n",
+        "v": 152
+      },
+      "D161": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E161": {
+        "t": "n",
+        "v": 1
+      },
+      "H161": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J161": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P161": {
+        "t": "n",
+        "v": 1
+      },
+      "Q161": {
+        "t": "n",
+        "v": 0
+      },
+      "X161": {
+        "t": "s",
+        "v": "baseline-152"
+      },
+      "B162": {
+        "t": "n",
+        "v": 153
+      },
+      "D162": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E162": {
+        "t": "n",
+        "v": 1
+      },
+      "H162": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J162": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P162": {
+        "t": "n",
+        "v": 1
+      },
+      "Q162": {
+        "t": "n",
+        "v": 0
+      },
+      "X162": {
+        "t": "s",
+        "v": "baseline-153"
+      },
+      "B163": {
+        "t": "n",
+        "v": 154
+      },
+      "D163": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E163": {
+        "t": "n",
+        "v": 1
+      },
+      "H163": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J163": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P163": {
+        "t": "n",
+        "v": 1
+      },
+      "Q163": {
+        "t": "n",
+        "v": 0
+      },
+      "X163": {
+        "t": "s",
+        "v": "baseline-154"
+      },
+      "B164": {
+        "t": "n",
+        "v": 155
+      },
+      "D164": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E164": {
+        "t": "n",
+        "v": 1
+      },
+      "H164": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J164": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P164": {
+        "t": "n",
+        "v": 1
+      },
+      "Q164": {
+        "t": "n",
+        "v": 0
+      },
+      "X164": {
+        "t": "s",
+        "v": "baseline-155"
+      },
+      "B165": {
+        "t": "n",
+        "v": 156
+      },
+      "D165": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E165": {
+        "t": "n",
+        "v": 1
+      },
+      "H165": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J165": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P165": {
+        "t": "n",
+        "v": 1
+      },
+      "Q165": {
+        "t": "n",
+        "v": 0
+      },
+      "X165": {
+        "t": "s",
+        "v": "baseline-156"
+      },
+      "B166": {
+        "t": "n",
+        "v": 157
+      },
+      "D166": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E166": {
+        "t": "n",
+        "v": 1
+      },
+      "H166": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J166": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P166": {
+        "t": "n",
+        "v": 1
+      },
+      "Q166": {
+        "t": "n",
+        "v": 0
+      },
+      "X166": {
+        "t": "s",
+        "v": "baseline-157"
+      },
+      "B167": {
+        "t": "n",
+        "v": 158
+      },
+      "D167": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E167": {
+        "t": "n",
+        "v": 1
+      },
+      "H167": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J167": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P167": {
+        "t": "n",
+        "v": 1
+      },
+      "Q167": {
+        "t": "n",
+        "v": 0
+      },
+      "X167": {
+        "t": "s",
+        "v": "baseline-158"
+      },
+      "B168": {
+        "t": "n",
+        "v": 159
+      },
+      "D168": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E168": {
+        "t": "n",
+        "v": 1
+      },
+      "H168": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J168": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P168": {
+        "t": "n",
+        "v": 1
+      },
+      "Q168": {
+        "t": "n",
+        "v": 0
+      },
+      "X168": {
+        "t": "s",
+        "v": "baseline-159"
+      },
+      "B169": {
+        "t": "n",
+        "v": 160
+      },
+      "D169": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E169": {
+        "t": "n",
+        "v": 1
+      },
+      "H169": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J169": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P169": {
+        "t": "n",
+        "v": 1
+      },
+      "Q169": {
+        "t": "n",
+        "v": 0
+      },
+      "X169": {
+        "t": "s",
+        "v": "baseline-160"
+      },
+      "B170": {
+        "t": "n",
+        "v": 161
+      },
+      "D170": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E170": {
+        "t": "n",
+        "v": 1
+      },
+      "H170": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J170": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P170": {
+        "t": "n",
+        "v": 1
+      },
+      "Q170": {
+        "t": "n",
+        "v": 0
+      },
+      "X170": {
+        "t": "s",
+        "v": "baseline-161"
+      },
+      "B171": {
+        "t": "n",
+        "v": 162
+      },
+      "D171": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E171": {
+        "t": "n",
+        "v": 1
+      },
+      "H171": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J171": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P171": {
+        "t": "n",
+        "v": 1
+      },
+      "Q171": {
+        "t": "n",
+        "v": 0
+      },
+      "X171": {
+        "t": "s",
+        "v": "baseline-162"
+      },
+      "B172": {
+        "t": "n",
+        "v": 163
+      },
+      "D172": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E172": {
+        "t": "n",
+        "v": 1
+      },
+      "H172": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J172": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P172": {
+        "t": "n",
+        "v": 1
+      },
+      "Q172": {
+        "t": "n",
+        "v": 0
+      },
+      "X172": {
+        "t": "s",
+        "v": "baseline-163"
+      },
+      "B173": {
+        "t": "n",
+        "v": 164
+      },
+      "D173": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E173": {
+        "t": "n",
+        "v": 1
+      },
+      "H173": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J173": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P173": {
+        "t": "n",
+        "v": 1
+      },
+      "Q173": {
+        "t": "n",
+        "v": 0
+      },
+      "X173": {
+        "t": "s",
+        "v": "baseline-164"
+      },
+      "B174": {
+        "t": "n",
+        "v": 165
+      },
+      "D174": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E174": {
+        "t": "n",
+        "v": 1
+      },
+      "H174": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J174": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P174": {
+        "t": "n",
+        "v": 1
+      },
+      "Q174": {
+        "t": "n",
+        "v": 0
+      },
+      "X174": {
+        "t": "s",
+        "v": "baseline-165"
+      },
+      "B175": {
+        "t": "n",
+        "v": 166
+      },
+      "D175": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E175": {
+        "t": "n",
+        "v": 1
+      },
+      "H175": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J175": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P175": {
+        "t": "n",
+        "v": 1
+      },
+      "Q175": {
+        "t": "n",
+        "v": 0
+      },
+      "X175": {
+        "t": "s",
+        "v": "baseline-166"
+      },
+      "B176": {
+        "t": "n",
+        "v": 167
+      },
+      "D176": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E176": {
+        "t": "n",
+        "v": 1
+      },
+      "H176": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J176": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P176": {
+        "t": "n",
+        "v": 1
+      },
+      "Q176": {
+        "t": "n",
+        "v": 0
+      },
+      "X176": {
+        "t": "s",
+        "v": "baseline-167"
+      },
+      "B177": {
+        "t": "n",
+        "v": 168
+      },
+      "D177": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E177": {
+        "t": "n",
+        "v": 1
+      },
+      "H177": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J177": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P177": {
+        "t": "n",
+        "v": 1
+      },
+      "Q177": {
+        "t": "n",
+        "v": 0
+      },
+      "X177": {
+        "t": "s",
+        "v": "baseline-168"
+      },
+      "B178": {
+        "t": "n",
+        "v": 169
+      },
+      "D178": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E178": {
+        "t": "n",
+        "v": 1
+      },
+      "H178": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J178": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P178": {
+        "t": "n",
+        "v": 1
+      },
+      "Q178": {
+        "t": "n",
+        "v": 0
+      },
+      "X178": {
+        "t": "s",
+        "v": "baseline-169"
+      },
+      "B179": {
+        "t": "n",
+        "v": 170
+      },
+      "D179": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E179": {
+        "t": "n",
+        "v": 1
+      },
+      "H179": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J179": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P179": {
+        "t": "n",
+        "v": 1
+      },
+      "Q179": {
+        "t": "n",
+        "v": 0
+      },
+      "X179": {
+        "t": "s",
+        "v": "baseline-170"
+      },
+      "B180": {
+        "t": "n",
+        "v": 171
+      },
+      "D180": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E180": {
+        "t": "n",
+        "v": 1
+      },
+      "H180": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J180": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P180": {
+        "t": "n",
+        "v": 1
+      },
+      "Q180": {
+        "t": "n",
+        "v": 0
+      },
+      "X180": {
+        "t": "s",
+        "v": "baseline-171"
+      },
+      "B181": {
+        "t": "n",
+        "v": 172
+      },
+      "D181": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E181": {
+        "t": "n",
+        "v": 1
+      },
+      "H181": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J181": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P181": {
+        "t": "n",
+        "v": 1
+      },
+      "Q181": {
+        "t": "n",
+        "v": 0
+      },
+      "X181": {
+        "t": "s",
+        "v": "baseline-172"
+      },
+      "B182": {
+        "t": "n",
+        "v": 173
+      },
+      "D182": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E182": {
+        "t": "n",
+        "v": 1
+      },
+      "H182": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J182": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P182": {
+        "t": "n",
+        "v": 1
+      },
+      "Q182": {
+        "t": "n",
+        "v": 0
+      },
+      "X182": {
+        "t": "s",
+        "v": "baseline-173"
+      },
+      "B183": {
+        "t": "n",
+        "v": 174
+      },
+      "D183": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E183": {
+        "t": "n",
+        "v": 1
+      },
+      "H183": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J183": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P183": {
+        "t": "n",
+        "v": 1
+      },
+      "Q183": {
+        "t": "n",
+        "v": 0
+      },
+      "X183": {
+        "t": "s",
+        "v": "baseline-174"
+      },
+      "B184": {
+        "t": "n",
+        "v": 175
+      },
+      "D184": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E184": {
+        "t": "n",
+        "v": 1
+      },
+      "H184": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J184": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P184": {
+        "t": "n",
+        "v": 1
+      },
+      "Q184": {
+        "t": "n",
+        "v": 0
+      },
+      "X184": {
+        "t": "s",
+        "v": "baseline-175"
+      },
+      "B185": {
+        "t": "n",
+        "v": 176
+      },
+      "D185": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E185": {
+        "t": "n",
+        "v": 1
+      },
+      "H185": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J185": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P185": {
+        "t": "n",
+        "v": 1
+      },
+      "Q185": {
+        "t": "n",
+        "v": 0
+      },
+      "X185": {
+        "t": "s",
+        "v": "baseline-176"
+      },
+      "B186": {
+        "t": "n",
+        "v": 177
+      },
+      "D186": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E186": {
+        "t": "n",
+        "v": 1
+      },
+      "H186": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J186": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P186": {
+        "t": "n",
+        "v": 1
+      },
+      "Q186": {
+        "t": "n",
+        "v": 0
+      },
+      "X186": {
+        "t": "s",
+        "v": "baseline-177"
+      },
+      "B187": {
+        "t": "n",
+        "v": 178
+      },
+      "D187": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E187": {
+        "t": "n",
+        "v": 1
+      },
+      "H187": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J187": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P187": {
+        "t": "n",
+        "v": 1
+      },
+      "Q187": {
+        "t": "n",
+        "v": 0
+      },
+      "X187": {
+        "t": "s",
+        "v": "baseline-178"
+      },
+      "B188": {
+        "t": "n",
+        "v": 179
+      },
+      "D188": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E188": {
+        "t": "n",
+        "v": 1
+      },
+      "H188": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J188": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P188": {
+        "t": "n",
+        "v": 1
+      },
+      "Q188": {
+        "t": "n",
+        "v": 0
+      },
+      "X188": {
+        "t": "s",
+        "v": "baseline-179"
+      },
+      "B189": {
+        "t": "n",
+        "v": 180
+      },
+      "D189": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E189": {
+        "t": "n",
+        "v": 1
+      },
+      "H189": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J189": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P189": {
+        "t": "n",
+        "v": 1
+      },
+      "Q189": {
+        "t": "n",
+        "v": 0
+      },
+      "X189": {
+        "t": "s",
+        "v": "baseline-180"
+      },
+      "B190": {
+        "t": "n",
+        "v": 181
+      },
+      "D190": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E190": {
+        "t": "n",
+        "v": 1
+      },
+      "H190": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J190": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P190": {
+        "t": "n",
+        "v": 1
+      },
+      "Q190": {
+        "t": "n",
+        "v": 0
+      },
+      "X190": {
+        "t": "s",
+        "v": "baseline-181"
+      },
+      "B191": {
+        "t": "n",
+        "v": 182
+      },
+      "D191": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E191": {
+        "t": "n",
+        "v": 1
+      },
+      "H191": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J191": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P191": {
+        "t": "n",
+        "v": 1
+      },
+      "Q191": {
+        "t": "n",
+        "v": 0
+      },
+      "X191": {
+        "t": "s",
+        "v": "baseline-182"
+      },
+      "B192": {
+        "t": "n",
+        "v": 183
+      },
+      "D192": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E192": {
+        "t": "n",
+        "v": 1
+      },
+      "H192": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J192": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P192": {
+        "t": "n",
+        "v": 1
+      },
+      "Q192": {
+        "t": "n",
+        "v": 0
+      },
+      "X192": {
+        "t": "s",
+        "v": "baseline-183"
+      },
+      "B193": {
+        "t": "n",
+        "v": 184
+      },
+      "D193": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E193": {
+        "t": "n",
+        "v": 1
+      },
+      "H193": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J193": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P193": {
+        "t": "n",
+        "v": 1
+      },
+      "Q193": {
+        "t": "n",
+        "v": 0
+      },
+      "X193": {
+        "t": "s",
+        "v": "baseline-184"
+      },
+      "B194": {
+        "t": "n",
+        "v": 185
+      },
+      "D194": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E194": {
+        "t": "n",
+        "v": 1
+      },
+      "H194": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J194": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P194": {
+        "t": "n",
+        "v": 1
+      },
+      "Q194": {
+        "t": "n",
+        "v": 0
+      },
+      "X194": {
+        "t": "s",
+        "v": "baseline-185"
+      },
+      "B195": {
+        "t": "n",
+        "v": 186
+      },
+      "D195": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E195": {
+        "t": "n",
+        "v": 1
+      },
+      "H195": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J195": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P195": {
+        "t": "n",
+        "v": 1
+      },
+      "Q195": {
+        "t": "n",
+        "v": 0
+      },
+      "X195": {
+        "t": "s",
+        "v": "baseline-186"
+      },
+      "B196": {
+        "t": "n",
+        "v": 187
+      },
+      "D196": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E196": {
+        "t": "n",
+        "v": 1
+      },
+      "H196": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J196": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P196": {
+        "t": "n",
+        "v": 1
+      },
+      "Q196": {
+        "t": "n",
+        "v": 0
+      },
+      "X196": {
+        "t": "s",
+        "v": "baseline-187"
+      },
+      "B197": {
+        "t": "n",
+        "v": 188
+      },
+      "D197": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E197": {
+        "t": "n",
+        "v": 1
+      },
+      "H197": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J197": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P197": {
+        "t": "n",
+        "v": 1
+      },
+      "Q197": {
+        "t": "n",
+        "v": 0
+      },
+      "X197": {
+        "t": "s",
+        "v": "baseline-188"
+      },
+      "B198": {
+        "t": "n",
+        "v": 189
+      },
+      "D198": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E198": {
+        "t": "n",
+        "v": 1
+      },
+      "H198": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J198": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P198": {
+        "t": "n",
+        "v": 1
+      },
+      "Q198": {
+        "t": "n",
+        "v": 0
+      },
+      "X198": {
+        "t": "s",
+        "v": "baseline-189"
+      },
+      "B199": {
+        "t": "n",
+        "v": 190
+      },
+      "D199": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E199": {
+        "t": "n",
+        "v": 1
+      },
+      "H199": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J199": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P199": {
+        "t": "n",
+        "v": 1
+      },
+      "Q199": {
+        "t": "n",
+        "v": 0
+      },
+      "X199": {
+        "t": "s",
+        "v": "baseline-190"
+      },
+      "B200": {
+        "t": "n",
+        "v": 191
+      },
+      "D200": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E200": {
+        "t": "n",
+        "v": 1
+      },
+      "H200": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J200": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P200": {
+        "t": "n",
+        "v": 1
+      },
+      "Q200": {
+        "t": "n",
+        "v": 0
+      },
+      "X200": {
+        "t": "s",
+        "v": "baseline-191"
+      },
+      "B201": {
+        "t": "n",
+        "v": 192
+      },
+      "D201": {
+        "t": "s",
+        "v": "Native hedgerow"
+      },
+      "E201": {
+        "t": "n",
+        "v": 1
+      },
+      "H201": {
+        "t": "s",
+        "v": "Poor"
+      },
+      "J201": {
+        "t": "s",
+        "v": "Area/compensation not in local strategy/ no local strategy"
+      },
+      "P201": {
+        "t": "n",
+        "v": 1
+      },
+      "Q201": {
+        "t": "n",
+        "v": 0
+      },
+      "X201": {
+        "t": "s",
+        "v": "baseline-192"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-2 On-Site Hedge Creation": {
+      "D10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "O11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "X11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "B-3 On-Site Hedge Enhancement": {
+      "M9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "M10": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "S11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AJ11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-1 Off-Site Hedge Baseline": {
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "Y8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "S9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "T9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "Z9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AA9": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-2 Off-Site Hedge Creation": {
+      "D10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "H10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M10": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Habitat type"
+      },
+      "E11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "P11": {
+        "t": "s",
+        "v": "Habitat created in advance (years) "
+      },
+      "Q11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AB11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AC11": {
+        "t": "s",
+        "v": "Habitat reference "
+      },
+      "AD11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "E-3 Off-Site Hedge Enhancement": {
+      "M9": {
+        "t": "s",
+        "v": "Change in distinctiveness and condition"
+      },
+      "M10": {
+        "t": "s",
+        "v": "Proposed habitat"
+      },
+      "S10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AL10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "S11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "U11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Y11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AL11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AM11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AN11": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-1 On-Site WaterC' Baseline": {
+      "C8": {
+        "t": "s",
+        "v": "Existing watercourse type"
+      },
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M8": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AA8": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH"
+      },
+      "AB8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "U9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "V9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "AB9": {
+        "t": "s",
+        "v": "User Comments"
+      },
+      "AC9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AD9": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-2 On-Site WaterC' Creation": {
+      "C10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "I10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AA10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C11": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "G11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "V11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "X11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AB11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AC11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "C-3 On-Site WaterC' Enhancement": {
+      "N9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "N10": {
+        "t": "s",
+        "v": "Proposed habitat\r\n"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Habitat condition"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "AK10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AN10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "T11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "V11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AN11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AO11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AP11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-1 Off-Site WaterC' Baseline": {
+      "C8": {
+        "t": "s",
+        "v": "Existing watercourse type"
+      },
+      "H8": {
+        "t": "s",
+        "v": "Condition"
+      },
+      "J8": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M8": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "O8": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "S8": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AD8": {
+        "t": "s",
+        "v": "Bespoke compensation agreed for losses of VHDH"
+      },
+      "AE8": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C9": {
+        "t": "s",
+        "v": "Ref"
+      },
+      "D9": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "E9": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "H9": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "J9": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M9": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "O9": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "S9": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "X9": {
+        "t": "s",
+        "v": "Length retained"
+      },
+      "Y9": {
+        "t": "s",
+        "v": "Length enhanced"
+      },
+      "AE9": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AF9": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AG9": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "AH9": {
+        "t": "s",
+        "v": "Off-site reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-2 Off-Site WaterC' Creation": {
+      "C10": {
+        "t": "s",
+        "v": "Proposed habitats"
+      },
+      "G10": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "X10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "Z10": {
+        "t": "s",
+        "v": "Spatial risk multiplier"
+      },
+      "AD10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "C11": {
+        "t": "s",
+        "v": "Watercourse type"
+      },
+      "D11": {
+        "t": "s",
+        "v": "Length (km)"
+      },
+      "G11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "I11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "M11": {
+        "t": "s",
+        "v": "Habitat created in advance (years)"
+      },
+      "N11": {
+        "t": "s",
+        "v": "Delay in starting habitat creation (years)"
+      },
+      "V11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "X11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Spatial risk category"
+      },
+      "AD11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AE11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AF11": {
+        "t": "s",
+        "v": "Habitat reference number"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "F-3 Off-Site WaterC Enhancement": {
+      "N9": {
+        "t": "s",
+        "v": "Post intervention habitats "
+      },
+      "N10": {
+        "t": "s",
+        "v": "Proposed habitat \r\n"
+      },
+      "T10": {
+        "t": "s",
+        "v": "Habitat condition"
+      },
+      "V10": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "AI10": {
+        "t": "s",
+        "v": "Watercourse encroachment"
+      },
+      "AK10": {
+        "t": "s",
+        "v": "Riparian encroachment"
+      },
+      "AP10": {
+        "t": "s",
+        "v": "Watercourse units delivered"
+      },
+      "AQ10": {
+        "t": "s",
+        "v": "Comments"
+      },
+      "B11": {
+        "t": "s",
+        "v": "Baseline ref"
+      },
+      "T11": {
+        "t": "s",
+        "v": "Condition "
+      },
+      "V11": {
+        "t": "s",
+        "v": "Strategic significance"
+      },
+      "Z11": {
+        "t": "s",
+        "v": "Habitat enhanced in advance (years)"
+      },
+      "AA11": {
+        "t": "s",
+        "v": "Delay in starting habitat enhancement (years)"
+      },
+      "AI11": {
+        "t": "s",
+        "v": "Extent of encroachment"
+      },
+      "AK11": {
+        "t": "s",
+        "v": "Extent of encroachment for both banks"
+      },
+      "AQ11": {
+        "t": "s",
+        "v": "User comments"
+      },
+      "AR11": {
+        "t": "s",
+        "v": "Planning authority comments"
+      },
+      "AS11": {
+        "t": "s",
+        "v": "Habitat reference"
+      },
+      "!ref": "A1:BZ260"
+    },
+    "Headline Results": {
+      "H9": {
+        "t": "n",
+        "v": 384,
+        "f": "IFERROR('B-1 On-Site Hedge Baseline'!N258,\"Check Data ⚠\")"
+      },
+      "!ref": "A1:BZ260"
+    }
+  }
+}

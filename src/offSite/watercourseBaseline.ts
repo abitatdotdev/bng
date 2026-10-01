@@ -14,6 +14,7 @@ import {
     enrichWithUnitsLost
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
+import { enrichWithVhdhBespokeCompensationUnits } from '../onSite/watercourseBaseline';
 import { fuzzyPicklist } from '../valibotPipes';
 
 const inputSchema = v.object({
@@ -71,6 +72,7 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
     v.transform(enrichWithTotalWatercourseUnits),
     // Calculate units lost
     v.transform(enrichWithUnitsLost),
+    v.transform(enrichWithVhdhBespokeCompensationUnits),
 );
 
 export type OffSiteWatercourseBaselineSchema = v.InferInput<typeof offSiteWatercourseBaselineSchema>;
@@ -84,6 +86,7 @@ export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithTotalWatercourseUnitsSRM),
     safeTransform(enrichWithTotalWatercourseUnits),
     safeTransform(enrichWithUnitsLost),
+    safeTransform(enrichWithVhdhBespokeCompensationUnits),
 );
 
 /**

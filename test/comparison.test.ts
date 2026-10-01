@@ -1,3 +1,4 @@
+import { allSheetSpecs } from '../src/parsers/columnMappings';
 import { describe, test, expect } from "bun:test"
 import * as v from 'valibot';
 import { EXCEL_FILES, expectCloseTo, testExcelFiles } from './helpers';
@@ -307,7 +308,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'A-1 On-Site Habitat Baseline')!;
 
         // Find all data rows (E column = broad habitat, 0-indexed as 4)
-        const dataRows = findAllDataRows(sheet, 4);
+        const spec = allSheetSpecs.find(s => s.name === 'A-1 On-Site Habitat Baseline')!;
+        const dataRows = findAllDataRows(sheet, 4, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site baseline data in test file", () => { });
@@ -403,7 +405,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
         // Find all data rows (Y column = habitat units delivered, 0-indexed as 24)
         // This is the most likely to show a full row since it only calculates after loads is filled in already
-        const dataRows = findAllDataRows(sheet, 24);
+        const spec = allSheetSpecs.find(s => s.name === 'A-2 On-Site Habitat Creation')!;
+        const dataRows = findAllDataRows(sheet, 24, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site creation data in test file", () => { });
@@ -502,7 +505,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
         // Find all data rows (AQ column = habitat reference number, 0-indexed as 42, starting from row 12)
         // However, let's use column B (1) which has the baseline reference as it's more reliable
-        const dataRows = findAllDataRows(sheet, 1, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'A-3 On-Site Habitat Enhancement')!;
+        const dataRows = findAllDataRows(sheet, 1, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site habitat enhancement data in test file", () => { });
@@ -611,7 +615,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'B-1 On-Site Hedge Baseline')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 10)
-        const dataRows = findAllDataRows(sheet, 3, 9);
+        const spec = allSheetSpecs.find(s => s.name === 'B-1 On-Site Hedge Baseline')!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site hedgerow baseline data in test file", () => { });
@@ -709,7 +714,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'B-2 On-Site Hedge Creation')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 11)
-        const dataRows = findAllDataRows(sheet, 3, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'B-2 On-Site Hedge Creation')!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site hedgerow creation data in test file", () => { });
@@ -814,7 +820,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
         // Find all data rows in enhancement sheet (B column = baseline ref, 0-indexed as 1, starting from row 11)
         // Column B has the baseline reference
-        const dataRows = findAllDataRows(sheet, 1, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'B-3 On-Site Hedge Enhancement')!;
+        const dataRows = findAllDataRows(sheet, 1, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site hedgerow enhancement data in test file", () => { });
@@ -924,7 +931,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline')!;
 
         // Find all data rows (E column = broad habitat, 0-indexed as 4)
-        const dataRows = findAllDataRows(sheet, 4);
+        const spec = allSheetSpecs.find(s => s.name === 'D-1 Off-Site Habitat Baseline')!;
+        const dataRows = findAllDataRows(sheet, 4, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site baseline data in test file", () => { });
@@ -1035,7 +1043,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'D-2 Off-Site Habitat Creation')!;
 
         // Find all data rows (D column = broad habitat, 0-indexed as 3)
-        const dataRows = findAllDataRows(sheet, 3);
+        const spec = allSheetSpecs.find(s => s.name === 'D-2 Off-Site Habitat Creation')!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site creation data in test file", () => { });
@@ -1147,7 +1156,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const baselineSheet = getSheet(workbook, 'D-1 Off-Site Habitat Baseline')!;
 
         // Find all data rows (E column = baseline reference, 0-indexed as 4, starting from row 12)
-        const dataRows = findAllDataRows(sheet, 4, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'D-3 Off-Site Habitat Enhancment')!;
+        const dataRows = findAllDataRows(sheet, 4, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site habitat enhancement data in test file", () => { });
@@ -1271,7 +1281,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 9)
-        const dataRows = findAllDataRows(sheet, 3, 9);
+        const spec = allSheetSpecs.find(s => s.name === 'E-1 Off-Site Hedge Baseline')!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site hedgerow baseline data in test file", () => { });
@@ -1383,7 +1394,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, 'E-2 Off-Site Hedge Creation')!;
 
         // Find all data rows (D column = habitat type, 0-indexed as 3, starting from row 12)
-        const dataRows = findAllDataRows(sheet, 3, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'E-2 Off-Site Hedge Creation')!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site hedgerow creation data in test file", () => { });
@@ -1504,7 +1516,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const baselineSheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline')!;
 
         // Column B has the baseline reference
-        const dataRows = findAllDataRows(sheet, 1, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'E-3 Off-Site Hedge Enhancement')!;
+        const dataRows = findAllDataRows(sheet, 1, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site hedgerow enhancement data in test file", () => { });
@@ -1627,7 +1640,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     describe("C-1 On-Site Watercourse Baseline", () => {
         const sheet = getSheet(workbook, "C-1 On-Site WaterC' Baseline")!;
         // E (4) = length input
-        const dataRows = findAllDataRows(sheet, 4, 9);
+        const spec = allSheetSpecs.find(s => s.name === "C-1 On-Site WaterC' Baseline")!;
+        const dataRows = findAllDataRows(sheet, 4, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site watercourse baseline data in test file", () => { });
@@ -1681,7 +1695,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     describe("C-2 On-Site Watercourse Creation", () => {
         const sheet = getSheet(workbook, "C-2 On-Site WaterC' Creation")!;
         // D (3) = length input
-        const dataRows = findAllDataRows(sheet, 3, 11);
+        const spec = allSheetSpecs.find(s => s.name === "C-2 On-Site WaterC' Creation")!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site watercourse creation data in test file", () => { });
@@ -1739,7 +1754,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         const sheet = getSheet(workbook, "C-3 On-Site WaterC' Enhancement")!;
         const baselineSheet = getSheet(workbook, "C-1 On-Site WaterC' Baseline")!;
         // B (1) = baseline ref (auto-populated VLOOKUP); use it for row detection
-        const dataRows = findAllDataRows(sheet, 1, 11);
+        const spec = allSheetSpecs.find(s => s.name === "C-3 On-Site WaterC' Enhancement")!;
+        const dataRows = findAllDataRows(sheet, 1, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no on-site watercourse enhancement data in test file", () => { });
@@ -1799,7 +1815,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
     describe("F-1 Off-Site Watercourse Baseline", () => {
         const sheet = getSheet(workbook, "F-1 Off-Site WaterC' Baseline")!;
-        const dataRows = findAllDataRows(sheet, 4, 9);
+        const spec = allSheetSpecs.find(s => s.name === "F-1 Off-Site WaterC' Baseline")!;
+        const dataRows = findAllDataRows(sheet, 4, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site watercourse baseline data in test file", () => { });
@@ -1854,7 +1871,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
 
     describe("F-2 Off-Site Watercourse Creation", () => {
         const sheet = getSheet(workbook, "F-2 Off-Site WaterC' Creation")!;
-        const dataRows = findAllDataRows(sheet, 3, 11);
+        const spec = allSheetSpecs.find(s => s.name === "F-2 Off-Site WaterC' Creation")!;
+        const dataRows = findAllDataRows(sheet, 3, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site watercourse creation data in test file", () => { });
@@ -1911,7 +1929,8 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     describe("F-3 Off-Site Watercourse Enhancement", () => {
         const sheet = getSheet(workbook, 'F-3 Off-Site WaterC Enhancement')!;
         const baselineSheet = getSheet(workbook, "F-1 Off-Site WaterC' Baseline")!;
-        const dataRows = findAllDataRows(sheet, 1, 11);
+        const spec = allSheetSpecs.find(s => s.name === 'F-3 Off-Site WaterC Enhancement')!;
+        const dataRows = findAllDataRows(sheet, 1, spec.startRow, spec.endRow - spec.startRow);
 
         if (dataRows.length === 0) {
             test.skip("no off-site watercourse enhancement data in test file", () => { });

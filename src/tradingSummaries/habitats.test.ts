@@ -1,3 +1,4 @@
+import { featuresFromInput } from '../parsers/featuresFromInput';
 import { expect, test, describe } from "bun:test";
 import { cumulativeBroadHabitatChange, habitatTradingSummary } from "./habitats";
 import { type AllFeatures } from "../features";
@@ -265,5 +266,33 @@ describe("cumulativeBroadHabitatChange", () => {
         // A Grassland-only loss leaves Medium tier unchanged.
         const medium = cumulativeBroadHabitatChange(input, "Medium");
         expect(medium.Grassland ?? 0).toBe(0);
+    });
+});
+
+describe('medium habitat trading across intertidal habitats', () => {
+    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+    for (const [area, expectedDownwards, expectedUpwards, satisfied] of [[2, 4, 0, true], [0.5, 0, -2, false]] as const) {
+        test(`IGGI area ${area} offsets littoral sand within the combined intertidal balance`, () => {
+            const { features, issues } = featuresFromInput({
+                onSiteHabitatBaselines: [{ broadHabitat: 'Intertidal sediment', habitatType: 'Littoral sand', area: 1, condition: 'Poor', irreplaceableHabitat: false, strategicSignificance }],
+                onSiteHabitatCreations: [{ broadHabitat: 'Intertidal hard structures', habitatType: 'Artificial hard structures with integrated greening of grey infrastructure (IGGI)', area, condition: 'Poor', strategicSignificance, habitatCreationInAdvance: 1 }],
+            });
+            expect(issues).toEqual([]);
+            const result = habitatTradingSummary(features);
+            expect(result.details.medium.unitsAvailableToOffsetDownwards).toBe(expectedDownwards);
+            expect(result.details.medium.unitsAvailableToOffsetUpwards).toBe(expectedUpwards);
+            expect(result.mediumSatisfied).toBe(satisfied);
+        });
+    }
+    test('grassland gains remain separate from intertidal losses', () => {
+        const { features, issues } = featuresFromInput({
+            onSiteHabitatBaselines: [{ broadHabitat: 'Intertidal sediment', habitatType: 'Littoral sand', area: 1, condition: 'Poor', irreplaceableHabitat: false, strategicSignificance }],
+            onSiteHabitatCreations: [{ broadHabitat: 'Grassland', habitatType: 'Other neutral grassland', area: 2, condition: 'Poor', strategicSignificance, habitatCreationInAdvance: '30+' }],
+        });
+        expect(issues).toEqual([]);
+        const result = habitatTradingSummary(features);
+        expect(result.details.medium.unitsAvailableToOffsetDownwards).toBe(8);
+        expect(result.details.medium.unitsAvailableToOffsetUpwards).toBe(-4);
+        expect(result.mediumSatisfied).toBeFalse();
     });
 });

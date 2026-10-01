@@ -109,16 +109,11 @@ const dataValueSchema = v.union([
 
 function findAllDataRows(sheet: SheetView, columnToCheckPresence: number, startRow: number, maxRows: number = MAX_DATA_ROWS): number[] {
     const out: number[] = [];
-    let consecutiveEmpty = 0;
     for (let row = startRow; row < startRow + maxRows; row++) {
         const value = getCellValue(sheet, row, columnToCheckPresence);
         const parsed = v.safeParse(dataValueSchema, value);
         if (parsed.success && parsed.output !== 'Broad Habitat') {
             out.push(row);
-            consecutiveEmpty = 0;
-        } else {
-            consecutiveEmpty++;
-            if (consecutiveEmpty > 10) break;
         }
     }
     return out;
@@ -287,7 +282,7 @@ async function* iterate(input: ParseFileStreamInput, validate: boolean, signal?:
         const schema = validate ? entry.checked : entry.unchecked;
         const sheet = loadView(entry.spec.name);
         const detectionCol = decodeCol(entry.spec.dataDetectionColumn);
-        const dataRows = findAllDataRows(sheet, detectionCol, entry.spec.startRow);
+        const dataRows = findAllDataRows(sheet, detectionCol, entry.spec.startRow, entry.spec.endRow - entry.spec.startRow);
 
         if (entry.tag === 'simple') {
             for (const r of dataRows) {

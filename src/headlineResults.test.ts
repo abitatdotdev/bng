@@ -1,3 +1,5 @@
+import { featuresFromInput, type BngInput } from './parsers/featuresFromInput';
+import { tradingSummaries } from './tradingSummaries';
 import { expect, test, describe } from "bun:test";
 import {
     calculateOnSiteHabitatBaseline,
@@ -1328,12 +1330,12 @@ describe("calculateTotalSRMDeductions", () => {
         expect(result.watercourse).toBe(0);
     });
 
-    test("handles negative values (when off-site net change is negative, SRM returns 0)", () => {
-        // When net change is negative, SRM calculation returns 0, so deduction equals the negative value
+    test("does not deduct SRM from off-site losses", () => {
+        // Losses stay in combined net change and have no spatial deduction.
         const result = calculateTotalSRMDeductions(-10, 0, -5, 0, -8, 0);
-        expect(result.habitat).toBe(-10);
-        expect(result.hedgerow).toBe(-5);
-        expect(result.watercourse).toBe(-8);
+        expect(result.habitat).toBe(0);
+        expect(result.hedgerow).toBe(0);
+        expect(result.watercourse).toBe(0);
     });
 });
 
@@ -1620,5 +1622,84 @@ describe("headlineResults - combined calculations", () => {
 
         expect(result.habitatUnitSummary.requiredUnits).toBe(110);
         expect(result.habitatUnitSummary.unitDeficit).toBe(10);
+    });
+});
+
+describe('spatial risk and watercourse compensation', () => {
+    function parseInput(input: BngInput) {
+        const result = featuresFromInput(input);
+        expect(result.issues).toEqual([]);
+        return result.features;
+    }
+
+    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+    const spatialRiskCategory = 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA' as const;
+    const waterSpatial = 'Outside waterbody catchment, but within operational catchment' as const;
+    const common = { condition: 'Poor', strategicSignificance, offSiteReferenceNumber: 'gain-site' } as const;
+    const area = { ...common, broadHabitat: 'Grassland', habitatType: 'Other neutral grassland', spatialRiskCategory } as const;
+    const hedge = { ...common, habitatType: 'Native hedgerow', spatialRiskCategory } as const;
+    const water = { ...common, watercourseType: 'Ditches', watercourseEncroachment: 'No Encroachment', riparianEncroachment: 'No Encroachment/ No Encroachment', spatialRiskCategory: waterSpatial } as const;
+
+    for (const change of ['negative', 'zero', 'positive'] as const) {
+        const behaviour = {
+            negative: 'keeps off-site losses in net change without spatial risk deductions',
+            zero: 'applies no spatial risk deductions when off-site units are unchanged',
+            positive: 'deducts spatial risk from off-site gains in all three unit families',
+        };
+        test(behaviour[change], () => {
+            const retained = change === 'zero' ? 1 : 0;
+            const features = parseInput({
+                offSiteHabitatBaselines: [{ ...area, area: 1, irreplaceableHabitat: false, areaRetained: retained }],
+                offSiteHedgerowBaselines: [{ ...hedge, length: 1, lengthRetained: retained }],
+                offSiteWatercourseBaselines: [{ ...water, length: 1, lengthRetained: retained }],
+                offSiteHabitatCreations: change === 'positive' ? [{ ...area, area: 2, habitatCreationInAdvance: '30+' }] : [],
+                offSiteHedgerowCreations: change === 'positive' ? [{ ...hedge, length: 2, habitatCreatedInAdvance: '30+' }] : [],
+                offSiteWatercourseCreations: change === 'positive' ? [{ ...water, length: 2, habitatCreatedInAdvance: '30+' }] : [],
+            });
+            const result = headlineResults(features, tradingSummaries(features));
+            const expectedChange = change === 'negative' ? { habitat: -4, hedgerow: -2, watercourse: -4 }
+                : change === 'zero' ? { habitat: 0, hedgerow: 0, watercourse: 0 }
+                : { habitat: 4, hedgerow: 2, watercourse: 4 };
+            const expectedDeductions = change === 'positive' ? { habitat: 1, hedgerow: 0.5, watercourse: 1 } : { habitat: 0, hedgerow: 0, watercourse: 0 };
+            expect(result.combinedNetUnitChange).toEqual(expectedChange);
+            expect(result.totalSRMDeductions).toEqual(expectedDeductions);
+            expect(calculateTotalSRMDeductions(
+                result.offSiteHabitatNetChange.units, result.offSiteHabitatNetChangeWithSRM,
+                result.offSiteHedgerowNetChange.units, result.offSiteHedgerowNetChangeWithSRM,
+                result.offSiteWatercourseNetChange.units, result.offSiteWatercourseNetChangeWithSRM,
+            )).toEqual(expectedDeductions);
+            for (const family of ['habitat', 'hedgerow', 'watercourse'] as const) {
+                expect(result.totalNetUnitChange[family]).toBe(expectedChange[family] - expectedDeductions[family]);
+            }
+        });
+    }
+
+    describe('off-site watercourse compensation aggregates', () => {
+        for (const bespokeCompensation of ['Yes', 'Pending', 'No'] as const) {
+            for (const [lengthRetained, lengthEnhanced, units] of [[0.5, 0, 8], [0, 0.5, 8], [0.25, 0.5, 4]] as const) {
+                test(`${bespokeCompensation}, retained ${lengthRetained}, enhanced ${lengthEnhanced}`, () => {
+                    const features = parseInput({ offSiteWatercourseBaselines: [{
+                        ...water, watercourseType: 'Priority habitat', condition: 'Moderate', length: 1,
+                        lengthRetained, lengthEnhanced, bespokeCompensation,
+                    }] });
+                    const baseline = features.offSiteWatercourseBaselines[0]!;
+                    const compensation = bespokeCompensation === 'No' ? 0 : units;
+                    expect(baseline.vhdhBespokeCompensationUnits).toBe(compensation);
+                    expect(calculateOffSiteWatercoursePostIntervention(features.offSiteWatercourseBaselines, [], [])).toBe(16 * lengthRetained + compensation);
+                });
+            }
+        }
+        test('excludes bespoke compensation from spatially adjusted watercourse gains', () => {
+            const features = parseInput({
+                offSiteWatercourseBaselines: [{ ...water, watercourseType: 'Priority habitat', condition: 'Moderate', length: 1, lengthRetained: 0.5, bespokeCompensation: 'Yes' }],
+                offSiteWatercourseCreations: [{ ...water, length: 1, condition: 'Moderate', habitatCreatedInAdvance: '30+' }],
+            });
+            const result = headlineResults(features, tradingSummaries(features));
+            expect(result.offSiteWatercoursePostIntervention).toBe(24); // H26: retained 8 + compensation 8 + creation 8
+            expect(result.offSiteWatercourseNetChange.units).toBe(8);
+            expect(result.offSiteWatercourseNetChangeWithSRM).toBe(0); // L26 (6 + 6) - L22 (12)
+            expect(calculateOffSiteWatercourseNetChangeWithSRM(features.offSiteWatercourseBaselines, features.offSiteWatercourseCreations, [], 8)).toBe(0);
+            expect(result.totalSRMDeductions.watercourse).toBe(8);
+        });
     });
 });

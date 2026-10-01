@@ -183,9 +183,40 @@ describe('full schema integration tests', () => {
 
         const result = v.parse(offSiteWatercourseCreationSchema, input);
 
-        // With 30 year delay, temporal multiplier should be 0.3434151104
-        expect(result.finalTimeToTarget).toBe(30);
-        expect(result.temporalMultiplier).toBeCloseTo(0.3434151104, 5);
+        // Standard time plus delay exceeds 30, so use the sentinel multiplier.
+        expect(result.finalTimeToTarget).toBe("30+");
+        expect(result.temporalMultiplier).toBeCloseTo(0.3197967361, 10);
         expect(result.unitsDelivered).toBeGreaterThan(0);
+    });
+});
+
+
+describe('creation time adjustments', () => {
+    const schema = offSiteWatercourseCreationSchema;
+    for (const [delay, time, multiplier, units] of [[24, 29, 0.3558705807, 1.907466312552], [25, 30, 0.3434151104, 1.840704991744], ['30+', '30+', 0.3197967361, 1.714110505496]] as const) {
+        test(`applies the ${time}-year temporal multiplier after a ${delay}-year delay`, () => {
+            const result = v.parse(schema, {
+                watercourseType: 'Ditches', length: 1, condition: 'Moderate',
+                strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+                delayInStarting: delay,
+                watercourseEncroachment: 'No Encroachment', riparianEncroachment: 'No Encroachment/ No Encroachment',
+                spatialRiskCategory: 'Within waterbody catchment', offSiteReferenceNumber: 'gain-site',
+            });
+            expect(result.finalTimeToTarget).toBe(time);
+            expect(result.temporalMultiplier).toBe(multiplier);
+            expect(Math.abs(result.unitsDelivered - units)).toBeLessThanOrEqual(1e-8);
+        });
+    }
+    test('habitat created over 30 years in advance delivers undiscounted units', () => {
+        const result = v.parse(schema, {
+            watercourseType: 'Ditches', length: 1, condition: 'Moderate',
+            strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+            habitatCreatedInAdvance: '30+',
+            watercourseEncroachment: 'No Encroachment', riparianEncroachment: 'No Encroachment/ No Encroachment',
+            spatialRiskCategory: 'Within waterbody catchment', offSiteReferenceNumber: 'gain-site',
+        });
+        expect(result.finalTimeToTarget).toBe(0);
+        expect(result.temporalMultiplier).toBe(1);
+        expect(result.unitsDelivered).toBe(8);
     });
 });

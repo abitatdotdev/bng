@@ -30,6 +30,7 @@
   },
   "files": ["dist"],
   "scripts": {
+    "test": "bun test",
     "mcp:habitat": "bun run mcp-server/habitat-server.ts",
     "gencode": "bun scripts/generateCodeFromSheet.ts",
     "test:fast": "bun test --concurrent ./src",

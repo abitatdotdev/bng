@@ -101,14 +101,14 @@ function inputFromWorkbook(fileName: string): BngInput {
 
     for (const [key, spec, parseRow] of simpleSheets) {
         const sheet = sheetJsView(getSheet(workbook, spec.name)!);
-        const rows = findAllDataRows(sheet, decodeCol(spec.dataDetectionColumn), spec.startRow);
+        const rows = findAllDataRows(sheet, decodeCol(spec.dataDetectionColumn), spec.startRow, spec.endRow - spec.startRow);
         input[key] = rows.map((row) => parseRow(sheet, row));
     }
 
     for (const [key, spec, baselineSpec, parseRow] of enhancementSheets) {
         const sheet = sheetJsView(getSheet(workbook, spec.name)!);
         const baselineSheet = sheetJsView(getSheet(workbook, baselineSpec.name)!);
-        const rows = findAllDataRows(sheet, decodeCol(spec.dataDetectionColumn), spec.startRow);
+        const rows = findAllDataRows(sheet, decodeCol(spec.dataDetectionColumn), spec.startRow, spec.endRow - spec.startRow);
         input[key] = rows.map((row) => parseRow(baselineSheet, sheet, row));
     }
 

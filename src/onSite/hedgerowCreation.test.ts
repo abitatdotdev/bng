@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import * as v from 'valibot';
 import {
     onSiteHedgerowCreationSchema,
@@ -200,13 +200,13 @@ test("enrichWithTemporalData - handles 30+ scenario", () => {
     const result = enrichWithTemporalData(inputData);
 
     // Ecologically valuable line of trees to Good = "30+"
-    // "30+" (31) + 5 delay = 36, which remains "30+"
+    // A standard "30+" with no advance remains "30+"
     expect(result.standardTimeToTargetCondition).toBe('30+');
     expect(result.finalTimeToTargetCondition).toBe('30+');
     expect(result.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
 });
 
-test("enrichWithTemporalData - advance can result in negative or zero", () => {
+test("enrichWithTemporalData - advance beyond target uses zero years", () => {
     const inputData = {
         habitatType: "Native hedgerow" as const,
         condition: "Poor" as const,
@@ -216,10 +216,10 @@ test("enrichWithTemporalData - advance can result in negative or zero", () => {
 
     const result = enrichWithTemporalData(inputData);
 
-    // Standard 1 - 5 advance = -4 years final (habitat already established)
+    // Advance beyond the standard time is clamped to zero (habitat already established)
     expect(result.standardTimeToTargetCondition).toBe(1);
-    expect(result.finalTimeToTargetCondition).toBe(-4);
-    // Negative years will lookup, but might not have a multiplier
+    expect(result.finalTimeToTargetCondition).toBe(0);
+    expect(result.temporalMultiplier).toBe(1);
 });
 
 test("enrichWithTemporalData - with '30+' advance", () => {
@@ -232,7 +232,7 @@ test("enrichWithTemporalData - with '30+' advance", () => {
 
     const result = enrichWithTemporalData(inputData);
 
-    // Standard "30+" - 31 (for "30+" in advance) = 0 years final (30 - 31 + 1 for base)
+    // The "30+" advance branch returns zero years.
     expect(result.standardTimeToTargetCondition).toBe('30+');
     expect(result.finalTimeToTargetCondition).toBe(0);
 });
@@ -247,7 +247,7 @@ test("enrichWithTemporalData - with '30+' delay", () => {
 
     const result = enrichWithTemporalData(inputData);
 
-    // Standard 12 + 31 (for "30+") = 43 years, which becomes "30+"
+    // The "30+" delay branch preserves the sentinel.
     expect(result.standardTimeToTargetCondition).toBe(12);
     expect(result.finalTimeToTargetCondition).toBe('30+');
     expect(result.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
@@ -629,7 +629,7 @@ test("full schema validation - with '30+' delay", () => {
         // Good condition = 3
         // Strategic significance = 1.1
         // Standard time to Good = 12 years
-        // With "30+" delay (31) = 43 years, which becomes "30+"
+        // A "30+" delay preserves the sentinel.
         expect(result.output.distinctivenessScore).toEqual(2);
         expect(result.output.conditionScore).toEqual(3);
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
@@ -662,7 +662,7 @@ test("full schema validation - with '30+' advance", () => {
         // Good condition = 3
         // Strategic significance = 1.1
         // Standard time to Good = "30+"
-        // With "30+" advance (31) = 0 years (30 represented as 31 internally, so 31 - 31 = 0)
+        // A "30+" advance returns zero years.
         expect(result.output.distinctivenessScore).toEqual(4);
         expect(result.output.conditionScore).toEqual(3);
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
@@ -675,3 +675,42 @@ test("full schema validation - with '30+' advance", () => {
     }
 });
 
+
+
+describe('creation time adjustments', () => {
+    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+    const schema = onSiteHedgerowCreationSchema;
+    for (const [delay, time, units] of [[24, 29, 1.4234823228], [25, 30, 1.3736604416], [26, '30+', 1.2791869444]] as const) {
+        test(`applies the ${time}-year temporal adjustment after a ${delay}-year delay`, () => {
+            const result = v.parse(schema, {
+                habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+                delayInStartingHabitatCreation: delay,
+                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+            });
+            expect(result.finalTimeToTargetCondition).toBe(time);
+            expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
+        });
+    }
+    test('advance beyond standard time delivers the undiscounted units', () => {
+        const result = v.parse(schema, {
+            habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+            habitatCreatedInAdvance: 10,
+            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+        });
+        expect(result.finalTimeToTargetCondition).toBe(0);
+        expect(result.temporalMultiplier).toBe(1);
+        expect(result.hedgerowUnitsDelivered).toBe(4);
+    });
+    for (const [advance, time, units] of [[0, '30+', 1.9187804166], [1, 29, 2.1352234842], ['30+', 0, 6]] as const) {
+        test(`adjusts a 30+ year target for ${advance} years of advance creation`, () => {
+            const result = v.parse(schema, {
+                habitatType: 'Line of trees', length: 1, condition: 'Good', strategicSignificance,
+                habitatCreatedInAdvance: advance,
+                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+            });
+            expect(result.standardTimeToTargetCondition).toBe('30+');
+            expect(result.finalTimeToTargetCondition).toBe(time);
+            expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
+        });
+    }
+});

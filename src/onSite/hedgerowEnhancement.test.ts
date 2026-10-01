@@ -514,3 +514,14 @@ test("handles '30+' time to target correctly", () => {
         expect(result.output.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
     }
 });
+
+test('enhancement delayed over 30 years preserves its temporal adjustment', () => {
+    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+    const result = v.parse(onSiteHedgerowEnhancementSchema, fixture({
+        baseline: createBaseline({ lengthEnhanced: 1, lengthRetained: 0, strategicSignificance }),
+        strategicSignificance, hedgerowEnhancedDelay: '30+',
+    }));
+    expect(result.finalTimeToTargetCondition).toBe('30+');
+    expect(result.temporalMultiplier).toBe(0.3197967361);
+    expect(Math.abs(result.hedgerowUnitsDelivered - 2.6395934722)).toBeLessThanOrEqual(1e-8);
+});

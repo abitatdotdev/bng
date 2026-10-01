@@ -78,53 +78,38 @@ export function calculateEnhancementPathway(input: {
     return { enhancementPathway: `${input.baselineCondition} to ${input.proposedCondition}` };
 }
 
-function yearsToNumber(years: number | "30+"): number {
-    return years === "30+" ? 31 : years;
-}
-
 /**
- * Pure calculation: derives finalTimeToTargetCondition for hedgerow creation
- * from standard time, advance and delay.
+ * Final creation time follows the B-2/E-2 formula branches. Numeric 30
+ * and the "30+" sentinel have different temporal multipliers.
  */
 export function calculateFinalTimeToTargetCondition(input: {
     standardTimeToTargetCondition: number | string | undefined;
     habitatCreatedInAdvance: number | "30+";
     delayInStartingHabitatCreation: number | "30+";
 }) {
-    const standardTimeToTarget = input.standardTimeToTargetCondition;
-    let finalTimeToTarget: number | string | undefined = undefined;
+    const standard = input.standardTimeToTargetCondition;
+    const advance = input.habitatCreatedInAdvance;
+    const delay = input.delayInStartingHabitatCreation;
+    let finalTimeToTargetCondition: number | string | undefined;
 
-    if (typeof standardTimeToTarget === 'string') {
-        if (standardTimeToTarget === '30+') {
-            const advanceYears = yearsToNumber(input.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(input.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(31).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        } else {
-            finalTimeToTarget = standardTimeToTarget;
-        }
+    if (standard === undefined) {
+        finalTimeToTargetCondition = undefined;
+    } else if (standard !== '30+' && typeof standard === 'string') {
+        finalTimeToTargetCondition = standard;
+    } else if (advance === '30+') {
+        finalTimeToTargetCondition = 0;
+    } else if (delay === '30+') {
+        finalTimeToTargetCondition = '30+';
+    } else if (standard === '30+') {
+        finalTimeToTargetCondition = advance > 0 ? new Decimal(30).minus(advance).toNumber() : '30+';
     } else {
-        if (!standardTimeToTarget) {
-            finalTimeToTarget = undefined;
-        } else {
-            const advanceYears = yearsToNumber(input.habitatCreatedInAdvance);
-            const delayYears = yearsToNumber(input.delayInStartingHabitatCreation);
-
-            finalTimeToTarget = new Decimal(standardTimeToTarget).minus(advanceYears).plus(delayYears).toNumber();
-
-            if (standardTimeToTarget >= 30 && finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            } else if (finalTimeToTarget >= 30) {
-                finalTimeToTarget = '30+';
-            }
-        }
+        const delayedTime = new Decimal(standard).plus(delay);
+        finalTimeToTargetCondition = delayedTime.gt(30)
+            ? '30+'
+            : Decimal.max(0, delayedTime.minus(advance)).toNumber();
     }
 
-    return { finalTimeToTargetCondition: finalTimeToTarget };
+    return { finalTimeToTargetCondition };
 }
 
 /**

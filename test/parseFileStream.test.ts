@@ -1,3 +1,5 @@
+import { loadWorkbookFixture, workbookBytes, workbookInput, workbookScenarios } from './workbookFixtures';
+import { headlineResults, tradingSummaries } from '../src/index';
 import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { parseFile } from '../src/parsers/parseFile';
@@ -90,4 +92,19 @@ describe('parseFileStream', () => {
         const it = parseFileStream(fileData, { signal: ac.signal })[Symbol.asyncIterator]();
         await expect(it.next()).rejects.toThrow('cancel');
     });
+});
+
+
+describe('parseFileStream', () => {
+    for (const scenario of workbookScenarios) {
+        test(scenario.description, async () => {
+            const bytes = workbookBytes(loadWorkbookFixture(scenario.id));
+            const eager = parseFile(workbookInput(bytes));
+            const { startPage, ...eagerFeatures } = eager;
+            const streamed = await accumulate(bytes);
+            expect(streamed).toEqual(eagerFeatures);
+            expect(headlineResults(streamed, tradingSummaries(streamed)))
+                .toEqual(headlineResults(eager, tradingSummaries(eager)));
+        });
+    }
 });

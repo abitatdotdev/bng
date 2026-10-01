@@ -393,14 +393,14 @@ function offSiteWatercoursePostInterventionD(
     creations: v.InferOutput<typeof offSiteWatercourseCreationSchema>[],
     enhancements: v.InferOutput<typeof offSiteWatercourseEnhancementSchema>[]
 ): Decimal {
-    return sumD(baselines, b => b.unitsRetained)
+    return sumD(baselines, b => new Decimal(b.unitsRetained).plus(b.vhdhBespokeCompensationUnits ?? 0))
         .plus(sumD(creations, c => c.unitsDelivered))
         .plus(sumD(enhancements, e => e.watercourseUnitsDelivered));
 }
 
 /**
  * Calculates the total off-site watercourse units after intervention
- * Sums retained/enhanced units from F-1 + created units from F-2 + enhanced units from F-3
+ * Sums retained and bespoke compensation units from F-1, creation from F-2 and enhancement from F-3
  * Corresponds to cell H26 in the Headline Results sheet
  */
 export function calculateOffSiteWatercoursePostIntervention(
@@ -431,6 +431,7 @@ function offSiteWatercourseNetChangeWithSRMD(
 ): Decimal | "N/A" {
     if (netChangeUnitsD.lte(0)) return "N/A" as const;
 
+    // L26 includes retained, created and enhanced units, without F-1 AT compensation.
     const baselineWithSRM = sumD(baselines, b => b.totalWatercourseUnitsSRM);
     const retainedAndEnhancedWithSRM = sumD(baselines, b => new Decimal(b.unitsRetained).mul(b.spatialRiskMultiplier));
     const createdWithSRM = sumD(creations, c => c.netUnitChangeWithSpatialRisk);
@@ -476,11 +477,15 @@ export function calculateCombinedNetUnitChange(
     };
 }
 
+function srmDeductionD(change: Decimal, changeWithSRM: Decimal | number | "N/A"): Decimal {
+    return change.lte(0) || changeWithSRM === "N/A" ? new Decimal(0) : change.minus(changeWithSRM);
+}
+
 /**
  * Calculates the total Spatial Risk Multiplier deductions
  * SRM deductions = the difference between regular net change and net change with SRM applied
  * This represents the units "lost" due to spatial risk
- * Corresponds to cells H44, H45, H46 in the Headline Results sheet
+ * Corresponds to cells H41, H42, H43 in the Headline Results sheet
  */
 export function calculateTotalSRMDeductions(
     offSiteHabitatNetChange: number,
@@ -491,14 +496,10 @@ export function calculateTotalSRMDeductions(
     offSiteWatercourseNetChangeWithSRM: number | "N/A"
 ) {
     return {
-        habitat: new Decimal(offSiteHabitatNetChange).minus(zeroNaN(offSiteHabitatNetChangeWithSRM)).toNumber(),
-        hedgerow: new Decimal(offSiteHedgerowNetChange).minus(zeroNaN(offSiteHedgerowNetChangeWithSRM)).toNumber(),
-        watercourse: new Decimal(offSiteWatercourseNetChange).minus(zeroNaN(offSiteWatercourseNetChangeWithSRM)).toNumber(),
+        habitat: srmDeductionD(new Decimal(offSiteHabitatNetChange), offSiteHabitatNetChangeWithSRM).toNumber(),
+        hedgerow: srmDeductionD(new Decimal(offSiteHedgerowNetChange), offSiteHedgerowNetChangeWithSRM).toNumber(),
+        watercourse: srmDeductionD(new Decimal(offSiteWatercourseNetChange), offSiteWatercourseNetChangeWithSRM).toNumber(),
     };
-}
-
-function zeroNaN<T>(x: number | T): number {
-    return typeof x === "number" ? x : 0;
 }
 
 function zeroNaND(x: Decimal | "N/A"): Decimal {
@@ -636,9 +637,9 @@ export function headlineResults(features: AllFeatures & { startPage?: { netGainT
     const combinedWatercourseD = onSiteWatercourseNet.unitsD.plus(offSiteWatercourseNet.unitsD);
 
     // SRM deductions (Decimal)
-    const srmDeductionHabitatD = offSiteHabitatNet.unitsD.minus(zeroNaND(offSiteHabitatNetChangeWithSRMD_));
-    const srmDeductionHedgerowD = offSiteHedgerowNet.unitsD.minus(zeroNaND(offSiteHedgerowNetChangeWithSRMD_));
-    const srmDeductionWatercourseD = offSiteWatercourseNet.unitsD.minus(zeroNaND(offSiteWatercourseNetChangeWithSRMD_));
+    const srmDeductionHabitatD = srmDeductionD(offSiteHabitatNet.unitsD, offSiteHabitatNetChangeWithSRMD_);
+    const srmDeductionHedgerowD = srmDeductionD(offSiteHedgerowNet.unitsD, offSiteHedgerowNetChangeWithSRMD_);
+    const srmDeductionWatercourseD = srmDeductionD(offSiteWatercourseNet.unitsD, offSiteWatercourseNetChangeWithSRMD_);
 
     // Final net unit change (Decimal)
     const totalHabitatD = combinedHabitatD.minus(srmDeductionHabitatD);

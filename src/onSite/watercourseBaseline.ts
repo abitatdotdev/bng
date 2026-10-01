@@ -81,15 +81,15 @@ export function calculateVhdhBespokeCompensationUnits(input: {
     bespokeCompensation: BespokeCompensation,
     tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
     totalWatercourseUnits: number,
-    lengthRetained: number,
-    lengthEnhanced: number,
+    unitsRetained: number,
+    unitsEnhanced: number,
 }) {
     const vhdhBespokeCompensationUnits =
         (
             input.bespokeCompensation === "Yes"
             || input.bespokeCompensation === "Pending"
         ) && input.tradingRules === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(input.totalWatercourseUnits).minus(input.lengthRetained).minus(input.lengthEnhanced).toNumber()
+            ? new Decimal(input.totalWatercourseUnits).minus(input.unitsRetained).minus(input.unitsEnhanced).toNumber()
             : 0;
 
     return { vhdhBespokeCompensationUnits };
@@ -99,8 +99,8 @@ export function enrichWithVhdhBespokeCompensationUnits<Data extends {
     bespokeCompensation: BespokeCompensation,
     tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
     totalWatercourseUnits: number,
-    lengthRetained: number,
-    lengthEnhanced: number,
+    unitsRetained: number,
+    unitsEnhanced: number,
 }>(data: Data) {
     return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
 }

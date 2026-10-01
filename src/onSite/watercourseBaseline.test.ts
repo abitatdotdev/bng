@@ -217,3 +217,26 @@ test("full schema validation - all conditions", () => {
         expect(result.conditionScore).toEqual(expectedScores[index]);
     });
 });
+
+for (const bespokeCompensation of ['Yes', 'Pending', 'No'] as const) {
+    for (const [lengthRetained, lengthEnhanced, compensated] of [[0.5, 0, 8], [0, 0.5, 8], [0.25, 0.5, 4]] as const) {
+        test(`bespoke ${bespokeCompensation}: retained ${lengthRetained}, enhanced ${lengthEnhanced} subtracts units`, () => {
+            const result = v.parse(onSiteWatercourseBaselineSchema, fixture({
+                watercourseType: 'Priority habitat', condition: 'Moderate',
+                strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+                lengthRetained, lengthEnhanced, bespokeCompensation,
+            }));
+            expect(result.totalWatercourseUnits).toBe(16);
+            expect(result.unitsRetained).toBe(16 * lengthRetained);
+            expect(result.unitsEnhanced).toBe(16 * lengthEnhanced);
+            expect(result.vhdhBespokeCompensationUnits).toBe(bespokeCompensation === 'No' ? 0 : compensated);
+        });
+    }
+}
+
+test('bespoke compensation contributes only for the bespoke trading rule', () => {
+    const result = v.parse(onSiteWatercourseBaselineSchema, fixture({
+        watercourseType: 'Ditches', lengthRetained: 0, lengthEnhanced: 0, bespokeCompensation: 'Yes',
+    }));
+    expect(result.vhdhBespokeCompensationUnits).toBe(0);
+});

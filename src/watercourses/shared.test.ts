@@ -345,7 +345,7 @@ describe("Creation Functions", () => {
             expect(result.finalTimeToTarget).toEqual(8); // 5 - 0 + 3
         });
 
-        test("caps at 30 years", () => {
+        test("preserves the sentinel above 30 years", () => {
             const data = {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
@@ -356,7 +356,7 @@ describe("Creation Functions", () => {
 
             const result = enrichWithTemporalData(data);
 
-            expect(result.finalTimeToTarget).toEqual(30);
+            expect(result.finalTimeToTarget).toEqual("30+");
         });
 
         test("minimum of 0 years", () => {
@@ -453,7 +453,7 @@ describe("Creation Functions", () => {
             expect(result.temporalMultiplier).toBe(0.8368287006);
         });
 
-        test('should cap time at 30 years', () => {
+        test('should use the sentinel above 30 years', () => {
             const input = {
                 watercourseType: 'Priority habitat' as const,
                 condition: 'Moderate' as const,
@@ -464,8 +464,8 @@ describe("Creation Functions", () => {
 
             const result = enrichWithTemporalData(input);
 
-            expect(result.finalTimeToTarget).toBe(30);
-            expect(result.temporalMultiplier).toBe(0.3434151104);
+            expect(result.finalTimeToTarget).toBe("30+");
+            expect(result.temporalMultiplier).toBe(0.3197967361);
         });
 
         test('should not go below 0 years', () => {
