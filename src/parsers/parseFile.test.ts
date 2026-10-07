@@ -13,6 +13,43 @@ function atPath(value: unknown, path: string): unknown {
 }
 
 describe('parseFile', () => {
+    test('preserves numeric off-site baseline comments and keeps their linked enhancements', async () => {
+        const workbook = loadWorkbookFixture('mixed-onsite-interventions');
+        for (const action of ['Baseline', 'Enhancement']) {
+            const sourceSpec = allSheetSpecs.find(s => s.name.startsWith('A-') && s.name.endsWith(action))!;
+            const targetSpec = allSheetSpecs.find(s => s.name.startsWith('D-') && s.name.endsWith(action === 'Enhancement' ? 'Enhancment' : action))!;
+            const sourceSheet = workbook.Sheets[sourceSpec.name]!;
+            const targetSheet = workbook.Sheets[targetSpec.name]!;
+            const row = targetSpec.startRow + 1;
+            for (const [field, column] of Object.entries(targetSpec.columns)) {
+                const sourceColumn = sourceSpec.columns[field];
+                const cell = sourceColumn && sourceSheet[`${sourceColumn.column}${sourceSpec.startRow + 1}`];
+                if (cell) targetSheet[`${column.column}${row}`] = { ...cell, f: undefined };
+            }
+            targetSheet[`${targetSpec.columns.offSiteReferenceNumber.column}${row}`] = { t: 's', v: 'gain-site' };
+            if (action === 'Baseline') {
+                targetSheet[`AC${row}`] = { t: 'n', v: 33 };
+                targetSheet[`AD${row}`] = { t: 'n', v: 0 };
+                targetSheet[`R${row}`] = { t: 's', v: 'This metric is being used by an off-site provider' };
+            }
+        }
+        const bytes = workbookBytes(workbook);
+        for (const validate of [true, false]) {
+            const features = parseFile(workbookInput(bytes), { validate });
+            expect(features.offSiteHabitatEnhancements).toHaveLength(1);
+            expect(features.offSiteHabitatEnhancements[0]!.baseline.userComments).toBe('33');
+            expect(features.offSiteHabitatEnhancements[0]!.baseline.planningAuthorityComments).toBe('0');
+        }
+        const enhancements = [];
+        for await (const result of parseFileStream(bytes)) {
+            if (result.kind === 'offSiteHabitatEnhancement') enhancements.push(result.row);
+        }
+        expect(enhancements).toHaveLength(1);
+        expect(enhancements[0]!.baseline.userComments).toBe('33');
+        expect(enhancements[0]!.baseline.planningAuthorityComments).toBe('0');
+    });
+
+
     for (const scenario of workbookScenarios) {
         test(scenario.description, () => {
             const bytes = workbookBytes(loadWorkbookFixture(scenario.id));

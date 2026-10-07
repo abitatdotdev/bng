@@ -110,8 +110,8 @@ export function parseOffSiteHabitatBaselineRow(sheet: SheetView, dataRow: number
         areaRetained: normalizeNumber(getCellValue(sheet, dataRow, c.areaRetained.column)) || 0,
         areaEnhanced: normalizeNumber(getCellValue(sheet, dataRow, c.areaEnhanced.column)) || 0,
         bespokeCompensationAgreed: getCellValue(sheet, dataRow, c.bespokeCompensationAgreed.column) || undefined,
-        userComments: getCellValue(sheet, dataRow, c.userComments.column) || undefined,
-        planningAuthorityComments: getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || undefined,
+        userComments: String(getCellValue(sheet, dataRow, c.userComments.column) ?? ""),
+        planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) ?? ""),
         habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
         offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) || ""),
     }
