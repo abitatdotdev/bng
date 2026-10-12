@@ -3,6 +3,30 @@ export { parseFile, type ParseFileOptions } from './parseFile';
 export { parseStartPage, type StartPage } from './startPage';
 export type { AllFeatures, ParsedFile } from '../features';
 
+export {
+    allSheetSpecs,
+    onSiteHabitatBaselineSpec,
+    onSiteHabitatCreationSpec,
+    onSiteHabitatEnhancementSpec,
+    offSiteHabitatBaselineSpec,
+    offSiteHabitatCreationSpec,
+    offSiteHabitatEnhancementSpec,
+    onSiteHedgerowBaselineSpec,
+    onSiteHedgerowCreationSpec,
+    onSiteHedgerowEnhancementSpec,
+    offSiteHedgerowBaselineSpec,
+    offSiteHedgerowCreationSpec,
+    offSiteHedgerowEnhancementSpec,
+    onSiteWatercourseBaselineSpec,
+    onSiteWatercourseCreationSpec,
+    onSiteWatercourseEnhancementSpec,
+    offSiteWatercourseBaselineSpec,
+    offSiteWatercourseCreationSpec,
+    offSiteWatercourseEnhancementSpec,
+    type ColumnSpec,
+    type SheetSpec,
+} from './columnMappings';
+
 // Stateless JSON → AllFeatures assembler — the serverless counterpart to
 // `parseFile`. Same schemas, but sourced from plain input arrays and
 // collecting issues instead of throwing.
