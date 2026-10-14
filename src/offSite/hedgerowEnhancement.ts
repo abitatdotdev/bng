@@ -1,13 +1,21 @@
+import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
-import { Decimal } from '../decimal';
+
 import { allHedgerows, type HedgerowLabel, type Hedgerow } from '../hedgerows';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, safeTransform, yearsSchema } from '../schemaUtils';
-import { getStrategicSignificance, type StrategicSignificanceDescription } from '../strategicSignificanceSchema';
+import {
+    getStrategicSignificance,
+    type StrategicSignificanceDescription,
+} from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
-import { offSiteHedgerowBaselineSchema, offSiteHedgerowBaselineUncheckedSchema, type OffSiteHedgerowBaseline } from './hedgerowBaseline';
+import {
+    offSiteHedgerowBaselineSchema,
+    offSiteHedgerowBaselineUncheckedSchema,
+    type OffSiteHedgerowBaseline,
+} from './hedgerowBaseline';
 import { enrichWithSpatialRisk } from './common';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import {
@@ -34,33 +42,44 @@ const inputSchema = v.object({
  * Extract baseline hedgerow data including length
  * The baseline contains the length that is being enhanced
  */
-const enrichBaselineHedgerowData = <Data extends {
-    baseline: OffSiteHedgerowBaseline
-}>(data: Data) => {
+const enrichBaselineHedgerowData = <
+    Data extends {
+        baseline: OffSiteHedgerowBaseline;
+    },
+>(
+    data: Data,
+) => {
     const { baseline } = data;
     const hedgerow = allHedgerows[baseline.habitatType];
 
     return {
         ...data,
         length: baseline.lengthEnhanced,
+        lengthDecimal: baseline.lengthEnhancedDecimal,
         _baselineHedgerow: {
             ...hedgerow,
             label: baseline.habitatType,
             distinctivenessScore: baseline.distinctivenessScore,
+            distinctivenessScoreDecimal: baseline.distinctivenessScoreDecimal,
             distinctivenessCategory: baseline.distinctiveness,
         },
         _baselineCondition: baseline.conditionScore,
+        _baselineConditionDecimal: toDecimal(baseline.conditionScore),
     };
-}
+};
 
 /**
  * Enrich data with proposed hedgerow properties from the hedgerows lookup
  */
-const enrichProposedHedgerowData = <Data extends {
-    habitatType: HedgerowLabel;
-    condition: HedgerowCondition;
-    strategicSignificance: StrategicSignificanceDescription;
-}>(data: Data) => {
+const enrichProposedHedgerowData = <
+    Data extends {
+        habitatType: HedgerowLabel;
+        condition: HedgerowCondition;
+        strategicSignificance: StrategicSignificanceDescription;
+    },
+>(
+    data: Data,
+) => {
     const hedgerow = allHedgerows[data.habitatType];
 
     const strategicSignificance = getStrategicSignificance(data.strategicSignificance);
@@ -69,53 +88,71 @@ const enrichProposedHedgerowData = <Data extends {
         ...data,
         distinctiveness: hedgerow.distinctivenessCategory,
         distinctivenessScore: hedgerow.distinctivenessScore,
+        distinctivenessScoreDecimal: toDecimal(hedgerow.distinctivenessScore),
         conditionScore: hedgerow.conditions[data.condition],
+        conditionScoreDecimal: toDecimal(hedgerow.conditions[data.condition]),
         strategicSignificanceCategory: strategicSignificance.significance,
         strategicSignificanceMultiplier: strategicSignificance.multiplier,
+        strategicSignificanceMultiplierDecimal: toDecimal(strategicSignificance.multiplier),
         tradingRules: hedgerow.tradingRules,
         technicalDifficultyEnhancement: hedgerow.technicalDifficultyEnhancement,
         technicalDifficultyEnhancementMultiplier: hedgerow.technicalDifficultyEnhancementMultiplier,
+        technicalDifficultyEnhancementMultiplierDecimal: toDecimal(
+            hedgerow.technicalDifficultyEnhancementMultiplier,
+        ),
     };
-}
+};
 
-const addEnhancementPathway = <Data extends {
-    baseline: OffSiteHedgerowBaseline,
-    condition: HedgerowCondition
-}>(data: Data) => {
+const addEnhancementPathway = <
+    Data extends {
+        baseline: OffSiteHedgerowBaseline;
+        condition: HedgerowCondition;
+    },
+>(
+    data: Data,
+) => {
     return {
         ...data,
         ...calculateEnhancementPathway({
             baselineCondition: data.baseline.condition,
-            proposedCondition: data.condition
-        })
+            proposedCondition: data.condition,
+        }),
     };
-}
+};
 
-const lookupEnhancementTimeToTarget = <Data extends {
-    _baselineHedgerow: Pick<Hedgerow, 'distinctivenessScore' | 'yearsToTargetConditionViaDistinctiveness'>,
-    distinctivenessScore: Hedgerow['distinctivenessScore'],
-    habitatType: HedgerowLabel,
-    enhancementPathway: string
-}>(data: Data) => {
+const lookupEnhancementTimeToTarget = <
+    Data extends {
+        _baselineHedgerow: Pick<
+            Hedgerow,
+            'distinctivenessScore' | 'yearsToTargetConditionViaDistinctiveness'
+        >;
+        distinctivenessScore: Hedgerow['distinctivenessScore'];
+        habitatType: HedgerowLabel;
+        enhancementPathway: string;
+    },
+>(
+    data: Data,
+) => {
     const hedgerow = allHedgerows[data.habitatType];
     return {
         ...data,
         ...calculateEnhancementTimeToTarget({
             baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
             distinctivenessScore: data.distinctivenessScore,
-            yearsToTargetConditionViaDistinctiveness: data._baselineHedgerow.yearsToTargetConditionViaDistinctiveness,
+            yearsToTargetConditionViaDistinctiveness:
+                data._baselineHedgerow.yearsToTargetConditionViaDistinctiveness,
             yearsToTargetConditionViaEnhancement: hedgerow.yearsToTargetConditionViaEnhancement,
             habitatType: data.habitatType,
             enhancementPathway: data.enhancementPathway,
         }),
     };
-}
+};
 
 /**
  * Helper to convert years value to number for arithmetic
  */
-function yearsToNumber(years: number | "30+"): number {
-    return years === "30+" ? 31 : years;
+function yearsToNumber(years: number | '30+'): number {
+    return years === '30+' ? 31 : years;
 }
 
 /**
@@ -124,40 +161,47 @@ function yearsToNumber(years: number | "30+"): number {
  * - Years of hedgerow enhanced in advance
  * - Years of delay in starting enhancement
  */
-const calculateFinalTimeToTargetCondition = <Data extends {
-    timeToTargetCondition: number | "30+" | "Not possible ▲",
-    hedgerowEnhancedInAdvance: number | "30+",
-    hedgerowEnhancedDelay: number | "30+"
-}>(data: Data) => {
+const calculateFinalTimeToTargetCondition = <
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not possible ▲';
+        hedgerowEnhancedInAdvance: number | '30+';
+        hedgerowEnhancedDelay: number | '30+';
+    },
+>(
+    data: Data,
+) => {
     const { timeToTargetCondition, hedgerowEnhancedInAdvance, hedgerowEnhancedDelay } = data;
 
-    let finalTimeToTargetCondition: number | "30+" | "Not possible ▲";
+    let finalTimeToTargetCondition: number | '30+' | 'Not possible ▲';
     const normalisedHedgerowEnhancedInAdvance = yearsToNumber(hedgerowEnhancedInAdvance);
     const normalisedHedgerowEnhancedDelay = yearsToNumber(hedgerowEnhancedDelay);
 
-    if (timeToTargetCondition === "Not possible ▲") {
-        finalTimeToTargetCondition = "Not possible ▲";
-    }
-    else if (timeToTargetCondition === "30+") {
+    if (timeToTargetCondition === 'Not possible ▲') {
+        finalTimeToTargetCondition = 'Not possible ▲';
+    } else if (timeToTargetCondition === '30+') {
         if (hedgerowEnhancedInAdvance === 0) {
-            finalTimeToTargetCondition = "30+";
+            finalTimeToTargetCondition = '30+';
         } else {
-            const result = new Decimal(31).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
+            const result = new Decimal(31)
+                .minus(normalisedHedgerowEnhancedInAdvance)
+                .plus(normalisedHedgerowEnhancedDelay)
+                .toNumber();
             if (result >= 30) {
-                finalTimeToTargetCondition = "30+";
+                finalTimeToTargetCondition = '30+';
             } else {
                 finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
             }
         }
-    }
-    else if (normalisedHedgerowEnhancedInAdvance >= timeToTargetCondition) {
+    } else if (normalisedHedgerowEnhancedInAdvance >= timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
-    }
-    else {
-        const result = new Decimal(timeToTargetCondition).minus(normalisedHedgerowEnhancedInAdvance).plus(normalisedHedgerowEnhancedDelay).toNumber();
+    } else {
+        const result = new Decimal(timeToTargetCondition)
+            .minus(normalisedHedgerowEnhancedInAdvance)
+            .plus(normalisedHedgerowEnhancedDelay)
+            .toNumber();
 
         if (result > 30) {
-            finalTimeToTargetCondition = "30+";
+            finalTimeToTargetCondition = '30+';
         } else {
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
@@ -166,50 +210,70 @@ const calculateFinalTimeToTargetCondition = <Data extends {
     return {
         ...data,
         finalTimeToTargetCondition,
+        finalTimeToTargetConditionDecimal:
+            typeof finalTimeToTargetCondition === 'number'
+                ? toDecimal(finalTimeToTargetCondition)
+                : finalTimeToTargetCondition,
     };
-}
+};
 
-const lookupTemporalMultiplierStep = <Data extends {
-    finalTimeToTargetCondition: number | "30+" | "Not possible ▲"
-}>(data: Data) => {
+const lookupTemporalMultiplierStep = <
+    Data extends {
+        finalTimeToTargetCondition: number | '30+' | 'Not possible ▲';
+    },
+>(
+    data: Data,
+) => {
     const finalTimeToTargetCondition = data.finalTimeToTargetCondition;
-    const temporalMultiplier = typeof finalTimeToTargetCondition === 'number' || finalTimeToTargetCondition === '30+'
-        ? lookupTemporalMultiplier(finalTimeToTargetCondition)
-        : finalTimeToTargetCondition;
+    const temporalMultiplier =
+        typeof finalTimeToTargetCondition === 'number' || finalTimeToTargetCondition === '30+'
+            ? lookupTemporalMultiplier(finalTimeToTargetCondition)
+            : finalTimeToTargetCondition;
 
-    const finalTimeToTargetMultiplier = typeof temporalMultiplier === 'number' ? temporalMultiplier : undefined;
+    const finalTimeToTargetMultiplier =
+        typeof temporalMultiplier === 'number' ? temporalMultiplier : undefined;
 
     return {
         ...data,
         temporalMultiplier,
-        finalTimeToTargetMultiplier
+        temporalMultiplierDecimal:
+            typeof temporalMultiplier === 'number' ? toDecimal(temporalMultiplier) : temporalMultiplier,
+        finalTimeToTargetMultiplier,
+        finalTimeToTargetMultiplierDecimal:
+            typeof finalTimeToTargetMultiplier === 'number'
+                ? toDecimal(finalTimeToTargetMultiplier)
+                : finalTimeToTargetMultiplier,
     };
-}
+};
 
 /**
  * Determine enhancement difficulty based on whether hedgerow reached target before losses
  */
 export function calculateEnhancementDifficulty(input: {
-    hedgerowEnhancedInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not possible ▲",
-    standardDifficultyOfEnhancement: string,
+    hedgerowEnhancedInAdvance: number | '30+';
+    finalTimeToTargetCondition: number | '30+' | 'Not possible ▲';
+    standardDifficultyOfEnhancement: string;
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.hedgerowEnhancedInAdvance,
         finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement as keyof typeof difficulty,
-        lowDifficultyMessage: "Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠",
+        lowDifficultyMessage: 'Low Difficulty - only applicable if all hedgerow enhanced before losses ⚠',
     });
 }
 
-const determineEnhancementDifficulty = <Data extends {
-    habitatType: HedgerowLabel,
-    timeToTargetCondition: number | "30+" | "Not possible ▲",
-    hedgerowEnhancedInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not possible ▲",
-    technicalDifficultyEnhancement: string,
-    technicalDifficultyEnhancementMultiplier: number
-}>(data: Data) => {
+const determineEnhancementDifficulty = <
+    Data extends {
+        habitatType: HedgerowLabel;
+        timeToTargetCondition: number | '30+' | 'Not possible ▲';
+        hedgerowEnhancedInAdvance: number | '30+';
+        finalTimeToTargetCondition: number | '30+' | 'Not possible ▲';
+        technicalDifficultyEnhancement: string;
+        technicalDifficultyEnhancementMultiplier: number;
+    },
+>(
+    data: Data,
+) => {
     const hedgerow = allHedgerows[data.habitatType];
 
     return {
@@ -220,19 +284,23 @@ const determineEnhancementDifficulty = <Data extends {
             standardDifficultyOfEnhancement: hedgerow.technicalDifficultyEnhancement,
         }),
     };
-}
+};
 
 /**
  * Enriches data with spatial risk multiplier from baseline.
  */
-const enrichWithSpatialRiskData = <Data extends {
-    baseline: OffSiteHedgerowBaseline
-}>(data: Data) => {
+const enrichWithSpatialRiskData = <
+    Data extends {
+        baseline: OffSiteHedgerowBaseline;
+    },
+>(
+    data: Data,
+) => {
     return enrichWithSpatialRisk({
         ...data,
-        spatialRiskCategory: data.baseline.spatialRiskCategory || 'Low'
+        spatialRiskCategory: data.baseline.spatialRiskCategory || 'Low',
     });
-}
+};
 
 /**
  * Calculate hedgerow units delivered from enhancement as NET GAIN over baseline
@@ -251,48 +319,89 @@ const enrichWithSpatialRiskData = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-const enrichWithEnhancementUnitsDelivered = <Data extends {
-    length: number,
-    _baselineHedgerow: any,
-    _baselineCondition: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    temporalMultiplier: number | string,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier: number
-}>(data: Data) => {
+const enrichWithEnhancementUnitsDelivered = <
+    Data extends {
+        length: number;
+        lengthDecimal: Decimal;
+        _baselineHedgerow: any;
+        _baselineCondition: number;
+        _baselineConditionDecimal: Decimal;
+        distinctivenessScore: number;
+        distinctivenessScoreDecimal: Decimal;
+        conditionScore: number;
+        conditionScoreDecimal: Decimal;
+        strategicSignificanceMultiplier: number;
+        strategicSignificanceMultiplierDecimal: Decimal;
+        temporalMultiplier: number | string;
+        temporalMultiplierDecimal: Decimal | string;
+        difficultyMultiplierApplied: number;
+        difficultyMultiplierAppliedDecimal: Decimal;
+        spatialRiskMultiplier: number;
+        spatialRiskMultiplierDecimal: Decimal;
+    },
+>(
+    data: Data,
+) => {
     return {
         ...data,
         ...calculateEnhancementUnitsDelivered({
             length: data.length,
+            lengthDecimal: data.lengthDecimal,
             baselineDistinctivenessScore: data._baselineHedgerow.distinctivenessScore,
+            baselineDistinctivenessScoreDecimal: toDecimal(data._baselineHedgerow.distinctivenessScore),
             baselineConditionScore: data._baselineCondition,
+            baselineConditionScoreDecimal: data._baselineConditionDecimal,
             distinctivenessScore: data.distinctivenessScore,
+            distinctivenessScoreDecimal: data.distinctivenessScoreDecimal,
             conditionScore: data.conditionScore,
+            conditionScoreDecimal: data.conditionScoreDecimal,
             strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+            strategicSignificanceMultiplierDecimal: data.strategicSignificanceMultiplierDecimal,
             temporalMultiplier: data.temporalMultiplier,
+            temporalMultiplierDecimal: data.temporalMultiplierDecimal,
             difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+            difficultyMultiplierAppliedDecimal: data.difficultyMultiplierAppliedDecimal,
             spatialRiskMultiplier: data.spatialRiskMultiplier,
-        })
+            spatialRiskMultiplierDecimal: data.spatialRiskMultiplierDecimal,
+        }),
     };
-}
+};
 
 export const offSiteHedgerowEnhancementSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        hedgerowEnhancedInAdvance: data.hedgerowEnhancedInAdvance,
+        hedgerowEnhancedInAdvanceDecimal:
+            typeof data.hedgerowEnhancedInAdvance === 'number'
+                ? toDecimal(data.hedgerowEnhancedInAdvance)
+                : data.hedgerowEnhancedInAdvance,
+        hedgerowEnhancedDelay: data.hedgerowEnhancedDelay,
+        hedgerowEnhancedDelayDecimal:
+            typeof data.hedgerowEnhancedDelay === 'number'
+                ? toDecimal(data.hedgerowEnhancedDelay)
+                : data.hedgerowEnhancedDelay,
+    })),
 
     // Basic validations
-    v.forward(v.check(s => !!allHedgerows[s.habitatType], "Invalid hedgerow habitat type"), ['habitatType']),
-    v.forward(v.check(
-        s => !(s.habitatType === "Non-native and ornamental hedgerow" && s.condition !== "Poor"),
-        "Non-native and ornamental hedgerow can only have Poor condition"
-    ), ['condition']),
-    v.check(
-        s => !(
-            (typeof s.hedgerowEnhancedInAdvance === "string" || s.hedgerowEnhancedInAdvance > 0)
-            && (typeof s.hedgerowEnhancedDelay === "string" || s.hedgerowEnhancedDelay > 0)
+    v.forward(
+        v.check((s) => !!allHedgerows[s.habitatType], 'Invalid hedgerow habitat type'),
+        ['habitatType'],
+    ),
+    v.forward(
+        v.check(
+            (s) => !(s.habitatType === 'Non-native and ornamental hedgerow' && s.condition !== 'Poor'),
+            'Non-native and ornamental hedgerow can only have Poor condition',
         ),
-        "Cannot have both hedgerow enhanced in advance and delay in starting hedgerow enhancement"
+        ['condition'],
+    ),
+    v.check(
+        (s) =>
+            !(
+                (typeof s.hedgerowEnhancedInAdvance === 'string' || s.hedgerowEnhancedInAdvance > 0) &&
+                (typeof s.hedgerowEnhancedDelay === 'string' || s.hedgerowEnhancedDelay > 0)
+            ),
+        'Cannot have both hedgerow enhanced in advance and delay in starting hedgerow enhancement',
     ),
 
     // Extract baseline data and length
@@ -302,45 +411,36 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
     v.transform(enrichProposedHedgerowData),
 
     // Validation checks for enhancement
-    v.check(
-        data => {
-            const baseline = data._baselineHedgerow;
-            const proposed = allHedgerows[data.habitatType];
+    v.check((data) => {
+        const baseline = data._baselineHedgerow;
+        const proposed = allHedgerows[data.habitatType];
 
-            // Mirror the DEFRA workbook (column O on E-3 / B-3): the only
-            // distinctiveness rejection is High→High with mismatched labels.
-            // Otherwise require same-or-better distinctiveness.
-            if (
-                baseline.distinctivenessCategory === 'High' &&
-                proposed.distinctivenessCategory === 'High'
-            ) {
-                return baseline.label === proposed.label;
-            }
-            return proposed.distinctivenessScore >= baseline.distinctivenessScore;
-        },
-        "Trading rules not satisfied - hedgerow distinctiveness mismatch"
-    ),
-    v.check(
-        data => {
-            const baselineCondition = data._baselineCondition;
-            const proposedCondition = data.conditionScore;
-            const baselineD = data._baselineHedgerow.distinctivenessScore;
-            const proposedD = data.distinctivenessScore;
+        // Mirror the DEFRA workbook (column O on E-3 / B-3): the only
+        // distinctiveness rejection is High→High with mismatched labels.
+        // Otherwise require same-or-better distinctiveness.
+        if (baseline.distinctivenessCategory === 'High' && proposed.distinctivenessCategory === 'High') {
+            return baseline.label === proposed.label;
+        }
+        return proposed.distinctivenessScore >= baseline.distinctivenessScore;
+    }, 'Trading rules not satisfied - hedgerow distinctiveness mismatch'),
+    v.check((data) => {
+        const baselineCondition = data._baselineCondition;
+        const proposedCondition = data.conditionScore;
+        const baselineD = data._baselineHedgerow.distinctivenessScore;
+        const proposedD = data.distinctivenessScore;
 
-            // Cannot reduce condition
-            if (baselineCondition > proposedCondition) {
-                return false;
-            }
+        // Cannot reduce condition
+        if (baselineCondition > proposedCondition) {
+            return false;
+        }
 
-            // If same condition, must have distinctiveness upgrade
-            if (baselineCondition === proposedCondition) {
-                return proposedD > baselineD;
-            }
+        // If same condition, must have distinctiveness upgrade
+        if (baselineCondition === proposedCondition) {
+            return proposedD > baselineD;
+        }
 
-            return true;
-        },
-        "Enhancement does not improve hedgerow quality"
-    ),
+        return true;
+    }, 'Enhancement does not improve hedgerow quality'),
 
     // Calculate enhancement pathway label
     v.transform(addEnhancementPathway),
@@ -358,18 +458,31 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
-)
+);
 
-export type OffSiteHedgerowEnhancementSchema = v.InferInput<typeof offSiteHedgerowEnhancementSchema>
-export type OffSiteHedgerowEnhancement = v.InferOutput<typeof offSiteHedgerowEnhancementSchema>
+export type OffSiteHedgerowEnhancementSchema = v.InferInput<typeof offSiteHedgerowEnhancementSchema>;
+export type OffSiteHedgerowEnhancement = v.InferOutput<typeof offSiteHedgerowEnhancementSchema>;
 
 const uncheckedInputSchema = v.object({
     ...inputSchema.entries,
     baseline: offSiteHedgerowBaselineUncheckedSchema,
-})
+});
 
 export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     uncheckedInputSchema,
+    v.transform((data) => ({
+        ...data,
+        hedgerowEnhancedInAdvance: data.hedgerowEnhancedInAdvance,
+        hedgerowEnhancedInAdvanceDecimal:
+            typeof data.hedgerowEnhancedInAdvance === 'number'
+                ? toDecimal(data.hedgerowEnhancedInAdvance)
+                : data.hedgerowEnhancedInAdvance,
+        hedgerowEnhancedDelay: data.hedgerowEnhancedDelay,
+        hedgerowEnhancedDelayDecimal:
+            typeof data.hedgerowEnhancedDelay === 'number'
+                ? toDecimal(data.hedgerowEnhancedDelay)
+                : data.hedgerowEnhancedDelay,
+    })),
     safeTransform(enrichBaselineHedgerowData),
     safeTransform(enrichProposedHedgerowData),
     safeTransform(addEnhancementPathway),
@@ -379,4 +492,4 @@ export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithEnhancementUnitsDelivered),
-)
+);

@@ -1,4 +1,4 @@
-import { Decimal } from '../decimal';
+import { Decimal, toDecimal } from '../decimal';
 import { getSpatialRiskMultiplier, getWatercourseSpatialRiskMultiplier } from '../spatialRisk';
 import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMultipliers';
 
@@ -10,35 +10,37 @@ import { getTemporalMultiplier, type TemporalMultiplierKey } from '../temporalMu
  * - Returns 0 if advance >= standardTime
  * - Returns "Not Possible" if standardTime is "Not Possible ▲"
  */
-export function calculateFinalTimeToTargetCondition<Data extends {
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    advance: number | "30+",
-    delay: number | "30+"
-}>(data: Data) {
+export function calculateFinalTimeToTargetCondition<
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        advance: number | '30+';
+        delay: number | '30+';
+    },
+>(data: Data) {
     const { timeToTargetCondition, advance, delay } = data;
 
-    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
-    const normalisedAdvance = typeof advance === "string" ? 30 : advance;
-    const normalisedDelay = typeof delay === "string" ? 30 : delay;
+    let finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    const normalisedAdvance = typeof advance === 'string' ? 30 : advance;
+    const normalisedDelay = typeof delay === 'string' ? 30 : delay;
 
-    if (timeToTargetCondition === "Not Possible ▲") {
-        finalTimeToTargetCondition = "Not Possible ▲";
-    }
-    else if (timeToTargetCondition === "30+") {
+    if (timeToTargetCondition === 'Not Possible ▲') {
+        finalTimeToTargetCondition = 'Not Possible ▲';
+    } else if (timeToTargetCondition === '30+') {
         if (advance === 0) {
-            finalTimeToTargetCondition = "30+";
+            finalTimeToTargetCondition = '30+';
         } else {
             finalTimeToTargetCondition = Decimal.max(0, new Decimal(30).minus(normalisedAdvance)).toNumber();
         }
-    }
-    else if (normalisedAdvance >= timeToTargetCondition) {
+    } else if (normalisedAdvance >= timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
-    }
-    else {
-        const result = new Decimal(timeToTargetCondition).minus(normalisedAdvance).plus(normalisedDelay).toNumber();
+    } else {
+        const result = new Decimal(timeToTargetCondition)
+            .minus(normalisedAdvance)
+            .plus(normalisedDelay)
+            .toNumber();
 
         if (result > 30) {
-            finalTimeToTargetCondition = "30+";
+            finalTimeToTargetCondition = '30+';
         } else {
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
@@ -46,16 +48,22 @@ export function calculateFinalTimeToTargetCondition<Data extends {
 
     return {
         ...data,
-        finalTimeToTargetCondition
+        finalTimeToTargetCondition,
+        finalTimeToTargetConditionDecimal:
+            typeof finalTimeToTargetCondition === 'number'
+                ? toDecimal(finalTimeToTargetCondition)
+                : finalTimeToTargetCondition,
     };
 }
 
 /**
  * Lookup: attaches finalTimeToTargetMultiplier from the temporal multipliers table.
  */
-export function lookupFinalTimeToTargetMultiplier<Data extends {
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
-}>(data: Data) {
+export function lookupFinalTimeToTargetMultiplier<
+    Data extends {
+        finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    },
+>(data: Data) {
     const multiplierKey = String(data.finalTimeToTargetCondition) as TemporalMultiplierKey;
     const multiplierResult = getTemporalMultiplier(multiplierKey);
 
@@ -63,18 +71,24 @@ export function lookupFinalTimeToTargetMultiplier<Data extends {
 
     return {
         ...data,
-        finalTimeToTargetMultiplier
+        finalTimeToTargetMultiplier,
+        finalTimeToTargetMultiplierDecimal:
+            typeof finalTimeToTargetMultiplier === 'number'
+                ? toDecimal(finalTimeToTargetMultiplier)
+                : finalTimeToTargetMultiplier,
     };
 }
 
 /**
  * Backwards-compatible wrapper: pure calc followed by lookup.
  */
-export function calculateFinalTimeToTargetValues<Data extends {
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    advance: number | "30+",
-    delay: number | "30+"
-}>(data: Data) {
+export function calculateFinalTimeToTargetValues<
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        advance: number | '30+';
+        delay: number | '30+';
+    },
+>(data: Data) {
     return lookupFinalTimeToTargetMultiplier(calculateFinalTimeToTargetCondition(data));
 }
 
@@ -83,14 +97,17 @@ export function calculateFinalTimeToTargetValues<Data extends {
  *
  * Looks up the multiplier value based on the spatial risk category.
  */
-export function enrichWithSpatialRisk<Data extends {
-    spatialRiskCategory: string
-}>(data: Data) {
+export function enrichWithSpatialRisk<
+    Data extends {
+        spatialRiskCategory: string;
+    },
+>(data: Data) {
     const spatialRiskMultiplier = getSpatialRiskMultiplier(data.spatialRiskCategory as any);
 
     return {
         ...data,
-        spatialRiskMultiplier
+        spatialRiskMultiplier,
+        spatialRiskMultiplierDecimal: toDecimal(spatialRiskMultiplier),
     };
 }
 
@@ -98,13 +115,16 @@ export function enrichWithSpatialRisk<Data extends {
  * Enriches watercourse data with spatial risk multiplier using the
  * watercourse-specific category list (catchment-based, not LPA/NCA).
  */
-export function enrichWithWatercourseSpatialRisk<Data extends {
-    spatialRiskCategory: string
-}>(data: Data) {
+export function enrichWithWatercourseSpatialRisk<
+    Data extends {
+        spatialRiskCategory: string;
+    },
+>(data: Data) {
     const spatialRiskMultiplier = getWatercourseSpatialRiskMultiplier(data.spatialRiskCategory as any);
 
     return {
         ...data,
-        spatialRiskMultiplier
+        spatialRiskMultiplier,
+        spatialRiskMultiplierDecimal: toDecimal(spatialRiskMultiplier),
     };
 }

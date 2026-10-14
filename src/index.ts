@@ -25,3 +25,6 @@ export const data = {
     watercourses: allWatercourses
 }
 export * from './offSiteGainSiteSummary';
+
+export { Decimal, toDecimal, type Quantity } from './decimal';
+export { quantitySchema, areaSchema, lengthSchema, yearsSchema } from './schemaUtils';

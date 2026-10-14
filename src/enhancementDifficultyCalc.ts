@@ -1,3 +1,4 @@
+import { toDecimal } from './decimal';
 import { difficulty } from './difficulty';
 
 /**
@@ -11,24 +12,24 @@ import { difficulty } from './difficulty';
  * `lowDifficultyMessage`.
  */
 export function calculateEnhancementDifficulty<S extends string>(input: {
-    enhancedInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | S,
-    standardDifficultyOfEnhancement: keyof typeof difficulty,
-    lowDifficultyMessage: string,
+    enhancedInAdvance: number | '30+';
+    finalTimeToTargetCondition: number | '30+' | S;
+    standardDifficultyOfEnhancement: keyof typeof difficulty;
+    lowDifficultyMessage: string;
 }) {
-    const normalisedEnhancedInAdvance = typeof input.enhancedInAdvance === "string" ? 30 : input.enhancedInAdvance;
+    const normalisedEnhancedInAdvance =
+        typeof input.enhancedInAdvance === 'string' ? 30 : input.enhancedInAdvance;
 
     const hasReachedTargetCondition =
-        normalisedEnhancedInAdvance > 0 &&
-        input.finalTimeToTargetCondition === 0;
+        normalisedEnhancedInAdvance > 0 && input.finalTimeToTargetCondition === 0;
 
     let appliedDifficultyMultiplier: string;
     let finalDifficultyOfEnhancement: keyof typeof difficulty;
     if (hasReachedTargetCondition) {
         appliedDifficultyMultiplier = input.lowDifficultyMessage;
-        finalDifficultyOfEnhancement = "Low";
+        finalDifficultyOfEnhancement = 'Low';
     } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
+        appliedDifficultyMultiplier = 'Standard difficulty applied';
         finalDifficultyOfEnhancement = input.standardDifficultyOfEnhancement;
     }
 
@@ -39,5 +40,6 @@ export function calculateEnhancementDifficulty<S extends string>(input: {
         appliedDifficultyMultiplier,
         finalDifficultyOfEnhancement,
         difficultyMultiplierApplied,
+        difficultyMultiplierAppliedDecimal: toDecimal(difficultyMultiplierApplied),
     };
 }

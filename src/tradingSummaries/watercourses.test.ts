@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import { expect, test, describe } from "bun:test";
 import { watercourseTradingSummary } from "./watercourses";
 import { type AllFeatures } from "../features";
@@ -44,7 +45,13 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when V.High watercourse has net gain", () => {
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Priority habitat", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -53,10 +60,30 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when V.High watercourse breaks even", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Priority habitat", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Priority habitat", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -65,10 +92,30 @@ describe("watercourseTradingSummary", () => {
         test("not satisfied when V.High watercourse has net loss", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Priority habitat", totalWatercourseUnits: 20, length: 200, lengthRetained: 0, unitsRetained: 0, lengthLost: 200, unitsLost: 20 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        totalWatercourseUnits: 20,
+                        totalWatercourseUnitsDecimal: new Decimal(20),
+                        length: 200,
+                        lengthDecimal: new Decimal(200),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 200,
+                        lengthLostDecimal: new Decimal(200),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Priority habitat", unitsDelivered: 5, length: 50 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        unitsDelivered: 5,
+                        unitsDeliveredDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).vHighSatisfied).toBeFalse();
@@ -79,7 +126,13 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when High watercourse has net gain", () => {
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Other rivers and streams", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).highSatisfied).toBeTrue();
@@ -88,10 +141,30 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when High breaks even", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Other rivers and streams", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Other rivers and streams", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).highSatisfied).toBeTrue();
@@ -100,7 +173,21 @@ describe("watercourseTradingSummary", () => {
         test("not satisfied when High watercourse has net loss", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Other rivers and streams", totalWatercourseUnits: 15, length: 150, lengthRetained: 0, unitsRetained: 0, lengthLost: 150, unitsLost: 15 } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        totalWatercourseUnits: 15,
+                        totalWatercourseUnitsDecimal: new Decimal(15),
+                        length: 150,
+                        lengthDecimal: new Decimal(150),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 150,
+                        lengthLostDecimal: new Decimal(150),
+                        unitsLost: 15,
+                        unitsLostDecimal: new Decimal(15),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).highSatisfied).toBeFalse();
@@ -111,7 +198,13 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when Medium watercourse has net gain", () => {
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Ditches", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Ditches",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -120,7 +213,21 @@ describe("watercourseTradingSummary", () => {
         test("not satisfied when Medium has net loss", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Ditches", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Ditches",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).mediumSatisfied).toBeFalse();
@@ -131,10 +238,30 @@ describe("watercourseTradingSummary", () => {
             // Ditches gains 8 (upwards=0), Canals loses 5 (upwards=-5) -> remainingLosses = -5 < 0
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Ditches", unitsDelivered: 8, length: 80 } as any,
+                    {
+                        watercourseType: "Ditches",
+                        unitsDelivered: 8,
+                        unitsDeliveredDecimal: new Decimal(8),
+                        length: 80,
+                        lengthDecimal: new Decimal(80),
+                    } as any,
                 ],
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Canals", totalWatercourseUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
+                    {
+                        watercourseType: "Canals",
+                        totalWatercourseUnits: 5,
+                        totalWatercourseUnitsDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 50,
+                        lengthLostDecimal: new Decimal(50),
+                        unitsLost: 5,
+                        unitsLostDecimal: new Decimal(5),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).mediumSatisfied).toBeFalse();
@@ -144,8 +271,20 @@ describe("watercourseTradingSummary", () => {
             // Ditches gains 3, Canals gains 2 -> remainingLosses = 0 + 0 = 0 >= 0
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Ditches", unitsDelivered: 3, length: 30 } as any,
-                    { watercourseType: "Canals", unitsDelivered: 2, length: 20 } as any,
+                    {
+                        watercourseType: "Ditches",
+                        unitsDelivered: 3,
+                        unitsDeliveredDecimal: new Decimal(3),
+                        length: 30,
+                        lengthDecimal: new Decimal(30),
+                    } as any,
+                    {
+                        watercourseType: "Canals",
+                        unitsDelivered: 2,
+                        unitsDeliveredDecimal: new Decimal(2),
+                        length: 20,
+                        lengthDecimal: new Decimal(20),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -156,7 +295,13 @@ describe("watercourseTradingSummary", () => {
         test("satisfied when Low watercourse has net gain", () => {
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Culvert", unitsDelivered: 10, length: 100 } as any,
+                    {
+                        watercourseType: "Culvert",
+                        unitsDelivered: 10,
+                        unitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).lowSatisfied).toBeTrue();
@@ -165,7 +310,21 @@ describe("watercourseTradingSummary", () => {
         test("not satisfied when Low has net loss and no surplus from above", () => {
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Culvert", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Culvert",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).lowSatisfied).toBeFalse();
@@ -176,12 +335,44 @@ describe("watercourseTradingSummary", () => {
             // cumulativeSurplus = 5 + 3 + 4 + (-10) = 2 >= 0
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Priority habitat", unitsDelivered: 5, length: 50 } as any,
-                    { watercourseType: "Other rivers and streams", unitsDelivered: 3, length: 30 } as any,
-                    { watercourseType: "Ditches", unitsDelivered: 4, length: 40 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        unitsDelivered: 5,
+                        unitsDeliveredDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                    } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        unitsDelivered: 3,
+                        unitsDeliveredDecimal: new Decimal(3),
+                        length: 30,
+                        lengthDecimal: new Decimal(30),
+                    } as any,
+                    {
+                        watercourseType: "Ditches",
+                        unitsDelivered: 4,
+                        unitsDeliveredDecimal: new Decimal(4),
+                        length: 40,
+                        lengthDecimal: new Decimal(40),
+                    } as any,
                 ],
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Culvert", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Culvert",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).lowSatisfied).toBeTrue();
@@ -192,12 +383,44 @@ describe("watercourseTradingSummary", () => {
             // cumulativeSurplus = 2 + 1 + 1 + (-10) = -6 < 0
             const input = emptyFixture({
                 onSiteWatercourseCreations: [
-                    { watercourseType: "Priority habitat", unitsDelivered: 2, length: 20 } as any,
-                    { watercourseType: "Other rivers and streams", unitsDelivered: 1, length: 10 } as any,
-                    { watercourseType: "Ditches", unitsDelivered: 1, length: 10 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        unitsDelivered: 2,
+                        unitsDeliveredDecimal: new Decimal(2),
+                        length: 20,
+                        lengthDecimal: new Decimal(20),
+                    } as any,
+                    {
+                        watercourseType: "Other rivers and streams",
+                        unitsDelivered: 1,
+                        unitsDeliveredDecimal: new Decimal(1),
+                        length: 10,
+                        lengthDecimal: new Decimal(10),
+                    } as any,
+                    {
+                        watercourseType: "Ditches",
+                        unitsDelivered: 1,
+                        unitsDeliveredDecimal: new Decimal(1),
+                        length: 10,
+                        lengthDecimal: new Decimal(10),
+                    } as any,
                 ],
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Culvert", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Culvert",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).lowSatisfied).toBeFalse();
@@ -211,10 +434,30 @@ describe("watercourseTradingSummary", () => {
             // overallUnitChange = -10 + 12 = +2 >= 0, satisfied
             const input = emptyFixture({
                 onSiteWatercourseBaselines: [
-                    { watercourseType: "Priority habitat", totalWatercourseUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        totalWatercourseUnits: 10,
+                        totalWatercourseUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 offSiteWatercourseEnhancements: [
-                    { watercourseType: "Priority habitat", watercourseUnitsDelivered: 12, length: 120 } as any,
+                    {
+                        watercourseType: "Priority habitat",
+                        watercourseUnitsDelivered: 12,
+                        watercourseUnitsDeliveredDecimal: new Decimal(12),
+                        length: 120,
+                        lengthDecimal: new Decimal(120),
+                    } as any,
                 ],
             });
             expect(watercourseTradingSummary(input).vHighSatisfied).toBeTrue();

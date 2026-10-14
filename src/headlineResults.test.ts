@@ -1,5 +1,6 @@
-import { featuresFromInput, type BngInput } from './parsers/featuresFromInput';
-import { tradingSummaries } from './tradingSummaries';
+import { Decimal } from "./decimal";
+import { featuresFromInput, type BngInput } from "./parsers/featuresFromInput";
+import { tradingSummaries } from "./tradingSummaries";
 import { expect, test, describe } from "bun:test";
 import {
     calculateOnSiteHabitatBaseline,
@@ -27,8 +28,8 @@ import {
     calculateTotalSRMDeductions,
     calculateFinalTotalNetUnitChange,
     headlineResults,
-} from './headlineResults';
-import { type AllFeatures } from './features';
+} from "./headlineResults";
+import { type AllFeatures } from "./features";
 import type { TradingSummaries } from "./tradingSummaries";
 
 /**
@@ -65,7 +66,7 @@ export function emptyTradingSummary(): TradingSummaries {
             vHighSatisfied: true,
             highSatisfied: true,
             mediumSatisfied: true,
-            lowSatisfied: true
+            lowSatisfied: true,
         },
         hedgerows: {
             details: {} as any,
@@ -82,7 +83,7 @@ export function emptyTradingSummary(): TradingSummaries {
             mediumSatisfied: true,
             lowSatisfied: true,
         },
-    }
+    };
 }
 
 describe("calculateOnSiteHabitatBaseline", () => {
@@ -92,18 +93,16 @@ describe("calculateOnSiteHabitatBaseline", () => {
     });
 
     test("sums totalHabitatUnits from single baseline", () => {
-        const baselines = [
-            { totalHabitatUnits: 10 } as any,
-        ];
+        const baselines = [{ totalHabitatUnits: 10, totalHabitatUnitsDecimal: new Decimal(10) } as any];
         const result = calculateOnSiteHabitatBaseline(baselines);
         expect(result).toBe(10);
     });
 
     test("sums totalHabitatUnits from multiple baselines", () => {
         const baselines = [
-            { totalHabitatUnits: 10 } as any,
-            { totalHabitatUnits: 20.5 } as any,
-            { totalHabitatUnits: 15.25 } as any,
+            { totalHabitatUnits: 10, totalHabitatUnitsDecimal: new Decimal(10) } as any,
+            { totalHabitatUnits: 20.5, totalHabitatUnitsDecimal: new Decimal(20.5) } as any,
+            { totalHabitatUnits: 15.25, totalHabitatUnitsDecimal: new Decimal(15.25) } as any,
         ];
         const result = calculateOnSiteHabitatBaseline(baselines);
         expect(result).toBe(45.75);
@@ -118,8 +117,18 @@ describe("calculateOnSiteHabitatPostIntervention", () => {
 
     test("sums retained and bespoke compensation units from baselines only", () => {
         const baselines = [
-            { baselineUnitsRetained: 10, vhdhBespokeCompensationUnits: 5 } as any,
-            { baselineUnitsRetained: 8, vhdhBespokeCompensationUnits: 3 } as any,
+            {
+                baselineUnitsRetained: 10,
+                baselineUnitsRetainedDecimal: new Decimal(10),
+                vhdhBespokeCompensationUnits: 5,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(5),
+            } as any,
+            {
+                baselineUnitsRetained: 8,
+                baselineUnitsRetainedDecimal: new Decimal(8),
+                vhdhBespokeCompensationUnits: 3,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(3),
+            } as any,
         ];
         const result = calculateOnSiteHabitatPostIntervention(baselines, [], []);
         expect(result).toBe(26);
@@ -127,8 +136,8 @@ describe("calculateOnSiteHabitatPostIntervention", () => {
 
     test("sums created units only", () => {
         const creations = [
-            { habitatUnitsDelivered: 15 } as any,
-            { habitatUnitsDelivered: 20 } as any,
+            { habitatUnitsDelivered: 15, habitatUnitsDeliveredDecimal: new Decimal(15) } as any,
+            { habitatUnitsDelivered: 20, habitatUnitsDeliveredDecimal: new Decimal(20) } as any,
         ];
         const result = calculateOnSiteHabitatPostIntervention([], creations, []);
         expect(result).toBe(35);
@@ -136,8 +145,8 @@ describe("calculateOnSiteHabitatPostIntervention", () => {
 
     test("sums enhanced units only", () => {
         const enhancements = [
-            { habitatUnitsDelivered: 12 } as any,
-            { habitatUnitsDelivered: 18 } as any,
+            { habitatUnitsDelivered: 12, habitatUnitsDeliveredDecimal: new Decimal(12) } as any,
+            { habitatUnitsDelivered: 18, habitatUnitsDeliveredDecimal: new Decimal(18) } as any,
         ];
         const result = calculateOnSiteHabitatPostIntervention([], [], enhancements);
         expect(result).toBe(30);
@@ -145,13 +154,18 @@ describe("calculateOnSiteHabitatPostIntervention", () => {
 
     test("sums all units from baselines, creations, and enhancements", () => {
         const baselines = [
-            { baselineUnitsRetained: 10, vhdhBespokeCompensationUnits: 5 } as any,
+            {
+                baselineUnitsRetained: 10,
+                baselineUnitsRetainedDecimal: new Decimal(10),
+                vhdhBespokeCompensationUnits: 5,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(5),
+            } as any,
         ];
         const creations = [
-            { habitatUnitsDelivered: 20 } as any,
+            { habitatUnitsDelivered: 20, habitatUnitsDeliveredDecimal: new Decimal(20) } as any,
         ];
         const enhancements = [
-            { habitatUnitsDelivered: 15 } as any,
+            { habitatUnitsDelivered: 15, habitatUnitsDeliveredDecimal: new Decimal(15) } as any,
         ];
         const result = calculateOnSiteHabitatPostIntervention(baselines, creations, enhancements);
         expect(result).toBe(50);
@@ -197,18 +211,16 @@ describe("calculateOffSiteHabitatBaseline", () => {
     });
 
     test("sums totalHabitatUnits from single baseline", () => {
-        const baselines = [
-            { totalHabitatUnits: 25 } as any,
-        ];
+        const baselines = [{ totalHabitatUnits: 25, totalHabitatUnitsDecimal: new Decimal(25) } as any];
         const result = calculateOffSiteHabitatBaseline(baselines);
         expect(result).toBe(25);
     });
 
     test("sums totalHabitatUnits from multiple baselines", () => {
         const baselines = [
-            { totalHabitatUnits: 15 } as any,
-            { totalHabitatUnits: 30.5 } as any,
-            { totalHabitatUnits: 10.25 } as any,
+            { totalHabitatUnits: 15, totalHabitatUnitsDecimal: new Decimal(15) } as any,
+            { totalHabitatUnits: 30.5, totalHabitatUnitsDecimal: new Decimal(30.5) } as any,
+            { totalHabitatUnits: 10.25, totalHabitatUnitsDecimal: new Decimal(10.25) } as any,
         ];
         const result = calculateOffSiteHabitatBaseline(baselines);
         expect(result).toBe(55.75);
@@ -223,8 +235,18 @@ describe("calculateOffSiteHabitatPostIntervention", () => {
 
     test("sums retained and bespoke compensation units from baselines only", () => {
         const baselines = [
-            { baselineUnitsRetained: 12, vhdhBespokeCompensationUnits: 6 } as any,
-            { baselineUnitsRetained: 9, vhdhBespokeCompensationUnits: 4 } as any,
+            {
+                baselineUnitsRetained: 12,
+                baselineUnitsRetainedDecimal: new Decimal(12),
+                vhdhBespokeCompensationUnits: 6,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(6),
+            } as any,
+            {
+                baselineUnitsRetained: 9,
+                baselineUnitsRetainedDecimal: new Decimal(9),
+                vhdhBespokeCompensationUnits: 4,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(4),
+            } as any,
         ];
         const result = calculateOffSiteHabitatPostIntervention(baselines, [], []);
         expect(result).toBe(31);
@@ -232,13 +254,18 @@ describe("calculateOffSiteHabitatPostIntervention", () => {
 
     test("sums all units from baselines, creations, and enhancements", () => {
         const baselines = [
-            { baselineUnitsRetained: 15, vhdhBespokeCompensationUnits: 8 } as any,
+            {
+                baselineUnitsRetained: 15,
+                baselineUnitsRetainedDecimal: new Decimal(15),
+                vhdhBespokeCompensationUnits: 8,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(8),
+            } as any,
         ];
         const creations = [
-            { habitatUnitsDelivered: 25 } as any,
+            { habitatUnitsDelivered: 25, habitatUnitsDeliveredDecimal: new Decimal(25) } as any,
         ];
         const enhancements = [
-            { habitatUnitsDelivered: 18 } as any,
+            { habitatUnitsDelivered: 18, habitatUnitsDeliveredDecimal: new Decimal(18) } as any,
         ];
         const result = calculateOffSiteHabitatPostIntervention(baselines, creations, enhancements);
         expect(result).toBe(66);
@@ -268,7 +295,16 @@ describe("calculateOffSiteHabitatNetChange", () => {
 describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
     test("returns N/A when net change is negative", () => {
         const baselines = [
-            { totalHabitatUnitsSRM: 50, baselineUnitsRetained: 0, baselineUnitsEnhanced: 0, spatialRiskMultiplier: 0.5 } as any,
+            {
+                totalHabitatUnitsSRM: 50,
+                totalHabitatUnitsSRMDecimal: new Decimal(50),
+                baselineUnitsRetained: 0,
+                baselineUnitsRetainedDecimal: new Decimal(0),
+                baselineUnitsEnhanced: 0,
+                baselineUnitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.5,
+                spatialRiskMultiplierDecimal: new Decimal(0.5),
+            } as any,
         ];
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, [], [], -10);
         expect(result).toBe("N/A");
@@ -276,7 +312,16 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
 
     test("returns N/A when net change is zero", () => {
         const baselines = [
-            { totalHabitatUnitsSRM: 50, baselineUnitsRetained: 0, baselineUnitsEnhanced: 0, spatialRiskMultiplier: 0.5 } as any,
+            {
+                totalHabitatUnitsSRM: 50,
+                totalHabitatUnitsSRMDecimal: new Decimal(50),
+                baselineUnitsRetained: 0,
+                baselineUnitsRetainedDecimal: new Decimal(0),
+                baselineUnitsEnhanced: 0,
+                baselineUnitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.5,
+                spatialRiskMultiplierDecimal: new Decimal(0.5),
+            } as any,
         ];
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, [], [], 0);
         expect(result).toBe("N/A");
@@ -289,20 +334,34 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         const baselines = [
             {
                 totalHabitatUnitsSRM: 50,
+                totalHabitatUnitsSRMDecimal: new Decimal(50),
                 areaRetained: 10,
+                areaRetainedDecimal: new Decimal(10),
                 distinctivenessScore: 6,
+                distinctivenessScoreDecimal: new Decimal(6),
                 conditionScore: 2,
+                conditionScoreDecimal: new Decimal(2),
                 strategicSignificanceMultiplier: 1.15,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.15),
                 vhdhBespokeCompensationUnits: 10,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
                 baselineUnitsRetainedWithSRM: 74,
+                baselineUnitsRetainedWithSRMDecimal: new Decimal(74),
                 spatialRiskMultiplier: 0.5,
+                spatialRiskMultiplierDecimal: new Decimal(0.5),
             } as any,
         ];
         const creations = [
-            { habitatUnitsDeliveredWithSpatialRisk: 30 } as any,
+            {
+                habitatUnitsDeliveredWithSpatialRisk: 30,
+                habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(30),
+            } as any,
         ];
         const enhancements = [
-            { habitatUnitsDeliveredWithSpatialRisk: 20 } as any,
+            {
+                habitatUnitsDeliveredWithSpatialRisk: 20,
+                habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(20),
+            } as any,
         ];
 
         // Post-intervention WITH SRM = 74 + 30 + 20 = 124
@@ -319,23 +378,39 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         const baselines = [
             {
                 totalHabitatUnitsSRM: 30,
+                totalHabitatUnitsSRMDecimal: new Decimal(30),
                 areaRetained: 5,
+                areaRetainedDecimal: new Decimal(5),
                 distinctivenessScore: 4,
+                distinctivenessScoreDecimal: new Decimal(4),
                 conditionScore: 1.5,
+                conditionScoreDecimal: new Decimal(1.5),
                 strategicSignificanceMultiplier: 1,
+                strategicSignificanceMultiplierDecimal: new Decimal(1),
                 vhdhBespokeCompensationUnits: 10,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
                 baselineUnitsRetainedWithSRM: 24,
+                baselineUnitsRetainedWithSRMDecimal: new Decimal(24),
                 spatialRiskMultiplier: 0.6,
+                spatialRiskMultiplierDecimal: new Decimal(0.6),
             } as any,
             {
                 totalHabitatUnitsSRM: 20,
+                totalHabitatUnitsSRMDecimal: new Decimal(20),
                 areaRetained: 4,
+                areaRetainedDecimal: new Decimal(4),
                 distinctivenessScore: 3,
+                distinctivenessScoreDecimal: new Decimal(3),
                 conditionScore: 2,
+                conditionScoreDecimal: new Decimal(2),
                 strategicSignificanceMultiplier: 1,
+                strategicSignificanceMultiplierDecimal: new Decimal(1),
                 vhdhBespokeCompensationUnits: 5,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(5),
                 baselineUnitsRetainedWithSRM: 23.2,
+                baselineUnitsRetainedWithSRMDecimal: new Decimal(23.2),
                 spatialRiskMultiplier: 0.8,
+                spatialRiskMultiplierDecimal: new Decimal(0.8),
             } as any,
         ];
 
@@ -349,17 +424,28 @@ describe("calculateOffSiteHabitatNetChangeWithSRM", () => {
         const baselines = [
             {
                 totalHabitatUnitsSRM: 0,
+                totalHabitatUnitsSRMDecimal: new Decimal(0),
                 areaRetained: 0,
+                areaRetainedDecimal: new Decimal(0),
                 distinctivenessScore: 6,
+                distinctivenessScoreDecimal: new Decimal(6),
                 conditionScore: 2,
+                conditionScoreDecimal: new Decimal(2),
                 strategicSignificanceMultiplier: 1.15,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.15),
                 vhdhBespokeCompensationUnits: 0,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
                 baselineUnitsRetainedWithSRM: 0,
+                baselineUnitsRetainedWithSRMDecimal: new Decimal(0),
                 spatialRiskMultiplier: 0.5,
+                spatialRiskMultiplierDecimal: new Decimal(0.5),
             } as any,
         ];
         const creations = [
-            { habitatUnitsDeliveredWithSpatialRisk: 20 } as any,
+            {
+                habitatUnitsDeliveredWithSpatialRisk: 20,
+                habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(20),
+            } as any,
         ];
 
         const result = calculateOffSiteHabitatNetChangeWithSRM(baselines, creations, [], 40);
@@ -381,13 +467,20 @@ describe("headlineResults", () => {
     test("calculates on-site habitat results with data", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 60, vhdhBespokeCompensationUnits: 20 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 60,
+                    baselineUnitsRetainedDecimal: new Decimal(60),
+                    vhdhBespokeCompensationUnits: 20,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(20),
+                } as any,
             ],
             onSiteHabitatCreations: [
-                { habitatUnitsDelivered: 30 } as any,
+                { habitatUnitsDelivered: 30, habitatUnitsDeliveredDecimal: new Decimal(30) } as any,
             ],
             onSiteHabitatEnhancements: [
-                { habitatUnitsDelivered: 10 } as any,
+                { habitatUnitsDelivered: 10, habitatUnitsDeliveredDecimal: new Decimal(10) } as any,
             ],
         });
 
@@ -418,28 +511,43 @@ describe("headlineResults", () => {
             offSiteHabitatBaselines: [
                 {
                     totalHabitatUnits: 80,
+                    totalHabitatUnitsDecimal: new Decimal(80),
                     totalHabitatUnitsSRM: 40,
+                    totalHabitatUnitsSRMDecimal: new Decimal(40),
                     baselineUnitsRetained: 50,
+                    baselineUnitsRetainedDecimal: new Decimal(50),
                     baselineUnitsEnhanced: 10,
+                    baselineUnitsEnhancedDecimal: new Decimal(10),
                     areaRetained: 8,
+                    areaRetainedDecimal: new Decimal(8),
                     distinctivenessScore: 4,
+                    distinctivenessScoreDecimal: new Decimal(4),
                     conditionScore: 2,
+                    conditionScoreDecimal: new Decimal(2),
                     strategicSignificanceMultiplier: 1,
+                    strategicSignificanceMultiplierDecimal: new Decimal(1),
                     vhdhBespokeCompensationUnits: 10,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
                     baselineUnitsRetainedWithSRM: 37,
+                    baselineUnitsRetainedWithSRMDecimal: new Decimal(37),
                     spatialRiskMultiplier: 0.5,
+                    spatialRiskMultiplierDecimal: new Decimal(0.5),
                 } as any,
             ],
             offSiteHabitatCreations: [
                 {
                     habitatUnitsDelivered: 30,
+                    habitatUnitsDeliveredDecimal: new Decimal(30),
                     habitatUnitsDeliveredWithSpatialRisk: 15,
+                    habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(15),
                 } as any,
             ],
             offSiteHabitatEnhancements: [
                 {
                     habitatUnitsDelivered: 20,
+                    habitatUnitsDeliveredDecimal: new Decimal(20),
                     habitatUnitsDeliveredWithSpatialRisk: 10,
+                    habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(10),
                 } as any,
             ],
         });
@@ -461,16 +569,27 @@ describe("headlineResults", () => {
             offSiteHabitatBaselines: [
                 {
                     totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
                     totalHabitatUnitsSRM: 50,
+                    totalHabitatUnitsSRMDecimal: new Decimal(50),
                     baselineUnitsRetained: 30,
+                    baselineUnitsRetainedDecimal: new Decimal(30),
                     baselineUnitsEnhanced: 0,
+                    baselineUnitsEnhancedDecimal: new Decimal(0),
                     areaRetained: 5,
+                    areaRetainedDecimal: new Decimal(5),
                     distinctivenessScore: 4,
+                    distinctivenessScoreDecimal: new Decimal(4),
                     conditionScore: 2,
+                    conditionScoreDecimal: new Decimal(2),
                     strategicSignificanceMultiplier: 1,
+                    strategicSignificanceMultiplierDecimal: new Decimal(1),
                     vhdhBespokeCompensationUnits: 0,
-                    baselineUnitsRetainedWithSRM: 20, // (5 * 4 * 2 * 1 * 0.5) + (0 * 0.5) = 20
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                    baselineUnitsRetainedWithSRM: 20,
+                    baselineUnitsRetainedWithSRMDecimal: new Decimal(20), // (5 * 4 * 2 * 1 * 0.5) + (0 * 0.5) = 20
                     spatialRiskMultiplier: 0.5,
+                    spatialRiskMultiplierDecimal: new Decimal(0.5),
                 } as any,
             ],
         });
@@ -491,18 +610,16 @@ describe("calculateOnSiteHedgerowBaseline", () => {
     });
 
     test("sums totalHedgerowUnits from single baseline", () => {
-        const baselines = [
-            { totalHedgerowUnits: 15 } as any,
-        ];
+        const baselines = [{ totalHedgerowUnits: 15, totalHedgerowUnitsDecimal: new Decimal(15) } as any];
         const result = calculateOnSiteHedgerowBaseline(baselines);
         expect(result).toBe(15);
     });
 
     test("sums totalHedgerowUnits from multiple baselines", () => {
         const baselines = [
-            { totalHedgerowUnits: 12.5 } as any,
-            { totalHedgerowUnits: 18.75 } as any,
-            { totalHedgerowUnits: 9.25 } as any,
+            { totalHedgerowUnits: 12.5, totalHedgerowUnitsDecimal: new Decimal(12.5) } as any,
+            { totalHedgerowUnits: 18.75, totalHedgerowUnitsDecimal: new Decimal(18.75) } as any,
+            { totalHedgerowUnits: 9.25, totalHedgerowUnitsDecimal: new Decimal(9.25) } as any,
         ];
         const result = calculateOnSiteHedgerowBaseline(baselines);
         expect(result).toBe(40.5);
@@ -517,8 +634,8 @@ describe("calculateOnSiteHedgerowPostIntervention", () => {
 
     test("sums retained units from baselines only", () => {
         const baselines = [
-            { unitsRetained: 8 } as any,
-            { unitsRetained: 6 } as any,
+            { unitsRetained: 8, unitsRetainedDecimal: new Decimal(8) } as any,
+            { unitsRetained: 6, unitsRetainedDecimal: new Decimal(6) } as any,
         ];
         const result = calculateOnSiteHedgerowPostIntervention(baselines, [], []);
         expect(result).toBe(14);
@@ -526,8 +643,8 @@ describe("calculateOnSiteHedgerowPostIntervention", () => {
 
     test("sums created units only", () => {
         const creations = [
-            { hedgerowUnitsDelivered: 12 } as any,
-            { hedgerowUnitsDelivered: 16 } as any,
+            { hedgerowUnitsDelivered: 12, hedgerowUnitsDeliveredDecimal: new Decimal(12) } as any,
+            { hedgerowUnitsDelivered: 16, hedgerowUnitsDeliveredDecimal: new Decimal(16) } as any,
         ];
         const result = calculateOnSiteHedgerowPostIntervention([], creations, []);
         expect(result).toBe(28);
@@ -535,22 +652,20 @@ describe("calculateOnSiteHedgerowPostIntervention", () => {
 
     test("sums enhanced units only", () => {
         const enhancements = [
-            { hedgerowUnitsDelivered: 10 } as any,
-            { hedgerowUnitsDelivered: 14 } as any,
+            { hedgerowUnitsDelivered: 10, hedgerowUnitsDeliveredDecimal: new Decimal(10) } as any,
+            { hedgerowUnitsDelivered: 14, hedgerowUnitsDeliveredDecimal: new Decimal(14) } as any,
         ];
         const result = calculateOnSiteHedgerowPostIntervention([], [], enhancements);
         expect(result).toBe(24);
     });
 
     test("sums all units from baselines, creations, and enhancements", () => {
-        const baselines = [
-            { unitsRetained: 8 } as any,
-        ];
+        const baselines = [{ unitsRetained: 8, unitsRetainedDecimal: new Decimal(8) } as any];
         const creations = [
-            { hedgerowUnitsDelivered: 15 } as any,
+            { hedgerowUnitsDelivered: 15, hedgerowUnitsDeliveredDecimal: new Decimal(15) } as any,
         ];
         const enhancements = [
-            { hedgerowUnitsDelivered: 12 } as any,
+            { hedgerowUnitsDelivered: 12, hedgerowUnitsDeliveredDecimal: new Decimal(12) } as any,
         ];
         const result = calculateOnSiteHedgerowPostIntervention(baselines, creations, enhancements);
         expect(result).toBe(35);
@@ -603,13 +718,18 @@ describe("headlineResults - on-site hedgerows", () => {
     test("calculates on-site hedgerow results with data", () => {
         const input = emptyFixture({
             onSiteHedgerowBaselines: [
-                { totalHedgerowUnits: 60, unitsRetained: 40 } as any,
+                {
+                    totalHedgerowUnits: 60,
+                    totalHedgerowUnitsDecimal: new Decimal(60),
+                    unitsRetained: 40,
+                    unitsRetainedDecimal: new Decimal(40),
+                } as any,
             ],
             onSiteHedgerowCreations: [
-                { hedgerowUnitsDelivered: 20 } as any,
+                { hedgerowUnitsDelivered: 20, hedgerowUnitsDeliveredDecimal: new Decimal(20) } as any,
             ],
             onSiteHedgerowEnhancements: [
-                { hedgerowUnitsDelivered: 8 } as any,
+                { hedgerowUnitsDelivered: 8, hedgerowUnitsDeliveredDecimal: new Decimal(8) } as any,
             ],
         });
 
@@ -624,15 +744,25 @@ describe("headlineResults - on-site hedgerows", () => {
     test("calculates with multiple hedgerow entries", () => {
         const input = emptyFixture({
             onSiteHedgerowBaselines: [
-                { totalHedgerowUnits: 30, unitsRetained: 20 } as any,
-                { totalHedgerowUnits: 25, unitsRetained: 15 } as any,
+                {
+                    totalHedgerowUnits: 30,
+                    totalHedgerowUnitsDecimal: new Decimal(30),
+                    unitsRetained: 20,
+                    unitsRetainedDecimal: new Decimal(20),
+                } as any,
+                {
+                    totalHedgerowUnits: 25,
+                    totalHedgerowUnitsDecimal: new Decimal(25),
+                    unitsRetained: 15,
+                    unitsRetainedDecimal: new Decimal(15),
+                } as any,
             ],
             onSiteHedgerowCreations: [
-                { hedgerowUnitsDelivered: 12 } as any,
-                { hedgerowUnitsDelivered: 8 } as any,
+                { hedgerowUnitsDelivered: 12, hedgerowUnitsDeliveredDecimal: new Decimal(12) } as any,
+                { hedgerowUnitsDelivered: 8, hedgerowUnitsDeliveredDecimal: new Decimal(8) } as any,
             ],
             onSiteHedgerowEnhancements: [
-                { hedgerowUnitsDelivered: 6 } as any,
+                { hedgerowUnitsDelivered: 6, hedgerowUnitsDeliveredDecimal: new Decimal(6) } as any,
             ],
         });
 
@@ -652,18 +782,16 @@ describe("calculateOffSiteHedgerowBaseline", () => {
     });
 
     test("sums totalHedgerowUnits from single baseline", () => {
-        const baselines = [
-            { totalHedgerowUnits: 20 } as any,
-        ];
+        const baselines = [{ totalHedgerowUnits: 20, totalHedgerowUnitsDecimal: new Decimal(20) } as any];
         const result = calculateOffSiteHedgerowBaseline(baselines);
         expect(result).toBe(20);
     });
 
     test("sums totalHedgerowUnits from multiple baselines", () => {
         const baselines = [
-            { totalHedgerowUnits: 14.5 } as any,
-            { totalHedgerowUnits: 22.75 } as any,
-            { totalHedgerowUnits: 8.25 } as any,
+            { totalHedgerowUnits: 14.5, totalHedgerowUnitsDecimal: new Decimal(14.5) } as any,
+            { totalHedgerowUnits: 22.75, totalHedgerowUnitsDecimal: new Decimal(22.75) } as any,
+            { totalHedgerowUnits: 8.25, totalHedgerowUnitsDecimal: new Decimal(8.25) } as any,
         ];
         const result = calculateOffSiteHedgerowBaseline(baselines);
         expect(result).toBe(45.5);
@@ -678,8 +806,18 @@ describe("calculateOffSiteHedgerowPostIntervention", () => {
 
     test("sums retained units from baselines only (not enhanced)", () => {
         const baselines = [
-            { unitsRetained: 10, unitsEnhanced: 5 } as any,
-            { unitsRetained: 8, unitsEnhanced: 3 } as any,
+            {
+                unitsRetained: 10,
+                unitsRetainedDecimal: new Decimal(10),
+                unitsEnhanced: 5,
+                unitsEnhancedDecimal: new Decimal(5),
+            } as any,
+            {
+                unitsRetained: 8,
+                unitsRetainedDecimal: new Decimal(8),
+                unitsEnhanced: 3,
+                unitsEnhancedDecimal: new Decimal(3),
+            } as any,
         ];
         const result = calculateOffSiteHedgerowPostIntervention(baselines, [], []);
         expect(result).toBe(18); // 10 + 8 (enhanced not counted here)
@@ -687,13 +825,18 @@ describe("calculateOffSiteHedgerowPostIntervention", () => {
 
     test("sums all units from baselines, creations, and enhancements", () => {
         const baselines = [
-            { unitsRetained: 12, unitsEnhanced: 6 } as any,
+            {
+                unitsRetained: 12,
+                unitsRetainedDecimal: new Decimal(12),
+                unitsEnhanced: 6,
+                unitsEnhancedDecimal: new Decimal(6),
+            } as any,
         ];
         const creations = [
-            { hedgerowUnitsDelivered: 18 } as any,
+            { hedgerowUnitsDelivered: 18, hedgerowUnitsDeliveredDecimal: new Decimal(18) } as any,
         ];
         const enhancements = [
-            { hedgerowUnitsDelivered: 14 } as any,
+            { hedgerowUnitsDelivered: 14, hedgerowUnitsDeliveredDecimal: new Decimal(14) } as any,
         ];
         const result = calculateOffSiteHedgerowPostIntervention(baselines, creations, enhancements);
         expect(result).toBe(44); // 12 + 18 + 14 (enhanced not counted from baselines)
@@ -723,7 +866,16 @@ describe("calculateOffSiteHedgerowNetChange", () => {
 describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
     test("returns N/A when net change is negative", () => {
         const baselines = [
-            { totalHedgerowUnitsSRM: 30, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.6 } as any,
+            {
+                totalHedgerowUnitsSRM: 30,
+                totalHedgerowUnitsSRMDecimal: new Decimal(30),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.6,
+                spatialRiskMultiplierDecimal: new Decimal(0.6),
+            } as any,
         ];
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], -10);
         expect(result).toBe("N/A");
@@ -731,7 +883,16 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
 
     test("returns N/A when net change is zero", () => {
         const baselines = [
-            { totalHedgerowUnitsSRM: 30, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.6 } as any,
+            {
+                totalHedgerowUnitsSRM: 30,
+                totalHedgerowUnitsSRMDecimal: new Decimal(30),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.6,
+                spatialRiskMultiplierDecimal: new Decimal(0.6),
+            } as any,
         ];
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, [], [], 0);
         expect(result).toBe("N/A");
@@ -740,17 +901,27 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
     test("calculates SRM-adjusted net change for positive gains", () => {
         const baselines = [
             {
-                totalHedgerowUnitsSRM: 36, // baseline WITH SRM
+                totalHedgerowUnitsSRM: 36,
+                totalHedgerowUnitsSRMDecimal: new Decimal(36), // baseline WITH SRM
                 unitsRetained: 30,
+                unitsRetainedDecimal: new Decimal(30),
                 unitsEnhanced: 10,
-                spatialRiskMultiplier: 0.6, // 60% multiplier (40% risk)
+                unitsEnhancedDecimal: new Decimal(10),
+                spatialRiskMultiplier: 0.6,
+                spatialRiskMultiplierDecimal: new Decimal(0.6), // 60% multiplier (40% risk)
             } as any,
         ];
         const creations = [
-            { hedgerowUnitsDeliveredWithSpatialRisk: 18 } as any, // already includes SRM
+            {
+                hedgerowUnitsDeliveredWithSpatialRisk: 18,
+                hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(18),
+            } as any, // already includes SRM
         ];
         const enhancements = [
-            { hedgerowUnitsDeliveredWithSpatialRisk: 12 } as any, // already includes SRM
+            {
+                hedgerowUnitsDeliveredWithSpatialRisk: 12,
+                hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(12),
+            } as any, // already includes SRM
         ];
 
         // Post-intervention WITH SRM = 30 * 0.6 + 18 + 12 = 18 + 18 + 12 = 48
@@ -762,16 +933,24 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
     test("handles multiple baselines with different SRM values", () => {
         const baselines = [
             {
-                totalHedgerowUnitsSRM: 24, // 40 * 0.6
+                totalHedgerowUnitsSRM: 24,
+                totalHedgerowUnitsSRMDecimal: new Decimal(24), // 40 * 0.6
                 unitsRetained: 15,
+                unitsRetainedDecimal: new Decimal(15),
                 unitsEnhanced: 5,
+                unitsEnhancedDecimal: new Decimal(5),
                 spatialRiskMultiplier: 0.6,
+                spatialRiskMultiplierDecimal: new Decimal(0.6),
             } as any,
             {
-                totalHedgerowUnitsSRM: 20, // 25 * 0.8
+                totalHedgerowUnitsSRM: 20,
+                totalHedgerowUnitsSRMDecimal: new Decimal(20), // 25 * 0.8
                 unitsRetained: 12,
+                unitsRetainedDecimal: new Decimal(12),
                 unitsEnhanced: 4,
+                unitsEnhancedDecimal: new Decimal(4),
                 spatialRiskMultiplier: 0.8,
+                spatialRiskMultiplierDecimal: new Decimal(0.8),
             } as any,
         ];
 
@@ -785,13 +964,20 @@ describe("calculateOffSiteHedgerowNetChangeWithSRM", () => {
         const baselines = [
             {
                 totalHedgerowUnitsSRM: 0,
+                totalHedgerowUnitsSRMDecimal: new Decimal(0),
                 unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
                 unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
                 spatialRiskMultiplier: 0.7,
+                spatialRiskMultiplierDecimal: new Decimal(0.7),
             } as any,
         ];
         const creations = [
-            { hedgerowUnitsDeliveredWithSpatialRisk: 15 } as any,
+            {
+                hedgerowUnitsDeliveredWithSpatialRisk: 15,
+                hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(15),
+            } as any,
         ];
 
         const result = calculateOffSiteHedgerowNetChangeWithSRM(baselines, creations, [], 25);
@@ -816,22 +1002,31 @@ describe("headlineResults - off-site hedgerows", () => {
             offSiteHedgerowBaselines: [
                 {
                     totalHedgerowUnits: 50,
-                    totalHedgerowUnitsSRM: 30, // 60% multiplier (40% spatial risk)
+                    totalHedgerowUnitsDecimal: new Decimal(50),
+                    totalHedgerowUnitsSRM: 30,
+                    totalHedgerowUnitsSRMDecimal: new Decimal(30), // 60% multiplier (40% spatial risk)
                     unitsRetained: 35,
+                    unitsRetainedDecimal: new Decimal(35),
                     unitsEnhanced: 8,
+                    unitsEnhancedDecimal: new Decimal(8),
                     spatialRiskMultiplier: 0.6,
+                    spatialRiskMultiplierDecimal: new Decimal(0.6),
                 } as any,
             ],
             offSiteHedgerowCreations: [
                 {
                     hedgerowUnitsDelivered: 20,
-                    hedgerowUnitsDeliveredWithSpatialRisk: 12, // 20 * 0.6
+                    hedgerowUnitsDeliveredDecimal: new Decimal(20),
+                    hedgerowUnitsDeliveredWithSpatialRisk: 12,
+                    hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(12), // 20 * 0.6
                 } as any,
             ],
             offSiteHedgerowEnhancements: [
                 {
                     hedgerowUnitsDelivered: 15,
-                    hedgerowUnitsDeliveredWithSpatialRisk: 9, // 15 * 0.6
+                    hedgerowUnitsDeliveredDecimal: new Decimal(15),
+                    hedgerowUnitsDeliveredWithSpatialRisk: 9,
+                    hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(9), // 15 * 0.6
                 } as any,
             ],
         });
@@ -853,10 +1048,15 @@ describe("headlineResults - off-site hedgerows", () => {
             offSiteHedgerowBaselines: [
                 {
                     totalHedgerowUnits: 80,
+                    totalHedgerowUnitsDecimal: new Decimal(80),
                     totalHedgerowUnitsSRM: 48,
+                    totalHedgerowUnitsSRMDecimal: new Decimal(48),
                     unitsRetained: 25,
+                    unitsRetainedDecimal: new Decimal(25),
                     unitsEnhanced: 0,
+                    unitsEnhancedDecimal: new Decimal(0),
                     spatialRiskMultiplier: 0.6,
+                    spatialRiskMultiplierDecimal: new Decimal(0.6),
                 } as any,
             ],
         });
@@ -878,7 +1078,7 @@ describe("calculateOnSiteWatercourseBaseline", () => {
 
     test("sums totalWatercourseUnits from single baseline", () => {
         const baselines = [
-            { totalWatercourseUnits: 15 } as any,
+            { totalWatercourseUnits: 15, totalWatercourseUnitsDecimal: new Decimal(15) } as any,
         ];
         const result = calculateOnSiteWatercourseBaseline(baselines);
         expect(result).toBe(15);
@@ -886,9 +1086,9 @@ describe("calculateOnSiteWatercourseBaseline", () => {
 
     test("sums totalWatercourseUnits from multiple baselines", () => {
         const baselines = [
-            { totalWatercourseUnits: 12 } as any,
-            { totalWatercourseUnits: 18.5 } as any,
-            { totalWatercourseUnits: 9.75 } as any,
+            { totalWatercourseUnits: 12, totalWatercourseUnitsDecimal: new Decimal(12) } as any,
+            { totalWatercourseUnits: 18.5, totalWatercourseUnitsDecimal: new Decimal(18.5) } as any,
+            { totalWatercourseUnits: 9.75, totalWatercourseUnitsDecimal: new Decimal(9.75) } as any,
         ];
         const result = calculateOnSiteWatercourseBaseline(baselines);
         expect(result).toBe(40.25);
@@ -903,8 +1103,18 @@ describe("calculateOnSiteWatercoursePostIntervention", () => {
 
     test("sums retained and bespoke compensation units from baselines only", () => {
         const baselines = [
-            { unitsRetained: 12, vhdhBespokeCompensationUnits: 6 } as any,
-            { unitsRetained: 9, vhdhBespokeCompensationUnits: 4 } as any,
+            {
+                unitsRetained: 12,
+                unitsRetainedDecimal: new Decimal(12),
+                vhdhBespokeCompensationUnits: 6,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(6),
+            } as any,
+            {
+                unitsRetained: 9,
+                unitsRetainedDecimal: new Decimal(9),
+                vhdhBespokeCompensationUnits: 4,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(4),
+            } as any,
         ];
         const result = calculateOnSiteWatercoursePostIntervention(baselines, [], []);
         expect(result).toBe(31);
@@ -912,8 +1122,8 @@ describe("calculateOnSiteWatercoursePostIntervention", () => {
 
     test("sums created units only", () => {
         const creations = [
-            { unitsDelivered: 18 } as any,
-            { unitsDelivered: 22 } as any,
+            { unitsDelivered: 18, unitsDeliveredDecimal: new Decimal(18) } as any,
+            { unitsDelivered: 22, unitsDeliveredDecimal: new Decimal(22) } as any,
         ];
         const result = calculateOnSiteWatercoursePostIntervention([], creations, []);
         expect(result).toBe(40);
@@ -921,8 +1131,8 @@ describe("calculateOnSiteWatercoursePostIntervention", () => {
 
     test("sums enhanced units only", () => {
         const enhancements = [
-            { watercourseUnitsDelivered: 14 } as any,
-            { watercourseUnitsDelivered: 19 } as any,
+            { watercourseUnitsDelivered: 14, watercourseUnitsDeliveredDecimal: new Decimal(14) } as any,
+            { watercourseUnitsDelivered: 19, watercourseUnitsDeliveredDecimal: new Decimal(19) } as any,
         ];
         const result = calculateOnSiteWatercoursePostIntervention([], [], enhancements);
         expect(result).toBe(33);
@@ -930,13 +1140,16 @@ describe("calculateOnSiteWatercoursePostIntervention", () => {
 
     test("sums all units from baselines, creations, and enhancements", () => {
         const baselines = [
-            { unitsRetained: 15, vhdhBespokeCompensationUnits: 7 } as any,
+            {
+                unitsRetained: 15,
+                unitsRetainedDecimal: new Decimal(15),
+                vhdhBespokeCompensationUnits: 7,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(7),
+            } as any,
         ];
-        const creations = [
-            { unitsDelivered: 20 } as any,
-        ];
+        const creations = [{ unitsDelivered: 20, unitsDeliveredDecimal: new Decimal(20) } as any];
         const enhancements = [
-            { watercourseUnitsDelivered: 16 } as any,
+            { watercourseUnitsDelivered: 16, watercourseUnitsDeliveredDecimal: new Decimal(16) } as any,
         ];
         const result = calculateOnSiteWatercoursePostIntervention(baselines, creations, enhancements);
         expect(result).toBe(58); // 15 + 7 + 20 + 16
@@ -985,18 +1198,23 @@ describe("headlineResults - on-site watercourses", () => {
             onSiteWatercourseBaselines: [
                 {
                     totalWatercourseUnits: 45,
+                    totalWatercourseUnitsDecimal: new Decimal(45),
                     unitsRetained: 30,
+                    unitsRetainedDecimal: new Decimal(30),
                     vhdhBespokeCompensationUnits: 10,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
                 } as any,
             ],
             onSiteWatercourseCreations: [
                 {
                     unitsDelivered: 25,
+                    unitsDeliveredDecimal: new Decimal(25),
                 } as any,
             ],
             onSiteWatercourseEnhancements: [
                 {
                     watercourseUnitsDelivered: 20,
+                    watercourseUnitsDeliveredDecimal: new Decimal(20),
                 } as any,
             ],
         });
@@ -1014,8 +1232,11 @@ describe("headlineResults - on-site watercourses", () => {
             onSiteWatercourseBaselines: [
                 {
                     totalWatercourseUnits: 60,
+                    totalWatercourseUnitsDecimal: new Decimal(60),
                     unitsRetained: 55,
+                    unitsRetainedDecimal: new Decimal(55),
                     vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
                 } as any,
             ],
         });
@@ -1037,7 +1258,7 @@ describe("calculateOffSiteWatercourseBaseline", () => {
 
     test("sums totalWatercourseUnits from single baseline", () => {
         const baselines = [
-            { totalWatercourseUnits: 20 } as any,
+            { totalWatercourseUnits: 20, totalWatercourseUnitsDecimal: new Decimal(20) } as any,
         ];
         const result = calculateOffSiteWatercourseBaseline(baselines);
         expect(result).toBe(20);
@@ -1045,9 +1266,9 @@ describe("calculateOffSiteWatercourseBaseline", () => {
 
     test("sums totalWatercourseUnits from multiple baselines", () => {
         const baselines = [
-            { totalWatercourseUnits: 14 } as any,
-            { totalWatercourseUnits: 22.5 } as any,
-            { totalWatercourseUnits: 11.75 } as any,
+            { totalWatercourseUnits: 14, totalWatercourseUnitsDecimal: new Decimal(14) } as any,
+            { totalWatercourseUnits: 22.5, totalWatercourseUnitsDecimal: new Decimal(22.5) } as any,
+            { totalWatercourseUnits: 11.75, totalWatercourseUnitsDecimal: new Decimal(11.75) } as any,
         ];
         const result = calculateOffSiteWatercourseBaseline(baselines);
         expect(result).toBe(48.25);
@@ -1062,8 +1283,18 @@ describe("calculateOffSiteWatercoursePostIntervention", () => {
 
     test("sums retained units from baselines only (not enhanced)", () => {
         const baselines = [
-            { unitsRetained: 14, unitsEnhanced: 7 } as any,
-            { unitsRetained: 11, unitsEnhanced: 5 } as any,
+            {
+                unitsRetained: 14,
+                unitsRetainedDecimal: new Decimal(14),
+                unitsEnhanced: 7,
+                unitsEnhancedDecimal: new Decimal(7),
+            } as any,
+            {
+                unitsRetained: 11,
+                unitsRetainedDecimal: new Decimal(11),
+                unitsEnhanced: 5,
+                unitsEnhancedDecimal: new Decimal(5),
+            } as any,
         ];
         const result = calculateOffSiteWatercoursePostIntervention(baselines, [], []);
         expect(result).toBe(25); // 14 + 11 (enhanced not counted here)
@@ -1071,13 +1302,16 @@ describe("calculateOffSiteWatercoursePostIntervention", () => {
 
     test("sums all units from baselines, creations, and enhancements", () => {
         const baselines = [
-            { unitsRetained: 16, unitsEnhanced: 8 } as any,
+            {
+                unitsRetained: 16,
+                unitsRetainedDecimal: new Decimal(16),
+                unitsEnhanced: 8,
+                unitsEnhancedDecimal: new Decimal(8),
+            } as any,
         ];
-        const creations = [
-            { unitsDelivered: 22 } as any,
-        ];
+        const creations = [{ unitsDelivered: 22, unitsDeliveredDecimal: new Decimal(22) } as any];
         const enhancements = [
-            { watercourseUnitsDelivered: 18 } as any,
+            { watercourseUnitsDelivered: 18, watercourseUnitsDeliveredDecimal: new Decimal(18) } as any,
         ];
         const result = calculateOffSiteWatercoursePostIntervention(baselines, creations, enhancements);
         expect(result).toBe(56); // 16 + 22 + 18 (enhanced not counted from baselines)
@@ -1107,7 +1341,16 @@ describe("calculateOffSiteWatercourseNetChange", () => {
 describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
     test("returns N/A when net change is negative", () => {
         const baselines = [
-            { totalWatercourseUnitsSRM: 35, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.7 } as any,
+            {
+                totalWatercourseUnitsSRM: 35,
+                totalWatercourseUnitsSRMDecimal: new Decimal(35),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.7,
+                spatialRiskMultiplierDecimal: new Decimal(0.7),
+            } as any,
         ];
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, [], [], -12);
         expect(result).toBe("N/A");
@@ -1115,7 +1358,16 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
 
     test("returns N/A when net change is zero", () => {
         const baselines = [
-            { totalWatercourseUnitsSRM: 35, unitsRetained: 0, unitsEnhanced: 0, spatialRiskMultiplier: 0.7 } as any,
+            {
+                totalWatercourseUnitsSRM: 35,
+                totalWatercourseUnitsSRMDecimal: new Decimal(35),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
+                spatialRiskMultiplier: 0.7,
+                spatialRiskMultiplierDecimal: new Decimal(0.7),
+            } as any,
         ];
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, [], [], 0);
         expect(result).toBe("N/A");
@@ -1124,17 +1376,24 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
     test("calculates SRM-adjusted net change for positive gains", () => {
         const baselines = [
             {
-                totalWatercourseUnitsSRM: 42, // baseline WITH SRM
+                totalWatercourseUnitsSRM: 42,
+                totalWatercourseUnitsSRMDecimal: new Decimal(42), // baseline WITH SRM
                 unitsRetained: 35,
+                unitsRetainedDecimal: new Decimal(35),
                 unitsEnhanced: 12,
-                spatialRiskMultiplier: 0.7, // 70% multiplier (30% risk)
+                unitsEnhancedDecimal: new Decimal(12),
+                spatialRiskMultiplier: 0.7,
+                spatialRiskMultiplierDecimal: new Decimal(0.7), // 70% multiplier (30% risk)
             } as any,
         ];
         const creations = [
-            { netUnitChangeWithSpatialRisk: 20 } as any,
+            { netUnitChangeWithSpatialRisk: 20, netUnitChangeWithSpatialRiskDecimal: new Decimal(20) } as any,
         ];
         const enhancements = [
-            { watercourseUnitsDeliveredWithSpatialRisk: 15 } as any,
+            {
+                watercourseUnitsDeliveredWithSpatialRisk: 15,
+                watercourseUnitsDeliveredWithSpatialRiskDecimal: new Decimal(15),
+            } as any,
         ];
 
         // Post-intervention WITH SRM = 35 * 0.7 + 20 + 15 = 24.5 + 20 + 15 = 59.5
@@ -1147,13 +1406,17 @@ describe("calculateOffSiteWatercourseNetChangeWithSRM", () => {
         const baselines = [
             {
                 totalWatercourseUnitsSRM: 0,
+                totalWatercourseUnitsSRMDecimal: new Decimal(0),
                 unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
                 unitsEnhanced: 0,
+                unitsEnhancedDecimal: new Decimal(0),
                 spatialRiskMultiplier: 0.8,
+                spatialRiskMultiplierDecimal: new Decimal(0.8),
             } as any,
         ];
         const creations = [
-            { netUnitChangeWithSpatialRisk: 18 } as any,
+            { netUnitChangeWithSpatialRisk: 18, netUnitChangeWithSpatialRiskDecimal: new Decimal(18) } as any,
         ];
 
         const result = calculateOffSiteWatercourseNetChangeWithSRM(baselines, creations, [], 28);
@@ -1178,22 +1441,31 @@ describe("headlineResults - off-site watercourses", () => {
             offSiteWatercourseBaselines: [
                 {
                     totalWatercourseUnits: 55,
-                    totalWatercourseUnitsSRM: 38.5, // 70% multiplier (30% spatial risk)
+                    totalWatercourseUnitsDecimal: new Decimal(55),
+                    totalWatercourseUnitsSRM: 38.5,
+                    totalWatercourseUnitsSRMDecimal: new Decimal(38.5), // 70% multiplier (30% spatial risk)
                     unitsRetained: 40,
+                    unitsRetainedDecimal: new Decimal(40),
                     unitsEnhanced: 10,
+                    unitsEnhancedDecimal: new Decimal(10),
                     spatialRiskMultiplier: 0.7,
+                    spatialRiskMultiplierDecimal: new Decimal(0.7),
                 } as any,
             ],
             offSiteWatercourseCreations: [
                 {
                     unitsDelivered: 25,
-                    netUnitChangeWithSpatialRisk: 17.5, // 25 * 0.7
+                    unitsDeliveredDecimal: new Decimal(25),
+                    netUnitChangeWithSpatialRisk: 17.5,
+                    netUnitChangeWithSpatialRiskDecimal: new Decimal(17.5), // 25 * 0.7
                 } as any,
             ],
             offSiteWatercourseEnhancements: [
                 {
                     watercourseUnitsDelivered: 20,
-                    watercourseUnitsDeliveredWithSpatialRisk: 14, // 20 * 0.7
+                    watercourseUnitsDeliveredDecimal: new Decimal(20),
+                    watercourseUnitsDeliveredWithSpatialRisk: 14,
+                    watercourseUnitsDeliveredWithSpatialRiskDecimal: new Decimal(14), // 20 * 0.7
                 } as any,
             ],
         });
@@ -1215,10 +1487,15 @@ describe("headlineResults - off-site watercourses", () => {
             offSiteWatercourseBaselines: [
                 {
                     totalWatercourseUnits: 85,
+                    totalWatercourseUnitsDecimal: new Decimal(85),
                     totalWatercourseUnitsSRM: 59.5,
+                    totalWatercourseUnitsSRMDecimal: new Decimal(59.5),
                     unitsRetained: 30,
+                    unitsRetainedDecimal: new Decimal(30),
                     unitsEnhanced: 0,
+                    unitsEnhancedDecimal: new Decimal(0),
                     spatialRiskMultiplier: 0.7,
+                    spatialRiskMultiplierDecimal: new Decimal(0.7),
                 } as any,
             ],
         });
@@ -1341,8 +1618,8 @@ describe("calculateTotalSRMDeductions", () => {
 
 describe("calculateFinalTotalNetUnitChange", () => {
     test("returns zero when both inputs are zero", () => {
-        const combinedChange = { habitat: 0, hedgerow: 0, watercourse: 0 };
-        const deductions = { habitat: 0, hedgerow: 0, watercourse: 0 };
+        const combinedChange = calculateCombinedNetUnitChange(0, 0, 0, 0, 0, 0);
+        const deductions = calculateTotalSRMDeductions(0, 0, 0, 0, 0, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(0);
         expect(result.hedgerow).toBe(0);
@@ -1350,8 +1627,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates final total with positive combined change and no deductions", () => {
-        const combinedChange = { habitat: 100, hedgerow: 50, watercourse: 30 };
-        const deductions = { habitat: 0, hedgerow: 0, watercourse: 0 };
+        const combinedChange = calculateCombinedNetUnitChange(100, 0, 50, 0, 30, 0);
+        const deductions = calculateTotalSRMDeductions(0, 0, 0, 0, 0, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(100);
         expect(result.hedgerow).toBe(50);
@@ -1359,8 +1636,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates final total with positive combined change and deductions", () => {
-        const combinedChange = { habitat: 100, hedgerow: 50, watercourse: 40 };
-        const deductions = { habitat: 25, hedgerow: 10, watercourse: 5 };
+        const combinedChange = calculateCombinedNetUnitChange(100, 0, 50, 0, 40, 0);
+        const deductions = calculateTotalSRMDeductions(25, 0, 10, 0, 5, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(75);
         expect(result.hedgerow).toBe(40);
@@ -1368,8 +1645,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates final total with negative combined change", () => {
-        const combinedChange = { habitat: -50, hedgerow: -20, watercourse: -10 };
-        const deductions = { habitat: 0, hedgerow: 0, watercourse: 0 };
+        const combinedChange = calculateCombinedNetUnitChange(-50, 0, -20, 0, -10, 0);
+        const deductions = calculateTotalSRMDeductions(0, 0, 0, 0, 0, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(-50);
         expect(result.hedgerow).toBe(-20);
@@ -1377,8 +1654,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates final total with negative combined change and deductions", () => {
-        const combinedChange = { habitat: -30, hedgerow: -15, watercourse: -5 };
-        const deductions = { habitat: 10, hedgerow: 5, watercourse: 2 };
+        const combinedChange = calculateCombinedNetUnitChange(-30, 0, -15, 0, -5, 0);
+        const deductions = calculateTotalSRMDeductions(10, 0, 5, 0, 2, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(-40);
         expect(result.hedgerow).toBe(-20);
@@ -1386,8 +1663,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates final total with realistic scenario", () => {
-        const combinedChange = { habitat: 50, hedgerow: 30, watercourse: 24 };
-        const deductions = { habitat: 15, hedgerow: 11.2, watercourse: 12 };
+        const combinedChange = calculateCombinedNetUnitChange(50, 0, 30, 0, 24, 0);
+        const deductions = calculateTotalSRMDeductions(15, 0, 11.2, 0, 12, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(35);
         expect(result.hedgerow).toBeCloseTo(18.8, 1);
@@ -1395,8 +1672,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("handles decimal values correctly", () => {
-        const combinedChange = { habitat: 87.5, hedgerow: 45.25, watercourse: 32.75 };
-        const deductions = { habitat: 23.75, hedgerow: 12.5, watercourse: 8.25 };
+        const combinedChange = calculateCombinedNetUnitChange(87.5, 0, 45.25, 0, 32.75, 0);
+        const deductions = calculateTotalSRMDeductions(23.75, 0, 12.5, 0, 8.25, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(63.75);
         expect(result.hedgerow).toBe(32.75);
@@ -1404,8 +1681,8 @@ describe("calculateFinalTotalNetUnitChange", () => {
     });
 
     test("calculates with large deductions that exceed combined change", () => {
-        const combinedChange = { habitat: 50, hedgerow: 30, watercourse: 20 };
-        const deductions = { habitat: 60, hedgerow: 40, watercourse: 25 };
+        const combinedChange = calculateCombinedNetUnitChange(50, 0, 30, 0, 20, 0);
+        const deductions = calculateTotalSRMDeductions(60, 0, 40, 0, 25, 0);
         const result = calculateFinalTotalNetUnitChange(combinedChange, deductions);
         expect(result.habitat).toBe(-10);
         expect(result.hedgerow).toBe(-10);
@@ -1417,10 +1694,28 @@ describe("headlineResults - combined calculations", () => {
     test("includes combined net unit change in results", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 80, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 80,
+                    baselineUnitsRetainedDecimal: new Decimal(80),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
             offSiteHabitatBaselines: [
-                { totalHabitatUnits: 50, baselineUnitsRetained: 40, vhdhBespokeCompensationUnits: 0, baselineUnitsEnhanced: 0, spatialRiskMultiplier: 0.5 } as any,
+                {
+                    totalHabitatUnits: 50,
+                    totalHabitatUnitsDecimal: new Decimal(50),
+                    baselineUnitsRetained: 40,
+                    baselineUnitsRetainedDecimal: new Decimal(40),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                    baselineUnitsEnhanced: 0,
+                    baselineUnitsEnhancedDecimal: new Decimal(0),
+                    spatialRiskMultiplier: 0.5,
+                    spatialRiskMultiplierDecimal: new Decimal(0.5),
+                } as any,
             ],
         });
 
@@ -1438,18 +1733,27 @@ describe("headlineResults - combined calculations", () => {
             offSiteHabitatBaselines: [
                 {
                     totalHabitatUnits: 80,
+                    totalHabitatUnitsDecimal: new Decimal(80),
                     totalHabitatUnitsSRM: 40,
+                    totalHabitatUnitsSRMDecimal: new Decimal(40),
                     baselineUnitsRetained: 50,
+                    baselineUnitsRetainedDecimal: new Decimal(50),
                     baselineUnitsEnhanced: 10,
+                    baselineUnitsEnhancedDecimal: new Decimal(10),
                     vhdhBespokeCompensationUnits: 10,
-                    baselineUnitsRetainedWithSRM: 30, // (50+10)*0.5
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetainedWithSRM: 30,
+                    baselineUnitsRetainedWithSRMDecimal: new Decimal(30), // (50+10)*0.5
                     spatialRiskMultiplier: 0.5,
+                    spatialRiskMultiplierDecimal: new Decimal(0.5),
                 } as any,
             ],
             offSiteHabitatCreations: [
                 {
                     habitatUnitsDelivered: 30,
+                    habitatUnitsDeliveredDecimal: new Decimal(30),
                     habitatUnitsDeliveredWithSpatialRisk: 15,
+                    habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(15),
                 } as any,
             ],
         });
@@ -1466,53 +1770,83 @@ describe("headlineResults - combined calculations", () => {
         const input = emptyFixture({
             // On-site habitat: +20
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 60, vhdhBespokeCompensationUnits: 20 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 60,
+                    baselineUnitsRetainedDecimal: new Decimal(60),
+                    vhdhBespokeCompensationUnits: 20,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(20),
+                } as any,
             ],
             onSiteHabitatCreations: [
-                { habitatUnitsDelivered: 40 } as any,
+                { habitatUnitsDelivered: 40, habitatUnitsDeliveredDecimal: new Decimal(40) } as any,
             ],
 
             // Off-site habitat: +30, with SRM: +15, deduction: 15
             offSiteHabitatBaselines: [
                 {
                     totalHabitatUnits: 80,
+                    totalHabitatUnitsDecimal: new Decimal(80),
                     totalHabitatUnitsSRM: 40,
+                    totalHabitatUnitsSRMDecimal: new Decimal(40),
                     baselineUnitsRetained: 50,
+                    baselineUnitsRetainedDecimal: new Decimal(50),
                     baselineUnitsEnhanced: 10,
+                    baselineUnitsEnhancedDecimal: new Decimal(10),
                     vhdhBespokeCompensationUnits: 10,
-                    baselineUnitsRetainedWithSRM: 30, // (50+10)*0.5
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetainedWithSRM: 30,
+                    baselineUnitsRetainedWithSRMDecimal: new Decimal(30), // (50+10)*0.5
                     spatialRiskMultiplier: 0.5,
+                    spatialRiskMultiplierDecimal: new Decimal(0.5),
                 } as any,
             ],
             offSiteHabitatCreations: [
                 {
                     habitatUnitsDelivered: 50,
+                    habitatUnitsDeliveredDecimal: new Decimal(50),
                     habitatUnitsDeliveredWithSpatialRisk: 25,
+                    habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(25),
                 } as any,
             ],
 
             // On-site hedgerow: +10
             onSiteHedgerowBaselines: [
-                { totalHedgerowUnits: 50, unitsRetained: 30, unitsEnhanced: 10 } as any,
+                {
+                    totalHedgerowUnits: 50,
+                    totalHedgerowUnitsDecimal: new Decimal(50),
+                    unitsRetained: 30,
+                    unitsRetainedDecimal: new Decimal(30),
+                    unitsEnhanced: 10,
+                    unitsEnhancedDecimal: new Decimal(10),
+                } as any,
             ],
             onSiteHedgerowCreations: [
-                { hedgerowUnitsDelivered: 20 } as any,
+                { hedgerowUnitsDelivered: 20, hedgerowUnitsDeliveredDecimal: new Decimal(20) } as any,
             ],
 
             // Off-site hedgerow: +20, with SRM: +12, deduction: 8
             offSiteHedgerowBaselines: [
                 {
                     totalHedgerowUnits: 60,
+                    totalHedgerowUnitsDecimal: new Decimal(60),
                     totalHedgerowUnitsSRM: 36,
+                    totalHedgerowUnitsSRMDecimal: new Decimal(36),
                     unitsRetained: 35,
+                    unitsRetainedDecimal: new Decimal(35),
                     unitsEnhanced: 10,
+                    unitsEnhancedDecimal: new Decimal(10),
                     spatialRiskMultiplier: 0.6,
+                    spatialRiskMultiplierDecimal: new Decimal(0.6),
                 } as any,
             ],
             offSiteHedgerowCreations: [
                 {
                     hedgerowUnitsDelivered: 35,
+                    hedgerowUnitsDeliveredDecimal: new Decimal(35),
                     hedgerowUnitsDeliveredWithSpatialRisk: 21,
+                    hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(21),
                 } as any,
             ],
         });
@@ -1536,22 +1870,43 @@ describe("headlineResults - combined calculations", () => {
     test("includes total net percentage change in results", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 60, vhdhBespokeCompensationUnits: 20 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 60,
+                    baselineUnitsRetainedDecimal: new Decimal(60),
+                    vhdhBespokeCompensationUnits: 20,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(20),
+                } as any,
             ],
             onSiteHabitatCreations: [
-                { habitatUnitsDelivered: 40 } as any,
+                { habitatUnitsDelivered: 40, habitatUnitsDeliveredDecimal: new Decimal(40) } as any,
             ],
             onSiteHedgerowBaselines: [
-                { totalHedgerowUnits: 50, unitsRetained: 30, unitsEnhanced: 10 } as any,
+                {
+                    totalHedgerowUnits: 50,
+                    totalHedgerowUnitsDecimal: new Decimal(50),
+                    unitsRetained: 30,
+                    unitsRetainedDecimal: new Decimal(30),
+                    unitsEnhanced: 10,
+                    unitsEnhancedDecimal: new Decimal(10),
+                } as any,
             ],
             onSiteHedgerowCreations: [
-                { hedgerowUnitsDelivered: 20 } as any,
+                { hedgerowUnitsDelivered: 20, hedgerowUnitsDeliveredDecimal: new Decimal(20) } as any,
             ],
             onSiteWatercourseBaselines: [
-                { totalWatercourseUnits: 40, unitsRetained: 20, vhdhBespokeCompensationUnits: 10 } as any,
+                {
+                    totalWatercourseUnits: 40,
+                    totalWatercourseUnitsDecimal: new Decimal(40),
+                    unitsRetained: 20,
+                    unitsRetainedDecimal: new Decimal(20),
+                    vhdhBespokeCompensationUnits: 10,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(10),
+                } as any,
             ],
             onSiteWatercourseCreations: [
-                { unitsDelivered: 20 } as any,
+                { unitsDelivered: 20, unitsDeliveredDecimal: new Decimal(20) } as any,
             ],
         });
 
@@ -1569,7 +1924,7 @@ describe("headlineResults - combined calculations", () => {
     test("handles zero baseline in total net percentage change", () => {
         const input = emptyFixture({
             onSiteHabitatCreations: [
-                { habitatUnitsDelivered: 50 } as any,
+                { habitatUnitsDelivered: 50, habitatUnitsDeliveredDecimal: new Decimal(50) } as any,
             ],
         });
 
@@ -1585,7 +1940,14 @@ describe("headlineResults - combined calculations", () => {
     test("netGainTarget option drives unit summary requirement and deficit", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 100,
+                    baselineUnitsRetainedDecimal: new Decimal(100),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
         });
 
@@ -1601,7 +1963,14 @@ describe("headlineResults - combined calculations", () => {
         const input = emptyFixture({
             startPage: { netGainTarget: 0.2 },
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 100,
+                    baselineUnitsRetainedDecimal: new Decimal(100),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
         } as Partial<AllFeatures> & { startPage: { netGainTarget: number } });
 
@@ -1614,7 +1983,14 @@ describe("headlineResults - combined calculations", () => {
     test("netGainTarget defaults to 0.1 when not provided", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 100, baselineUnitsRetained: 100, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 100,
+                    totalHabitatUnitsDecimal: new Decimal(100),
+                    baselineUnitsRetained: 100,
+                    baselineUnitsRetainedDecimal: new Decimal(100),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
         });
 
@@ -1625,80 +2001,147 @@ describe("headlineResults - combined calculations", () => {
     });
 });
 
-describe('spatial risk and watercourse compensation', () => {
+describe("spatial risk and watercourse compensation", () => {
     function parseInput(input: BngInput) {
         const result = featuresFromInput(input);
         expect(result.issues).toEqual([]);
         return result.features;
     }
 
-    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
-    const spatialRiskCategory = 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA' as const;
-    const waterSpatial = 'Outside waterbody catchment, but within operational catchment' as const;
-    const common = { condition: 'Poor', strategicSignificance, offSiteReferenceNumber: 'gain-site' } as const;
-    const area = { ...common, broadHabitat: 'Grassland', habitatType: 'Other neutral grassland', spatialRiskCategory } as const;
-    const hedge = { ...common, habitatType: 'Native hedgerow', spatialRiskCategory } as const;
-    const water = { ...common, watercourseType: 'Ditches', watercourseEncroachment: 'No Encroachment', riparianEncroachment: 'No Encroachment/ No Encroachment', spatialRiskCategory: waterSpatial } as const;
+    const strategicSignificance = "Area/compensation not in local strategy/ no local strategy" as const;
+    const spatialRiskCategory =
+        "Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA" as const;
+    const waterSpatial = "Outside waterbody catchment, but within operational catchment" as const;
+    const common = { condition: "Poor", strategicSignificance, offSiteReferenceNumber: "gain-site" } as const;
+    const area = {
+        ...common,
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",
+        spatialRiskCategory,
+    } as const;
+    const hedge = { ...common, habitatType: "Native hedgerow", spatialRiskCategory } as const;
+    const water = {
+        ...common,
+        watercourseType: "Ditches",
+        watercourseEncroachment: "No Encroachment",
+        riparianEncroachment: "No Encroachment/ No Encroachment",
+        spatialRiskCategory: waterSpatial,
+    } as const;
 
-    for (const change of ['negative', 'zero', 'positive'] as const) {
+    for (const change of ["negative", "zero", "positive"] as const) {
         const behaviour = {
-            negative: 'keeps off-site losses in net change without spatial risk deductions',
-            zero: 'applies no spatial risk deductions when off-site units are unchanged',
-            positive: 'deducts spatial risk from off-site gains in all three unit families',
+            negative: "keeps off-site losses in net change without spatial risk deductions",
+            zero: "applies no spatial risk deductions when off-site units are unchanged",
+            positive: "deducts spatial risk from off-site gains in all three unit families",
         };
         test(behaviour[change], () => {
-            const retained = change === 'zero' ? 1 : 0;
+            const retained = change === "zero" ? 1 : 0;
             const features = parseInput({
-                offSiteHabitatBaselines: [{ ...area, area: 1, irreplaceableHabitat: false, areaRetained: retained }],
+                offSiteHabitatBaselines: [
+                    { ...area, area: 1, irreplaceableHabitat: false, areaRetained: retained },
+                ],
                 offSiteHedgerowBaselines: [{ ...hedge, length: 1, lengthRetained: retained }],
                 offSiteWatercourseBaselines: [{ ...water, length: 1, lengthRetained: retained }],
-                offSiteHabitatCreations: change === 'positive' ? [{ ...area, area: 2, habitatCreationInAdvance: '30+' }] : [],
-                offSiteHedgerowCreations: change === 'positive' ? [{ ...hedge, length: 2, habitatCreatedInAdvance: '30+' }] : [],
-                offSiteWatercourseCreations: change === 'positive' ? [{ ...water, length: 2, habitatCreatedInAdvance: '30+' }] : [],
+                offSiteHabitatCreations:
+                    change === "positive" ? [{ ...area, area: 2, habitatCreationInAdvance: "30+" }] : [],
+                offSiteHedgerowCreations:
+                    change === "positive" ? [{ ...hedge, length: 2, habitatCreatedInAdvance: "30+" }] : [],
+                offSiteWatercourseCreations:
+                    change === "positive" ? [{ ...water, length: 2, habitatCreatedInAdvance: "30+" }] : [],
             });
             const result = headlineResults(features, tradingSummaries(features));
-            const expectedChange = change === 'negative' ? { habitat: -4, hedgerow: -2, watercourse: -4 }
-                : change === 'zero' ? { habitat: 0, hedgerow: 0, watercourse: 0 }
-                : { habitat: 4, hedgerow: 2, watercourse: 4 };
-            const expectedDeductions = change === 'positive' ? { habitat: 1, hedgerow: 0.5, watercourse: 1 } : { habitat: 0, hedgerow: 0, watercourse: 0 };
-            expect(result.combinedNetUnitChange).toEqual(expectedChange);
-            expect(result.totalSRMDeductions).toEqual(expectedDeductions);
-            expect(calculateTotalSRMDeductions(
-                result.offSiteHabitatNetChange.units, result.offSiteHabitatNetChangeWithSRM,
-                result.offSiteHedgerowNetChange.units, result.offSiteHedgerowNetChangeWithSRM,
-                result.offSiteWatercourseNetChange.units, result.offSiteWatercourseNetChangeWithSRM,
-            )).toEqual(expectedDeductions);
-            for (const family of ['habitat', 'hedgerow', 'watercourse'] as const) {
-                expect(result.totalNetUnitChange[family]).toBe(expectedChange[family] - expectedDeductions[family]);
+            const expectedChange =
+                change === "negative"
+                    ? { habitat: -4, hedgerow: -2, watercourse: -4 }
+                    : change === "zero"
+                      ? { habitat: 0, hedgerow: 0, watercourse: 0 }
+                      : { habitat: 4, hedgerow: 2, watercourse: 4 };
+            const expectedDeductions =
+                change === "positive"
+                    ? { habitat: 1, hedgerow: 0.5, watercourse: 1 }
+                    : { habitat: 0, hedgerow: 0, watercourse: 0 };
+            expect(result.combinedNetUnitChange).toMatchObject(expectedChange);
+            expect(result.totalSRMDeductions).toMatchObject(expectedDeductions);
+            expect(
+                calculateTotalSRMDeductions(
+                    result.offSiteHabitatNetChange.units,
+                    result.offSiteHabitatNetChangeWithSRM,
+                    result.offSiteHedgerowNetChange.units,
+                    result.offSiteHedgerowNetChangeWithSRM,
+                    result.offSiteWatercourseNetChange.units,
+                    result.offSiteWatercourseNetChangeWithSRM,
+                ),
+            ).toMatchObject(expectedDeductions);
+            for (const family of ["habitat", "hedgerow", "watercourse"] as const) {
+                expect(result.totalNetUnitChange[family]).toBe(
+                    expectedChange[family] - expectedDeductions[family],
+                );
             }
         });
     }
 
-    describe('off-site watercourse compensation aggregates', () => {
-        for (const bespokeCompensation of ['Yes', 'Pending', 'No'] as const) {
-            for (const [lengthRetained, lengthEnhanced, units] of [[0.5, 0, 8], [0, 0.5, 8], [0.25, 0.5, 4]] as const) {
+    describe("off-site watercourse compensation aggregates", () => {
+        for (const bespokeCompensation of ["Yes", "Pending", "No"] as const) {
+            for (const [lengthRetained, lengthEnhanced, units] of [
+                [0.5, 0, 8],
+                [0, 0.5, 8],
+                [0.25, 0.5, 4],
+            ] as const) {
                 test(`${bespokeCompensation}, retained ${lengthRetained}, enhanced ${lengthEnhanced}`, () => {
-                    const features = parseInput({ offSiteWatercourseBaselines: [{
-                        ...water, watercourseType: 'Priority habitat', condition: 'Moderate', length: 1,
-                        lengthRetained, lengthEnhanced, bespokeCompensation,
-                    }] });
+                    const features = parseInput({
+                        offSiteWatercourseBaselines: [
+                            {
+                                ...water,
+                                watercourseType: "Priority habitat",
+                                condition: "Moderate",
+                                length: 1,
+                                lengthRetained,
+                                lengthEnhanced,
+                                bespokeCompensation,
+                            },
+                        ],
+                    });
                     const baseline = features.offSiteWatercourseBaselines[0]!;
-                    const compensation = bespokeCompensation === 'No' ? 0 : units;
+                    const compensation = bespokeCompensation === "No" ? 0 : units;
                     expect(baseline.vhdhBespokeCompensationUnits).toBe(compensation);
-                    expect(calculateOffSiteWatercoursePostIntervention(features.offSiteWatercourseBaselines, [], [])).toBe(16 * lengthRetained + compensation);
+                    expect(
+                        calculateOffSiteWatercoursePostIntervention(
+                            features.offSiteWatercourseBaselines,
+                            [],
+                            [],
+                        ),
+                    ).toBe(16 * lengthRetained + compensation);
                 });
             }
         }
-        test('includes spatially adjusted bespoke compensation in watercourse gains', () => {
+        test("includes spatially adjusted bespoke compensation in watercourse gains", () => {
             const features = parseInput({
-                offSiteWatercourseBaselines: [{ ...water, watercourseType: 'Priority habitat', condition: 'Moderate', length: 1, lengthRetained: 0.5, bespokeCompensation: 'Yes' }],
-                offSiteWatercourseCreations: [{ ...water, length: 1, condition: 'Moderate', habitatCreatedInAdvance: '30+' }],
+                offSiteWatercourseBaselines: [
+                    {
+                        ...water,
+                        watercourseType: "Priority habitat",
+                        condition: "Moderate",
+                        length: 1,
+                        lengthRetained: 0.5,
+                        bespokeCompensation: "Yes",
+                    },
+                ],
+                offSiteWatercourseCreations: [
+                    { ...water, length: 1, condition: "Moderate", habitatCreatedInAdvance: "30+" },
+                ],
             });
             const result = headlineResults(features, tradingSummaries(features));
             expect(result.offSiteWatercoursePostIntervention).toBe(24); // H26: retained 8 + compensation 8 + creation 8
             expect(result.offSiteWatercourseNetChange.units).toBe(8);
             expect(result.offSiteWatercourseNetChangeWithSRM).toBe(6); // L26 (6 + 6 + 6) - L22 (12)
-            expect(calculateOffSiteWatercourseNetChangeWithSRM(features.offSiteWatercourseBaselines, features.offSiteWatercourseCreations, [], 8)).toBe(6);
+            expect(
+                calculateOffSiteWatercourseNetChangeWithSRM(
+                    features.offSiteWatercourseBaselines,
+                    features.offSiteWatercourseCreations,
+                    [],
+                    8,
+                ),
+            ).toBe(6);
             expect(result.totalSRMDeductions.watercourse).toBe(2);
         });
     });

@@ -105,6 +105,15 @@ Here's a simple example, outputting parsed files to the console.
 </html>
 ```
 
+### Exact quantities
+
+`featuresFromInput` accepts finite numbers, decimal strings or Decimal instances for measurement
+inputs. Rows, groupings, trading results, gain-site summaries, headlines and unit
+shortfalls retain their existing number fields and expose matching `...Decimal`
+companions. Scalar and number-map helpers have parallel Decimal functions.
+See [the Decimal API contract](./docs/decimal-api.md) for examples, arithmetic
+precision, JSON conversion and compatibility with older feature objects.
+
 ### Streaming large files
 
 For large metric files where loading the whole workbook into memory is a

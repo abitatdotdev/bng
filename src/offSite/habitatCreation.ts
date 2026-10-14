@@ -1,31 +1,44 @@
+import { type Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
 import { creationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { areaSchema, enrichWithCreationData, enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, safeTransform, yearsSchema } from '../schemaUtils';
+import {
+    areaSchema,
+    enrichWithCreationData,
+    enrichWithHabitatData,
+    freeTextSchema,
+    isValidCondition,
+    isValidHabitat,
+    safeTransform,
+    yearsSchema,
+} from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
-import { calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon, lookupFinalTimeToTargetMultiplier, enrichWithSpatialRisk } from './common';
+import {
+    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon,
+    lookupFinalTimeToTargetMultiplier,
+    enrichWithSpatialRisk,
+} from './common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 
-const inputSchema =
-    v.object({
-        broadHabitat: broadHabitatSchema,
-        habitatType: creationHabitatType,
-        area: areaSchema,
-        condition: conditionSchema,
-        strategicSignificance: strategicSignificanceSchema,
-        habitatCreationInAdvance: v.optional(yearsSchema, 0),
-        habitatCreationDelay: v.optional(yearsSchema, 0),
-        spatialRiskCategory: spatialRiskCategorySchema,
-        userComments: freeTextSchema,
-        planningAuthorityComments: freeTextSchema,
-        habitatReferenceNumber: freeTextSchema,
-        offSiteReferenceNumber: freeTextSchema,
-        baselineReferenceNumber: freeTextSchema,
-    })
+const inputSchema = v.object({
+    broadHabitat: broadHabitatSchema,
+    habitatType: creationHabitatType,
+    area: areaSchema,
+    condition: conditionSchema,
+    strategicSignificance: strategicSignificanceSchema,
+    habitatCreationInAdvance: v.optional(yearsSchema, 0),
+    habitatCreationDelay: v.optional(yearsSchema, 0),
+    spatialRiskCategory: spatialRiskCategorySchema,
+    userComments: freeTextSchema,
+    planningAuthorityComments: freeTextSchema,
+    habitatReferenceNumber: freeTextSchema,
+    offSiteReferenceNumber: freeTextSchema,
+    baselineReferenceNumber: freeTextSchema,
+});
 
 /**
  * Calculates the final time to target condition and its corresponding multiplier based on:
@@ -35,17 +48,29 @@ const inputSchema =
  *
  * Corresponds to formula in Excel cell S11 of sheet D-2
  */
-const calculateFinalTimeToTargetCondition = <Data extends {
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatCreationInAdvance: number | "30+",
-    habitatCreationDelay: number | "30+"
-}>(data: Data) => {
+const calculateFinalTimeToTargetCondition = <
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        habitatCreationInAdvance: number | '30+';
+        habitatCreationDelay: number | '30+';
+    },
+>(
+    data: Data,
+) => {
     return calculateFinalTimeToTargetConditionCommon({
         ...data,
         advance: data.habitatCreationInAdvance,
+        advanceDecimal:
+            typeof data.habitatCreationInAdvance === 'number'
+                ? toDecimal(data.habitatCreationInAdvance)
+                : data.habitatCreationInAdvance,
         delay: data.habitatCreationDelay,
+        delayDecimal:
+            typeof data.habitatCreationDelay === 'number'
+                ? toDecimal(data.habitatCreationDelay)
+                : data.habitatCreationDelay,
     });
-}
+};
 
 /**
  * Enriches data with difficulty-related properties.
@@ -62,48 +87,53 @@ const calculateFinalTimeToTargetCondition = <Data extends {
  * Pure calculation: derives all difficulty fields from resolved habitat values.
  */
 export function calculateDifficultyData(input: {
-    habitatType: string,
-    habitatCreationInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲",
-    standardDifficultyOfCreation: keyof typeof difficulty,
-    technicalDifficultyEnhancement: keyof typeof difficulty,
-    timeToPoorCondition: number | "30+" | "Not Possible ▲",
+    habitatType: string;
+    habitatCreationInAdvance: number | '30+';
+    finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    standardDifficultyOfCreation: keyof typeof difficulty;
+    technicalDifficultyEnhancement: keyof typeof difficulty;
+    timeToPoorCondition: number | '30+' | 'Not Possible ▲';
 }) {
-    const normalisedHabitatCreationInAdvance = typeof input.habitatCreationInAdvance === "string" ? 30 : input.habitatCreationInAdvance;
+    const normalisedHabitatCreationInAdvance =
+        typeof input.habitatCreationInAdvance === 'string' ? 30 : input.habitatCreationInAdvance;
 
     const excludedHabitats = [
-        "Traditional orchards",
-        "Ornamental lake or pond",
-        "Ponds (non-priority habitat)",
-        "Ruderal/Ephemeral",
-        "Tall forbs",
-        "Developed land; sealed surface"
+        'Traditional orchards',
+        'Ornamental lake or pond',
+        'Ponds (non-priority habitat)',
+        'Ruderal/Ephemeral',
+        'Tall forbs',
+        'Developed land; sealed surface',
     ];
 
     const hasReachedTargetCondition =
-        normalisedHabitatCreationInAdvance > 0 &&
-        input.finalTimeToTargetCondition === 0;
+        normalisedHabitatCreationInAdvance > 0 && input.finalTimeToTargetCondition === 0;
 
     const hasReachedPoorThreshold =
         normalisedHabitatCreationInAdvance > 0 &&
-        input.timeToPoorCondition !== "Not Possible ▲" &&
+        input.timeToPoorCondition !== 'Not Possible ▲' &&
         (input.timeToPoorCondition === 0 ||
-            (typeof input.timeToPoorCondition === 'number' && normalisedHabitatCreationInAdvance >= input.timeToPoorCondition)) &&
+            (typeof input.timeToPoorCondition === 'number' &&
+                normalisedHabitatCreationInAdvance >= input.timeToPoorCondition)) &&
         !hasReachedTargetCondition;
 
     let appliedDifficultyMultiplier: string;
     if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier = "Low Difficulty - only applicable if all habitat created before losses ⚠";
+        appliedDifficultyMultiplier =
+            'Low Difficulty - only applicable if all habitat created before losses ⚠';
     } else if (hasReachedPoorThreshold && !excludedHabitats.includes(input.habitatType)) {
-        appliedDifficultyMultiplier = "Enhancement difficulty applied";
+        appliedDifficultyMultiplier = 'Enhancement difficulty applied';
     } else {
-        appliedDifficultyMultiplier = "Standard difficulty applied";
+        appliedDifficultyMultiplier = 'Standard difficulty applied';
     }
 
     let finalDifficultyOfCreation: keyof typeof difficulty;
-    if (appliedDifficultyMultiplier === "Low Difficulty - only applicable if all habitat created before losses ⚠") {
-        finalDifficultyOfCreation = "Low";
-    } else if (appliedDifficultyMultiplier === "Enhancement difficulty applied") {
+    if (
+        appliedDifficultyMultiplier ===
+        'Low Difficulty - only applicable if all habitat created before losses ⚠'
+    ) {
+        finalDifficultyOfCreation = 'Low';
+    } else if (appliedDifficultyMultiplier === 'Enhancement difficulty applied') {
         finalDifficultyOfCreation = input.technicalDifficultyEnhancement;
     } else {
         finalDifficultyOfCreation = input.standardDifficultyOfCreation;
@@ -116,16 +146,21 @@ export function calculateDifficultyData(input: {
         appliedDifficultyMultiplier,
         finalDifficultyOfCreation,
         difficultyMultiplierApplied,
+        difficultyMultiplierAppliedDecimal: toDecimal(difficultyMultiplierApplied),
     };
 }
 
-const enrichWithDifficultyData = <Data extends {
-    broadHabitat: string,
-    habitatType: string,
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatCreationInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
-}>(data: Data) => {
+const enrichWithDifficultyData = <
+    Data extends {
+        broadHabitat: string;
+        habitatType: string;
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        habitatCreationInAdvance: number | '30+';
+        finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    },
+>(
+    data: Data,
+) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
     return {
@@ -139,7 +174,7 @@ const enrichWithDifficultyData = <Data extends {
             timeToPoorCondition: habitat.temporalMultipliers['Poor'],
         }),
     };
-}
+};
 
 /**
  * Enriches data with spatial risk multiplier.
@@ -161,28 +196,65 @@ const enrichWithSpatialRiskData = enrichWithSpatialRisk;
  *
  * Corresponds to columns AA and AB in Excel sheet D-2
  */
-const enrichWithHabitatUnitsDelivered = <Data extends {
-    area: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier: number
-}>(data: Data) => {
+const enrichWithHabitatUnitsDelivered = <
+    Data extends {
+        area: number;
+        areaDecimal: Decimal;
+        distinctivenessScore: number;
+        distinctivenessScoreDecimal: Decimal;
+        conditionScore: number;
+        conditionScoreDecimal: Decimal;
+        strategicSignificanceMultiplier: number;
+        strategicSignificanceMultiplierDecimal: Decimal;
+        finalTimeToTargetMultiplier: number | undefined;
+        difficultyMultiplierApplied: number;
+        difficultyMultiplierAppliedDecimal: Decimal;
+        spatialRiskMultiplier: number;
+    },
+>(
+    data: Data,
+) => {
     return { ...data, ...calculateHabitatUnitsDelivered(data) };
-}
+};
 
 export const offSiteHabitatCreationSchema = v.pipe(
     inputSchema,
-    v.forward(v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"), ['habitatType']),
-    v.forward(v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"), ['condition']),
-    v.check(
-        s => !(
-            (s.habitatCreationInAdvance === "30+" || s.habitatCreationInAdvance > 0)
-            && (s.habitatCreationDelay === "30+" || s.habitatCreationDelay > 0)
+    v.transform((data) => ({
+        ...data,
+        area: data.area.toNumber(),
+        areaDecimal: data.area,
+        habitatCreationInAdvance: data.habitatCreationInAdvance,
+        habitatCreationInAdvanceDecimal:
+            typeof data.habitatCreationInAdvance === 'number'
+                ? toDecimal(data.habitatCreationInAdvance)
+                : data.habitatCreationInAdvance,
+        habitatCreationDelay: data.habitatCreationDelay,
+        habitatCreationDelayDecimal:
+            typeof data.habitatCreationDelay === 'number'
+                ? toDecimal(data.habitatCreationDelay)
+                : data.habitatCreationDelay,
+    })),
+    v.forward(
+        v.check(
+            (s) => isValidHabitat(s.broadHabitat, s.habitatType),
+            'The broad habitat and habitat type are incompatible',
         ),
-        "Cannot have both habitat creation in advance and delay in starting habitat creation"
+        ['habitatType'],
+    ),
+    v.forward(
+        v.check(
+            (s) => isValidCondition(s.broadHabitat, s.habitatType, s.condition),
+            'The condition for this habitat is invalid',
+        ),
+        ['condition'],
+    ),
+    v.check(
+        (s) =>
+            !(
+                (s.habitatCreationInAdvance === '30+' || s.habitatCreationInAdvance > 0) &&
+                (s.habitatCreationDelay === '30+' || s.habitatCreationDelay > 0)
+            ),
+        'Cannot have both habitat creation in advance and delay in starting habitat creation',
     ),
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithCreationData),
@@ -190,14 +262,29 @@ export const offSiteHabitatCreationSchema = v.pipe(
     v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
     v.transform(enrichWithSpatialRiskData),
-    v.transform(enrichWithHabitatUnitsDelivered)
-)
+    v.transform(enrichWithHabitatUnitsDelivered),
+);
 
-export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>
-export type OffSiteHabitatCreation = v.InferOutput<typeof offSiteHabitatCreationSchema>
+export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>;
+export type OffSiteHabitatCreation = v.InferOutput<typeof offSiteHabitatCreationSchema>;
 
 export const offSiteHabitatCreationUncheckedSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        area: data.area.toNumber(),
+        areaDecimal: data.area,
+        habitatCreationInAdvance: data.habitatCreationInAdvance,
+        habitatCreationInAdvanceDecimal:
+            typeof data.habitatCreationInAdvance === 'number'
+                ? toDecimal(data.habitatCreationInAdvance)
+                : data.habitatCreationInAdvance,
+        habitatCreationDelay: data.habitatCreationDelay,
+        habitatCreationDelayDecimal:
+            typeof data.habitatCreationDelay === 'number'
+                ? toDecimal(data.habitatCreationDelay)
+                : data.habitatCreationDelay,
+    })),
     safeTransform(enrichWithHabitatData),
     safeTransform(enrichWithCreationData),
     safeTransform(calculateFinalTimeToTargetCondition),
@@ -205,5 +292,4 @@ export const offSiteHabitatCreationUncheckedSchema = v.pipe(
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithHabitatUnitsDelivered),
-)
-
+);

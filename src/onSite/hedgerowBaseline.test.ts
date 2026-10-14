@@ -1,12 +1,13 @@
+import { Decimal } from "../decimal";
 import { expect, test } from "bun:test";
-import * as v from 'valibot';
+import * as v from "valibot";
 import {
     onSiteHedgerowBaselineSchema,
     enrichWithHedgerowData,
     enrichWithBaselineUnitsData,
     enrichWithTotalHedgerowUnits,
     enrichWithUnitsLost,
-    type OnSiteHedgerowBaselineSchema
+    type OnSiteHedgerowBaselineSchema,
 } from "./hedgerowBaseline";
 
 export function fixture(overrides: Partial<OnSiteHedgerowBaselineSchema> = {}): OnSiteHedgerowBaselineSchema {
@@ -18,14 +19,26 @@ export function fixture(overrides: Partial<OnSiteHedgerowBaselineSchema> = {}): 
         lengthRetained: 1,
         lengthEnhanced: 0,
         ...overrides,
-    }
+    };
 }
 
 test("valid hedgerow types", () => {
-    expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Native hedgerow" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Species-rich native hedgerow" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Line of trees" })).success).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Native hedgerow" })).success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Species-rich native hedgerow" }))
+            .success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" }),
+        ).success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowBaselineSchema, fixture({ habitatType: "Line of trees" })).success,
+    ).toBeTrue();
 });
 
 test("condition validation for hedgerows", () => {
@@ -34,38 +47,58 @@ test("condition validation for hedgerows", () => {
     expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ condition: "Poor" })).success).toBeTrue();
 
     // Hedgerows don't use "Fairly Good" or other habitat conditions
-    expect(v.safeParse(onSiteHedgerowBaselineSchema, fixture({ condition: "Fairly Good" })).success).toBeFalse();
+    expect(
+        v.safeParse(onSiteHedgerowBaselineSchema, fixture({ condition: "Fairly Good" })).success,
+    ).toBeFalse();
 });
 
 test("Non-native and ornamental hedgerow can only have Poor condition", () => {
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" }),
+        ).success,
+    ).toBeTrue();
 
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Moderate" })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Moderate" }),
+        ).success,
+    ).toBeFalse();
 
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Good" })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Good" }),
+        ).success,
+    ).toBeFalse();
 });
 
 test("length arithmetic validation", () => {
     // Valid: retained + enhanced = total
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ length: 1, lengthRetained: 0.6, lengthEnhanced: 0.4 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ length: 1, lengthRetained: 0.6, lengthEnhanced: 0.4 }),
+        ).success,
+    ).toBeTrue();
 
     // Valid: retained + enhanced < total
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ length: 1, lengthRetained: 0.5, lengthEnhanced: 0.3 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ length: 1, lengthRetained: 0.5, lengthEnhanced: 0.3 }),
+        ).success,
+    ).toBeTrue();
 
     // Invalid: retained + enhanced > total
-    expect(v.safeParse(onSiteHedgerowBaselineSchema,
-        fixture({ length: 1, lengthRetained: 0.7, lengthEnhanced: 0.5 })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowBaselineSchema,
+            fixture({ length: 1, lengthRetained: 0.7, lengthEnhanced: 0.5 }),
+        ).success,
+    ).toBeFalse();
 });
 
 test("enrichWithHedgerowData calculations", () => {
@@ -92,32 +125,43 @@ test("enrichWithHedgerowData calculations", () => {
 });
 
 test("enrichWithHedgerowData for different conditions", () => {
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Good",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(3);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Good",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(3);
 
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Moderate",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(2);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Moderate",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(2);
 
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Poor",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(1);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Poor",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(1);
 });
 
 test("enrichWithBaselineUnitsData calculations", () => {
     const inputData = {
         lengthRetained: 0.03,
+        lengthRetainedDecimal: new Decimal(0.03),
         lengthEnhanced: 0.02,
+        lengthEnhancedDecimal: new Decimal(0.02),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
     };
 
     const result = enrichWithBaselineUnitsData(inputData);
@@ -130,10 +174,15 @@ test("enrichWithBaselineUnitsData calculations", () => {
 test("enrichWithBaselineUnitsData with zero lengths", () => {
     const inputData = {
         lengthRetained: 0,
+        lengthRetainedDecimal: new Decimal(0),
         lengthEnhanced: 0,
+        lengthEnhancedDecimal: new Decimal(0),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.1,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.1),
     };
 
     const result = enrichWithBaselineUnitsData(inputData);
@@ -145,9 +194,13 @@ test("enrichWithBaselineUnitsData with zero lengths", () => {
 test("enrichWithTotalHedgerowUnits calculation", () => {
     const inputData = {
         length: 0.052,
+        lengthDecimal: new Decimal(0.052),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
     };
 
     const result = enrichWithTotalHedgerowUnits(inputData);
@@ -158,44 +211,74 @@ test("enrichWithTotalHedgerowUnits calculation", () => {
 
 test("enrichWithUnitsLost calculations", () => {
     // No length lost
-    expect(enrichWithUnitsLost({
-        length: 1,
-        lengthRetained: 0.7,
-        lengthEnhanced: 0.3,
-        totalHedgerowUnits: 10,
-        unitsRetained: 7,
-        unitsEnhanced: 3,
-    }).unitsLost).toEqual(0);
+    expect(
+        enrichWithUnitsLost({
+            length: 1,
+            lengthDecimal: new Decimal(1),
+            lengthRetained: 0.7,
+            lengthRetainedDecimal: new Decimal(0.7),
+            lengthEnhanced: 0.3,
+            lengthEnhancedDecimal: new Decimal(0.3),
+            totalHedgerowUnits: 10,
+            totalHedgerowUnitsDecimal: new Decimal(10),
+            unitsRetained: 7,
+            unitsRetainedDecimal: new Decimal(7),
+            unitsEnhanced: 3,
+            unitsEnhancedDecimal: new Decimal(3),
+        }).unitsLost,
+    ).toEqual(0);
 
     // Some length lost
-    expect(enrichWithUnitsLost({
-        length: 1,
-        lengthRetained: 0.5,
-        lengthEnhanced: 0.3,
-        totalHedgerowUnits: 10,
-        unitsRetained: 5,
-        unitsEnhanced: 3,
-    }).unitsLost).toEqual(2);
+    expect(
+        enrichWithUnitsLost({
+            length: 1,
+            lengthDecimal: new Decimal(1),
+            lengthRetained: 0.5,
+            lengthRetainedDecimal: new Decimal(0.5),
+            lengthEnhanced: 0.3,
+            lengthEnhancedDecimal: new Decimal(0.3),
+            totalHedgerowUnits: 10,
+            totalHedgerowUnitsDecimal: new Decimal(10),
+            unitsRetained: 5,
+            unitsRetainedDecimal: new Decimal(5),
+            unitsEnhanced: 3,
+            unitsEnhancedDecimal: new Decimal(3),
+        }).unitsLost,
+    ).toEqual(2);
 
     // All length lost
-    expect(enrichWithUnitsLost({
-        length: 1,
-        lengthRetained: 0,
-        lengthEnhanced: 0,
-        totalHedgerowUnits: 10,
-        unitsRetained: 0,
-        unitsEnhanced: 0,
-    }).unitsLost).toEqual(10);
+    expect(
+        enrichWithUnitsLost({
+            length: 1,
+            lengthDecimal: new Decimal(1),
+            lengthRetained: 0,
+            lengthRetainedDecimal: new Decimal(0),
+            lengthEnhanced: 0,
+            lengthEnhancedDecimal: new Decimal(0),
+            totalHedgerowUnits: 10,
+            totalHedgerowUnitsDecimal: new Decimal(10),
+            unitsRetained: 0,
+            unitsRetainedDecimal: new Decimal(0),
+            unitsEnhanced: 0,
+            unitsEnhancedDecimal: new Decimal(0),
+        }).unitsLost,
+    ).toEqual(10);
 });
 
 test("enrichWithUnitsLost calculates length lost correctly", () => {
     const result = enrichWithUnitsLost({
         length: 0.052,
+        lengthDecimal: new Decimal(0.052),
         lengthRetained: 0.052,
+        lengthRetainedDecimal: new Decimal(0.052),
         lengthEnhanced: 0,
+        lengthEnhancedDecimal: new Decimal(0),
         totalHedgerowUnits: 0.3588,
+        totalHedgerowUnitsDecimal: new Decimal(0.3588),
         unitsRetained: 0.3588,
+        unitsRetainedDecimal: new Decimal(0.3588),
         unitsEnhanced: 0,
+        unitsEnhancedDecimal: new Decimal(0),
     });
 
     expect(result.lengthLost).toBeCloseTo(0, 5);
@@ -207,10 +290,13 @@ test("full schema validation with real example from Excel B-1", () => {
     const result = v.safeParse(onSiteHedgerowBaselineSchema, {
         habitatType: "Native hedgerow",
         length: 0.052,
+        lengthDecimal: new Decimal(0.052),
         condition: "Good",
         strategicSignificance: "Formally identified in local strategy",
         lengthRetained: 0.052,
+        lengthRetainedDecimal: new Decimal(0.052),
         lengthEnhanced: 0,
+        lengthEnhancedDecimal: new Decimal(0),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -234,10 +320,13 @@ test("schema validation with partial loss", () => {
     const result = v.safeParse(onSiteHedgerowBaselineSchema, {
         habitatType: "Species-rich native hedgerow",
         length: 0.1,
+        lengthDecimal: new Decimal(0.1),
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         lengthRetained: 0.06,
+        lengthRetainedDecimal: new Decimal(0.06),
         lengthEnhanced: 0.02,
+        lengthEnhancedDecimal: new Decimal(0.02),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,

@@ -1,12 +1,13 @@
+import { Decimal } from "../decimal";
 import { describe, expect, test } from "bun:test";
-import * as v from 'valibot';
+import * as v from "valibot";
 import {
     onSiteHedgerowCreationSchema,
     enrichWithHedgerowData,
     enrichWithTemporalData,
     enrichWithDifficultyData,
     enrichWithHedgerowUnitsDelivered,
-    type OnSiteHedgerowCreationSchema
+    type OnSiteHedgerowCreationSchema,
 } from "./hedgerowCreation";
 
 export function fixture(overrides: Partial<OnSiteHedgerowCreationSchema> = {}): OnSiteHedgerowCreationSchema {
@@ -21,14 +22,26 @@ export function fixture(overrides: Partial<OnSiteHedgerowCreationSchema> = {}): 
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
         ...overrides,
-    }
+    };
 }
 
 test("valid hedgerow types", () => {
-    expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Native hedgerow" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Species-rich native hedgerow" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" })).success).toBeTrue();
-    expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Line of trees" })).success).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Native hedgerow" })).success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Species-rich native hedgerow" }))
+            .success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" }),
+        ).success,
+    ).toBeTrue();
+    expect(
+        v.safeParse(onSiteHedgerowCreationSchema, fixture({ habitatType: "Line of trees" })).success,
+    ).toBeTrue();
 });
 
 test("condition validation for hedgerows", () => {
@@ -37,63 +50,98 @@ test("condition validation for hedgerows", () => {
     expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ condition: "Poor" })).success).toBeTrue();
 
     // Hedgerows don't use "Fairly Good" or other habitat conditions
-    expect(v.safeParse(onSiteHedgerowCreationSchema, fixture({ condition: "Fairly Good" })).success).toBeFalse();
+    expect(
+        v.safeParse(onSiteHedgerowCreationSchema, fixture({ condition: "Fairly Good" })).success,
+    ).toBeFalse();
 });
 
 test("Non-native and ornamental hedgerow can only have Poor condition", () => {
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Poor" }),
+        ).success,
+    ).toBeTrue();
 
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Moderate" })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Moderate" }),
+        ).success,
+    ).toBeFalse();
 
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Good" })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatType: "Non-native and ornamental hedgerow", condition: "Good" }),
+        ).success,
+    ).toBeFalse();
 });
 
 test("temporal adjustment validation - cannot have both advance and delay", () => {
     // Valid: only advance
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: 5, delayInStartingHabitatCreation: 0 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: 5, delayInStartingHabitatCreation: 0 }),
+        ).success,
+    ).toBeTrue();
 
     // Valid: only delay
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: 3 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: 3 }),
+        ).success,
+    ).toBeTrue();
 
     // Valid: neither
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: 0 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: 0 }),
+        ).success,
+    ).toBeTrue();
 
     // Valid: only advance with "30+"
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: 0 })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: 0 }),
+        ).success,
+    ).toBeTrue();
 
     // Valid: only delay with "30+"
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: "30+" })
-    ).success).toBeTrue();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: 0, delayInStartingHabitatCreation: "30+" }),
+        ).success,
+    ).toBeTrue();
 
     // Invalid: both advance and delay
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: 5, delayInStartingHabitatCreation: 3 })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: 5, delayInStartingHabitatCreation: 3 }),
+        ).success,
+    ).toBeFalse();
 
     // Invalid: both advance and delay with "30+"
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: 3 })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: 3 }),
+        ).success,
+    ).toBeFalse();
 
     // Invalid: both with "30+"
-    expect(v.safeParse(onSiteHedgerowCreationSchema,
-        fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: "30+" })
-    ).success).toBeFalse();
+    expect(
+        v.safeParse(
+            onSiteHedgerowCreationSchema,
+            fixture({ habitatCreatedInAdvance: "30+", delayInStartingHabitatCreation: "30+" }),
+        ).success,
+    ).toBeFalse();
 });
 
 test("enrichWithHedgerowData calculations", () => {
@@ -122,23 +170,29 @@ test("enrichWithHedgerowData calculations", () => {
 });
 
 test("enrichWithHedgerowData for different conditions", () => {
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Good",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(3);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Good",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(3);
 
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Moderate",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(2);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Moderate",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(2);
 
-    expect(enrichWithHedgerowData({
-        habitatType: "Native hedgerow",
-        condition: "Poor",
-        strategicSignificance: "Location ecologically desirable but not in local strategy",
-    }).conditionScore).toEqual(1);
+    expect(
+        enrichWithHedgerowData({
+            habitatType: "Native hedgerow",
+            condition: "Poor",
+            strategicSignificance: "Location ecologically desirable but not in local strategy",
+        }).conditionScore,
+    ).toEqual(1);
 });
 
 test("enrichWithTemporalData - basic calculation", () => {
@@ -146,7 +200,9 @@ test("enrichWithTemporalData - basic calculation", () => {
         habitatType: "Native hedgerow" as const,
         condition: "Good" as const,
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
     };
 
     const result = enrichWithTemporalData(inputData);
@@ -162,7 +218,9 @@ test("enrichWithTemporalData - with advance", () => {
         habitatType: "Native hedgerow" as const,
         condition: "Good" as const,
         habitatCreatedInAdvance: 5,
+        habitatCreatedInAdvanceDecimal: new Decimal(5),
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
     };
 
     const result = enrichWithTemporalData(inputData);
@@ -178,7 +236,9 @@ test("enrichWithTemporalData - with delay", () => {
         habitatType: "Native hedgerow" as const,
         condition: "Good" as const,
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: 3,
+        delayInStartingHabitatCreationDecimal: new Decimal(3),
     };
 
     const result = enrichWithTemporalData(inputData);
@@ -194,15 +254,17 @@ test("enrichWithTemporalData - handles 30+ scenario", () => {
         habitatType: "Ecologically valuable line of trees" as const,
         condition: "Good" as const,
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: 5,
+        delayInStartingHabitatCreationDecimal: new Decimal(5),
     };
 
     const result = enrichWithTemporalData(inputData);
 
     // Ecologically valuable line of trees to Good = "30+"
     // A standard "30+" with no advance remains "30+"
-    expect(result.standardTimeToTargetCondition).toBe('30+');
-    expect(result.finalTimeToTargetCondition).toBe('30+');
+    expect(result.standardTimeToTargetCondition).toBe("30+");
+    expect(result.finalTimeToTargetCondition).toBe("30+");
     expect(result.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
 });
 
@@ -211,7 +273,9 @@ test("enrichWithTemporalData - advance beyond target uses zero years", () => {
         habitatType: "Native hedgerow" as const,
         condition: "Poor" as const,
         habitatCreatedInAdvance: 5,
+        habitatCreatedInAdvanceDecimal: new Decimal(5),
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
     };
 
     const result = enrichWithTemporalData(inputData);
@@ -228,12 +292,13 @@ test("enrichWithTemporalData - with '30+' advance", () => {
         condition: "Good" as const,
         habitatCreatedInAdvance: "30+" as const,
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
     };
 
     const result = enrichWithTemporalData(inputData);
 
     // The "30+" advance branch returns zero years.
-    expect(result.standardTimeToTargetCondition).toBe('30+');
+    expect(result.standardTimeToTargetCondition).toBe("30+");
     expect(result.finalTimeToTargetCondition).toBe(0);
 });
 
@@ -242,6 +307,7 @@ test("enrichWithTemporalData - with '30+' delay", () => {
         habitatType: "Native hedgerow" as const,
         condition: "Good" as const,
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: "30+" as const,
     };
 
@@ -249,7 +315,7 @@ test("enrichWithTemporalData - with '30+' delay", () => {
 
     // The "30+" delay branch preserves the sentinel.
     expect(result.standardTimeToTargetCondition).toBe(12);
-    expect(result.finalTimeToTargetCondition).toBe('30+');
+    expect(result.finalTimeToTargetCondition).toBe("30+");
     expect(result.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
 });
 
@@ -257,10 +323,14 @@ test("enrichWithDifficultyData - standard difficulty", () => {
     const inputData = {
         habitatType: "Native hedgerow" as const,
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         standardTimeToTargetCondition: 12,
+        standardTimeToTargetConditionDecimal: new Decimal(12),
         finalTimeToTargetCondition: 12,
+        finalTimeToTargetConditionDecimal: new Decimal(12),
         technicalDifficultyCreation: "Low",
         technicalDifficultyCreationMultiplier: 1,
+        technicalDifficultyCreationMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithDifficultyData(inputData);
@@ -274,10 +344,14 @@ test("enrichWithDifficultyData - low difficulty when created in advance", () => 
     const inputData = {
         habitatType: "Native hedgerow" as const,
         habitatCreatedInAdvance: 15,
+        habitatCreatedInAdvanceDecimal: new Decimal(15),
         standardTimeToTargetCondition: 12,
-        finalTimeToTargetCondition: -3, // Created well in advance
+        standardTimeToTargetConditionDecimal: new Decimal(12),
+        finalTimeToTargetCondition: -3,
+        finalTimeToTargetConditionDecimal: new Decimal(-3), // Created well in advance
         technicalDifficultyCreation: "Low",
         technicalDifficultyCreationMultiplier: 1,
+        technicalDifficultyCreationMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithDifficultyData(inputData);
@@ -292,10 +366,14 @@ test("enrichWithDifficultyData - maintains standard when advance not sufficient"
     const inputData = {
         habitatType: "Native hedgerow" as const,
         habitatCreatedInAdvance: 5,
+        habitatCreatedInAdvanceDecimal: new Decimal(5),
         standardTimeToTargetCondition: 12,
-        finalTimeToTargetCondition: 7, // Still positive
+        standardTimeToTargetConditionDecimal: new Decimal(12),
+        finalTimeToTargetCondition: 7,
+        finalTimeToTargetConditionDecimal: new Decimal(7), // Still positive
         technicalDifficultyCreation: "Low",
         technicalDifficultyCreationMultiplier: 1,
+        technicalDifficultyCreationMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithDifficultyData(inputData);
@@ -309,11 +387,17 @@ test("enrichWithDifficultyData - maintains standard when advance not sufficient"
 test("enrichWithHedgerowUnitsDelivered - basic calculation", () => {
     const inputData = {
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
-        temporalMultiplier: 0.7002822741999999, // 10 years
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
+        temporalMultiplier: 0.7002822741999999,
+        temporalMultiplierDecimal: new Decimal(0.7002822741999999), // 10 years
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -325,11 +409,16 @@ test("enrichWithHedgerowUnitsDelivered - basic calculation", () => {
 test("enrichWithHedgerowUnitsDelivered - with string temporal multiplier", () => {
     const inputData = {
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: "Check Data ⚠" as string,
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -341,11 +430,16 @@ test("enrichWithHedgerowUnitsDelivered - with string temporal multiplier", () =>
 test("enrichWithHedgerowUnitsDelivered - with N/A temporal multiplier", () => {
     const inputData = {
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: "N/A" as string,
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -357,11 +451,16 @@ test("enrichWithHedgerowUnitsDelivered - with N/A temporal multiplier", () => {
 test("enrichWithHedgerowUnitsDelivered - with undefined temporal multiplier", () => {
     const inputData = {
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: undefined,
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -373,11 +472,17 @@ test("enrichWithHedgerowUnitsDelivered - with undefined temporal multiplier", ()
 test("enrichWithHedgerowUnitsDelivered - with zero length", () => {
     const inputData = {
         length: 0,
+        lengthDecimal: new Decimal(0),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: 0.7002822741999999,
+        temporalMultiplierDecimal: new Decimal(0.7002822741999999),
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -389,11 +494,17 @@ test("enrichWithHedgerowUnitsDelivered - with zero length", () => {
 test("enrichWithHedgerowUnitsDelivered - with maximum temporal multiplier", () => {
     const inputData = {
         length: 1.0,
+        lengthDecimal: new Decimal(1.0),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
-        temporalMultiplier: 1.0, // Maximum multiplier (0 years)
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
+        temporalMultiplier: 1.0,
+        temporalMultiplierDecimal: new Decimal(1.0), // Maximum multiplier (0 years)
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -405,11 +516,17 @@ test("enrichWithHedgerowUnitsDelivered - with maximum temporal multiplier", () =
 test("enrichWithHedgerowUnitsDelivered - with high difficulty multiplier", () => {
     const inputData = {
         length: 0.5,
-        distinctivenessScore: 4, // Species-rich hedgerow
+        lengthDecimal: new Decimal(0.5),
+        distinctivenessScore: 4,
+        distinctivenessScoreDecimal: new Decimal(4), // Species-rich hedgerow
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: 0.7002822741999999,
-        difficultyMultiplier: 1.5, // Very High difficulty
+        temporalMultiplierDecimal: new Decimal(0.7002822741999999),
+        difficultyMultiplier: 1.5,
+        difficultyMultiplierDecimal: new Decimal(1.5), // Very High difficulty
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -421,11 +538,17 @@ test("enrichWithHedgerowUnitsDelivered - with high difficulty multiplier", () =>
 test("enrichWithHedgerowUnitsDelivered - with poor condition", () => {
     const inputData = {
         length: 1.0,
+        lengthDecimal: new Decimal(1.0),
         distinctivenessScore: 2,
-        conditionScore: 1, // Poor condition
+        distinctivenessScoreDecimal: new Decimal(2),
+        conditionScore: 1,
+        conditionScoreDecimal: new Decimal(1), // Poor condition
         strategicSignificanceMultiplier: 1.0,
-        temporalMultiplier: 0.898632125, // 3 years
+        strategicSignificanceMultiplierDecimal: new Decimal(1.0),
+        temporalMultiplier: 0.898632125,
+        temporalMultiplierDecimal: new Decimal(0.898632125), // 3 years
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -437,11 +560,17 @@ test("enrichWithHedgerowUnitsDelivered - with poor condition", () => {
 test("enrichWithHedgerowUnitsDelivered - with low temporal multiplier (30+ years)", () => {
     const inputData = {
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
-        temporalMultiplier: 0.3197967361, // 30+ years
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
+        temporalMultiplier: 0.3197967361,
+        temporalMultiplierDecimal: new Decimal(0.3197967361), // 30+ years
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -453,11 +582,17 @@ test("enrichWithHedgerowUnitsDelivered - with low temporal multiplier (30+ years
 test("enrichWithHedgerowUnitsDelivered - with high distinctiveness score", () => {
     const inputData = {
         length: 0.3,
-        distinctivenessScore: 6, // High distinctiveness
+        lengthDecimal: new Decimal(0.3),
+        distinctivenessScore: 6,
+        distinctivenessScoreDecimal: new Decimal(6), // High distinctiveness
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: 0.7002822741999999,
+        temporalMultiplierDecimal: new Decimal(0.7002822741999999),
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -469,11 +604,17 @@ test("enrichWithHedgerowUnitsDelivered - with high distinctiveness score", () =>
 test("enrichWithHedgerowUnitsDelivered - with very large length", () => {
     const inputData = {
         length: 100.0,
+        lengthDecimal: new Decimal(100.0),
         distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3),
         strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15),
         temporalMultiplier: 0.7002822741999999,
+        temporalMultiplierDecimal: new Decimal(0.7002822741999999),
         difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1),
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -485,11 +626,17 @@ test("enrichWithHedgerowUnitsDelivered - with very large length", () => {
 test("enrichWithHedgerowUnitsDelivered - with all minimum non-zero values", () => {
     const inputData = {
         length: 0.01,
-        distinctivenessScore: 2, // Minimum distinctiveness
-        conditionScore: 1, // Minimum condition
-        strategicSignificanceMultiplier: 1.0, // Minimum strategic significance
-        temporalMultiplier: 0.3197967361, // Minimum temporal multiplier (30+)
-        difficultyMultiplier: 1, // Minimum difficulty
+        lengthDecimal: new Decimal(0.01),
+        distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2), // Minimum distinctiveness
+        conditionScore: 1,
+        conditionScoreDecimal: new Decimal(1), // Minimum condition
+        strategicSignificanceMultiplier: 1.0,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.0), // Minimum strategic significance
+        temporalMultiplier: 0.3197967361,
+        temporalMultiplierDecimal: new Decimal(0.3197967361), // Minimum temporal multiplier (30+)
+        difficultyMultiplier: 1,
+        difficultyMultiplierDecimal: new Decimal(1), // Minimum difficulty
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -501,11 +648,17 @@ test("enrichWithHedgerowUnitsDelivered - with all minimum non-zero values", () =
 test("enrichWithHedgerowUnitsDelivered - with all maximum values", () => {
     const inputData = {
         length: 10.0,
-        distinctivenessScore: 6, // Maximum distinctiveness
-        conditionScore: 3, // Maximum condition
-        strategicSignificanceMultiplier: 1.15, // Maximum strategic significance
-        temporalMultiplier: 1.0, // Maximum temporal multiplier (0 years)
-        difficultyMultiplier: 1.5, // Maximum difficulty
+        lengthDecimal: new Decimal(10.0),
+        distinctivenessScore: 6,
+        distinctivenessScoreDecimal: new Decimal(6), // Maximum distinctiveness
+        conditionScore: 3,
+        conditionScoreDecimal: new Decimal(3), // Maximum condition
+        strategicSignificanceMultiplier: 1.15,
+        strategicSignificanceMultiplierDecimal: new Decimal(1.15), // Maximum strategic significance
+        temporalMultiplier: 1.0,
+        temporalMultiplierDecimal: new Decimal(1.0), // Maximum temporal multiplier (0 years)
+        difficultyMultiplier: 1.5,
+        difficultyMultiplierDecimal: new Decimal(1.5), // Maximum difficulty
     };
 
     const result = enrichWithHedgerowUnitsDelivered(inputData);
@@ -518,10 +671,13 @@ test("full schema validation - Native hedgerow to Good", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Native hedgerow",
         length: 0.5,
+        lengthDecimal: new Decimal(0.5),
         condition: "Good",
         strategicSignificance: "Formally identified in local strategy",
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -547,10 +703,13 @@ test("full schema validation - Species-rich hedgerow with advance", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Species-rich native hedgerow",
         length: 0.2,
+        lengthDecimal: new Decimal(0.2),
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         habitatCreatedInAdvance: 3,
+        habitatCreatedInAdvanceDecimal: new Decimal(3),
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -580,10 +739,13 @@ test("full schema validation - with delay", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Native hedgerow",
         length: 0.1,
+        lengthDecimal: new Decimal(0.1),
         condition: "Poor",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: 2,
+        delayInStartingHabitatCreationDecimal: new Decimal(2),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -613,9 +775,11 @@ test("full schema validation - with '30+' delay", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Native hedgerow",
         length: 0.15,
+        lengthDecimal: new Decimal(0.15),
         condition: "Good",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         habitatCreatedInAdvance: 0,
+        habitatCreatedInAdvanceDecimal: new Decimal(0),
         delayInStartingHabitatCreation: "30+",
         userComments: undefined,
         planningAuthorityComments: undefined,
@@ -634,7 +798,7 @@ test("full schema validation - with '30+' delay", () => {
         expect(result.output.conditionScore).toEqual(3);
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
         expect(result.output.standardTimeToTargetCondition).toEqual(12);
-        expect(result.output.finalTimeToTargetCondition).toEqual('30+');
+        expect(result.output.finalTimeToTargetCondition).toEqual("30+");
         expect(result.output.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
         expect(result.output.difficultyMultiplier).toEqual(1);
         // 0.15 * 2 * 3 * 1.1 * 0.3197967361 * 1
@@ -646,10 +810,12 @@ test("full schema validation - with '30+' advance", () => {
     const result = v.safeParse(onSiteHedgerowCreationSchema, {
         habitatType: "Ecologically valuable line of trees",
         length: 0.2,
+        lengthDecimal: new Decimal(0.2),
         condition: "Good",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         habitatCreatedInAdvance: "30+",
         delayInStartingHabitatCreation: 0,
+        delayInStartingHabitatCreationDecimal: new Decimal(0),
         userComments: undefined,
         planningAuthorityComments: undefined,
         habitatReferenceNumber: undefined,
@@ -666,7 +832,7 @@ test("full schema validation - with '30+' advance", () => {
         expect(result.output.distinctivenessScore).toEqual(4);
         expect(result.output.conditionScore).toEqual(3);
         expect(result.output.strategicSignificanceMultiplier).toEqual(1.1);
-        expect(result.output.standardTimeToTargetCondition).toEqual('30+');
+        expect(result.output.standardTimeToTargetCondition).toEqual("30+");
         expect(result.output.finalTimeToTargetCondition).toEqual(0);
         expect(result.output.difficultyMultiplier).toEqual(1); // Low difficulty when created in advance
         // 0 years uses temporal multiplier of 1.0
@@ -675,40 +841,62 @@ test("full schema validation - with '30+' advance", () => {
     }
 });
 
-
-
-describe('creation time adjustments', () => {
-    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
+describe("creation time adjustments", () => {
+    const strategicSignificance = "Area/compensation not in local strategy/ no local strategy" as const;
     const schema = onSiteHedgerowCreationSchema;
-    for (const [delay, time, units] of [[24, 29, 1.4234823228], [25, 30, 1.3736604416], [26, '30+', 1.2791869444]] as const) {
+    for (const [delay, time, units] of [
+        [24, 29, 1.4234823228],
+        [25, 30, 1.3736604416],
+        [26, "30+", 1.2791869444],
+    ] as const) {
         test(`applies the ${time}-year temporal adjustment after a ${delay}-year delay`, () => {
             const result = v.parse(schema, {
-                habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+                habitatType: "Native hedgerow",
+                length: 1,
+                lengthDecimal: new Decimal(1),
+                condition: "Moderate",
+                strategicSignificance,
                 delayInStartingHabitatCreation: delay,
-                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+                spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+                offSiteReferenceNumber: "gain-site",
             });
             expect(result.finalTimeToTargetCondition).toBe(time);
             expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
         });
     }
-    test('advance beyond standard time delivers the undiscounted units', () => {
+    test("advance beyond standard time delivers the undiscounted units", () => {
         const result = v.parse(schema, {
-            habitatType: 'Native hedgerow', length: 1, condition: 'Moderate', strategicSignificance,
+            habitatType: "Native hedgerow",
+            length: 1,
+            lengthDecimal: new Decimal(1),
+            condition: "Moderate",
+            strategicSignificance,
             habitatCreatedInAdvance: 10,
-            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+            habitatCreatedInAdvanceDecimal: new Decimal(10),
+            spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+            offSiteReferenceNumber: "gain-site",
         });
         expect(result.finalTimeToTargetCondition).toBe(0);
         expect(result.temporalMultiplier).toBe(1);
         expect(result.hedgerowUnitsDelivered).toBe(4);
     });
-    for (const [advance, time, units] of [[0, '30+', 1.9187804166], [1, 29, 2.1352234842], ['30+', 0, 6]] as const) {
+    for (const [advance, time, units] of [
+        [0, "30+", 1.9187804166],
+        [1, 29, 2.1352234842],
+        ["30+", 0, 6],
+    ] as const) {
         test(`adjusts a 30+ year target for ${advance} years of advance creation`, () => {
             const result = v.parse(schema, {
-                habitatType: 'Line of trees', length: 1, condition: 'Good', strategicSignificance,
+                habitatType: "Line of trees",
+                length: 1,
+                lengthDecimal: new Decimal(1),
+                condition: "Good",
+                strategicSignificance,
                 habitatCreatedInAdvance: advance,
-                spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site', offSiteReferenceNumber: 'gain-site',
+                spatialRiskCategory: "Compensation inside LPA boundary or NCA of impact site",
+                offSiteReferenceNumber: "gain-site",
             });
-            expect(result.standardTimeToTargetCondition).toBe('30+');
+            expect(result.standardTimeToTargetCondition).toBe("30+");
             expect(result.finalTimeToTargetCondition).toBe(time);
             expect(Math.abs(result.hedgerowUnitsDelivered - units)).toBeLessThanOrEqual(1e-8);
         });

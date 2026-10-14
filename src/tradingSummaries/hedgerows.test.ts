@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import { expect, test, describe } from "bun:test";
 import { hedgerowTradingSummary } from "./hedgerows";
 import { type AllFeatures } from "../features";
@@ -46,7 +47,14 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when V.High hedgerow has net gain", () => {
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -55,10 +63,32 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when V.High hedgerow breaks even", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        totalHedgerowUnits: 10,
+                        totalHedgerowUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -67,10 +97,32 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("not satisfied when V.High hedgerow has net loss", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", totalHedgerowUnits: 20, length: 200, lengthRetained: 0, unitsRetained: 0, lengthLost: 200, unitsLost: 20 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        totalHedgerowUnits: 20,
+                        totalHedgerowUnitsDecimal: new Decimal(20),
+                        length: 200,
+                        lengthDecimal: new Decimal(200),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 200,
+                        lengthLostDecimal: new Decimal(200),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 5, length: 50 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        hedgerowUnitsDelivered: 5,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vHighSatisfied).toBeFalse();
@@ -81,7 +133,13 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when High hedgerow has net gain", () => {
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow with trees",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).highSatisfied).toBeTrue();
@@ -90,7 +148,21 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("not satisfied when High has net loss and no V.High surplus", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow with trees", totalHedgerowUnits: 15, length: 150, lengthRetained: 0, unitsRetained: 0, lengthLost: 150, unitsLost: 15 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow with trees",
+                        totalHedgerowUnits: 15,
+                        totalHedgerowUnitsDecimal: new Decimal(15),
+                        length: 150,
+                        lengthDecimal: new Decimal(150),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 150,
+                        lengthLostDecimal: new Decimal(150),
+                        unitsLost: 15,
+                        unitsLostDecimal: new Decimal(15),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).highSatisfied).toBeFalse();
@@ -101,10 +173,31 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // highSatisfied = vHighAvailable + highUpwards >= 0 => 20 + (-10) = 10 >= 0
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 20, length: 200 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        hedgerowUnitsDelivered: 20,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(20),
+                        length: 200,
+                        lengthDecimal: new Decimal(200),
+                    } as any,
                 ],
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow with trees", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow with trees",
+                        totalHedgerowUnits: 10,
+                        totalHedgerowUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).highSatisfied).toBeTrue();
@@ -115,7 +208,13 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when Medium hedgerow has net gain", () => {
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -124,7 +223,21 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("not satisfied when Medium has net loss and no surplus from above", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow", totalHedgerowUnits: 20, length: 200, lengthRetained: 0, unitsRetained: 0, lengthLost: 200, unitsLost: 20 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow",
+                        totalHedgerowUnits: 20,
+                        totalHedgerowUnitsDecimal: new Decimal(20),
+                        length: 200,
+                        lengthDecimal: new Decimal(200),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 200,
+                        lengthLostDecimal: new Decimal(200),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).mediumSatisfied).toBeFalse();
@@ -136,10 +249,30 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // cumulativeSurplus = -10 + 30 = 20 >= 0
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow with trees", hedgerowUnitsDelivered: 15, length: 150 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow with trees",
+                        hedgerowUnitsDelivered: 15,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(15),
+                        length: 150,
+                        lengthDecimal: new Decimal(150),
+                    } as any,
                 ],
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow",
+                        totalHedgerowUnits: 10,
+                        totalHedgerowUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -150,7 +283,13 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when Low hedgerow has net gain", () => {
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Native hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).lowSatisfied).toBeTrue();
@@ -159,7 +298,21 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("not satisfied when Low has net loss and no surplus from above", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Native hedgerow", totalHedgerowUnits: 15, length: 150, lengthRetained: 0, unitsRetained: 0, lengthLost: 150, unitsLost: 15 } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        totalHedgerowUnits: 15,
+                        totalHedgerowUnitsDecimal: new Decimal(15),
+                        length: 150,
+                        lengthDecimal: new Decimal(150),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 150,
+                        lengthLostDecimal: new Decimal(150),
+                        unitsLost: 15,
+                        unitsLostDecimal: new Decimal(15),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).lowSatisfied).toBeFalse();
@@ -169,10 +322,30 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // Medium gains 10, Low loses 5 -> Low cumulativeSurplus = -5 + 10 = 5 >= 0
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Species-rich native hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Native hedgerow", totalHedgerowUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        totalHedgerowUnits: 5,
+                        totalHedgerowUnitsDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 50,
+                        lengthLostDecimal: new Decimal(50),
+                        unitsLost: 5,
+                        unitsLostDecimal: new Decimal(5),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).lowSatisfied).toBeTrue();
@@ -183,8 +356,36 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // lowSatisfied = netChange only = -3 < 0
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow", totalHedgerowUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
-                    { habitatType: "Native hedgerow", totalHedgerowUnits: 3, length: 30, lengthRetained: 0, unitsRetained: 0, lengthLost: 30, unitsLost: 3 } as any,
+                    {
+                        habitatType: "Species-rich native hedgerow",
+                        totalHedgerowUnits: 5,
+                        totalHedgerowUnitsDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 50,
+                        lengthLostDecimal: new Decimal(50),
+                        unitsLost: 5,
+                        unitsLostDecimal: new Decimal(5),
+                    } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        totalHedgerowUnits: 3,
+                        totalHedgerowUnitsDecimal: new Decimal(3),
+                        length: 30,
+                        lengthDecimal: new Decimal(30),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 30,
+                        lengthLostDecimal: new Decimal(30),
+                        unitsLost: 3,
+                        unitsLostDecimal: new Decimal(3),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).lowSatisfied).toBeFalse();
@@ -195,7 +396,13 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("satisfied when V.Low hedgerow has net gain", () => {
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Non-native and ornamental hedgerow", hedgerowUnitsDelivered: 10, length: 100 } as any,
+                    {
+                        habitatType: "Non-native and ornamental hedgerow",
+                        hedgerowUnitsDelivered: 10,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vLowSatisfied).toBeTrue();
@@ -204,7 +411,21 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
         test("not satisfied when V.Low has net loss and no surplus from above", () => {
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        habitatType: "Non-native and ornamental hedgerow",
+                        totalHedgerowUnits: 10,
+                        totalHedgerowUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vLowSatisfied).toBeFalse();
@@ -214,10 +435,30 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // Low gains 8, V.Low loses 5 -> V.Low cumulativeSurplus = -5 + 8 = 3 >= 0
             const input = emptyFixture({
                 onSiteHedgerowCreations: [
-                    { habitatType: "Native hedgerow", hedgerowUnitsDelivered: 8, length: 80 } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        hedgerowUnitsDelivered: 8,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(8),
+                        length: 80,
+                        lengthDecimal: new Decimal(80),
+                    } as any,
                 ],
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 5, length: 50, lengthRetained: 0, unitsRetained: 0, lengthLost: 50, unitsLost: 5 } as any,
+                    {
+                        habitatType: "Non-native and ornamental hedgerow",
+                        totalHedgerowUnits: 5,
+                        totalHedgerowUnitsDecimal: new Decimal(5),
+                        length: 50,
+                        lengthDecimal: new Decimal(50),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 50,
+                        lengthLostDecimal: new Decimal(50),
+                        unitsLost: 5,
+                        unitsLostDecimal: new Decimal(5),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vLowSatisfied).toBeTrue();
@@ -227,8 +468,36 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // Low loses 3, V.Low loses 2 -> V.Low cumulativeSurplus = -2 (Low surplus not applied)
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Native hedgerow", totalHedgerowUnits: 3, length: 30, lengthRetained: 0, unitsRetained: 0, lengthLost: 30, unitsLost: 3 } as any,
-                    { habitatType: "Non-native and ornamental hedgerow", totalHedgerowUnits: 2, length: 20, lengthRetained: 0, unitsRetained: 0, lengthLost: 20, unitsLost: 2 } as any,
+                    {
+                        habitatType: "Native hedgerow",
+                        totalHedgerowUnits: 3,
+                        totalHedgerowUnitsDecimal: new Decimal(3),
+                        length: 30,
+                        lengthDecimal: new Decimal(30),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 30,
+                        lengthLostDecimal: new Decimal(30),
+                        unitsLost: 3,
+                        unitsLostDecimal: new Decimal(3),
+                    } as any,
+                    {
+                        habitatType: "Non-native and ornamental hedgerow",
+                        totalHedgerowUnits: 2,
+                        totalHedgerowUnitsDecimal: new Decimal(2),
+                        length: 20,
+                        lengthDecimal: new Decimal(20),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 20,
+                        lengthLostDecimal: new Decimal(20),
+                        unitsLost: 2,
+                        unitsLostDecimal: new Decimal(2),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vLowSatisfied).toBeFalse();
@@ -242,10 +511,32 @@ describe("hedgerowTradingSummary (hedgerows)", () => {
             // overallUnitChange = -10 + 12 = +2 > 0, no remaining loss, satisfied
             const input = emptyFixture({
                 onSiteHedgerowBaselines: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", totalHedgerowUnits: 10, length: 100, lengthRetained: 0, unitsRetained: 0, lengthLost: 100, unitsLost: 10 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        totalHedgerowUnits: 10,
+                        totalHedgerowUnitsDecimal: new Decimal(10),
+                        length: 100,
+                        lengthDecimal: new Decimal(100),
+                        lengthRetained: 0,
+                        lengthRetainedDecimal: new Decimal(0),
+                        unitsRetained: 0,
+                        unitsRetainedDecimal: new Decimal(0),
+                        lengthLost: 100,
+                        lengthLostDecimal: new Decimal(100),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 offSiteHedgerowEnhancements: [
-                    { habitatType: "Species-rich native hedgerow with trees - associated with bank or ditch", hedgerowUnitsDelivered: 12, length: 120 } as any,
+                    {
+                        habitatType:
+                            "Species-rich native hedgerow with trees - associated with bank or ditch",
+                        hedgerowUnitsDelivered: 12,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(12),
+                        length: 120,
+                        lengthDecimal: new Decimal(120),
+                    } as any,
                 ],
             });
             expect(hedgerowTradingSummary(input).vHighSatisfied).toBeTrue();

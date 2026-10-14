@@ -1,7 +1,8 @@
+import { Decimal } from "./decimal";
 import { expect, test, describe } from "bun:test";
-import { headlineResults } from './headlineResults';
-import { type AllFeatures } from './features';
-import type { TradingSummaries } from './tradingSummaries';
+import { headlineResults } from "./headlineResults";
+import { type AllFeatures } from "./features";
+import type { TradingSummaries } from "./tradingSummaries";
 
 function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
     return {
@@ -29,9 +30,28 @@ function emptyFixture(overrides: Partial<AllFeatures> = {}): AllFeatures {
 
 function emptyTradingSummary(): TradingSummaries {
     return {
-        habitats: { details: {} as any, vHighSatisfied: true, highSatisfied: true, mediumSatisfied: true, lowSatisfied: true },
-        hedgerows: { details: {} as any, vHighSatisfied: true, highSatisfied: true, mediumSatisfied: true, lowSatisfied: true, vLowSatisfied: true },
-        watercourses: { details: {} as any, vHighSatisfied: true, highSatisfied: true, mediumSatisfied: true, lowSatisfied: true },
+        habitats: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true,
+        },
+        hedgerows: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true,
+            vLowSatisfied: true,
+        },
+        watercourses: {
+            details: {} as any,
+            vHighSatisfied: true,
+            highSatisfied: true,
+            mediumSatisfied: true,
+            lowSatisfied: true,
+        },
     };
 }
 
@@ -69,12 +89,25 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 10, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteHabitatCreations: Array.from({ length: N }, () => ({
-                habitatUnitsDelivered: perRow,
-                habitatUnitsDeliveredWithSpatialRisk: perRow,
-            } as any)),
+            offSiteHabitatCreations: Array.from(
+                { length: N },
+                () =>
+                    ({
+                        habitatUnitsDelivered: perRow,
+                        habitatUnitsDeliveredDecimal: new Decimal(perRow),
+                        habitatUnitsDeliveredWithSpatialRisk: perRow,
+                        habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(perRow),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());
@@ -96,12 +129,24 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 10, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteHabitatCreations: contributions.map(v => ({
-                habitatUnitsDelivered: v,
-                habitatUnitsDeliveredWithSpatialRisk: v,
-            } as any)),
+            offSiteHabitatCreations: contributions.map(
+                (v) =>
+                    ({
+                        habitatUnitsDelivered: v,
+                        habitatUnitsDeliveredDecimal: new Decimal(v),
+                        habitatUnitsDeliveredWithSpatialRisk: v,
+                        habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(v),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());
@@ -120,16 +165,31 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 10, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
             offSiteHabitatCreations: [
-                ...Array.from({ length: N - 1 }, () => ({
-                    habitatUnitsDelivered: perRow,
-                    habitatUnitsDeliveredWithSpatialRisk: perRow,
-                } as any)),
+                ...Array.from(
+                    { length: N - 1 },
+                    () =>
+                        ({
+                            habitatUnitsDelivered: perRow,
+                            habitatUnitsDeliveredDecimal: new Decimal(perRow),
+                            habitatUnitsDeliveredWithSpatialRisk: perRow,
+                            habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(perRow),
+                        }) as any,
+                ),
                 {
                     habitatUnitsDelivered: perRow - shortBy,
+                    habitatUnitsDeliveredDecimal: new Decimal(perRow - shortBy),
                     habitatUnitsDeliveredWithSpatialRisk: perRow - shortBy,
+                    habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(perRow - shortBy),
                 } as any,
             ],
         });
@@ -143,7 +203,14 @@ describe("headlineResults precision", () => {
         // Baseline whose × 1.1 product can drift under float math.
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 4.3724, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 4.3724,
+                    totalHabitatUnitsDecimal: new Decimal(4.3724),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
         });
 
@@ -160,12 +227,25 @@ describe("headlineResults precision", () => {
         const N = 22;
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 10, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteHabitatCreations: Array.from({ length: N }, () => ({
-                habitatUnitsDelivered: 1.0,
-                habitatUnitsDeliveredWithSpatialRisk: 0.5,
-            } as any)),
+            offSiteHabitatCreations: Array.from(
+                { length: N },
+                () =>
+                    ({
+                        habitatUnitsDelivered: 1.0,
+                        habitatUnitsDeliveredDecimal: new Decimal(1.0),
+                        habitatUnitsDeliveredWithSpatialRisk: 0.5,
+                        habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(0.5),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());
@@ -183,12 +263,23 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteHedgerowBaselines: [
-                { totalHedgerowUnits: 10, unitsRetained: 0 } as any,
+                {
+                    totalHedgerowUnits: 10,
+                    totalHedgerowUnitsDecimal: new Decimal(10),
+                    unitsRetained: 0,
+                    unitsRetainedDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteHedgerowCreations: Array.from({ length: N }, () => ({
-                hedgerowUnitsDelivered: perRow,
-                hedgerowUnitsDeliveredWithSpatialRisk: perRow,
-            } as any)),
+            offSiteHedgerowCreations: Array.from(
+                { length: N },
+                () =>
+                    ({
+                        hedgerowUnitsDelivered: perRow,
+                        hedgerowUnitsDeliveredDecimal: new Decimal(perRow),
+                        hedgerowUnitsDeliveredWithSpatialRisk: perRow,
+                        hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal(perRow),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());
@@ -203,12 +294,25 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteWatercourseBaselines: [
-                { totalWatercourseUnits: 10, unitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalWatercourseUnits: 10,
+                    totalWatercourseUnitsDecimal: new Decimal(10),
+                    unitsRetained: 0,
+                    unitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteWatercourseCreations: Array.from({ length: N }, () => ({
-                unitsDelivered: perRow,
-                netUnitChangeWithSpatialRisk: perRow,
-            } as any)),
+            offSiteWatercourseCreations: Array.from(
+                { length: N },
+                () =>
+                    ({
+                        unitsDelivered: perRow,
+                        unitsDeliveredDecimal: new Decimal(perRow),
+                        netUnitChangeWithSpatialRisk: perRow,
+                        netUnitChangeWithSpatialRiskDecimal: new Decimal(perRow),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());
@@ -226,12 +330,25 @@ describe("headlineResults precision", () => {
 
         const features: AllFeatures = emptyFixture({
             onSiteHabitatBaselines: [
-                { totalHabitatUnits: 10, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0 } as any,
+                {
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                } as any,
             ],
-            offSiteHabitatCreations: Array.from({ length: N }, () => ({
-                habitatUnitsDelivered: perRow,
-                habitatUnitsDeliveredWithSpatialRisk: perRow,
-            } as any)),
+            offSiteHabitatCreations: Array.from(
+                { length: N },
+                () =>
+                    ({
+                        habitatUnitsDelivered: perRow,
+                        habitatUnitsDeliveredDecimal: new Decimal(perRow),
+                        habitatUnitsDeliveredWithSpatialRisk: perRow,
+                        habitatUnitsDeliveredWithSpatialRiskDecimal: new Decimal(perRow),
+                    }) as any,
+            ),
         });
 
         const result = headlineResults(features, emptyTradingSummary());

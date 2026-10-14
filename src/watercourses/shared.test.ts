@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import { expect, test, describe } from "bun:test";
 import {
     // Baseline functions
@@ -33,8 +34,11 @@ describe("Baseline Functions", () => {
         test("Priority habitat", () => {
             const result = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0.7,
+                lengthRetainedDecimal: new Decimal(0.7),
                 lengthEnhanced: 0.3,
+                lengthEnhancedDecimal: new Decimal(0.3),
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
@@ -54,8 +58,11 @@ describe("Baseline Functions", () => {
         test("Other rivers and streams with encroachment", () => {
             const result = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0.8,
+                lengthRetainedDecimal: new Decimal(0.8),
                 lengthEnhanced: 0.2,
+                lengthEnhancedDecimal: new Decimal(0.2),
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
@@ -74,8 +81,11 @@ describe("Baseline Functions", () => {
         test("Ditches with minimal encroachment", () => {
             const result = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 1,
+                lengthRetainedDecimal: new Decimal(1),
                 lengthEnhanced: 0,
+                lengthEnhancedDecimal: new Decimal(0),
                 watercourseType: "Ditches",
                 condition: "Poor",
                 strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
@@ -94,17 +104,29 @@ describe("Baseline Functions", () => {
         test("various encroachment multipliers", () => {
             const base = {
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0.5,
+                lengthRetainedDecimal: new Decimal(0.5),
                 lengthEnhanced: 0.5,
+                lengthEnhancedDecimal: new Decimal(0.5),
                 watercourseType: "Canals" as const,
                 condition: "Fairly Good" as const,
                 strategicSignificance: "Location ecologically desirable but not in local strategy" as const,
                 riparianEncroachment: "No Encroachment/ No Encroachment" as const,
             };
 
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "No Encroachment" }).watercourseEncroachmentMultiplier).toEqual(1);
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Minor" }).watercourseEncroachmentMultiplier).toEqual(0.8);
-            expect(enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Major" }).watercourseEncroachmentMultiplier).toEqual(0.5);
+            expect(
+                enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "No Encroachment" })
+                    .watercourseEncroachmentMultiplier,
+            ).toEqual(1);
+            expect(
+                enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Minor" })
+                    .watercourseEncroachmentMultiplier,
+            ).toEqual(0.8);
+            expect(
+                enrichWithBaselineWatercourseData({ ...base, watercourseEncroachment: "Major" })
+                    .watercourseEncroachmentMultiplier,
+            ).toEqual(0.5);
         });
     });
 
@@ -112,8 +134,11 @@ describe("Baseline Functions", () => {
         test("calculates units correctly", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0.5,
+                lengthRetainedDecimal: new Decimal(0.5),
                 lengthEnhanced: 0.3,
+                lengthEnhancedDecimal: new Decimal(0.3),
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
@@ -132,8 +157,11 @@ describe("Baseline Functions", () => {
         test("handles zero lengths", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0,
+                lengthRetainedDecimal: new Decimal(0),
                 lengthEnhanced: 0,
+                lengthEnhancedDecimal: new Decimal(0),
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
@@ -152,8 +180,11 @@ describe("Baseline Functions", () => {
         test("calculates total units correctly", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1.2,
+                lengthDecimal: new Decimal(1.2),
                 lengthRetained: 0.8,
+                lengthRetainedDecimal: new Decimal(0.8),
                 lengthEnhanced: 0.2,
+                lengthEnhancedDecimal: new Decimal(0.2),
                 watercourseType: "Other rivers and streams",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
@@ -171,8 +202,11 @@ describe("Baseline Functions", () => {
         test("Priority habitat calculation", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 2,
+                lengthDecimal: new Decimal(2),
                 lengthRetained: 1.5,
+                lengthRetainedDecimal: new Decimal(1.5),
                 lengthEnhanced: 0.5,
+                lengthEnhancedDecimal: new Decimal(0.5),
                 watercourseType: "Priority habitat",
                 condition: "Good",
                 strategicSignificance: "Formally identified in local strategy",
@@ -192,8 +226,11 @@ describe("Baseline Functions", () => {
         test("full retention - no loss", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 1,
+                lengthRetainedDecimal: new Decimal(1),
                 lengthEnhanced: 0,
+                lengthEnhancedDecimal: new Decimal(0),
                 watercourseType: "Ditches",
                 condition: "Moderate",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
@@ -212,8 +249,11 @@ describe("Baseline Functions", () => {
         test("partial retention", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0.5,
+                lengthRetainedDecimal: new Decimal(0.5),
                 lengthEnhanced: 0.3,
+                lengthEnhancedDecimal: new Decimal(0.3),
                 watercourseType: "Canals",
                 condition: "Fairly Good",
                 strategicSignificance: "Location ecologically desirable but not in local strategy",
@@ -232,8 +272,11 @@ describe("Baseline Functions", () => {
         test("total loss", () => {
             const enriched = enrichWithBaselineWatercourseData({
                 length: 1,
+                lengthDecimal: new Decimal(1),
                 lengthRetained: 0,
+                lengthRetainedDecimal: new Decimal(0),
                 lengthEnhanced: 0,
+                lengthEnhancedDecimal: new Decimal(0),
                 watercourseType: "Culvert",
                 condition: "Poor",
                 strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
@@ -256,21 +299,21 @@ describe("Baseline Functions", () => {
 // ============================================================================
 
 describe("Creation Functions", () => {
-    describe('enrichWithCreationWatercourseData', () => {
-        test('enriches with watercourse properties', () => {
+    describe("enrichWithCreationWatercourseData", () => {
+        test("enriches with watercourse properties", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Moderate' as const,
-                strategicSignificance: 'Location ecologically desirable but not in local strategy' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Moderate" as const,
+                strategicSignificance: "Location ecologically desirable but not in local strategy" as const,
             };
 
             const result = enrichWithCreationWatercourseData(input);
 
-            expect(result.distinctiveness).toBe('Medium');
+            expect(result.distinctiveness).toBe("Medium");
             expect(result.distinctivenessScore).toBe(4);
             expect(result.conditionScore).toBe(2);
             expect(result.standardTimeToTarget).toBe(5);
-            expect(result.standardDifficulty).toBe('Medium');
+            expect(result.standardDifficulty).toBe("Medium");
 
             const result2 = enrichWithCreationWatercourseData({
                 watercourseType: "Priority habitat",
@@ -298,31 +341,34 @@ describe("Creation Functions", () => {
             expect(result.standardTimeToTarget).toBeGreaterThan(0);
         });
 
-        test('should handle priority habitat', () => {
+        test("should handle priority habitat", () => {
             const input = {
-                watercourseType: 'Priority habitat' as const,
-                condition: 'Moderate' as const,
-                strategicSignificance: 'Formally identified in local strategy' as const,
+                watercourseType: "Priority habitat" as const,
+                condition: "Moderate" as const,
+                strategicSignificance: "Formally identified in local strategy" as const,
             };
 
             const result = enrichWithCreationWatercourseData(input);
 
-            expect(result.distinctiveness).toBe('V.High');
+            expect(result.distinctiveness).toBe("V.High");
             expect(result.distinctivenessScore).toBe(8);
             expect(result.conditionScore).toBe(2);
             expect(result.standardTimeToTarget).toBe(5);
-            expect(result.standardDifficulty).toBe('High');
+            expect(result.standardDifficulty).toBe("High");
         });
     });
 
-    describe('enrichWithTemporalData', () => {
+    describe("enrichWithTemporalData", () => {
         test("calculates final time to target with advance", () => {
             const data = {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
                 habitatCreatedInAdvance: 2,
+                habitatCreatedInAdvanceDecimal: new Decimal(2),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result = enrichWithTemporalData(data);
@@ -336,8 +382,11 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 3,
+                delayInStartingDecimal: new Decimal(3),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result = enrichWithTemporalData(data);
@@ -350,8 +399,11 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 35,
+                delayInStartingDecimal: new Decimal(35),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result = enrichWithTemporalData(data);
@@ -364,8 +416,11 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
                 habitatCreatedInAdvance: 10,
+                habitatCreatedInAdvanceDecimal: new Decimal(10),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result = enrichWithTemporalData(data);
@@ -378,8 +433,11 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Fairly Poor" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result1 = enrichWithTemporalData(data1);
@@ -389,8 +447,11 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Fairly Good" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result2 = enrichWithTemporalData(data2);
@@ -400,20 +461,26 @@ describe("Creation Functions", () => {
                 watercourseType: "Ditches" as const,
                 condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 5,
+                standardTimeToTargetDecimal: new Decimal(5),
             };
 
             const result3 = enrichWithTemporalData(data3);
             expect(result3.isDitchFairlyCategory).toBeFalse();
         });
-        test('should calculate temporal multiplier with no advance or delay', () => {
+        test("should calculate temporal multiplier with no advance or delay", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Moderate' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 2,
+                standardTimeToTargetDecimal: new Decimal(2),
             };
 
             const result = enrichWithTemporalData(input);
@@ -423,13 +490,16 @@ describe("Creation Functions", () => {
             expect(result.isDitchFairlyCategory).toBe(false);
         });
 
-        test('should reduce time with advance creation', () => {
+        test("should reduce time with advance creation", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Moderate' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Moderate" as const,
                 habitatCreatedInAdvance: 1,
+                habitatCreatedInAdvanceDecimal: new Decimal(1),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 2,
+                standardTimeToTargetDecimal: new Decimal(2),
             };
 
             const result = enrichWithTemporalData(input);
@@ -438,13 +508,16 @@ describe("Creation Functions", () => {
             expect(result.temporalMultiplier).toBe(0.965);
         });
 
-        test('should increase time with delay', () => {
+        test("should increase time with delay", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Moderate' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 3,
+                delayInStartingDecimal: new Decimal(3),
                 standardTimeToTarget: 2,
+                standardTimeToTargetDecimal: new Decimal(2),
             };
 
             const result = enrichWithTemporalData(input);
@@ -453,13 +526,16 @@ describe("Creation Functions", () => {
             expect(result.temporalMultiplier).toBe(0.8368287006);
         });
 
-        test('should use the sentinel above 30 years', () => {
+        test("should use the sentinel above 30 years", () => {
             const input = {
-                watercourseType: 'Priority habitat' as const,
-                condition: 'Moderate' as const,
+                watercourseType: "Priority habitat" as const,
+                condition: "Moderate" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 25,
+                delayInStartingDecimal: new Decimal(25),
                 standardTimeToTarget: 8,
+                standardTimeToTargetDecimal: new Decimal(8),
             };
 
             const result = enrichWithTemporalData(input);
@@ -468,13 +544,16 @@ describe("Creation Functions", () => {
             expect(result.temporalMultiplier).toBe(0.3197967361);
         });
 
-        test('should not go below 0 years', () => {
+        test("should not go below 0 years", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Moderate' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Moderate" as const,
                 habitatCreatedInAdvance: 5,
+                habitatCreatedInAdvanceDecimal: new Decimal(5),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 2,
+                standardTimeToTargetDecimal: new Decimal(2),
             };
 
             const result = enrichWithTemporalData(input);
@@ -483,13 +562,16 @@ describe("Creation Functions", () => {
             expect(result.temporalMultiplier).toBe(1);
         });
 
-        test('should detect ditch fairly category', () => {
+        test("should detect ditch fairly category", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Fairly Poor' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Fairly Poor" as const,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
                 delayInStarting: 0,
+                delayInStartingDecimal: new Decimal(0),
                 standardTimeToTarget: 0,
+                standardTimeToTargetDecimal: new Decimal(0),
             };
 
             const result = enrichWithTemporalData(input);
@@ -498,76 +580,87 @@ describe("Creation Functions", () => {
         });
     });
 
-    describe('enrichWithDifficultyData', () => {
-        test('should use standard difficulty for non-ditch', () => {
+    describe("enrichWithDifficultyData", () => {
+        test("should use standard difficulty for non-ditch", () => {
             const input = {
-                watercourseType: 'Priority habitat' as const,
-                condition: 'Moderate' as const,
-                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                watercourseType: "Priority habitat" as const,
+                condition: "Moderate" as const,
+                standardOrAdjustedTimeToTargetCondition: "Standard time to target condition applied" as const,
                 standardTimeToTarget: 5 as const,
-                standardDifficulty: 'Medium' as const,
+                standardTimeToTargetDecimal: new Decimal(5 as const),
+                standardDifficulty: "Medium" as const,
                 isDitchFairlyCategory: false,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
-            expect(result.finalDifficultyOfCreation).toBe('Medium');
+            expect(result.appliedDifficulty).toBe("Standard difficulty applied");
+            expect(result.finalDifficultyOfCreation).toBe("Medium");
             expect(result.difficultyMultiplier).toBe(0.67);
         });
 
-        test('should use low difficulty for ditch fairly category with advance creation', () => {
+        test("should use low difficulty for ditch fairly category with advance creation", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Fairly Poor' as const,
-                standardOrAdjustedTimeToTargetCondition: 'Check details - Is there evidence that habitat has reached target condition? ⚠' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Fairly Poor" as const,
+                standardOrAdjustedTimeToTargetCondition:
+                    "Check details - Is there evidence that habitat has reached target condition? ⚠" as const,
                 standardTimeToTarget: 2 as const,
-                standardDifficulty: 'Medium' as const,
+                standardTimeToTargetDecimal: new Decimal(2 as const),
+                standardDifficulty: "Medium" as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 2,
+                habitatCreatedInAdvanceDecimal: new Decimal(2),
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Low Difficulty - only applicable if all habitat created before losses ⚠');
-            expect(result.finalDifficultyOfCreation).toBe('Low');
+            expect(result.appliedDifficulty).toBe(
+                "Low Difficulty - only applicable if all habitat created before losses ⚠",
+            );
+            expect(result.finalDifficultyOfCreation).toBe("Low");
             expect(result.difficultyMultiplier).toBe(1);
         });
 
-        test('should use standard difficulty for ditch fairly category without advance creation', () => {
+        test("should use standard difficulty for ditch fairly category without advance creation", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                condition: 'Fairly Poor' as const,
-                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                watercourseType: "Ditches" as const,
+                condition: "Fairly Poor" as const,
+                standardOrAdjustedTimeToTargetCondition: "Standard time to target condition applied" as const,
                 standardTimeToTarget: 2 as const,
-                standardDifficulty: 'Medium' as const,
+                standardTimeToTargetDecimal: new Decimal(2 as const),
+                standardDifficulty: "Medium" as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
-            expect(result.finalDifficultyOfCreation).toBe('Medium');
+            expect(result.appliedDifficulty).toBe("Standard difficulty applied");
+            expect(result.finalDifficultyOfCreation).toBe("Medium");
             expect(result.difficultyMultiplier).toBe(0.67);
         });
 
-        test('should handle high difficulty', () => {
+        test("should handle high difficulty", () => {
             const input = {
-                watercourseType: 'Other rivers and streams' as const,
-                condition: 'Good' as const,
-                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                watercourseType: "Other rivers and streams" as const,
+                condition: "Good" as const,
+                standardOrAdjustedTimeToTargetCondition: "Standard time to target condition applied" as const,
                 standardTimeToTarget: 10 as const,
-                standardDifficulty: 'High' as const,
+                standardTimeToTargetDecimal: new Decimal(10 as const),
+                standardDifficulty: "High" as const,
                 isDitchFairlyCategory: false,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
             };
 
             const result = enrichWithDifficultyData(input);
 
-            expect(result.appliedDifficulty).toBe('Standard difficulty applied');
-            expect(result.finalDifficultyOfCreation).toBe('High');
+            expect(result.appliedDifficulty).toBe("Standard difficulty applied");
+            expect(result.finalDifficultyOfCreation).toBe("High");
             expect(result.difficultyMultiplier).toBe(0.33);
         });
 
@@ -575,11 +668,13 @@ describe("Creation Functions", () => {
             const data = {
                 watercourseType: "Ditches" as const,
                 condition: "Fairly Poor" as const,
-                standardOrAdjustedTimeToTargetCondition: 'Standard time to target condition applied' as const,
+                standardOrAdjustedTimeToTargetCondition: "Standard time to target condition applied" as const,
                 standardTimeToTarget: 2 as const,
+                standardTimeToTargetDecimal: new Decimal(2 as const),
                 standardDifficulty: "Medium" as const,
                 isDitchFairlyCategory: true,
                 habitatCreatedInAdvance: 0,
+                habitatCreatedInAdvanceDecimal: new Decimal(0),
             };
 
             const result = enrichWithDifficultyData(data);
@@ -590,12 +685,12 @@ describe("Creation Functions", () => {
         });
     });
 
-    describe('enrichCreationWithEncroachmentData', () => {
-        test('should calculate encroachment multipliers', () => {
+    describe("enrichCreationWithEncroachmentData", () => {
+        test("should calculate encroachment multipliers", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                watercourseEncroachment: 'No Encroachment' as const,
-                riparianEncroachment: 'No Encroachment/ No Encroachment' as const,
+                watercourseType: "Ditches" as const,
+                watercourseEncroachment: "No Encroachment" as const,
+                riparianEncroachment: "No Encroachment/ No Encroachment" as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
@@ -604,11 +699,11 @@ describe("Creation Functions", () => {
             expect(result.riparianEncroachmentMultiplier).toBe(1);
         });
 
-        test('should handle partial encroachment', () => {
+        test("should handle partial encroachment", () => {
             const input = {
-                watercourseType: 'Other rivers and streams' as const,
-                watercourseEncroachment: 'Minor' as const,
-                riparianEncroachment: 'Moderate/ Minor' as const,
+                watercourseType: "Other rivers and streams" as const,
+                watercourseEncroachment: "Minor" as const,
+                riparianEncroachment: "Moderate/ Minor" as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
@@ -617,11 +712,11 @@ describe("Creation Functions", () => {
             expect(result.riparianEncroachmentMultiplier).toBe(0.9);
         });
 
-        test('should handle N/A - Culvert encroachment', () => {
+        test("should handle N/A - Culvert encroachment", () => {
             const input = {
-                watercourseType: 'Culvert' as const,
-                watercourseEncroachment: 'N/A - Culvert' as const,
-                riparianEncroachment: 'N/A - Culvert' as const,
+                watercourseType: "Culvert" as const,
+                watercourseEncroachment: "N/A - Culvert" as const,
+                riparianEncroachment: "N/A - Culvert" as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
@@ -630,11 +725,11 @@ describe("Creation Functions", () => {
             expect(result.riparianEncroachmentMultiplier).toBe(1);
         });
 
-        test('should handle major encroachment', () => {
+        test("should handle major encroachment", () => {
             const input = {
-                watercourseType: 'Ditches' as const,
-                watercourseEncroachment: 'Major' as const,
-                riparianEncroachment: 'Major/Major' as const,
+                watercourseType: "Ditches" as const,
+                watercourseEncroachment: "Major" as const,
+                riparianEncroachment: "Major/Major" as const,
             };
 
             const result = enrichCreationWithEncroachmentData(input);
@@ -644,17 +739,25 @@ describe("Creation Functions", () => {
         });
     });
 
-    describe('enrichWithNetUnitChange', () => {
-        test('should calculate net unit change', () => {
+    describe("enrichWithNetUnitChange", () => {
+        test("should calculate net unit change", () => {
             const input = {
                 length: 1.5,
+                lengthDecimal: new Decimal(1.5),
                 distinctivenessScore: 4,
-                conditionScore: 2 as number | 'Not possible',
+                distinctivenessScoreDecimal: new Decimal(4),
+                conditionScore: 2 as number | "Not possible",
+                conditionScoreDecimal: new Decimal(2 as number | "Not possible"),
                 strategicSignificanceMultiplier: 1.1,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.1),
                 temporalMultiplier: 0.98,
+                temporalMultiplierDecimal: new Decimal(0.98),
                 difficultyMultiplier: 1,
+                difficultyMultiplierDecimal: new Decimal(1),
                 watercourseEncroachmentMultiplier: 1,
+                watercourseEncroachmentMultiplierDecimal: new Decimal(1),
                 riparianEncroachmentMultiplier: 1,
+                riparianEncroachmentMultiplierDecimal: new Decimal(1),
             };
 
             const result = enrichWithUnitsDelivered(input);
@@ -663,16 +766,24 @@ describe("Creation Functions", () => {
             expect(result.unitsDelivered).toBeCloseTo(12.936, 2);
         });
 
-        test('should calculate net unit change with multiple multipliers', () => {
+        test("should calculate net unit change with multiple multipliers", () => {
             const input = {
                 length: 2,
+                lengthDecimal: new Decimal(2),
                 distinctivenessScore: 8,
-                conditionScore: 2.5 as number | 'Not possible',
+                distinctivenessScoreDecimal: new Decimal(8),
+                conditionScore: 2.5 as number | "Not possible",
+                conditionScoreDecimal: new Decimal(2.5 as number | "Not possible"),
                 strategicSignificanceMultiplier: 1.15,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.15),
                 temporalMultiplier: 0.95,
+                temporalMultiplierDecimal: new Decimal(0.95),
                 difficultyMultiplier: 1.1,
+                difficultyMultiplierDecimal: new Decimal(1.1),
                 watercourseEncroachmentMultiplier: 0.7,
+                watercourseEncroachmentMultiplierDecimal: new Decimal(0.7),
                 riparianEncroachmentMultiplier: 0.9,
+                riparianEncroachmentMultiplierDecimal: new Decimal(0.9),
             };
 
             const result = enrichWithUnitsDelivered(input);
@@ -708,10 +819,13 @@ describe("Enhancement Functions", () => {
         test("extracts baseline data correctly", () => {
             const baseline = {
                 lengthEnhanced: 0.5,
+                lengthEnhancedDecimal: new Decimal(0.5),
                 watercourseType: "Ditches" as const,
                 distinctivenessScore: 4,
+                distinctivenessScoreDecimal: new Decimal(4),
                 distinctiveness: "Medium",
-                conditionScore: 2 as number | 'Not possible',
+                conditionScore: 2 as number | "Not possible",
+                conditionScoreDecimal: new Decimal(2 as number | "Not possible"),
                 condition: "Moderate" as const,
             };
 
@@ -754,8 +868,12 @@ describe("Enhancement Functions", () => {
     describe("lookupEnhancementTimeToTarget", () => {
         test("uses distinctiveness upgrade years when upgrading", () => {
             const result = lookupEnhancementTimeToTarget({
-                _baselineWatercourse: { distinctivenessScore: 4 },
+                _baselineWatercourse: {
+                    distinctivenessScore: 4,
+                    distinctivenessScoreDecimal: new Decimal(4),
+                },
                 distinctivenessScore: 6,
+                distinctivenessScoreDecimal: new Decimal(6),
                 enhancementPathway: "Poor to Good",
             });
 
@@ -764,8 +882,12 @@ describe("Enhancement Functions", () => {
 
         test("looks up from matrix when not upgrading distinctiveness", () => {
             const result = lookupEnhancementTimeToTarget({
-                _baselineWatercourse: { distinctivenessScore: 6 },
+                _baselineWatercourse: {
+                    distinctivenessScore: 6,
+                    distinctivenessScoreDecimal: new Decimal(6),
+                },
                 distinctivenessScore: 6,
+                distinctivenessScoreDecimal: new Decimal(6),
                 enhancementPathway: "Poor to Moderate",
             });
 
@@ -778,8 +900,11 @@ describe("Enhancement Functions", () => {
         test("calculates final time with advance", () => {
             const result = calculateFinalTimeToTargetValues({
                 timeToTargetCondition: 10,
+                timeToTargetConditionDecimal: new Decimal(10),
                 watercourseEnhancedInAdvance: 3,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(3),
                 watercourseEnhancedDelay: 0,
+                watercourseEnhancedDelayDecimal: new Decimal(0),
             });
 
             expect(result.finalTimeToTargetCondition).toEqual(7); // 10 - 3 + 0
@@ -789,8 +914,11 @@ describe("Enhancement Functions", () => {
         test("returns 0 when advance exceeds time to target", () => {
             const result = calculateFinalTimeToTargetValues({
                 timeToTargetCondition: 5,
+                timeToTargetConditionDecimal: new Decimal(5),
                 watercourseEnhancedInAdvance: 10,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(10),
                 watercourseEnhancedDelay: 0,
+                watercourseEnhancedDelayDecimal: new Decimal(0),
             });
 
             expect(result.finalTimeToTargetCondition).toEqual(0);
@@ -799,8 +927,11 @@ describe("Enhancement Functions", () => {
         test("caps at 30+", () => {
             const result = calculateFinalTimeToTargetValues({
                 timeToTargetCondition: 10,
+                timeToTargetConditionDecimal: new Decimal(10),
                 watercourseEnhancedInAdvance: 0,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(0),
                 watercourseEnhancedDelay: 25,
+                watercourseEnhancedDelayDecimal: new Decimal(25),
             });
 
             expect(result.finalTimeToTargetCondition).toEqual("30+");
@@ -810,7 +941,9 @@ describe("Enhancement Functions", () => {
             const result = calculateFinalTimeToTargetValues({
                 timeToTargetCondition: "N/A",
                 watercourseEnhancedInAdvance: 0,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(0),
                 watercourseEnhancedDelay: 0,
+                watercourseEnhancedDelayDecimal: new Decimal(0),
             });
 
             expect(result.finalTimeToTargetCondition).toEqual("N/A");
@@ -822,7 +955,9 @@ describe("Enhancement Functions", () => {
         test("applies low difficulty when reached target", () => {
             const result = determineEnhancementDifficulty({
                 watercourseEnhancedInAdvance: 5,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(5),
                 finalTimeToTargetCondition: 0,
+                finalTimeToTargetConditionDecimal: new Decimal(0),
                 technicalDifficulty: "Medium",
             });
 
@@ -834,7 +969,9 @@ describe("Enhancement Functions", () => {
         test("applies standard difficulty when not reached target", () => {
             const result = determineEnhancementDifficulty({
                 watercourseEnhancedInAdvance: 0,
+                watercourseEnhancedInAdvanceDecimal: new Decimal(0),
                 finalTimeToTargetCondition: 5,
+                finalTimeToTargetConditionDecimal: new Decimal(5),
                 technicalDifficulty: "Medium",
             });
 
@@ -860,16 +997,28 @@ describe("Enhancement Functions", () => {
         test("calculates units when proposed length > baseline length", () => {
             const data = {
                 length: 1.5,
-                _baselineWatercourse: { distinctivenessScore: 4 },
-                _baselineCondition: 1 as number | 'Not possible',
+                lengthDecimal: new Decimal(1.5),
+                _baselineWatercourse: {
+                    distinctivenessScore: 4,
+                    distinctivenessScoreDecimal: new Decimal(4),
+                },
+                _baselineCondition: 1 as number | "Not possible",
+                _baselineConditionDecimal: new Decimal(1 as number | "Not possible"),
                 distinctivenessScore: 6,
-                conditionScore: 2 as number | 'Not possible',
+                distinctivenessScoreDecimal: new Decimal(6),
+                conditionScore: 2 as number | "Not possible",
+                conditionScoreDecimal: new Decimal(2 as number | "Not possible"),
                 strategicSignificanceMultiplier: 1.1,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.1),
                 temporalMultiplier: 0.8 as number | string,
+                temporalMultiplierDecimal: new Decimal(0.8 as number | string),
                 difficultyMultiplierApplied: 1.1,
+                difficultyMultiplierAppliedDecimal: new Decimal(1.1),
                 watercourseEncroachmentMultiplier: 0.7,
+                watercourseEncroachmentMultiplierDecimal: new Decimal(0.7),
                 riparianEncroachmentMultiplier: 0.9,
-                baseline: { lengthEnhanced: 1 },
+                riparianEncroachmentMultiplierDecimal: new Decimal(0.9),
+                baseline: { lengthEnhanced: 1, lengthEnhancedDecimal: new Decimal(1) },
             };
 
             const result = calculateEnhancementUnitsDelivered(data);
@@ -880,16 +1029,28 @@ describe("Enhancement Functions", () => {
         test("calculates units when proposed length <= baseline length", () => {
             const data = {
                 length: 0.8,
-                _baselineWatercourse: { distinctivenessScore: 4 },
-                _baselineCondition: 1 as number | 'Not possible',
+                lengthDecimal: new Decimal(0.8),
+                _baselineWatercourse: {
+                    distinctivenessScore: 4,
+                    distinctivenessScoreDecimal: new Decimal(4),
+                },
+                _baselineCondition: 1 as number | "Not possible",
+                _baselineConditionDecimal: new Decimal(1 as number | "Not possible"),
                 distinctivenessScore: 6,
-                conditionScore: 2 as number | 'Not possible',
+                distinctivenessScoreDecimal: new Decimal(6),
+                conditionScore: 2 as number | "Not possible",
+                conditionScoreDecimal: new Decimal(2 as number | "Not possible"),
                 strategicSignificanceMultiplier: 1.1,
+                strategicSignificanceMultiplierDecimal: new Decimal(1.1),
                 temporalMultiplier: 0.8 as number | string,
+                temporalMultiplierDecimal: new Decimal(0.8 as number | string),
                 difficultyMultiplierApplied: 1.1,
+                difficultyMultiplierAppliedDecimal: new Decimal(1.1),
                 watercourseEncroachmentMultiplier: 0.7,
+                watercourseEncroachmentMultiplierDecimal: new Decimal(0.7),
                 riparianEncroachmentMultiplier: 0.9,
-                baseline: { lengthEnhanced: 1 },
+                riparianEncroachmentMultiplierDecimal: new Decimal(0.9),
+                baseline: { lengthEnhanced: 1, lengthEnhancedDecimal: new Decimal(1) },
             };
 
             const result = calculateEnhancementUnitsDelivered(data);

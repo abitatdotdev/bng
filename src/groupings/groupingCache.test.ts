@@ -1,3 +1,4 @@
+import { Decimal } from "../decimal";
 import { describe, expect, test } from "bun:test";
 import type { AllFeatures } from "../features";
 import { valuesByHedgerow } from "./hedgerows";
@@ -42,7 +43,9 @@ describe("grouping caches", () => {
                 {
                     habitatType: "Native hedgerow",
                     hedgerowUnitsDelivered: 3,
+                    hedgerowUnitsDeliveredDecimal: new Decimal(3),
                     length: 10,
+                    lengthDecimal: new Decimal(10),
                 } as AllFeatures["onSiteHedgerowCreations"][number],
             ],
         };
@@ -65,7 +68,9 @@ describe("grouping caches", () => {
                 {
                     watercourseType: "Ditches",
                     unitsDelivered: 4,
+                    unitsDeliveredDecimal: new Decimal(4),
                     length: 10,
+                    lengthDecimal: new Decimal(10),
                 } as AllFeatures["onSiteWatercourseCreations"][number],
             ],
         };

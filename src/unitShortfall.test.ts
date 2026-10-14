@@ -1,5 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { featureShortfall, a1BalancingShortfall } from "./unitShortfall";
+import { Decimal } from "./decimal";
 import type { HeadlineResults } from "./headlineResults";
 
 describe("featureShortfall", () => {
@@ -60,55 +61,135 @@ describe("a1BalancingShortfall", () => {
     const createHeadline = (
         unitDeficit: number,
         requiredUnits: number,
-        baselineUnits: number
-    ): HeadlineResults => ({
-        habitatUnitSummary: {
-            target: 1.1,
-            unitDeficit,
-            requiredUnits,
-            baselineUnits,
-        },
-        hedgerowUnitSummary: {
-            target: 1.1,
-            unitDeficit: 0,
-            requiredUnits: 0,
-            baselineUnits: 0,
-        },
-        watercourseUnitSummary: {
-            target: 1.1,
-            unitDeficit: 0,
-            requiredUnits: 0,
-            baselineUnits: 0,
-        },
-    } as HeadlineResults);
+        baselineUnits: number,
+    ): HeadlineResults =>
+        ({
+            habitatUnitSummary: {
+                target: 1.1,
+                targetDecimal: new Decimal(1.1),
+                unitDeficit,
+                unitDeficitDecimal: new Decimal(unitDeficit),
+                requiredUnits,
+                requiredUnitsDecimal: new Decimal(requiredUnits),
+                baselineUnits,
+                baselineUnitsDecimal: new Decimal(baselineUnits),
+            },
+            hedgerowUnitSummary: {
+                target: 1.1,
+                targetDecimal: new Decimal(1.1),
+                unitDeficit: 0,
+                unitDeficitDecimal: new Decimal(0),
+                requiredUnits: 0,
+                requiredUnitsDecimal: new Decimal(0),
+                baselineUnits: 0,
+                baselineUnitsDecimal: new Decimal(0),
+            },
+            watercourseUnitSummary: {
+                target: 1.1,
+                targetDecimal: new Decimal(1.1),
+                unitDeficit: 0,
+                unitDeficitDecimal: new Decimal(0),
+                requiredUnits: 0,
+                requiredUnitsDecimal: new Decimal(0),
+                baselineUnits: 0,
+                baselineUnitsDecimal: new Decimal(0),
+            },
+        }) as HeadlineResults;
 
     // Helper to create mock tier details
     const createDetails = (highA1: number, mediumA1: number, lowA1: number) => ({
         high: {
-            a1: { lossesInTier: highA1, unitChange: [] },
-            a2: { lossesInTier: 0, unitChange: [] },
-            a3: { lossesInTier: 0, unitChange: [] },
-            a4: { lossesInTier: 0, unitChange: [] },
-            a5: { lossesInTier: 0, unitChange: [] },
+            a1: {
+                lossesInTier: highA1,
+                lossesInTierDecimal: new Decimal(highA1),
+                unitChange: [],
+                unitChangeDecimal: [],
+            },
+            a2: {
+                lossesInTier: 0,
+                lossesInTierDecimal: new Decimal(0),
+                unitChange: [],
+                unitChangeDecimal: [],
+            },
+            a3: {
+                lossesInTier: 0,
+                lossesInTierDecimal: new Decimal(0),
+                unitChange: [],
+                unitChangeDecimal: [],
+            },
+            a4: {
+                lossesInTier: 0,
+                lossesInTierDecimal: new Decimal(0),
+                unitChange: [],
+                unitChangeDecimal: [],
+            },
+            a5: {
+                lossesInTier: 0,
+                lossesInTierDecimal: new Decimal(0),
+                unitChange: [],
+                unitChangeDecimal: [],
+            },
         },
         medium: {
-            a1: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: mediumA1 },
-            a2: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: 0 },
-            a4: { rule1: [], rule2: 0, rule3: 0, rule4: 0, finalLosses: 0 },
+            a1: {
+                rule1: [],
+                rule1Decimal: [],
+                rule2: 0,
+                rule2Decimal: new Decimal(0),
+                rule3: 0,
+                rule3Decimal: new Decimal(0),
+                rule4: 0,
+                rule4Decimal: new Decimal(0),
+                finalLosses: mediumA1,
+                finalLossesDecimal: new Decimal(mediumA1),
+            },
+            a2: {
+                rule1: [],
+                rule1Decimal: [],
+                rule2: 0,
+                rule2Decimal: new Decimal(0),
+                rule3: 0,
+                rule3Decimal: new Decimal(0),
+                rule4: 0,
+                rule4Decimal: new Decimal(0),
+                finalLosses: 0,
+                finalLossesDecimal: new Decimal(0),
+            },
+            a4: {
+                rule1: [],
+                rule1Decimal: [],
+                rule2: 0,
+                rule2Decimal: new Decimal(0),
+                rule3: 0,
+                rule3Decimal: new Decimal(0),
+                rule4: 0,
+                rule4Decimal: new Decimal(0),
+                finalLosses: 0,
+                finalLossesDecimal: new Decimal(0),
+            },
         },
         low: {
             a1: {
                 netUnitChange: 0,
+                netUnitChangeDecimal: new Decimal(0),
                 unitChangeFollowingOffset: 0,
+                unitChangeFollowingOffsetDecimal: new Decimal(0),
                 unitsRemainingAfterRule5: 0,
+                unitsRemainingAfterRule5Decimal: new Decimal(0),
                 finalLosses: lowA1,
+                finalLossesDecimal: new Decimal(lowA1),
             },
         },
         vh: {
-            a5: { netGains: 0, netLosses: 0 },
+            a5: {
+                netGains: 0,
+                netGainsDecimal: new Decimal(0),
+                netLosses: 0,
+                netLossesDecimal: new Decimal(0),
+            },
         },
-        hedgerows: { finalLosses: 0 },
-        watercourses: { finalLosses: 0 },
+        hedgerows: { finalLosses: 0, finalLossesDecimal: new Decimal(0) },
+        watercourses: { finalLosses: 0, finalLossesDecimal: new Decimal(0) },
     });
 
     test("returns -allA1Losses when a2ToA5Shortfalls - allA1Losses >= habitatUnitDeficit", () => {

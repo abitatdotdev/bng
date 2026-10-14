@@ -1,3 +1,4 @@
+import { toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -29,32 +30,64 @@ const inputSchema = v.object({
 
 export const onSiteWatercourseCreationSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        habitatCreatedInAdvance: data.habitatCreatedInAdvance,
+        habitatCreatedInAdvanceDecimal:
+            typeof data.habitatCreatedInAdvance === 'number'
+                ? toDecimal(data.habitatCreatedInAdvance)
+                : data.habitatCreatedInAdvance,
+        delayInStarting: data.delayInStarting,
+        delayInStartingDecimal:
+            typeof data.delayInStarting === 'number' ? toDecimal(data.delayInStarting) : data.delayInStarting,
+    })),
     // Validate that the watercourse type is valid
-    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
+    v.forward(
+        v.check((s) => !!allWatercourses[s.watercourseType], 'Invalid watercourse type'),
+        ['watercourseType'],
+    ),
     // Validate temporal inputs - can't have both advance and delay
     v.check(
-        s => !(
-            (typeof s.habitatCreatedInAdvance === "string" || s.habitatCreatedInAdvance > 0)
-            && (typeof s.delayInStarting === "string" || s.delayInStarting > 0)
-        ),
-        "Cannot have both habitat created in advance and delay in starting"
+        (s) =>
+            !(
+                (typeof s.habitatCreatedInAdvance === 'string' || s.habitatCreatedInAdvance > 0) &&
+                (typeof s.delayInStarting === 'string' || s.delayInStarting > 0)
+            ),
+        'Cannot have both habitat created in advance and delay in starting',
     ),
     // Enrich with watercourse data
     v.transform(enrichWithCreationWatercourseData),
     // Validate that the condition is possible for this watercourse type
-    v.forward(v.check(
-        s => typeof s.conditionScore === 'number',
-        "The selected condition is not possible for this watercourse type"
-    ), ['condition']),
+    v.forward(
+        v.check(
+            (s) => typeof s.conditionScore === 'number',
+            'The selected condition is not possible for this watercourse type',
+        ),
+        ['condition'],
+    ),
     // Validate encroachment consistency with watercourse type
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ), ['watercourseEncroachment']),
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ), ['riparianEncroachment']),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.watercourseEncroachment === 'N/A - Culvert'
+                    : s.watercourseEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment",
+        ),
+        ['watercourseEncroachment'],
+    ),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.riparianEncroachment === 'N/A - Culvert'
+                    : s.riparianEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment",
+        ),
+        ['riparianEncroachment'],
+    ),
     // Calculate temporal adjustments
     v.transform(enrichWithTemporalData),
     // Calculate difficulty multiplier
@@ -70,6 +103,19 @@ export type OnSiteWatercourseCreation = v.InferOutput<typeof onSiteWatercourseCr
 
 export const onSiteWatercourseCreationUncheckedSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        habitatCreatedInAdvance: data.habitatCreatedInAdvance,
+        habitatCreatedInAdvanceDecimal:
+            typeof data.habitatCreatedInAdvance === 'number'
+                ? toDecimal(data.habitatCreatedInAdvance)
+                : data.habitatCreatedInAdvance,
+        delayInStarting: data.delayInStarting,
+        delayInStartingDecimal:
+            typeof data.delayInStarting === 'number' ? toDecimal(data.delayInStarting) : data.delayInStarting,
+    })),
     safeTransform(enrichWithCreationWatercourseData),
     safeTransform(enrichWithTemporalData),
     safeTransform(enrichWithDifficultyData),

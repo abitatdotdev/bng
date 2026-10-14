@@ -1,5 +1,6 @@
+import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
-import { Decimal } from '../decimal';
+
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
@@ -9,7 +10,7 @@ import {
     enrichWithBaselineWatercourseData,
     enrichWithBaselineUnitsData,
     enrichWithTotalWatercourseUnits,
-    enrichWithUnitsLost
+    enrichWithUnitsLost,
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
@@ -23,7 +24,7 @@ const inputSchema = v.object({
     riparianEncroachment: riparianEncroachmentSchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    bespokeCompensation: v.optional(bespokeCompensationSchema, "No"),
+    bespokeCompensation: v.optional(bespokeCompensationSchema, 'No'),
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -31,29 +32,62 @@ const inputSchema = v.object({
 
 export const onSiteWatercourseBaselineSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        lengthRetained: data.lengthRetained.toNumber(),
+        lengthRetainedDecimal: data.lengthRetained,
+        lengthEnhanced: data.lengthEnhanced.toNumber(),
+        lengthEnhancedDecimal: data.lengthEnhanced,
+    })),
     // Validate that the watercourse type is valid
-    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
+    v.forward(
+        v.check((s) => !!allWatercourses[s.watercourseType], 'Invalid watercourse type'),
+        ['watercourseType'],
+    ),
     // Check that retained + enhanced doesn't exceed total length
-    v.forward(v.check(
-        s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
-        "Retained and enhanced lengths cannot exceed total length"
-    ), ['length']),
+    v.forward(
+        v.check(
+            (s) =>
+                new Decimal(s.lengthRetainedDecimal)
+                    .plus(s.lengthEnhancedDecimal)
+                    .lessThanOrEqualTo(s.lengthDecimal),
+            'Retained and enhanced lengths cannot exceed total length',
+        ),
+        ['length'],
+    ),
     // Validate encroachment consistency with watercourse type
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ), ['watercourseEncroachment']),
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ), ['riparianEncroachment']),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.watercourseEncroachment === 'N/A - Culvert'
+                    : s.watercourseEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment",
+        ),
+        ['watercourseEncroachment'],
+    ),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.riparianEncroachment === 'N/A - Culvert'
+                    : s.riparianEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment",
+        ),
+        ['riparianEncroachment'],
+    ),
     // Enrich with watercourse data
     v.transform(enrichWithBaselineWatercourseData),
     // Validate that the condition is possible for this watercourse type
-    v.forward(v.check(
-        s => typeof s.conditionScore === 'number',
-        "The selected condition is not possible for this watercourse type"
-    ), ['condition']),
+    v.forward(
+        v.check(
+            (s) => typeof s.conditionScore === 'number',
+            'The selected condition is not possible for this watercourse type',
+        ),
+        ['condition'],
+    ),
     // Calculate baseline units
     v.transform(enrichWithBaselineUnitsData),
     // Calculate total watercourse units
@@ -68,6 +102,15 @@ export type OnSiteWatercourseBaseline = v.InferOutput<typeof onSiteWatercourseBa
 
 export const onSiteWatercourseBaselineUncheckedSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        lengthRetained: data.lengthRetained.toNumber(),
+        lengthRetainedDecimal: data.lengthRetained,
+        lengthEnhanced: data.lengthEnhanced.toNumber(),
+        lengthEnhancedDecimal: data.lengthEnhanced,
+    })),
     safeTransform(enrichWithBaselineWatercourseData),
     safeTransform(enrichWithBaselineUnitsData),
     safeTransform(enrichWithTotalWatercourseUnits),
@@ -78,29 +121,40 @@ export const onSiteWatercourseBaselineUncheckedSchema = v.pipe(
  * Pure calculation of hidden cell AT, used later in the headline results.
  */
 export function calculateVhdhBespokeCompensationUnits(input: {
-    bespokeCompensation: BespokeCompensation,
-    tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
-    totalWatercourseUnits: number,
-    unitsRetained: number,
-    unitsEnhanced: number,
+    bespokeCompensation: BespokeCompensation;
+    tradingRules: (typeof allWatercourses)[keyof typeof allWatercourses]['tradingRules'];
+    totalWatercourseUnits: number;
+    totalWatercourseUnitsDecimal?: Decimal;
+    unitsRetained: number;
+    unitsRetainedDecimal?: Decimal;
+    unitsEnhanced: number;
+    unitsEnhancedDecimal?: Decimal;
 }) {
     const vhdhBespokeCompensationUnits =
-        (
-            input.bespokeCompensation === "Yes"
-            || input.bespokeCompensation === "Pending"
-        ) && input.tradingRules === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(input.totalWatercourseUnits).minus(input.unitsRetained).minus(input.unitsEnhanced).toNumber()
+        (input.bespokeCompensation === 'Yes' || input.bespokeCompensation === 'Pending') &&
+        input.tradingRules === 'Same habitat required – bespoke compensation option ⚠'
+            ? new Decimal(input.totalWatercourseUnitsDecimal ?? toDecimal(input.totalWatercourseUnits))
+                  .minus(input.unitsRetainedDecimal ?? toDecimal(input.unitsRetained))
+                  .minus(input.unitsEnhancedDecimal ?? toDecimal(input.unitsEnhanced))
             : 0;
 
-    return { vhdhBespokeCompensationUnits };
+    return {
+        vhdhBespokeCompensationUnits: toDecimal(vhdhBespokeCompensationUnits).toNumber(),
+        vhdhBespokeCompensationUnitsDecimal: toDecimal(vhdhBespokeCompensationUnits),
+    };
 }
 
-export function enrichWithVhdhBespokeCompensationUnits<Data extends {
-    bespokeCompensation: BespokeCompensation,
-    tradingRules: typeof allWatercourses[keyof typeof allWatercourses]['tradingRules'],
-    totalWatercourseUnits: number,
-    unitsRetained: number,
-    unitsEnhanced: number,
-}>(data: Data) {
+export function enrichWithVhdhBespokeCompensationUnits<
+    Data extends {
+        bespokeCompensation: BespokeCompensation;
+        tradingRules: (typeof allWatercourses)[keyof typeof allWatercourses]['tradingRules'];
+        totalWatercourseUnits: number;
+        totalWatercourseUnitsDecimal: Decimal;
+        unitsRetained: number;
+        unitsRetainedDecimal: Decimal;
+        unitsEnhanced: number;
+        unitsEnhancedDecimal: Decimal;
+    },
+>(data: Data) {
     return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
 }

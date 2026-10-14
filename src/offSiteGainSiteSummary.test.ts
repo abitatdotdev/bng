@@ -13,7 +13,7 @@ describe('calculateOffSiteGainSiteSummary', () => {
             { reference: 'Site B', baseline: 2, created: 2 },
         ];
 
-        expect(calculateOffSiteGainSiteSummary(contributions)).toEqual([
+        expect(calculateOffSiteGainSiteSummary(contributions)).toMatchObject([
             {
                 reference: 'Site A',
                 baseline: 14,
@@ -41,7 +41,7 @@ describe('calculateOffSiteGainSiteSummary', () => {
             { reference: 'Decimal Site', created: 0.1, enhanced: 0.2 },
         ]);
 
-        expect(result).toEqual([
+        expect(result).toMatchObject([
             {
                 reference: 'Decimal Site',
                 baseline: 0.3,

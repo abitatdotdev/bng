@@ -1,4 +1,4 @@
-import { Decimal } from './decimal';
+import { type Quantity, Decimal, toDecimal } from './decimal';
 import type { BespokeCompensation } from './bespokeCompensation';
 import type { SuggestedTradingActions } from './distinctivenessCategories';
 
@@ -11,64 +11,84 @@ import type { SuggestedTradingActions } from './distinctivenessCategories';
  */
 export function calculateBaselineUnits(input: {
     irreplaceableHabitat: boolean;
-    area: number;
-    areaRetained: number;
-    areaEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number;
-    strategicSignificanceMultiplier: number;
+    area: Quantity;
+    areaDecimal?: Decimal;
+    areaRetained: Quantity;
+    areaRetainedDecimal?: Decimal;
+    areaEnhanced: Quantity;
+    areaEnhancedDecimal?: Decimal;
+    distinctivenessScore: Quantity;
+    distinctivenessScoreDecimal?: Decimal;
+    conditionScore: Quantity;
+    conditionScoreDecimal?: Decimal;
+    strategicSignificanceMultiplier: Quantity;
+    strategicSignificanceMultiplierDecimal?: Decimal;
     broadHabitat?: string;
 }) {
-    const distinctivenessScore = input.distinctivenessScore ?? 0;
-    const conditionScore = input.conditionScore ?? 0;
-    const strategicSignificanceMultiplier = input.strategicSignificanceMultiplier ?? 0;
+    const distinctivenessScore = toDecimal(
+        input.distinctivenessScoreDecimal ?? input.distinctivenessScore ?? 0,
+    );
+    const conditionScore = toDecimal(input.conditionScoreDecimal ?? input.conditionScore ?? 0);
+    const strategicSignificanceMultiplier = toDecimal(
+        input.strategicSignificanceMultiplierDecimal ?? input.strategicSignificanceMultiplier ?? 0,
+    );
 
     const baselineUnitsRetained = input.irreplaceableHabitat
         ? 0
-        : new Decimal(input.areaRetained)
-            .mul(distinctivenessScore)
-            .mul(conditionScore)
-            .mul(strategicSignificanceMultiplier)
-            .toNumber();
+        : new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
+              .mul(distinctivenessScore)
+              .mul(conditionScore)
+              .mul(strategicSignificanceMultiplier);
 
-    const baselineUnitsEnhanced = (input.broadHabitat === "Individual trees" && input.areaEnhanced > 0 && input.irreplaceableHabitat)
-        ? 0
-        : new Decimal(input.areaEnhanced)
-            .mul(distinctivenessScore)
-            .mul(conditionScore)
-            .mul(strategicSignificanceMultiplier)
-            .toNumber();
+    const baselineUnitsEnhanced =
+        input.broadHabitat === 'Individual trees' &&
+        new Decimal(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced)).gt(0) &&
+        input.irreplaceableHabitat
+            ? 0
+            : new Decimal(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
+                  .mul(distinctivenessScore)
+                  .mul(conditionScore)
+                  .mul(strategicSignificanceMultiplier);
 
-    const areaHabitatLost = new Decimal(input.area)
-        .minus(input.areaRetained)
-        .minus(input.areaEnhanced)
-        .toNumber();
+    const areaHabitatLost = new Decimal(input.areaDecimal ?? toDecimal(input.area))
+        .minus(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
+        .minus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced));
 
-    return { baselineUnitsRetained, baselineUnitsEnhanced, areaHabitatLost };
+    return {
+        baselineUnitsRetained: toDecimal(baselineUnitsRetained).toNumber(),
+        baselineUnitsRetainedDecimal: toDecimal(baselineUnitsRetained),
+        baselineUnitsEnhanced: toDecimal(baselineUnitsEnhanced).toNumber(),
+        baselineUnitsEnhancedDecimal: toDecimal(baselineUnitsEnhanced),
+        areaHabitatLost: areaHabitatLost.toNumber(),
+        areaHabitatLostDecimal: areaHabitatLost,
+    };
 }
 
 /**
  * Pure calculation of hidden cell AT/AS, used later in the headline results.
  */
 export function calculateVhdhBespokeCompensationUnits(input: {
-    bespokeCompensationAgreed: BespokeCompensation,
-    requiredAction: SuggestedTradingActions,
-    totalHabitatUnits: number,
-    baselineUnitsRetained: number,
-    baselineUnitsEnhanced: number,
+    bespokeCompensationAgreed: BespokeCompensation;
+    requiredAction: SuggestedTradingActions;
+    totalHabitatUnits: Quantity;
+    totalHabitatUnitsDecimal?: Decimal;
+    baselineUnitsRetained: Quantity;
+    baselineUnitsRetainedDecimal?: Decimal;
+    baselineUnitsEnhanced: Quantity;
+    baselineUnitsEnhancedDecimal?: Decimal;
 }) {
     const vhdhBespokeCompensationUnits =
-        (
-            input.bespokeCompensationAgreed === "Yes"
-            || input.bespokeCompensationAgreed === "Pending"
-        ) && input.requiredAction === "Same habitat required – bespoke compensation option ⚠"
-            ? new Decimal(input.totalHabitatUnits)
-                .minus(input.baselineUnitsRetained)
-                .minus(input.baselineUnitsEnhanced)
-                .toNumber()
+        (input.bespokeCompensationAgreed === 'Yes' || input.bespokeCompensationAgreed === 'Pending') &&
+        input.requiredAction === 'Same habitat required – bespoke compensation option ⚠'
+            ? new Decimal(input.totalHabitatUnitsDecimal ?? toDecimal(input.totalHabitatUnits))
+                  .minus(input.baselineUnitsRetainedDecimal ?? toDecimal(input.baselineUnitsRetained))
+                  .minus(input.baselineUnitsEnhancedDecimal ?? toDecimal(input.baselineUnitsEnhanced))
             : 0;
 
-    return { vhdhBespokeCompensationUnits };
+    return {
+        vhdhBespokeCompensationUnits: toDecimal(vhdhBespokeCompensationUnits).toNumber(),
+        vhdhBespokeCompensationUnitsDecimal: toDecimal(vhdhBespokeCompensationUnits),
+    };
 }
 
 /**
@@ -78,49 +98,64 @@ export function calculateVhdhBespokeCompensationUnits(input: {
  * Omit or pass `false` to skip it (on-site behaviour).
  */
 export function calculateTotalHabitatUnits(input: {
-    requiredAction: SuggestedTradingActions,
-    area: number,
-    areaRetained: number,
-    areaEnhanced: number,
-    bespokeCompensationAgreed: BespokeCompensation,
-    baselineUnitsRetained: number,
-    baselineUnitsEnhanced: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    irreplaceableHabitat?: boolean,
+    requiredAction: SuggestedTradingActions;
+    area: Quantity;
+    areaDecimal?: Decimal;
+    areaRetained: Quantity;
+    areaRetainedDecimal?: Decimal;
+    areaEnhanced: Quantity;
+    areaEnhancedDecimal?: Decimal;
+    bespokeCompensationAgreed: BespokeCompensation;
+    baselineUnitsRetained: Quantity;
+    baselineUnitsRetainedDecimal?: Decimal;
+    baselineUnitsEnhanced: Quantity;
+    baselineUnitsEnhancedDecimal?: Decimal;
+    distinctivenessScore: Quantity;
+    distinctivenessScoreDecimal?: Decimal;
+    conditionScore: Quantity;
+    conditionScoreDecimal?: Decimal;
+    strategicSignificanceMultiplier: Quantity;
+    strategicSignificanceMultiplierDecimal?: Decimal;
+    irreplaceableHabitat?: boolean;
 }) {
-    const bespokeRequired = input.requiredAction === "Bespoke compensation likely to be required";
-    const hasRetention = input.areaRetained > 0;
-    const hasEnhancement = input.areaEnhanced > 0;
+    const bespokeRequired = input.requiredAction === 'Bespoke compensation likely to be required';
+    const hasRetention = new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained)).gt(0);
+    const hasEnhancement = new Decimal(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced)).gt(0);
     const hasBiodiversityGain = hasRetention || hasEnhancement;
 
-    const distinctivenessScore = input.distinctivenessScore ?? 0;
-    const conditionScore = input.conditionScore ?? 0;
-    const strategicSignificanceMultiplier = input.strategicSignificanceMultiplier ?? 0;
+    const distinctivenessScore = toDecimal(
+        input.distinctivenessScoreDecimal ?? input.distinctivenessScore ?? 0,
+    );
+    const conditionScore = toDecimal(input.conditionScoreDecimal ?? input.conditionScore ?? 0);
+    const strategicSignificanceMultiplier = toDecimal(
+        input.strategicSignificanceMultiplierDecimal ?? input.strategicSignificanceMultiplier ?? 0,
+    );
 
-    let totalHabitatUnits: number = 0;
+    let totalHabitatUnits: Quantity = 0;
 
     if (input.irreplaceableHabitat) {
-        totalHabitatUnits = new Decimal(input.areaRetained)
-            .plus(input.areaEnhanced)
+        totalHabitatUnits = new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
+            .plus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
             .mul(distinctivenessScore)
             .mul(conditionScore)
-            .mul(strategicSignificanceMultiplier)
-            .toNumber();
-    } else if (bespokeRequired && !hasBiodiversityGain && input.bespokeCompensationAgreed === "Yes") {
+            .mul(strategicSignificanceMultiplier);
+    } else if (bespokeRequired && !hasBiodiversityGain && input.bespokeCompensationAgreed === 'Yes') {
         totalHabitatUnits = 0;
     } else if (bespokeRequired && hasBiodiversityGain) {
-        totalHabitatUnits = new Decimal(input.baselineUnitsRetained).plus(input.baselineUnitsEnhanced).toNumber();
+        totalHabitatUnits = new Decimal(
+            input.baselineUnitsRetainedDecimal ?? toDecimal(input.baselineUnitsRetained),
+        ).plus(input.baselineUnitsEnhancedDecimal ?? toDecimal(input.baselineUnitsEnhanced));
     } else {
-        totalHabitatUnits = new Decimal(input.area)
+        totalHabitatUnits = new Decimal(input.areaDecimal ?? toDecimal(input.area))
             .mul(distinctivenessScore)
             .mul(conditionScore)
-            .mul(strategicSignificanceMultiplier)
-            .toNumber();
+            .mul(strategicSignificanceMultiplier);
     }
 
-    return { totalHabitatUnits };
+    return {
+        totalHabitatUnits: toDecimal(totalHabitatUnits).toNumber(),
+        totalHabitatUnitsDecimal: toDecimal(totalHabitatUnits),
+    };
 }
 
 /**
@@ -128,27 +163,48 @@ export function calculateTotalHabitatUnits(input: {
  * spatialRiskMultiplier is supplied) habitatUnitsDeliveredWithSpatialRisk.
  */
 export function calculateHabitatUnitsDelivered(input: {
-    area: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier?: number,
+    area: Quantity;
+    areaDecimal?: Decimal;
+    distinctivenessScore: Quantity;
+    distinctivenessScoreDecimal?: Decimal;
+    conditionScore: Quantity;
+    conditionScoreDecimal?: Decimal;
+    strategicSignificanceMultiplier: Quantity;
+    strategicSignificanceMultiplierDecimal?: Decimal;
+    finalTimeToTargetMultiplier: Quantity | undefined;
+    finalTimeToTargetMultiplierDecimal?: Decimal;
+    difficultyMultiplierApplied: Quantity;
+    difficultyMultiplierAppliedDecimal?: Decimal;
+    spatialRiskMultiplier?: Quantity;
+    spatialRiskMultiplierDecimal?: Decimal;
 }) {
-    const habitatUnitsDelivered = new Decimal(input.area)
-        .mul(input.distinctivenessScore)
-        .mul(input.conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(input.finalTimeToTargetMultiplier ?? 0)
-        .mul(input.difficultyMultiplierApplied)
-        .toNumber();
+    const habitatUnitsDelivered = new Decimal(input.areaDecimal ?? toDecimal(input.area))
+        .mul(input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore))
+        .mul(input.conditionScoreDecimal ?? toDecimal(input.conditionScore))
+        .mul(input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier))
+        .mul(
+            input.finalTimeToTargetMultiplierDecimal ??
+                (input.finalTimeToTargetMultiplier === undefined
+                    ? undefined
+                    : toDecimal(input.finalTimeToTargetMultiplier)) ??
+                0,
+        )
+        .mul(input.difficultyMultiplierAppliedDecimal ?? toDecimal(input.difficultyMultiplierApplied));
 
-    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(habitatUnitsDelivered)
-        .mul(input.spatialRiskMultiplier ?? 1)
-        .toNumber();
+    const habitatUnitsDeliveredWithSpatialRisk = new Decimal(habitatUnitsDelivered).mul(
+        input.spatialRiskMultiplierDecimal ??
+            (input.spatialRiskMultiplier === undefined
+                ? undefined
+                : toDecimal(input.spatialRiskMultiplier)) ??
+            1,
+    );
 
-    return { habitatUnitsDelivered, habitatUnitsDeliveredWithSpatialRisk };
+    return {
+        habitatUnitsDelivered: habitatUnitsDelivered.toNumber(),
+        habitatUnitsDeliveredDecimal: habitatUnitsDelivered,
+        habitatUnitsDeliveredWithSpatialRisk: habitatUnitsDeliveredWithSpatialRisk.toNumber(),
+        habitatUnitsDeliveredWithSpatialRiskDecimal: habitatUnitsDeliveredWithSpatialRisk,
+    };
 }
 
 /**
@@ -156,33 +212,61 @@ export function calculateHabitatUnitsDelivered(input: {
  * spatialRiskMultiplier is supplied) habitatUnitsDeliveredWithSpatialRisk.
  */
 export function calculateEnhancementUnitsDelivered(input: {
-    area: number,
-    baselineDistinctivenessScore: number,
-    baselineConditionScore: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number,
-    spatialRiskMultiplier?: number,
+    area: Quantity;
+    areaDecimal?: Decimal;
+    baselineDistinctivenessScore: Quantity;
+    baselineDistinctivenessScoreDecimal?: Decimal;
+    baselineConditionScore: Quantity;
+    baselineConditionScoreDecimal?: Decimal;
+    distinctivenessScore: Quantity;
+    distinctivenessScoreDecimal?: Decimal;
+    conditionScore: Quantity;
+    conditionScoreDecimal?: Decimal;
+    strategicSignificanceMultiplier: Quantity;
+    strategicSignificanceMultiplierDecimal?: Decimal;
+    finalTimeToTargetMultiplier: Quantity | undefined;
+    finalTimeToTargetMultiplierDecimal?: Decimal;
+    difficultyMultiplierApplied: Quantity;
+    difficultyMultiplierAppliedDecimal?: Decimal;
+    spatialRiskMultiplier?: Quantity;
+    spatialRiskMultiplierDecimal?: Decimal;
 }) {
-    const area = input.area;
-    const baselineD = input.baselineDistinctivenessScore;
-    const baselineC = input.baselineConditionScore;
-    const proposedD = input.distinctivenessScore;
-    const proposedC = input.conditionScore;
-    const strategic = input.strategicSignificanceMultiplier;
-    const difficulty = input.difficultyMultiplierApplied;
-    const temporal = input.finalTimeToTargetMultiplier ?? 0;
+    const area = input.areaDecimal ?? toDecimal(input.area);
+    const baselineD =
+        input.baselineDistinctivenessScoreDecimal ?? toDecimal(input.baselineDistinctivenessScore);
+    const baselineC = input.baselineConditionScoreDecimal ?? toDecimal(input.baselineConditionScore);
+    const proposedD = input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore);
+    const proposedC = input.conditionScoreDecimal ?? toDecimal(input.conditionScore);
+    const strategic =
+        input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier);
+    const difficulty =
+        input.difficultyMultiplierAppliedDecimal ?? toDecimal(input.difficultyMultiplierApplied);
+    const temporal =
+        input.finalTimeToTargetMultiplierDecimal ??
+        (input.finalTimeToTargetMultiplier === undefined
+            ? undefined
+            : toDecimal(input.finalTimeToTargetMultiplier)) ??
+        0;
 
-    const effectiveBaselineC = baselineC > proposedC ? proposedC : baselineC;
+    const effectiveBaselineC = new Decimal(baselineC).gt(proposedC) ? proposedC : baselineC;
     const proposedUnits = new Decimal(area).mul(proposedD).mul(proposedC);
     const baselineUnits = new Decimal(area).mul(baselineD).mul(effectiveBaselineC);
     const delta = proposedUnits.minus(baselineUnits).mul(difficulty).mul(temporal);
     const baseUnits = delta.plus(baselineUnits).mul(strategic);
 
-    const habitatUnitsDelivered = baseUnits.toNumber();
-    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(input.spatialRiskMultiplier ?? 1).toNumber();
+    const habitatUnitsDelivered = baseUnits;
+    const habitatUnitsDeliveredWithSpatialRisk = baseUnits.mul(
+        input.spatialRiskMultiplierDecimal ??
+            (input.spatialRiskMultiplier === undefined
+                ? undefined
+                : toDecimal(input.spatialRiskMultiplier)) ??
+            1,
+    );
 
-    return { habitatUnitsDelivered, habitatUnitsDeliveredWithSpatialRisk };
+    return {
+        habitatUnitsDelivered: habitatUnitsDelivered.toNumber(),
+        habitatUnitsDeliveredDecimal: habitatUnitsDelivered,
+        habitatUnitsDeliveredWithSpatialRisk: habitatUnitsDeliveredWithSpatialRisk.toNumber(),
+        habitatUnitsDeliveredWithSpatialRiskDecimal: habitatUnitsDeliveredWithSpatialRisk,
+    };
 }

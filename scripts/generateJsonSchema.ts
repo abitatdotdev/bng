@@ -1,4 +1,6 @@
 import * as v from 'valibot';
+import { isFiniteQuantity } from '../src/decimal';
+import { isValidYearsQuantity } from '../src/schemaUtils';
 import { toJsonSchema } from '@valibot/to-json-schema';
 
 import pkg from '../package.json' with { type: 'json' };
@@ -51,6 +53,26 @@ const jsonSchema = toJsonSchema(catalog, {
     typeMode: 'input',
     errorMode: 'ignore',
     target: 'draft-2020-12',
+    overrideAction({ valibotAction, jsonSchema }) {
+        if (valibotAction.type === 'check' && 'requirement' in valibotAction && valibotAction.requirement === isValidYearsQuantity) {
+            return {
+                anyOf: [
+                    { type: 'integer', minimum: 0, maximum: 30 },
+                    { type: 'string', pattern: /^(?:\+?0*(?:[0-9]|[12][0-9]|30)(?:\.0+)?|[+-]?0*\.0+|-0+(?:\.0+)?)$/.source },
+                ],
+            };
+        }
+    },
+    overrideSchema({ valibotSchema }) {
+        if (valibotSchema.type === 'custom' && 'check' in valibotSchema && valibotSchema.check === isFiniteQuantity) {
+            return {
+                anyOf: [
+                    { type: 'number', minimum: 0 },
+                    { type: 'string', pattern: /^(?:\+?(?:\d*\.)?\d+|-0+(?:\.0+)?|-\.0+)$/.source },
+                ],
+            };
+        }
+    },
 });
 
 type AnyAction = {

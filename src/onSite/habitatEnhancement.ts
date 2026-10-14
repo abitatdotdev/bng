@@ -1,14 +1,26 @@
+import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
 import { enhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
-import { enrichWithHabitatData, freeTextSchema, isValidCondition, isValidHabitat, safeTransform, yearsSchema } from '../schemaUtils';
-import { onSiteHabitatBaselineSchema, onSiteHabitatBaselineUncheckedSchema, type OnSiteHabitatBaseline } from './habitatBaseline';
+import {
+    enrichWithHabitatData,
+    freeTextSchema,
+    isValidCondition,
+    isValidHabitat,
+    safeTransform,
+    yearsSchema,
+} from '../schemaUtils';
+import {
+    onSiteHabitatBaselineSchema,
+    onSiteHabitatBaselineUncheckedSchema,
+    type OnSiteHabitatBaseline,
+} from './habitatBaseline';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
-import { Decimal } from '../decimal';
+
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 
@@ -23,25 +35,31 @@ const inputSchema = v.object({
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
-})
+});
 
 /**
  * Extract baseline habitat data including area
  * The baseline contains the area that is being enhanced
  */
-const enrichBaselineHabitatData = <Data extends {
-    baseline: OnSiteHabitatBaseline
-}>(data: Data) => {
+const enrichBaselineHabitatData = <
+    Data extends {
+        baseline: OnSiteHabitatBaseline;
+    },
+>(
+    data: Data,
+) => {
     const { baseline } = data;
-    const baselineHabitat = habitatByBroadAndType(baseline.broadHabitat, baseline.habitatType)!
+    const baselineHabitat = habitatByBroadAndType(baseline.broadHabitat, baseline.habitatType)!;
 
     return {
         ...data,
         area: baseline.areaEnhanced,
+        areaDecimal: baseline.areaEnhancedDecimal,
         _baselineHabitat: baselineHabitat,
         _baselineCondition: baseline.conditionScore,
+        _baselineConditionDecimal: baseline.conditionScoreDecimal,
     };
-}
+};
 
 /**
  * Lookup enhancement time to target from habitat enhancement temporal multipliers
@@ -52,18 +70,31 @@ const enrichBaselineHabitatData = <Data extends {
  * falling back to "Not Possible ▲" when the key is missing.
  */
 export function calculateEnhancementTimeToTarget(input: {
-    enhancementTemporalMultipliers: Habitat['enhancementTemporalMultipliers'],
-    conditionChange: string,
+    enhancementTemporalMultipliers: Habitat['enhancementTemporalMultipliers'];
+    conditionChange: string;
 }) {
-    const value = input.enhancementTemporalMultipliers[input.conditionChange as keyof typeof input.enhancementTemporalMultipliers];
-    const timeToTargetCondition: number | "30+" | "Not Possible ▲" = value ? value : "Not Possible ▲";
-    return { timeToTargetCondition };
+    const value =
+        input.enhancementTemporalMultipliers[
+            input.conditionChange as keyof typeof input.enhancementTemporalMultipliers
+        ];
+    const timeToTargetCondition: number | '30+' | 'Not Possible ▲' = value ? value : 'Not Possible ▲';
+    return {
+        timeToTargetCondition,
+        timeToTargetConditionDecimal:
+            typeof timeToTargetCondition === 'number'
+                ? toDecimal(timeToTargetCondition)
+                : timeToTargetCondition,
+    };
 }
 
-const lookupEnhancementTimeToTarget = <Data extends {
-    _habitat: Habitat,
-    conditionChange: ReturnType<typeof addDistinctivenessAndConditionChange>['conditionChange'],
-}>(data: Data) => {
+const lookupEnhancementTimeToTarget = <
+    Data extends {
+        _habitat: Habitat;
+        conditionChange: ReturnType<typeof addDistinctivenessAndConditionChange>['conditionChange'];
+    },
+>(
+    data: Data,
+) => {
     return {
         ...data,
         ...calculateEnhancementTimeToTarget({
@@ -71,7 +102,7 @@ const lookupEnhancementTimeToTarget = <Data extends {
             conditionChange: data.conditionChange,
         }),
     };
-}
+};
 
 /**
  * Calculate final time to target condition based on:
@@ -84,64 +115,77 @@ const lookupEnhancementTimeToTarget = <Data extends {
  *
  * Matches Excel columns AD-AI in sheet A-3
  */
-const calculateFinalTimeToTargetCondition = <Data extends {
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatEnhancedInAdvance: number | "30+",
-    habitatEnhancedDelay: number | "30+"
-}>(data: Data) => {
+const calculateFinalTimeToTargetCondition = <
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        habitatEnhancedInAdvance: number | '30+';
+        habitatEnhancedDelay: number | '30+';
+    },
+>(
+    data: Data,
+) => {
     const { timeToTargetCondition, habitatEnhancedInAdvance, habitatEnhancedDelay } = data;
 
     const standardTimeToTargetCondition = timeToTargetCondition;
 
     let standardOrAdjustedTimeToTargetCondition: string;
-    const hasAdvance = typeof habitatEnhancedInAdvance === "string" || habitatEnhancedInAdvance > 0;
-    const hasDelay = typeof habitatEnhancedDelay === "string" || habitatEnhancedDelay > 0;
+    const hasAdvance = typeof habitatEnhancedInAdvance === 'string' || habitatEnhancedInAdvance > 0;
+    const hasDelay = typeof habitatEnhancedDelay === 'string' || habitatEnhancedDelay > 0;
 
     if (hasAdvance) {
-        const normalisedAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
-        const normalisedStandardTime = typeof timeToTargetCondition === "string" ?
-            (timeToTargetCondition === "30+" ? 30 : Infinity) : timeToTargetCondition;
+        const normalisedAdvance =
+            typeof habitatEnhancedInAdvance === 'string' ? 30 : habitatEnhancedInAdvance;
+        const normalisedStandardTime =
+            typeof timeToTargetCondition === 'string'
+                ? timeToTargetCondition === '30+'
+                    ? 30
+                    : Infinity
+                : timeToTargetCondition;
 
         if (normalisedAdvance >= normalisedStandardTime) {
-            standardOrAdjustedTimeToTargetCondition = "Check details - Is there evidence that habitat has reached target condition? ⚠";
+            standardOrAdjustedTimeToTargetCondition =
+                'Check details - Is there evidence that habitat has reached target condition? ⚠';
         } else {
-            standardOrAdjustedTimeToTargetCondition = "Check details - Is there evidence habitat creation started/in place? ⚠";
+            standardOrAdjustedTimeToTargetCondition =
+                'Check details - Is there evidence habitat creation started/in place? ⚠';
         }
     } else if (hasDelay) {
-        standardOrAdjustedTimeToTargetCondition = "Check details- Delay in starting habitat in required condition? ⚠";
+        standardOrAdjustedTimeToTargetCondition =
+            'Check details- Delay in starting habitat in required condition? ⚠';
     } else {
-        standardOrAdjustedTimeToTargetCondition = "Standard time to target condition applied";
+        standardOrAdjustedTimeToTargetCondition = 'Standard time to target condition applied';
     }
 
-    let finalTimeToTargetCondition: number | "30+" | "Not Possible ▲";
-    const normalisedHabitatEnhancedInAdvance = typeof habitatEnhancedInAdvance === "string" ? 30 : habitatEnhancedInAdvance;
-    const normalisedHabitatEnhancedDelay = typeof habitatEnhancedDelay === "string" ? 30 : habitatEnhancedDelay;
+    let finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    const normalisedHabitatEnhancedInAdvance =
+        typeof habitatEnhancedInAdvance === 'string' ? 30 : habitatEnhancedInAdvance;
+    const normalisedHabitatEnhancedDelay =
+        typeof habitatEnhancedDelay === 'string' ? 30 : habitatEnhancedDelay;
 
-    if (timeToTargetCondition === "Not Possible ▲") {
-        finalTimeToTargetCondition = "Not Possible ▲";
-    }
-    else if (timeToTargetCondition === "30+") {
+    if (timeToTargetCondition === 'Not Possible ▲') {
+        finalTimeToTargetCondition = 'Not Possible ▲';
+    } else if (timeToTargetCondition === '30+') {
         if (habitatEnhancedInAdvance === 0) {
-            finalTimeToTargetCondition = "30+";
-        } else if (habitatEnhancedInAdvance === "30+") {
+            finalTimeToTargetCondition = '30+';
+        } else if (habitatEnhancedInAdvance === '30+') {
             finalTimeToTargetCondition = 0;
         } else if (normalisedHabitatEnhancedInAdvance < 30) {
             finalTimeToTargetCondition = new Decimal(30).minus(normalisedHabitatEnhancedInAdvance).toNumber();
         } else {
             finalTimeToTargetCondition = new Decimal(30).minus(normalisedHabitatEnhancedInAdvance).toNumber();
         }
-    }
-    else if (normalisedHabitatEnhancedInAdvance > timeToTargetCondition) {
+    } else if (normalisedHabitatEnhancedInAdvance > timeToTargetCondition) {
         finalTimeToTargetCondition = 0;
-    }
-    else if (habitatEnhancedDelay === "30+") {
-        finalTimeToTargetCondition = "30+";
-    }
-    else {
-        const result = new Decimal(timeToTargetCondition).plus(normalisedHabitatEnhancedDelay).minus(normalisedHabitatEnhancedInAdvance).toNumber();
+    } else if (habitatEnhancedDelay === '30+') {
+        finalTimeToTargetCondition = '30+';
+    } else {
+        const result = new Decimal(timeToTargetCondition)
+            .plus(normalisedHabitatEnhancedDelay)
+            .minus(normalisedHabitatEnhancedInAdvance)
+            .toNumber();
 
         if (result > 30) {
-            finalTimeToTargetCondition = "30+";
+            finalTimeToTargetCondition = '30+';
         } else {
             finalTimeToTargetCondition = Decimal.max(0, result).toNumber();
         }
@@ -150,35 +194,47 @@ const calculateFinalTimeToTargetCondition = <Data extends {
     return {
         ...data,
         standardTimeToTargetCondition,
+        standardTimeToTargetConditionDecimal:
+            typeof standardTimeToTargetCondition === 'number'
+                ? toDecimal(standardTimeToTargetCondition)
+                : standardTimeToTargetCondition,
         standardOrAdjustedTimeToTargetCondition,
         finalTimeToTargetCondition,
+        finalTimeToTargetConditionDecimal:
+            typeof finalTimeToTargetCondition === 'number'
+                ? toDecimal(finalTimeToTargetCondition)
+                : finalTimeToTargetCondition,
     };
-}
+};
 
 /**
  * Determine enhancement difficulty based on whether habitat reached target before losses
  * Simpler than creation difficulty logic
  */
 export function calculateEnhancementDifficulty(input: {
-    habitatEnhancedInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲",
-    standardDifficultyOfEnhancement: keyof typeof difficulty,
+    habitatEnhancedInAdvance: number | '30+';
+    finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    standardDifficultyOfEnhancement: keyof typeof difficulty;
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.habitatEnhancedInAdvance,
         finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
-        lowDifficultyMessage: "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        lowDifficultyMessage: 'Low Difficulty - only applicable if all habitat created before losses ⚠',
     });
 }
 
-const determineEnhancementDifficulty = <Data extends {
-    broadHabitat: string,
-    habitatType: string,
-    timeToTargetCondition: number | "30+" | "Not Possible ▲",
-    habitatEnhancedInAdvance: number | "30+",
-    finalTimeToTargetCondition: number | "30+" | "Not Possible ▲"
-}>(data: Data) => {
+const determineEnhancementDifficulty = <
+    Data extends {
+        broadHabitat: string;
+        habitatType: string;
+        timeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        habitatEnhancedInAdvance: number | '30+';
+        finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+    },
+>(
+    data: Data,
+) => {
     const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
     return {
@@ -189,7 +245,7 @@ const determineEnhancementDifficulty = <Data extends {
             standardDifficultyOfEnhancement: habitat.technicalDifficultyEnhancement,
         }),
     };
-}
+};
 
 /**
  * Add distinctiveness and condition change labels
@@ -199,14 +255,16 @@ const determineEnhancementDifficulty = <Data extends {
  * Pure calculation: derives distinctivenessChange and conditionChange labels.
  */
 export function calculateDistinctivenessAndConditionChange(input: {
-    baselineDistinctivenessCategory: string,
-    baselineLabel: string,
-    baselineCondition: string,
-    baselineDistinctivenessScore: number,
-    proposedLabel: string,
-    proposedDistinctiveness: string,
-    proposedDistinctivenessScore: number,
-    condition: string,
+    baselineDistinctivenessCategory: string;
+    baselineLabel: string;
+    baselineCondition: string;
+    baselineDistinctivenessScore: number;
+    baselineDistinctivenessScoreDecimal?: Decimal;
+    proposedLabel: string;
+    proposedDistinctiveness: string;
+    proposedDistinctivenessScore: number;
+    proposedDistinctivenessScoreDecimal?: Decimal;
+    condition: string;
 }) {
     const distinctivenessChange = `${input.baselineDistinctivenessCategory} - ${input.proposedDistinctiveness}`;
 
@@ -223,15 +281,19 @@ export function calculateDistinctivenessAndConditionChange(input: {
     return { distinctivenessChange, conditionChange };
 }
 
-const addDistinctivenessAndConditionChange = <Data extends {
-    baseline: any,
-    _baselineHabitat: any,
-    broadHabitat: string,
-    habitatType: string,
-    condition: string,
-    distinctiveness: string,
-    distinctivenessScore: number
-}>(data: Data) => {
+const addDistinctivenessAndConditionChange = <
+    Data extends {
+        baseline: any;
+        _baselineHabitat: any;
+        broadHabitat: string;
+        habitatType: string;
+        condition: string;
+        distinctiveness: string;
+        distinctivenessScore: number;
+    },
+>(
+    data: Data,
+) => {
     const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
     return {
         ...data,
@@ -240,13 +302,14 @@ const addDistinctivenessAndConditionChange = <Data extends {
             baselineLabel: data._baselineHabitat.label,
             baselineCondition: data.baseline.condition,
             baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+            baselineDistinctivenessScoreDecimal: toDecimal(data._baselineHabitat.distinctivenessScore),
             proposedLabel: proposedHabitat.label,
             proposedDistinctiveness: data.distinctiveness,
             proposedDistinctivenessScore: data.distinctivenessScore,
             condition: data.condition,
         }),
     };
-}
+};
 
 /**
  * Calculate habitat units delivered from enhancement as NET GAIN over baseline
@@ -261,41 +324,90 @@ const addDistinctivenessAndConditionChange = <Data extends {
  * Special case: If baseline condition > proposed condition (condition reduced),
  * use proposed condition as baseline condition for calculation
  */
-const enrichWithEnhancementUnitsDelivered = <Data extends {
-    area: number,
-    _baselineHabitat: any,
-    _baselineCondition: number,
-    distinctivenessScore: number,
-    conditionScore: number,
-    strategicSignificanceMultiplier: number,
-    finalTimeToTargetMultiplier: number | undefined,
-    difficultyMultiplierApplied: number
-}>(data: Data) => {
-    const { habitatUnitsDelivered } = calculateEnhancementUnitsDelivered({
+const enrichWithEnhancementUnitsDelivered = <
+    Data extends {
+        area: number;
+        areaDecimal: Decimal;
+        _baselineHabitat: any;
+        _baselineCondition: number;
+        _baselineConditionDecimal: Decimal;
+        distinctivenessScore: number;
+        distinctivenessScoreDecimal: Decimal;
+        conditionScore: number;
+        conditionScoreDecimal: Decimal;
+        strategicSignificanceMultiplier: number;
+        strategicSignificanceMultiplierDecimal: Decimal;
+        finalTimeToTargetMultiplier: number | undefined;
+        finalTimeToTargetMultiplierDecimal: Decimal | undefined;
+        difficultyMultiplierApplied: number;
+        difficultyMultiplierAppliedDecimal: Decimal;
+    },
+>(
+    data: Data,
+) => {
+    const delivered = calculateEnhancementUnitsDelivered({
         area: data.area,
+        areaDecimal: data.areaDecimal,
         baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+        baselineDistinctivenessScoreDecimal: toDecimal(data._baselineHabitat.distinctivenessScore),
         baselineConditionScore: data._baselineCondition,
+        baselineConditionScoreDecimal: data._baselineConditionDecimal,
         distinctivenessScore: data.distinctivenessScore,
+        distinctivenessScoreDecimal: data.distinctivenessScoreDecimal,
         conditionScore: data.conditionScore,
+        conditionScoreDecimal: data.conditionScoreDecimal,
         strategicSignificanceMultiplier: data.strategicSignificanceMultiplier,
+        strategicSignificanceMultiplierDecimal: data.strategicSignificanceMultiplierDecimal,
         finalTimeToTargetMultiplier: data.finalTimeToTargetMultiplier,
+        finalTimeToTargetMultiplierDecimal: data.finalTimeToTargetMultiplierDecimal,
         difficultyMultiplierApplied: data.difficultyMultiplierApplied,
+        difficultyMultiplierAppliedDecimal: data.difficultyMultiplierAppliedDecimal,
     });
-    return { ...data, habitatUnitsDelivered };
-}
+    return {
+        ...data,
+        habitatUnitsDelivered: delivered.habitatUnitsDelivered,
+        habitatUnitsDeliveredDecimal: delivered.habitatUnitsDeliveredDecimal,
+    };
+};
 
 export const onSiteHabitatEnhancementSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        habitatEnhancedInAdvance: data.habitatEnhancedInAdvance,
+        habitatEnhancedInAdvanceDecimal:
+            typeof data.habitatEnhancedInAdvance === 'number'
+                ? toDecimal(data.habitatEnhancedInAdvance)
+                : data.habitatEnhancedInAdvance,
+        habitatEnhancedDelay: data.habitatEnhancedDelay,
+        habitatEnhancedDelayDecimal:
+            typeof data.habitatEnhancedDelay === 'number'
+                ? toDecimal(data.habitatEnhancedDelay)
+                : data.habitatEnhancedDelay,
+    })),
 
     // Basic validations
-    v.forward(v.check(s => isValidHabitat(s.broadHabitat, s.habitatType), "The broad habitat and habitat type are incompatible"), ['habitatType']),
-    v.forward(v.check(s => isValidCondition(s.broadHabitat, s.habitatType, s.condition), "The condition for this habitat is invalid"), ['condition']),
-    v.check(
-        s => !(
-            (typeof s.habitatEnhancedInAdvance === "string" || s.habitatEnhancedInAdvance > 0)
-            && (typeof s.habitatEnhancedDelay === "string" || s.habitatEnhancedDelay > 0)
+    v.forward(
+        v.check(
+            (s) => isValidHabitat(s.broadHabitat, s.habitatType),
+            'The broad habitat and habitat type are incompatible',
         ),
-        "Cannot have both habitat enhanced in advance and delay in starting habitat enhancement"
+        ['habitatType'],
+    ),
+    v.forward(
+        v.check(
+            (s) => isValidCondition(s.broadHabitat, s.habitatType, s.condition),
+            'The condition for this habitat is invalid',
+        ),
+        ['condition'],
+    ),
+    v.check(
+        (s) =>
+            !(
+                (typeof s.habitatEnhancedInAdvance === 'string' || s.habitatEnhancedInAdvance > 0) &&
+                (typeof s.habitatEnhancedDelay === 'string' || s.habitatEnhancedDelay > 0)
+            ),
+        'Cannot have both habitat enhanced in advance and delay in starting habitat enhancement',
     ),
 
     // Extract baseline data and area
@@ -308,94 +420,87 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
     v.transform(addDistinctivenessAndConditionChange),
 
     // Validation checks for enhancement
-    v.check(
-        data => {
-            const baseline = data._baselineHabitat;
-            const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+    v.check((data) => {
+        const baseline = data._baselineHabitat;
+        const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-            // V.High/High: Same habitat required
-            if (['V.High', 'High'].includes(baseline.distinctivenessCategory)) {
-                return baseline.label === proposed.label;
-            }
+        // V.High/High: Same habitat required
+        if (['V.High', 'High'].includes(baseline.distinctivenessCategory)) {
+            return baseline.label === proposed.label;
+        }
 
-            // Medium: Same broad habitat or higher distinctiveness
-            if (baseline.distinctivenessCategory === 'Medium') {
-                return baseline.broadHabitat === proposed.broadHabitat
-                    || proposed.distinctivenessScore >= baseline.distinctivenessScore;
-            }
+        // Medium: Same broad habitat or higher distinctiveness
+        if (baseline.distinctivenessCategory === 'Medium') {
+            return (
+                baseline.broadHabitat === proposed.broadHabitat ||
+                proposed.distinctivenessScore >= baseline.distinctivenessScore
+            );
+        }
 
-            // Low: Same distinctiveness or better
-            if (baseline.distinctivenessCategory === 'Low') {
-                return proposed.distinctivenessScore >= baseline.distinctivenessScore;
-            }
+        // Low: Same distinctiveness or better
+        if (baseline.distinctivenessCategory === 'Low') {
+            return proposed.distinctivenessScore >= baseline.distinctivenessScore;
+        }
 
-            return true;
-        },
-        "Trading rules not satisfied - habitat distinctiveness mismatch"
-    ),
-    v.check(
-        data => {
-            const baselineCondition = data._baselineCondition;
-            const proposedCondition = data.conditionScore;
-            const baselineD = data._baselineHabitat.distinctivenessScore;
-            const proposedD = data.distinctivenessScore;
+        return true;
+    }, 'Trading rules not satisfied - habitat distinctiveness mismatch'),
+    v.check((data) => {
+        const baselineCondition = data._baselineCondition;
+        const proposedCondition = data.conditionScore;
+        const baselineD = data._baselineHabitat.distinctivenessScore;
+        const proposedD = data.distinctivenessScore;
 
-            // Cannot reduce condition
-            if (baselineCondition > proposedCondition) {
-                return false;
-            }
+        // Cannot reduce condition
+        if (baselineCondition > proposedCondition) {
+            return false;
+        }
 
-            // If same condition, must have distinctiveness upgrade
-            if (baselineCondition === proposedCondition) {
-                return proposedD > baselineD;
-            }
+        // If same condition, must have distinctiveness upgrade
+        if (baselineCondition === proposedCondition) {
+            return proposedD > baselineD;
+        }
 
-            return true;
-        },
-        "Enhancement does not improve habitat quality"
-    ),
-    v.check(
-        data => {
-            const baseline = data._baselineHabitat;
-            const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+        return true;
+    }, 'Enhancement does not improve habitat quality'),
+    v.check((data) => {
+        const baseline = data._baselineHabitat;
+        const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-            // Cannot replace irreplaceable habitat with different habitat
-            if (baseline.irreplaceable && baseline.label !== proposed.label) {
-                return false;
-            }
+        // Cannot replace irreplaceable habitat with different habitat
+        if (baseline.irreplaceable && baseline.label !== proposed.label) {
+            return false;
+        }
 
-            return true;
-        },
-        "Cannot replace an irreplaceable habitat with a different habitat"
-    ),
-    v.check(
-        data => {
-            const baseline = data._baselineHabitat;
-            const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+        return true;
+    }, 'Cannot replace an irreplaceable habitat with a different habitat'),
+    v.check((data) => {
+        const baseline = data._baselineHabitat;
+        const proposed = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
 
-            // Special habitat validation: Littoral seagrass
-            if (proposed.type === "Littoral seagrass") {
-                const allowedBaselines = [
-                    "Intertidal sediment - Littoral seagrass",
-                    "Intertidal sediment - Littoral sand"
-                ];
-                return allowedBaselines.includes(baseline.label);
-            }
+        // Special habitat validation: Littoral seagrass
+        if (proposed.type === 'Littoral seagrass') {
+            const allowedBaselines = [
+                'Intertidal sediment - Littoral seagrass',
+                'Intertidal sediment - Littoral sand',
+            ];
+            return allowedBaselines.includes(baseline.label);
+        }
 
-            // Special habitat validation: IGGI (Integrated Greening of Grey Infrastructure)
-            if (proposed.type === "Artificial hard structures with integrated greening of grey infrastructure (IGGI)") {
-                const allowedBaselines = [
-                    "Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)",
-                    "Intertidal hard structures - Artificial hard structures",
-                    "Intertidal hard structures - Artificial features of hard structures"
-                ];
-                return allowedBaselines.includes(baseline.label);
-            }
+        // Special habitat validation: IGGI (Integrated Greening of Grey Infrastructure)
+        if (
+            proposed.type ===
+            'Artificial hard structures with integrated greening of grey infrastructure (IGGI)'
+        ) {
+            const allowedBaselines = [
+                'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
+                'Intertidal hard structures - Artificial hard structures',
+                'Intertidal hard structures - Artificial features of hard structures',
+            ];
+            return allowedBaselines.includes(baseline.label);
+        }
 
-            return true;
-        },
-        "Enhancement not possible for this habitat type from the selected baseline"
-    ),
+        return true;
+    }, 'Enhancement not possible for this habitat type from the selected baseline'),
 
     // Temporal calculation
     v.transform(lookupEnhancementTimeToTarget),
@@ -407,18 +512,31 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
-)
+);
 
-export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>
-export type OnSiteHabitatEnhancement = v.InferOutput<typeof onSiteHabitatEnhancementSchema>
+export type OnSiteHabitatEnhancementSchema = v.InferInput<typeof onSiteHabitatEnhancementSchema>;
+export type OnSiteHabitatEnhancement = v.InferOutput<typeof onSiteHabitatEnhancementSchema>;
 
 const uncheckedInputSchema = v.object({
     ...inputSchema.entries,
     baseline: onSiteHabitatBaselineUncheckedSchema,
-})
+});
 
 export const onSiteHabitatEnhancementUncheckedSchema = v.pipe(
     uncheckedInputSchema,
+    v.transform((data) => ({
+        ...data,
+        habitatEnhancedInAdvance: data.habitatEnhancedInAdvance,
+        habitatEnhancedInAdvanceDecimal:
+            typeof data.habitatEnhancedInAdvance === 'number'
+                ? toDecimal(data.habitatEnhancedInAdvance)
+                : data.habitatEnhancedInAdvance,
+        habitatEnhancedDelay: data.habitatEnhancedDelay,
+        habitatEnhancedDelayDecimal:
+            typeof data.habitatEnhancedDelay === 'number'
+                ? toDecimal(data.habitatEnhancedDelay)
+                : data.habitatEnhancedDelay,
+    })),
     safeTransform(enrichBaselineHabitatData),
     safeTransform(enrichWithHabitatData),
     safeTransform(addDistinctivenessAndConditionChange),
@@ -427,4 +545,4 @@ export const onSiteHabitatEnhancementUncheckedSchema = v.pipe(
     safeTransform(lookupFinalTimeToTargetMultiplier),
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithEnhancementUnitsDelivered),
-)
+);

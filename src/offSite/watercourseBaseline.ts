@@ -1,3 +1,4 @@
+import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -6,12 +7,12 @@ import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { watercourseSpatialRiskCategorySchema } from '../spatialRisk';
 import { enrichWithWatercourseSpatialRisk } from './common';
-import { Decimal } from '../decimal';
+
 import {
     enrichWithBaselineWatercourseData,
     enrichWithBaselineUnitsData,
     enrichWithTotalWatercourseUnits,
-    enrichWithUnitsLost
+    enrichWithUnitsLost,
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import { enrichWithVhdhBespokeCompensationUnits } from '../onSite/watercourseBaseline';
@@ -27,7 +28,7 @@ const inputSchema = v.object({
     spatialRiskCategory: watercourseSpatialRiskCategorySchema,
     lengthRetained: v.optional(lengthSchema, 0),
     lengthEnhanced: v.optional(lengthSchema, 0),
-    bespokeCompensation: v.optional(fuzzyPicklist(["Yes", "No", "Pending"] as const), "No"),
+    bespokeCompensation: v.optional(fuzzyPicklist(['Yes', 'No', 'Pending'] as const), 'No'),
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
@@ -36,34 +37,70 @@ const inputSchema = v.object({
 
 export const offSiteWatercourseBaselineSchema = v.pipe(
     inputSchema,
-    v.forward(v.check(s => !!allWatercourses[s.watercourseType], "Invalid watercourse type"), ['watercourseType']),
-    v.forward(v.check(
-        s => new Decimal(s.lengthRetained).plus(s.lengthEnhanced).lessThanOrEqualTo(s.length),
-        "Retained and enhanced lengths cannot exceed total length"
-    ), ['length']),
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        lengthRetained: data.lengthRetained.toNumber(),
+        lengthRetainedDecimal: data.lengthRetained,
+        lengthEnhanced: data.lengthEnhanced.toNumber(),
+        lengthEnhancedDecimal: data.lengthEnhanced,
+    })),
+    v.forward(
+        v.check((s) => !!allWatercourses[s.watercourseType], 'Invalid watercourse type'),
+        ['watercourseType'],
+    ),
+    v.forward(
+        v.check(
+            (s) =>
+                new Decimal(s.lengthRetainedDecimal)
+                    .plus(s.lengthEnhancedDecimal)
+                    .lessThanOrEqualTo(s.lengthDecimal),
+            'Retained and enhanced lengths cannot exceed total length',
+        ),
+        ['length'],
+    ),
     // Validate encroachment consistency with watercourse type
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.watercourseEncroachment === 'N/A - Culvert' : s.watercourseEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment"
-    ), ['watercourseEncroachment']),
-    v.forward(v.check(
-        s => s.watercourseType === 'Culvert' ? s.riparianEncroachment === 'N/A - Culvert' : s.riparianEncroachment !== 'N/A - Culvert',
-        "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment"
-    ), ['riparianEncroachment']),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.watercourseEncroachment === 'N/A - Culvert'
+                    : s.watercourseEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for watercourse encroachment",
+        ),
+        ['watercourseEncroachment'],
+    ),
+    v.forward(
+        v.check(
+            (s) =>
+                s.watercourseType === 'Culvert'
+                    ? s.riparianEncroachment === 'N/A - Culvert'
+                    : s.riparianEncroachment !== 'N/A - Culvert',
+            "Culvert watercourses must use 'N/A - Culvert' for riparian encroachment",
+        ),
+        ['riparianEncroachment'],
+    ),
     // Enrich with watercourse data
     v.transform(enrichWithBaselineWatercourseData),
     // Validate that the condition is possible for this watercourse type
-    v.forward(v.check(
-        s => typeof s.conditionScore === 'number',
-        "The selected condition is not possible for this watercourse type"
-    ), ['condition']),
+    v.forward(
+        v.check(
+            (s) => typeof s.conditionScore === 'number',
+            'The selected condition is not possible for this watercourse type',
+        ),
+        ['condition'],
+    ),
     // Enrich with spatial risk multiplier
     v.transform(enrichWithWatercourseSpatialRisk),
     // Check that off-site reference is provided when spatial risk is present
-    v.forward(v.check(
-        s => !(s.spatialRiskCategory && !s.offSiteReferenceNumber),
-        "Off-site reference required ▲"
-    ), ['offSiteReferenceNumber']),
+    v.forward(
+        v.check(
+            (s) => !(s.spatialRiskCategory && !s.offSiteReferenceNumber),
+            'Off-site reference required ▲',
+        ),
+        ['offSiteReferenceNumber'],
+    ),
     // Calculate baseline units
     v.transform(enrichWithBaselineUnitsData),
     // Calculate total watercourse units (SRM)
@@ -80,6 +117,15 @@ export type OffSiteWatercourseBaseline = v.InferOutput<typeof offSiteWatercourse
 
 export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
     inputSchema,
+    v.transform((data) => ({
+        ...data,
+        length: data.length.toNumber(),
+        lengthDecimal: data.length,
+        lengthRetained: data.lengthRetained.toNumber(),
+        lengthRetainedDecimal: data.lengthRetained,
+        lengthEnhanced: data.lengthEnhanced.toNumber(),
+        lengthEnhancedDecimal: data.lengthEnhanced,
+    })),
     safeTransform(enrichWithBaselineWatercourseData),
     safeTransform(enrichWithWatercourseSpatialRisk),
     safeTransform(enrichWithBaselineUnitsData),
@@ -98,38 +144,58 @@ export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
  */
 export function calculateTotalWatercourseUnitsSRM(input: {
     length: number;
+    lengthDecimal?: Decimal;
     distinctivenessScore: number;
+    distinctivenessScoreDecimal?: Decimal;
     conditionScore: number | 'Not possible';
     strategicSignificanceMultiplier: number;
+    strategicSignificanceMultiplierDecimal?: Decimal;
     watercourseEncroachmentMultiplier: number;
+    watercourseEncroachmentMultiplierDecimal?: Decimal;
     riparianEncroachmentMultiplier: number;
+    riparianEncroachmentMultiplierDecimal?: Decimal;
     spatialRiskMultiplier: number;
+    spatialRiskMultiplierDecimal?: Decimal;
 }) {
     const conditionScore = input.conditionScore as number;
 
-    const totalWatercourseUnitsSRM = new Decimal(input.length)
-        .mul(input.distinctivenessScore)
+    const totalWatercourseUnitsSRM = new Decimal(input.lengthDecimal ?? toDecimal(input.length))
+        .mul(input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore))
         .mul(conditionScore)
-        .mul(input.strategicSignificanceMultiplier)
-        .mul(input.watercourseEncroachmentMultiplier)
-        .mul(input.riparianEncroachmentMultiplier)
-        .mul(input.spatialRiskMultiplier)
-        .toNumber();
+        .mul(input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier))
+        .mul(
+            input.watercourseEncroachmentMultiplierDecimal ??
+                toDecimal(input.watercourseEncroachmentMultiplier),
+        )
+        .mul(input.riparianEncroachmentMultiplierDecimal ?? toDecimal(input.riparianEncroachmentMultiplier))
+        .mul(input.spatialRiskMultiplierDecimal ?? toDecimal(input.spatialRiskMultiplier));
 
-    return { totalWatercourseUnitsSRM };
+    return {
+        totalWatercourseUnitsSRM: totalWatercourseUnitsSRM.toNumber(),
+        totalWatercourseUnitsSRMDecimal: totalWatercourseUnitsSRM,
+    };
 }
 
-export function enrichWithTotalWatercourseUnitsSRM<Data extends {
-    length: number;
-    lengthRetained: number;
-    lengthEnhanced: number;
-    distinctivenessScore: number;
-    conditionScore: number | 'Not possible';
-    strategicSignificanceMultiplier: number;
-    watercourseEncroachmentMultiplier: number;
-    riparianEncroachmentMultiplier: number;
-    spatialRiskMultiplier: number;
-}>(data: Data) {
+export function enrichWithTotalWatercourseUnitsSRM<
+    Data extends {
+        length: number;
+        lengthDecimal: Decimal;
+        lengthRetained: number;
+        lengthRetainedDecimal: Decimal;
+        lengthEnhanced: number;
+        lengthEnhancedDecimal: Decimal;
+        distinctivenessScore: number;
+        distinctivenessScoreDecimal: Decimal;
+        conditionScore: number | 'Not possible';
+        strategicSignificanceMultiplier: number;
+        strategicSignificanceMultiplierDecimal: Decimal;
+        watercourseEncroachmentMultiplier: number;
+        watercourseEncroachmentMultiplierDecimal: Decimal;
+        riparianEncroachmentMultiplier: number;
+        riparianEncroachmentMultiplierDecimal: Decimal;
+        spatialRiskMultiplier: number;
+        spatialRiskMultiplierDecimal: Decimal;
+    },
+>(data: Data) {
     return { ...data, ...calculateTotalWatercourseUnitsSRM(data) };
 }
-

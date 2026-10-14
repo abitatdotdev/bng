@@ -1,4 +1,5 @@
-import { featuresFromInput } from '../parsers/featuresFromInput';
+import { Decimal } from "../decimal";
+import { featuresFromInput } from "../parsers/featuresFromInput";
 import { expect, test, describe } from "bun:test";
 import { cumulativeBroadHabitatChange, habitatTradingSummary } from "./habitats";
 import { type AllFeatures } from "../features";
@@ -46,7 +47,14 @@ describe("habitatTradingSummary", () => {
         test("satisfied when V.High habitat has net gain", () => {
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 10, area: 1 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -55,10 +63,34 @@ describe("habitatTradingSummary", () => {
         test("satisfied when V.High habitat breaks even", () => {
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        totalHabitatUnits: 10,
+                        totalHabitatUnitsDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 10,
+                        areaHabitatLostDecimal: new Decimal(10),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 10, area: 10 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -67,10 +99,34 @@ describe("habitatTradingSummary", () => {
         test("not satisfied when V.High habitat has net loss", () => {
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", totalHabitatUnits: 20, area: 20, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        totalHabitatUnits: 20,
+                        totalHabitatUnitsDecimal: new Decimal(20),
+                        area: 20,
+                        areaDecimal: new Decimal(20),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 20,
+                        areaHabitatLostDecimal: new Decimal(20),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 5, area: 5 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 5,
+                        habitatUnitsDeliveredDecimal: new Decimal(5),
+                        area: 5,
+                        areaDecimal: new Decimal(5),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeFalse();
@@ -80,10 +136,34 @@ describe("habitatTradingSummary", () => {
             // One V.High gains 10, another V.High loses 15 -> net -5, not satisfied
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland meadows", totalHabitatUnits: 15, area: 15, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 15, unitsLost: 15 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland meadows",
+                        totalHabitatUnits: 15,
+                        totalHabitatUnitsDecimal: new Decimal(15),
+                        area: 15,
+                        areaDecimal: new Decimal(15),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 15,
+                        areaHabitatLostDecimal: new Decimal(15),
+                        unitsLost: 15,
+                        unitsLostDecimal: new Decimal(15),
+                    } as any,
                 ],
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 10, area: 10 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeFalse();
@@ -94,7 +174,14 @@ describe("habitatTradingSummary", () => {
         test("satisfied when High habitat has net gain", () => {
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland calcareous grassland", habitatUnitsDelivered: 10, area: 1 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland calcareous grassland",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).highSatisfied).toBeTrue();
@@ -103,10 +190,34 @@ describe("habitatTradingSummary", () => {
         test("not satisfied when High habitat has net loss", () => {
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland calcareous grassland", totalHabitatUnits: 20, area: 20, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland calcareous grassland",
+                        totalHabitatUnits: 20,
+                        totalHabitatUnitsDecimal: new Decimal(20),
+                        area: 20,
+                        areaDecimal: new Decimal(20),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 20,
+                        areaHabitatLostDecimal: new Decimal(20),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland calcareous grassland", habitatUnitsDelivered: 5, area: 5 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland calcareous grassland",
+                        habitatUnitsDelivered: 5,
+                        habitatUnitsDeliveredDecimal: new Decimal(5),
+                        area: 5,
+                        areaDecimal: new Decimal(5),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).highSatisfied).toBeFalse();
@@ -117,10 +228,34 @@ describe("habitatTradingSummary", () => {
             // unitsRequiredOffSite = min(unitChangeIncludingOffSite, 0) — purely per-habitat
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 50, area: 1 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 50,
+                        habitatUnitsDeliveredDecimal: new Decimal(50),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland calcareous grassland", totalHabitatUnits: 15, area: 15, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 15, unitsLost: 15 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland calcareous grassland",
+                        totalHabitatUnits: 15,
+                        totalHabitatUnitsDecimal: new Decimal(15),
+                        area: 15,
+                        areaDecimal: new Decimal(15),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 15,
+                        areaHabitatLostDecimal: new Decimal(15),
+                        unitsLost: 15,
+                        unitsLostDecimal: new Decimal(15),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).highSatisfied).toBeFalse();
@@ -131,7 +266,14 @@ describe("habitatTradingSummary", () => {
         test("satisfied when Medium habitat has net gain", () => {
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Cropland", habitatType: "Arable field margins cultivated annually", habitatUnitsDelivered: 10, area: 1 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Arable field margins cultivated annually",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -140,7 +282,24 @@ describe("habitatTradingSummary", () => {
         test("not satisfied when Medium has net loss and no higher-level surplus", () => {
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Cropland", habitatType: "Arable field margins cultivated annually", totalHabitatUnits: 20, area: 20, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Arable field margins cultivated annually",
+                        totalHabitatUnits: 20,
+                        totalHabitatUnitsDecimal: new Decimal(20),
+                        area: 20,
+                        areaDecimal: new Decimal(20),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 20,
+                        areaHabitatLostDecimal: new Decimal(20),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).mediumSatisfied).toBeFalse();
@@ -153,11 +312,42 @@ describe("habitatTradingSummary", () => {
             //                 = 5 + 6 + (-10) = 1 >= 0
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 5, area: 1 } as any,
-                    { broadHabitat: "Grassland", habitatType: "Lowland calcareous grassland", habitatUnitsDelivered: 6, area: 1 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 5,
+                        habitatUnitsDeliveredDecimal: new Decimal(5),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland calcareous grassland",
+                        habitatUnitsDelivered: 6,
+                        habitatUnitsDeliveredDecimal: new Decimal(6),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Cropland", habitatType: "Arable field margins cultivated annually", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Arable field margins cultivated annually",
+                        totalHabitatUnits: 10,
+                        totalHabitatUnitsDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 10,
+                        areaHabitatLostDecimal: new Decimal(10),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).mediumSatisfied).toBeTrue();
@@ -169,11 +359,42 @@ describe("habitatTradingSummary", () => {
             // Medium satisfied
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Grassland", habitatType: "Other lowland acid grassland", habitatUnitsDelivered: 10, area: 1 } as any,
-                    { broadHabitat: "Heathland and Shrub", habitatType: "Blackthorn scrub", habitatUnitsDelivered: 21, area: 1 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Other lowland acid grassland",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
+                    {
+                        broadHabitat: "Heathland and Shrub",
+                        habitatType: "Blackthorn scrub",
+                        habitatUnitsDelivered: 21,
+                        habitatUnitsDeliveredDecimal: new Decimal(21),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Other lowland acid grassland", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Other lowland acid grassland",
+                        totalHabitatUnits: 10,
+                        totalHabitatUnitsDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 20,
+                        areaHabitatLostDecimal: new Decimal(20),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
             });
             console.info(habitatTradingSummary(input));
@@ -185,7 +406,14 @@ describe("habitatTradingSummary", () => {
         test("satisfied when Low habitat has net gain", () => {
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Cropland", habitatType: "Cereal crops", habitatUnitsDelivered: 10, area: 1 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Cereal crops",
+                        habitatUnitsDelivered: 10,
+                        habitatUnitsDeliveredDecimal: new Decimal(10),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).lowSatisfied).toBeTrue();
@@ -194,7 +422,24 @@ describe("habitatTradingSummary", () => {
         test("not satisfied when Low has net loss and no surplus from above", () => {
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Cropland", habitatType: "Cereal crops", totalHabitatUnits: 20, area: 20, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 20, unitsLost: 20 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Cereal crops",
+                        totalHabitatUnits: 20,
+                        totalHabitatUnitsDecimal: new Decimal(20),
+                        area: 20,
+                        areaDecimal: new Decimal(20),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 20,
+                        areaHabitatLostDecimal: new Decimal(20),
+                        unitsLost: 20,
+                        unitsLostDecimal: new Decimal(20),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).lowSatisfied).toBeFalse();
@@ -204,10 +449,34 @@ describe("habitatTradingSummary", () => {
             // Medium gains 15, Low loses 10 -> cumulative surplus = 15 + (-10) = 5 >= 0
             const input = emptyFixture({
                 onSiteHabitatCreations: [
-                    { broadHabitat: "Cropland", habitatType: "Arable field margins cultivated annually", habitatUnitsDelivered: 15, area: 1 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Arable field margins cultivated annually",
+                        habitatUnitsDelivered: 15,
+                        habitatUnitsDeliveredDecimal: new Decimal(15),
+                        area: 1,
+                        areaDecimal: new Decimal(1),
+                    } as any,
                 ],
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Cropland", habitatType: "Cereal crops", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Cereal crops",
+                        totalHabitatUnits: 10,
+                        totalHabitatUnitsDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 10,
+                        areaHabitatLostDecimal: new Decimal(10),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).lowSatisfied).toBeTrue();
@@ -218,8 +487,42 @@ describe("habitatTradingSummary", () => {
             // lowSatisfied uses only Low's netChangeInUnits = -3 < 0
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Cropland", habitatType: "Arable field margins cultivated annually", totalHabitatUnits: 5, area: 5, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 5, unitsLost: 5 } as any,
-                    { broadHabitat: "Cropland", habitatType: "Cereal crops", totalHabitatUnits: 3, area: 3, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 3, unitsLost: 3 } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Arable field margins cultivated annually",
+                        totalHabitatUnits: 5,
+                        totalHabitatUnitsDecimal: new Decimal(5),
+                        area: 5,
+                        areaDecimal: new Decimal(5),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 5,
+                        areaHabitatLostDecimal: new Decimal(5),
+                        unitsLost: 5,
+                        unitsLostDecimal: new Decimal(5),
+                    } as any,
+                    {
+                        broadHabitat: "Cropland",
+                        habitatType: "Cereal crops",
+                        totalHabitatUnits: 3,
+                        totalHabitatUnitsDecimal: new Decimal(3),
+                        area: 3,
+                        areaDecimal: new Decimal(3),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 3,
+                        areaHabitatLostDecimal: new Decimal(3),
+                        unitsLost: 3,
+                        unitsLostDecimal: new Decimal(3),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).lowSatisfied).toBeFalse();
@@ -233,10 +536,34 @@ describe("habitatTradingSummary", () => {
             // unitChangeIncludingOffSite = -10 + 12 = +2, satisfied
             const input = emptyFixture({
                 onSiteHabitatBaselines: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        totalHabitatUnits: 10,
+                        totalHabitatUnitsDecimal: new Decimal(10),
+                        area: 10,
+                        areaDecimal: new Decimal(10),
+                        areaRetained: 0,
+                        areaRetainedDecimal: new Decimal(0),
+                        baselineUnitsRetained: 0,
+                        baselineUnitsRetainedDecimal: new Decimal(0),
+                        vhdhBespokeCompensationUnits: 0,
+                        vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                        areaHabitatLost: 10,
+                        areaHabitatLostDecimal: new Decimal(10),
+                        unitsLost: 10,
+                        unitsLostDecimal: new Decimal(10),
+                    } as any,
                 ],
                 offSiteHabitatEnhancements: [
-                    { broadHabitat: "Grassland", habitatType: "Lowland dry acid grassland", habitatUnitsDelivered: 12, area: 12 } as any,
+                    {
+                        broadHabitat: "Grassland",
+                        habitatType: "Lowland dry acid grassland",
+                        habitatUnitsDelivered: 12,
+                        habitatUnitsDeliveredDecimal: new Decimal(12),
+                        area: 12,
+                        areaDecimal: new Decimal(12),
+                    } as any,
                 ],
             });
             expect(habitatTradingSummary(input).vHighSatisfied).toBeTrue();
@@ -255,10 +582,34 @@ describe("cumulativeBroadHabitatChange", () => {
     test("groups per-broad unit change at the requested distinctiveness category", () => {
         const input = emptyFixture({
             onSiteHabitatBaselines: [
-                { broadHabitat: "Grassland", habitatType: "Traditional orchards", totalHabitatUnits: 10, area: 10, areaRetained: 0, baselineUnitsRetained: 0, vhdhBespokeCompensationUnits: 0, areaHabitatLost: 10, unitsLost: 10 } as any,
+                {
+                    broadHabitat: "Grassland",
+                    habitatType: "Traditional orchards",
+                    totalHabitatUnits: 10,
+                    totalHabitatUnitsDecimal: new Decimal(10),
+                    area: 10,
+                    areaDecimal: new Decimal(10),
+                    areaRetained: 0,
+                    areaRetainedDecimal: new Decimal(0),
+                    baselineUnitsRetained: 0,
+                    baselineUnitsRetainedDecimal: new Decimal(0),
+                    vhdhBespokeCompensationUnits: 0,
+                    vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                    areaHabitatLost: 10,
+                    areaHabitatLostDecimal: new Decimal(10),
+                    unitsLost: 10,
+                    unitsLostDecimal: new Decimal(10),
+                } as any,
             ],
             onSiteHabitatCreations: [
-                { broadHabitat: "Grassland", habitatType: "Traditional orchards", habitatUnitsDelivered: 4, area: 4 } as any,
+                {
+                    broadHabitat: "Grassland",
+                    habitatType: "Traditional orchards",
+                    habitatUnitsDelivered: 4,
+                    habitatUnitsDeliveredDecimal: new Decimal(4),
+                    area: 4,
+                    areaDecimal: new Decimal(4),
+                } as any,
             ],
         });
         const high = cumulativeBroadHabitatChange(input, "High");
@@ -269,13 +620,35 @@ describe("cumulativeBroadHabitatChange", () => {
     });
 });
 
-describe('medium habitat trading across intertidal habitats', () => {
-    const strategicSignificance = 'Area/compensation not in local strategy/ no local strategy' as const;
-    for (const [area, expectedDownwards, expectedUpwards, satisfied] of [[2, 4, 0, true], [0.5, 0, -2, false]] as const) {
+describe("medium habitat trading across intertidal habitats", () => {
+    const strategicSignificance = "Area/compensation not in local strategy/ no local strategy" as const;
+    for (const [area, expectedDownwards, expectedUpwards, satisfied] of [
+        [2, 4, 0, true],
+        [0.5, 0, -2, false],
+    ] as const) {
         test(`IGGI area ${area} offsets littoral sand within the combined intertidal balance`, () => {
             const { features, issues } = featuresFromInput({
-                onSiteHabitatBaselines: [{ broadHabitat: 'Intertidal sediment', habitatType: 'Littoral sand', area: 1, condition: 'Poor', irreplaceableHabitat: false, strategicSignificance }],
-                onSiteHabitatCreations: [{ broadHabitat: 'Intertidal hard structures', habitatType: 'Artificial hard structures with integrated greening of grey infrastructure (IGGI)', area, condition: 'Poor', strategicSignificance, habitatCreationInAdvance: 1 }],
+                onSiteHabitatBaselines: [
+                    {
+                        broadHabitat: "Intertidal sediment",
+                        habitatType: "Littoral sand",
+                        area: 1,
+                        condition: "Poor",
+                        irreplaceableHabitat: false,
+                        strategicSignificance,
+                    },
+                ],
+                onSiteHabitatCreations: [
+                    {
+                        broadHabitat: "Intertidal hard structures",
+                        habitatType:
+                            "Artificial hard structures with integrated greening of grey infrastructure (IGGI)",
+                        area,
+                        condition: "Poor",
+                        strategicSignificance,
+                        habitatCreationInAdvance: 1,
+                    },
+                ],
             });
             expect(issues).toEqual([]);
             const result = habitatTradingSummary(features);
@@ -284,10 +657,28 @@ describe('medium habitat trading across intertidal habitats', () => {
             expect(result.mediumSatisfied).toBe(satisfied);
         });
     }
-    test('grassland gains remain separate from intertidal losses', () => {
+    test("grassland gains remain separate from intertidal losses", () => {
         const { features, issues } = featuresFromInput({
-            onSiteHabitatBaselines: [{ broadHabitat: 'Intertidal sediment', habitatType: 'Littoral sand', area: 1, condition: 'Poor', irreplaceableHabitat: false, strategicSignificance }],
-            onSiteHabitatCreations: [{ broadHabitat: 'Grassland', habitatType: 'Other neutral grassland', area: 2, condition: 'Poor', strategicSignificance, habitatCreationInAdvance: '30+' }],
+            onSiteHabitatBaselines: [
+                {
+                    broadHabitat: "Intertidal sediment",
+                    habitatType: "Littoral sand",
+                    area: 1,
+                    condition: "Poor",
+                    irreplaceableHabitat: false,
+                    strategicSignificance,
+                },
+            ],
+            onSiteHabitatCreations: [
+                {
+                    broadHabitat: "Grassland",
+                    habitatType: "Other neutral grassland",
+                    area: 2,
+                    condition: "Poor",
+                    strategicSignificance,
+                    habitatCreationInAdvance: "30+",
+                },
+            ],
         });
         expect(issues).toEqual([]);
         const result = habitatTradingSummary(features);
