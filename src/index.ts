@@ -24,3 +24,4 @@ export const data = {
     hedgerows: allHedgerows,
     watercourses: allWatercourses
 }
+export * from './offSiteGainSiteSummary';
