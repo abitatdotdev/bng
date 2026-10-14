@@ -1689,7 +1689,7 @@ describe('spatial risk and watercourse compensation', () => {
                 });
             }
         }
-        test('excludes bespoke compensation from spatially adjusted watercourse gains', () => {
+        test('includes spatially adjusted bespoke compensation in watercourse gains', () => {
             const features = parseInput({
                 offSiteWatercourseBaselines: [{ ...water, watercourseType: 'Priority habitat', condition: 'Moderate', length: 1, lengthRetained: 0.5, bespokeCompensation: 'Yes' }],
                 offSiteWatercourseCreations: [{ ...water, length: 1, condition: 'Moderate', habitatCreatedInAdvance: '30+' }],
@@ -1697,9 +1697,9 @@ describe('spatial risk and watercourse compensation', () => {
             const result = headlineResults(features, tradingSummaries(features));
             expect(result.offSiteWatercoursePostIntervention).toBe(24); // H26: retained 8 + compensation 8 + creation 8
             expect(result.offSiteWatercourseNetChange.units).toBe(8);
-            expect(result.offSiteWatercourseNetChangeWithSRM).toBe(0); // L26 (6 + 6) - L22 (12)
-            expect(calculateOffSiteWatercourseNetChangeWithSRM(features.offSiteWatercourseBaselines, features.offSiteWatercourseCreations, [], 8)).toBe(0);
-            expect(result.totalSRMDeductions.watercourse).toBe(8);
+            expect(result.offSiteWatercourseNetChangeWithSRM).toBe(6); // L26 (6 + 6 + 6) - L22 (12)
+            expect(calculateOffSiteWatercourseNetChangeWithSRM(features.offSiteWatercourseBaselines, features.offSiteWatercourseCreations, [], 8)).toBe(6);
+            expect(result.totalSRMDeductions.watercourse).toBe(2);
         });
     });
 });

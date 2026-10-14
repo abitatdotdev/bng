@@ -431,9 +431,9 @@ function offSiteWatercourseNetChangeWithSRMD(
 ): Decimal | "N/A" {
     if (netChangeUnitsD.lte(0)) return "N/A" as const;
 
-    // L26 includes retained, created and enhanced units, without F-1 AT compensation.
+    // L26 includes retained, created, enhanced and F-1 compensation units after SRM.
     const baselineWithSRM = sumD(baselines, b => b.totalWatercourseUnitsSRM);
-    const retainedAndEnhancedWithSRM = sumD(baselines, b => new Decimal(b.unitsRetained).mul(b.spatialRiskMultiplier));
+    const retainedAndEnhancedWithSRM = sumD(baselines, b => new Decimal(b.unitsRetained).plus(b.vhdhBespokeCompensationUnits ?? 0).mul(b.spatialRiskMultiplier));
     const createdWithSRM = sumD(creations, c => c.netUnitChangeWithSpatialRisk);
     const enhancedWithSRM = sumD(enhancements, e => e.watercourseUnitsDeliveredWithSpatialRisk);
 
