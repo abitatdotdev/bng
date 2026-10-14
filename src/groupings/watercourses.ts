@@ -245,7 +245,11 @@ function calculateExistingLengthRetainedOnSite(inputData: AllFeatures, watercour
 function calculateExistingUnitsRetainedOnSite(inputData: AllFeatures, watercourse: Watercourse): Decimal {
     return inputData.onSiteWatercourseBaselines
         .filter((baseline) => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum.plus(baseline.unitsRetainedDecimal), ZERO);
+        .reduce(
+            (sum, baseline) =>
+                sum.plus(baseline.unitsRetainedDecimal).plus(baseline.vhdhBespokeCompensationUnitsDecimal ?? ZERO),
+            ZERO,
+        );
 }
 function calculateExistingLengthLostOnSite(inputData: AllFeatures, watercourse: Watercourse): Decimal {
     return inputData.onSiteWatercourseBaselines
@@ -333,7 +337,11 @@ function calculateRetainedLengthOffSite(inputData: AllFeatures, watercourse: Wat
 function calculateRetainedUnitsOffSite(inputData: AllFeatures, watercourse: Watercourse): Decimal {
     return inputData.offSiteWatercourseBaselines
         .filter((baseline) => isWatercourse(baseline, watercourse))
-        .reduce((sum, baseline) => sum.plus(baseline.unitsRetainedDecimal), ZERO);
+        .reduce(
+            (sum, baseline) =>
+                sum.plus(baseline.unitsRetainedDecimal).plus(baseline.vhdhBespokeCompensationUnitsDecimal ?? ZERO),
+            ZERO,
+        );
 }
 function calculateProposedLengthCreationOffSite(inputData: AllFeatures, watercourse: Watercourse): Decimal {
     return inputData.offSiteWatercourseCreations
