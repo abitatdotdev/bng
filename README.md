@@ -30,14 +30,6 @@ The aims of this library are:
 On its own, this library doesn't do much.
 However, by building on top of this library, we can power the next wave of BNG tooling.
 
-## Abitat Finder
-
-If you have a statutory metric and need to source off-site biodiversity units,
-use [abitat finder](https://intel.abitat.dev/finder). Submit your metric and
-see every registered habitat bank in England that matches your deficit — built
-by the team behind this library. No account required.
-
-
 ## Community contributions
 
 We encourage community contributions, but it's too early to be directly involved.
@@ -108,11 +100,7 @@ Here's a simple example, outputting parsed files to the console.
 ### Exact quantities
 
 `featuresFromInput` accepts finite numbers, decimal strings or Decimal instances for measurement
-inputs. Rows, groupings, trading results, gain-site summaries, headlines and unit
-shortfalls retain their existing number fields and expose matching `...Decimal`
-companions. Scalar and number-map helpers have parallel Decimal functions.
-See [the Decimal API contract](./docs/decimal-api.md) for examples, arithmetic
-precision, JSON conversion and compatibility with older feature objects.
+inputs.
 
 ### Streaming large files
 
