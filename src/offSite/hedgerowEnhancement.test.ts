@@ -145,12 +145,12 @@ test("Non-native and ornamental hedgerow can only have Poor condition", () => {
         condition: "Moderate"
     })).success).toBeFalse();
 
-    // Valid enhancement: Non-native to Native hedgerow (distinctiveness upgrade)
+    // The movement matrix forbids this distinctiveness upgrade.
     expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
         baseline,
         habitatType: "Native hedgerow",
         condition: "Poor"
-    })).success).toBeTrue();
+    })).success).toBeFalse();
 });
 
 test("temporal adjustment validation - cannot have both advance and delay", () => {
@@ -234,7 +234,7 @@ test("trading rules - High baseline rejects different-label High proposed", () =
     })).success).toBeFalse();
 });
 
-test("trading rules - Medium distinctiveness allows same or higher distinctiveness", () => {
+test("trading rules - Medium distinctiveness follows movement matrix and allows upgrades", () => {
     const baseline = createBaseline({
         habitatType: "Native hedgerow with trees",
         distinctivenessScore: 4,
@@ -243,12 +243,12 @@ test("trading rules - Medium distinctiveness allows same or higher distinctivene
         conditionScore: 1,
     });
 
-    // Should succeed with same distinctiveness
+    // The movement matrix forbids this change within the same band.
     expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({
         baseline,
         habitatType: "Species-rich native hedgerow",
         condition: "Moderate"
-    })).success).toBeTrue();
+    })).success).toBeFalse();
 
     // Should succeed with higher distinctiveness
     expect(v.safeParse(offSiteHedgerowEnhancementSchema, fixture({

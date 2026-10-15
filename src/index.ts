@@ -28,3 +28,9 @@ export * from './offSiteGainSiteSummary';
 
 export { Decimal, toDecimal, type Quantity } from './decimal';
 export { quantitySchema, areaSchema, lengthSchema, yearsSchema } from './schemaUtils';
+
+export type { HedgerowEnhancementMovement } from './hedgerowEnhancementMovements';
+export type {
+    HedgerowEnhancementMovementState,
+    HedgerowEnhancementUnavailableResult,
+} from './hedgerowEnhancementMovementGate';

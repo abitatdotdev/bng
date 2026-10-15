@@ -24,6 +24,10 @@ import {
     calculateEnhancementUnitsDelivered,
 } from '../hedgerowCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
+import {
+    enrichHedgerowEnhancementMovement,
+    gateHedgerowEnhancementMovement,
+} from '../hedgerowEnhancementMovementGate';
 
 const inputSchema = v.object({
     baseline: offSiteHedgerowBaselineSchema,
@@ -383,6 +387,15 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
                 : data.hedgerowEnhancedDelay,
     })),
 
+    v.transform((data) => enrichHedgerowEnhancementMovement(data, true)),
+    v.forward(
+        v.check(
+            (data) => data.enhancementMovement.status !== 'forbidden',
+            (issue) => issue.input.enhancementMovement.message,
+        ),
+        ['habitatType'],
+    ),
+
     // Basic validations
     v.forward(
         v.check((s) => !!allHedgerows[s.habitatType], 'Invalid hedgerow habitat type'),
@@ -458,6 +471,7 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
+    v.transform(gateHedgerowEnhancementMovement),
 );
 
 export type OffSiteHedgerowEnhancementSchema = v.InferInput<typeof offSiteHedgerowEnhancementSchema>;
@@ -483,6 +497,7 @@ export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
                 ? toDecimal(data.hedgerowEnhancedDelay)
                 : data.hedgerowEnhancedDelay,
     })),
+    safeTransform((data) => enrichHedgerowEnhancementMovement(data, true)),
     safeTransform(enrichBaselineHedgerowData),
     safeTransform(enrichProposedHedgerowData),
     safeTransform(addEnhancementPathway),
@@ -492,4 +507,5 @@ export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithEnhancementUnitsDelivered),
+    safeTransform(gateHedgerowEnhancementMovement),
 );
