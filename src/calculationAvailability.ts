@@ -35,6 +35,22 @@ export type EnhancementConditionState = {
     unavailableResults: Partial<Record<EnhancementConditionResult, ResultAvailability>>;
 };
 
+export type WatercourseEnhancementMovementState = {
+    rule: 'watercourse-enhancement-movement';
+    status: 'allowed' | 'forbidden';
+    message?: 'Error Trading Down ▲';
+    unavailableResults: Partial<Record<
+        | 'timeToTargetCondition'
+        | 'standardOrAdjustedTimeToTargetCondition'
+        | 'finalTimeToTargetCondition'
+        | 'temporalMultiplier'
+        | 'appliedDifficultyMultiplier'
+        | 'watercourseUnitsDelivered'
+        | 'watercourseUnitsDeliveredWithSpatialRisk',
+        ResultAvailability
+    >>;
+};
+
 const UNIT_RESULTS = [
     'habitatUnitsDelivered',
     'habitatUnitsDeliveredWithSpatialRisk',
@@ -124,4 +140,37 @@ export function applyEnhancementConditionAvailability<T extends {
             : {},
     };
     return withUnavailableUnitContributions({ ...data, enhancementCondition }, enhancementCondition.unavailableResults);
+}
+
+export function applyWatercourseEnhancementAvailability<T extends {
+    baseline: { distinctivenessScore: number; conditionScore: ConditionScore };
+    distinctivenessScore: number;
+    conditionScore: ConditionScore;
+}>(data: T, offSite: boolean): T & {
+    enhancementCondition: EnhancementConditionState;
+    enhancementMovement: WatercourseEnhancementMovementState;
+} {
+    const forbidden = data.baseline.distinctivenessScore > data.distinctivenessScore;
+    const enhancementMovement: WatercourseEnhancementMovementState = {
+        rule: 'watercourse-enhancement-movement',
+        status: forbidden ? 'forbidden' : 'allowed',
+        ...(forbidden ? { message: 'Error Trading Down ▲' as const } : {}),
+        unavailableResults: forbidden
+            ? {
+                  timeToTargetCondition: 'check-data',
+                  standardOrAdjustedTimeToTargetCondition: 'check-data',
+                  finalTimeToTargetCondition: 'check-data',
+                  temporalMultiplier: 'check-data',
+                  appliedDifficultyMultiplier: 'check-data',
+                  watercourseUnitsDelivered: 'blank',
+                  ...(offSite
+                      ? { watercourseUnitsDeliveredWithSpatialRisk: 'blank' as const }
+                      : {}),
+              }
+            : {},
+    };
+    return withUnavailableUnitContributions(
+        { ...applyEnhancementConditionAvailability(data, 'watercourse', offSite), enhancementMovement },
+        enhancementMovement.unavailableResults,
+    );
 }

@@ -1,5 +1,5 @@
 import { toDecimal } from '../decimal';
-import { applyEnhancementConditionAvailability } from '../calculationAvailability';
+import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -134,7 +134,7 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
-    v.transform((data) => applyEnhancementConditionAvailability(data, 'watercourse', false)),
+    v.transform((data) => applyWatercourseEnhancementAvailability(data, false)),
 );
 
 export type OnSiteWatercourseEnhancementSchema = v.InferInput<typeof onSiteWatercourseEnhancementSchema>;
@@ -168,5 +168,5 @@ export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichEnhancementWithEncroachmentData),
     safeTransform(calculateEnhancementUnitsDelivered),
-    safeTransform((data) => applyEnhancementConditionAvailability(data, 'watercourse', false)),
+    safeTransform((data) => applyWatercourseEnhancementAvailability(data, false)),
 );

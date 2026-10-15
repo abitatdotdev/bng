@@ -846,6 +846,8 @@ export function calculateEnhancementDifficulty(input: {
     standardDifficultyOfEnhancement: Watercourse['technicalDifficultyOfEnhancement'];
     baselineConditionScore?: number | 'Not possible';
     conditionScore?: number | 'Not possible';
+    baselineDistinctivenessScore?: number;
+    distinctivenessScore?: number;
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.watercourseEnhancedInAdvance,
@@ -853,9 +855,12 @@ export function calculateEnhancementDifficulty(input: {
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement as keyof typeof difficulty,
         lowDifficultyMessage: 'Low Difficulty - only applicable if all watercourse enhanced before losses ⚠',
         hasReachedTargetCondition:
-            typeof input.baselineConditionScore === 'number' &&
-            typeof input.conditionScore === 'number' &&
-            input.baselineConditionScore > input.conditionScore
+            (typeof input.baselineConditionScore === 'number' &&
+                typeof input.conditionScore === 'number' &&
+                input.baselineConditionScore > input.conditionScore) ||
+            (typeof input.baselineDistinctivenessScore === 'number' &&
+                typeof input.distinctivenessScore === 'number' &&
+                input.baselineDistinctivenessScore > input.distinctivenessScore)
                 ? false
                 : undefined,
     });
@@ -868,6 +873,8 @@ export function determineEnhancementDifficulty<
         technicalDifficulty: Watercourse['technicalDifficultyOfEnhancement'];
         _baselineCondition?: number | 'Not possible';
         conditionScore?: number | 'Not possible';
+        _baselineWatercourse?: { distinctivenessScore: number };
+        distinctivenessScore?: number;
     },
 >(data: Data) {
     return {
@@ -878,6 +885,8 @@ export function determineEnhancementDifficulty<
             standardDifficultyOfEnhancement: data.technicalDifficulty,
             baselineConditionScore: data._baselineCondition,
             conditionScore: data.conditionScore,
+            baselineDistinctivenessScore: data._baselineWatercourse?.distinctivenessScore,
+            distinctivenessScore: data.distinctivenessScore,
         }),
     };
 }

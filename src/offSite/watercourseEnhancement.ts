@@ -1,5 +1,5 @@
 import { Decimal, toDecimal } from '../decimal';
-import { applyEnhancementConditionAvailability } from '../calculationAvailability';
+import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -163,8 +163,8 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory }),
     ),
     v.transform((data) =>
-        applyEnhancementConditionAvailability(
-            enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data), 'watercourse', true,
+        applyWatercourseEnhancementAvailability(
+            enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data), true,
         ),
     ),
 );
@@ -206,7 +206,7 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
     // F-3 AP requires its own reference; AO calculates spatial units independently.
     safeTransform(excludeUnreferencedRawUnits),
-    safeTransform((data) => applyEnhancementConditionAvailability(data, 'watercourse', true)),
+    safeTransform((data) => applyWatercourseEnhancementAvailability(data, true)),
 );
 
 /**
