@@ -1,4 +1,5 @@
 import { toDecimal } from '../decimal';
+import { applyEnhancementConditionAvailability } from '../calculationAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -88,17 +89,13 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
         // Cannot reduce distinctiveness (trading down)
         return proposed.distinctivenessScore >= baseline.distinctivenessScore;
     }, 'Trading rules not satisfied - watercourse distinctiveness cannot be reduced'),
-    v.check((data) => {
-        const baselineCondition = data._baselineCondition as number;
-        const proposedCondition = data.conditionScore as number;
-
-        // Cannot reduce condition
-        if (proposedCondition < baselineCondition) {
-            return false;
-        }
-
-        return true;
-    }, 'Enhancement cannot reduce condition'),
+    v.forward(
+        v.check(
+            (data) => !((data.conditionScore as number) < (data._baselineCondition as number)),
+            'Enhancement cannot reduce condition',
+        ),
+        ['condition'],
+    ),
 
     // Validate encroachment consistency with watercourse type
     v.forward(
@@ -137,6 +134,7 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
+    v.transform((data) => applyEnhancementConditionAvailability(data, 'watercourse', false)),
 );
 
 export type OnSiteWatercourseEnhancementSchema = v.InferInput<typeof onSiteWatercourseEnhancementSchema>;
@@ -170,4 +168,5 @@ export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichEnhancementWithEncroachmentData),
     safeTransform(calculateEnhancementUnitsDelivered),
+    safeTransform((data) => applyEnhancementConditionAvailability(data, 'watercourse', false)),
 );

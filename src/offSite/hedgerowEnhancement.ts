@@ -24,6 +24,7 @@ import {
     calculateEnhancementUnitsDelivered,
 } from '../hedgerowCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
+import { applyEnhancementConditionAvailability } from '../calculationAvailability';
 import {
     enrichHedgerowEnhancementMovement,
     gateHedgerowEnhancementMovement,
@@ -436,24 +437,19 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
         }
         return proposed.distinctivenessScore >= baseline.distinctivenessScore;
     }, 'Trading rules not satisfied - hedgerow distinctiveness mismatch'),
-    v.check((data) => {
-        const baselineCondition = data._baselineCondition;
-        const proposedCondition = data.conditionScore;
-        const baselineD = data._baselineHedgerow.distinctivenessScore;
-        const proposedD = data.distinctivenessScore;
-
-        // Cannot reduce condition
-        if (baselineCondition > proposedCondition) {
-            return false;
-        }
-
-        // If same condition, must have distinctiveness upgrade
-        if (baselineCondition === proposedCondition) {
-            return proposedD > baselineD;
-        }
-
-        return true;
-    }, 'Enhancement does not improve hedgerow quality'),
+    v.forward(
+        v.check(
+            (data) => data._baselineCondition <= data.conditionScore,
+            'Error - Can not reduce condition ▲',
+        ),
+        ['condition'],
+    ),
+    v.check(
+        (data) =>
+            data._baselineCondition !== data.conditionScore ||
+            data.distinctivenessScore > data._baselineHedgerow.distinctivenessScore,
+        'Enhancement does not improve hedgerow quality',
+    ),
 
     // Calculate enhancement pathway label
     v.transform(addEnhancementPathway),
@@ -471,7 +467,9 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
 
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
-    v.transform(gateHedgerowEnhancementMovement),
+    v.transform((data) =>
+        applyEnhancementConditionAvailability(gateHedgerowEnhancementMovement(data), 'hedgerow', true),
+    ),
 );
 
 export type OffSiteHedgerowEnhancementSchema = v.InferInput<typeof offSiteHedgerowEnhancementSchema>;
@@ -508,4 +506,5 @@ export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithEnhancementUnitsDelivered),
     safeTransform(gateHedgerowEnhancementMovement),
+    safeTransform((data) => applyEnhancementConditionAvailability(data, 'hedgerow', true)),
 );

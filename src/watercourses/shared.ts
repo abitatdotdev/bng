@@ -844,12 +844,20 @@ export function calculateEnhancementDifficulty(input: {
     watercourseEnhancedInAdvance: number | '30+';
     finalTimeToTargetCondition: number | '30+' | 'N/A';
     standardDifficultyOfEnhancement: Watercourse['technicalDifficultyOfEnhancement'];
+    baselineConditionScore?: number | 'Not possible';
+    conditionScore?: number | 'Not possible';
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.watercourseEnhancedInAdvance,
         finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement as keyof typeof difficulty,
         lowDifficultyMessage: 'Low Difficulty - only applicable if all watercourse enhanced before losses ⚠',
+        hasReachedTargetCondition:
+            typeof input.baselineConditionScore === 'number' &&
+            typeof input.conditionScore === 'number' &&
+            input.baselineConditionScore > input.conditionScore
+                ? false
+                : undefined,
     });
 }
 
@@ -858,6 +866,8 @@ export function determineEnhancementDifficulty<
         watercourseEnhancedInAdvance: number | '30+';
         finalTimeToTargetCondition: number | '30+' | 'N/A';
         technicalDifficulty: Watercourse['technicalDifficultyOfEnhancement'];
+        _baselineCondition?: number | 'Not possible';
+        conditionScore?: number | 'Not possible';
     },
 >(data: Data) {
     return {
@@ -866,6 +876,8 @@ export function determineEnhancementDifficulty<
             watercourseEnhancedInAdvance: data.watercourseEnhancedInAdvance,
             finalTimeToTargetCondition: data.finalTimeToTargetCondition,
             standardDifficultyOfEnhancement: data.technicalDifficulty,
+            baselineConditionScore: data._baselineCondition,
+            conditionScore: data.conditionScore,
         }),
     };
 }
@@ -986,6 +998,8 @@ export function calculateEnhancementUnitsDeliveredPure(input: {
 
 export function calculateEnhancementUnitsDelivered<
     Baseline extends {
+        length?: number;
+        lengthDecimal?: Decimal;
         lengthEnhanced: number;
         lengthEnhancedDecimal?: Decimal;
     },
@@ -1016,9 +1030,12 @@ export function calculateEnhancementUnitsDelivered<
         ...calculateEnhancementUnitsDeliveredPure({
             proposedLength: data.length,
             proposedLengthDecimal: data.lengthDecimal ?? toDecimal(data.length),
-            baselineLength: data.baseline.lengthEnhanced,
+            baselineLength: data.baseline.length ?? data.baseline.lengthEnhanced,
             baselineLengthDecimal:
-                data.baseline.lengthEnhancedDecimal ?? toDecimal(data.baseline.lengthEnhanced),
+                data.baseline.lengthDecimal ??
+                (data.baseline.length !== undefined
+                    ? toDecimal(data.baseline.length)
+                    : data.baseline.lengthEnhancedDecimal ?? toDecimal(data.baseline.lengthEnhanced)),
             baselineDistinctivenessScore: data._baselineWatercourse.distinctivenessScore,
             baselineDistinctivenessScoreDecimal: toDecimal(data._baselineWatercourse.distinctivenessScore),
             baselineConditionScore: data._baselineCondition,

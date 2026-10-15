@@ -34,3 +34,5 @@ export type {
     HedgerowEnhancementMovementState,
     HedgerowEnhancementUnavailableResult,
 } from './hedgerowEnhancementMovementGate';
+
+export type { HabitatCreationTimingState, EnhancementConditionState } from './calculationAvailability';

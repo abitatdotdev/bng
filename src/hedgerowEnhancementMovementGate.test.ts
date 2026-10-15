@@ -152,7 +152,7 @@ for (const site of sites) {
             }
         });
 
-        test('does not gate unrelated unchecked condition or timing failures', () => {
+        test('keeps movement availability independent of condition and timing failures', () => {
             const input = {
                 baseline: baseline('Native hedgerow'),
                 habitatType: 'Native hedgerow',
@@ -166,7 +166,7 @@ for (const site of sites) {
                 const row = v.parse(site.unchecked, rowInput);
                 expect(row.enhancementMovement.status).toBe('allowed');
                 expect(row.enhancementMovement.unavailableResults).toEqual({});
-                expect(row.hedgerowUnitsDeliveredDecimal.gt(0)).toBeTrue();
+                expect(row.hedgerowUnitsDeliveredDecimal.isZero()).toBe(rowInput.baseline.condition === 'Good');
                 expect(v.safeParse(site.checked, rowInput).success).toBeFalse();
             }
         });

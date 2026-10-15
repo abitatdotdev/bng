@@ -1,4 +1,5 @@
 import { Decimal, toDecimal } from '../decimal';
+import { applyEnhancementConditionAvailability } from '../calculationAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -113,19 +114,13 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         // Cannot reduce distinctiveness (trading down)
         return proposed.distinctivenessScore >= baseline.distinctivenessScore;
     }, 'Trading rules not satisfied - watercourse distinctiveness cannot be reduced'),
-    v.check((data) => {
-        const baselineCondition = data._baselineCondition as number;
-        const proposedCondition = data.conditionScore as number;
-
-        // Cannot reduce condition. Condition-neutral rows are valid for
-        // watercourses: encroachment and strategic significance are uplift
-        // levers that area and hedgerow habitats do not have.
-        if (proposedCondition < baselineCondition) {
-            return false;
-        }
-
-        return true;
-    }, 'Enhancement cannot reduce condition'),
+    v.forward(
+        v.check(
+            (data) => !((data.conditionScore as number) < (data._baselineCondition as number)),
+            'Enhancement cannot reduce condition',
+        ),
+        ['condition'],
+    ),
 
     // Validate encroachment consistency with watercourse type
     v.forward(
@@ -167,7 +162,11 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     v.transform((d) =>
         enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory }),
     ),
-    v.transform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
+    v.transform((data) =>
+        applyEnhancementConditionAvailability(
+            enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data), 'watercourse', true,
+        ),
+    ),
 );
 
 export type OffSiteWatercourseEnhancementSchema = v.InferInput<typeof offSiteWatercourseEnhancementSchema>;
@@ -207,6 +206,7 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
     // F-3 AP requires its own reference; AO calculates spatial units independently.
     safeTransform(excludeUnreferencedRawUnits),
+    safeTransform((data) => applyEnhancementConditionAvailability(data, 'watercourse', true)),
 );
 
 /**

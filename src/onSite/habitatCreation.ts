@@ -20,6 +20,7 @@ import { difficulty } from '../difficulty';
 import { hasAreaHabitatReachedTarget } from '../areaTiming';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
+import { applyHabitatCreationTimingAvailability } from '../calculationAvailability';
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -412,6 +413,7 @@ export const onSiteHabitatCreationSchema = v.pipe(
     v.transform(lookupFinalTimeToTargetMultiplier),
     v.transform(enrichWithDifficultyData),
     v.transform(enrichWithHabitatUnitsDelivered),
+    v.transform((data) => applyHabitatCreationTimingAvailability(data, false)),
 );
 export type OnSiteHabitatCreation = v.InferOutput<typeof onSiteHabitatCreationSchema>;
 export type OnSiteHabitatCreationSchema = v.InferInput<typeof onSiteHabitatCreationSchema>;
@@ -439,4 +441,5 @@ export const onSiteHabitatCreationUncheckedSchema = v.pipe(
     safeTransform(lookupFinalTimeToTargetMultiplier),
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichWithHabitatUnitsDelivered),
+    safeTransform((data) => applyHabitatCreationTimingAvailability(data, false)),
 );
