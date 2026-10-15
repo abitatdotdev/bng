@@ -19,6 +19,7 @@ import {
 } from './habitatBaseline';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
+import { calculateAreaEnhancementTimingEvidence } from '../areaTiming';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
@@ -77,7 +78,7 @@ export function calculateEnhancementTimeToTarget(input: {
         input.enhancementTemporalMultipliers[
             input.conditionChange as keyof typeof input.enhancementTemporalMultipliers
         ];
-    const timeToTargetCondition: number | '30+' | 'Not Possible ▲' = value ? value : 'Not Possible ▲';
+    const timeToTargetCondition: number | '30+' | 'Not Possible ▲' = value ?? 'Not Possible ▲';
     return {
         timeToTargetCondition,
         timeToTargetConditionDecimal:
@@ -128,33 +129,11 @@ const calculateFinalTimeToTargetCondition = <
 
     const standardTimeToTargetCondition = timeToTargetCondition;
 
-    let standardOrAdjustedTimeToTargetCondition: string;
-    const hasAdvance = typeof habitatEnhancedInAdvance === 'string' || habitatEnhancedInAdvance > 0;
-    const hasDelay = typeof habitatEnhancedDelay === 'string' || habitatEnhancedDelay > 0;
-
-    if (hasAdvance) {
-        const normalisedAdvance =
-            typeof habitatEnhancedInAdvance === 'string' ? 30 : habitatEnhancedInAdvance;
-        const normalisedStandardTime =
-            typeof timeToTargetCondition === 'string'
-                ? timeToTargetCondition === '30+'
-                    ? 30
-                    : Infinity
-                : timeToTargetCondition;
-
-        if (normalisedAdvance >= normalisedStandardTime) {
-            standardOrAdjustedTimeToTargetCondition =
-                'Check details - Is there evidence that habitat has reached target condition? ⚠';
-        } else {
-            standardOrAdjustedTimeToTargetCondition =
-                'Check details - Is there evidence habitat creation started/in place? ⚠';
-        }
-    } else if (hasDelay) {
-        standardOrAdjustedTimeToTargetCondition =
-            'Check details- Delay in starting habitat in required condition? ⚠';
-    } else {
-        standardOrAdjustedTimeToTargetCondition = 'Standard time to target condition applied';
-    }
+    const standardOrAdjustedTimeToTargetCondition = calculateAreaEnhancementTimingEvidence(
+        timeToTargetCondition,
+        habitatEnhancedInAdvance,
+        habitatEnhancedDelay,
+    );
 
     let finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
     const normalisedHabitatEnhancedInAdvance =
@@ -212,12 +191,16 @@ const calculateFinalTimeToTargetCondition = <
  * Simpler than creation difficulty logic
  */
 export function calculateEnhancementDifficulty(input: {
+    standardOrAdjustedTimeToTargetCondition: string;
     habitatEnhancedInAdvance: number | '30+';
     finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
     standardDifficultyOfEnhancement: keyof typeof difficulty;
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.habitatEnhancedInAdvance,
+        hasReachedTargetCondition:
+            input.standardOrAdjustedTimeToTargetCondition ===
+            'Check details - Is there evidence that habitat has reached target condition? ⚠',
         finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
         lowDifficultyMessage: 'Low Difficulty - only applicable if all habitat created before losses ⚠',
@@ -231,6 +214,7 @@ const determineEnhancementDifficulty = <
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatEnhancedInAdvance: number | '30+';
         finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        standardOrAdjustedTimeToTargetCondition: string;
     },
 >(
     data: Data,
@@ -240,6 +224,7 @@ const determineEnhancementDifficulty = <
     return {
         ...data,
         ...calculateEnhancementDifficulty({
+            standardOrAdjustedTimeToTargetCondition: data.standardOrAdjustedTimeToTargetCondition,
             habitatEnhancedInAdvance: data.habitatEnhancedInAdvance,
             finalTimeToTargetCondition: data.finalTimeToTargetCondition,
             standardDifficultyOfEnhancement: habitat.technicalDifficultyEnhancement,

@@ -15,6 +15,7 @@ import {
 import { offSiteHabitatBaselineSchema, offSiteHabitatBaselineUncheckedSchema } from './habitatBaseline';
 import { habitatByBroadAndType } from '../habitats';
 import { difficulty } from '../difficulty';
+import { calculateAreaEnhancementTimingEvidence } from '../areaTiming';
 import {
     calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon,
     lookupFinalTimeToTargetMultiplier,
@@ -225,6 +226,11 @@ const calculateFinalTimeToTargetCondition = <
 ) => {
     return calculateFinalTimeToTargetConditionCommon({
         ...data,
+        standardOrAdjustedTimeToTargetCondition: calculateAreaEnhancementTimingEvidence(
+            data.timeToTargetCondition,
+            data.habitatEnhancedInAdvance,
+            data.habitatEnhancedDelay,
+        ),
         advance: data.habitatEnhancedInAdvance,
         advanceDecimal:
             typeof data.habitatEnhancedInAdvance === 'number'
@@ -243,12 +249,16 @@ const calculateFinalTimeToTargetCondition = <
  * Simpler than creation difficulty logic
  */
 export function calculateEnhancementDifficulty(input: {
+    standardOrAdjustedTimeToTargetCondition: string;
     habitatEnhancedInAdvance: number | '30+';
     finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
     standardDifficultyOfEnhancement: keyof typeof difficulty;
 }) {
     return calculateEnhancementDifficultyShared({
         enhancedInAdvance: input.habitatEnhancedInAdvance,
+        hasReachedTargetCondition:
+            input.standardOrAdjustedTimeToTargetCondition ===
+            'Check details - Is there evidence that habitat has reached target condition? ⚠',
         finalTimeToTargetCondition: input.finalTimeToTargetCondition,
         standardDifficultyOfEnhancement: input.standardDifficultyOfEnhancement,
         lowDifficultyMessage: 'Low Difficulty - only applicable if all habitat created before losses ⚠',
@@ -262,6 +272,7 @@ const determineEnhancementDifficulty = <
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatEnhancedInAdvance: number | '30+';
         finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
+        standardOrAdjustedTimeToTargetCondition: string;
     },
 >(
     data: Data,
@@ -271,6 +282,7 @@ const determineEnhancementDifficulty = <
     return {
         ...data,
         ...calculateEnhancementDifficulty({
+            standardOrAdjustedTimeToTargetCondition: data.standardOrAdjustedTimeToTargetCondition,
             habitatEnhancedInAdvance: data.habitatEnhancedInAdvance,
             finalTimeToTargetCondition: data.finalTimeToTargetCondition,
             standardDifficultyOfEnhancement: habitat.technicalDifficultyEnhancement,

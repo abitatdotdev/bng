@@ -17,6 +17,7 @@ import {
 } from '../schemaUtils';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
+import { hasAreaHabitatReachedTarget } from '../areaTiming';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 
@@ -227,11 +228,7 @@ export function calculateStandardOrAdjustedTimeToTarget(
     }
 
     // Check if habitat has reached target condition (advance >= standard time)
-    if (
-        timeToTargetCondition !== 'Not Possible ▲' &&
-        timeToTargetCondition !== '30+' &&
-        normalisedHabitatCreationInAdvance >= timeToTargetCondition
-    ) {
+    if (hasAreaHabitatReachedTarget(timeToTargetCondition, habitatCreationInAdvance)) {
         return 'Check details - Is there evidence that habitat has reached target condition? ⚠' as const;
     }
 
@@ -286,14 +283,15 @@ export function calculateFinalDifficultyOfCreation(
 ) {
     if (
         appliedDifficultyMultiplier === 'Standard difficulty applied' &&
-        timeToTargetCondition > habitatCreationInAdvance
+        timeToTargetCondition !== 'Not Possible ▲' &&
+        !hasAreaHabitatReachedTarget(timeToTargetCondition, habitatCreationInAdvance)
     ) {
         return standardDifficultyOfCreation;
     }
     if (
         appliedDifficultyMultiplier ===
             'Low Difficulty - only applicable if all habitat created before losses ⚠' &&
-        habitatCreationInAdvance >= timeToTargetCondition
+        hasAreaHabitatReachedTarget(timeToTargetCondition, habitatCreationInAdvance)
     ) {
         return 'Low';
     }

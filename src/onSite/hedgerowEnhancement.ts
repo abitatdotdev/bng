@@ -217,6 +217,51 @@ const calculateFinalTimeToTargetCondition = <
     };
 };
 
+const calculateEnhancementTimingEvidence = <
+    Data extends {
+        timeToTargetCondition: number | '30+' | 'Not possible ▲';
+        hedgerowEnhancedInAdvance: number | '30+';
+        hedgerowEnhancedDelay: number | '30+';
+    },
+>(data: Data) => {
+    const { timeToTargetCondition, hedgerowEnhancedInAdvance, hedgerowEnhancedDelay } = data;
+    const advanceIsPositive =
+        typeof hedgerowEnhancedInAdvance === 'string' || hedgerowEnhancedInAdvance > 0;
+    const delayIsPositive =
+        typeof hedgerowEnhancedDelay === 'string' || hedgerowEnhancedDelay > 0;
+    const targetReached =
+        timeToTargetCondition !== 'Not possible ▲' &&
+        (hedgerowEnhancedInAdvance === '30+' ||
+            (typeof timeToTargetCondition === 'number' &&
+                typeof hedgerowEnhancedInAdvance === 'number' &&
+                timeToTargetCondition <= hedgerowEnhancedInAdvance));
+
+    let standardOrAdjustedTimeToTargetCondition:
+        | 'Error -both advance and delayed habitat creation ▲'
+        | 'Check details - Is there evidence that habitat has reached target condition? ⚠'
+        | 'Check details - Is there evidence habitat creation started/in place? ⚠'
+        | 'Check details- Delay in starting habitat in required condition? ⚠'
+        | 'Standard time to target condition applied';
+
+    if (advanceIsPositive && delayIsPositive) {
+        standardOrAdjustedTimeToTargetCondition =
+            'Error -both advance and delayed habitat creation ▲';
+    } else if (targetReached && !delayIsPositive) {
+        standardOrAdjustedTimeToTargetCondition =
+            'Check details - Is there evidence that habitat has reached target condition? ⚠';
+    } else if (advanceIsPositive) {
+        standardOrAdjustedTimeToTargetCondition =
+            'Check details - Is there evidence habitat creation started/in place? ⚠';
+    } else if (delayIsPositive) {
+        standardOrAdjustedTimeToTargetCondition =
+            'Check details- Delay in starting habitat in required condition? ⚠';
+    } else {
+        standardOrAdjustedTimeToTargetCondition = 'Standard time to target condition applied';
+    }
+
+    return { ...data, standardOrAdjustedTimeToTargetCondition };
+};
+
 const lookupTemporalMultiplierStep = <
     Data extends {
         finalTimeToTargetCondition: number | '30+' | 'Not possible ▲';
@@ -418,6 +463,7 @@ export const onSiteHedgerowEnhancementSchema = v.pipe(
     // Temporal calculation
     v.transform(lookupEnhancementTimeToTarget),
     v.transform(calculateFinalTimeToTargetCondition),
+    v.transform(calculateEnhancementTimingEvidence),
     v.transform(lookupTemporalMultiplierStep),
 
     // Difficulty logic
@@ -455,6 +501,7 @@ export const onSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(addEnhancementPathway),
     safeTransform(lookupEnhancementTimeToTarget),
     safeTransform(calculateFinalTimeToTargetCondition),
+    safeTransform(calculateEnhancementTimingEvidence),
     safeTransform(lookupTemporalMultiplierStep),
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithEnhancementUnitsDelivered),

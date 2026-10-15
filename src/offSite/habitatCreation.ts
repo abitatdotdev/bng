@@ -1,7 +1,7 @@
 import { type Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
-import { creationHabitatType } from '../habitatTypes';
+import { creationHabitatType, type CreationHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import {
@@ -15,14 +15,19 @@ import {
     yearsSchema,
 } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
-import { habitatByBroadAndType } from '../habitats';
-import { difficulty } from '../difficulty';
+import { habitatByBroadAndType, type Habitat } from '../habitats';
+import {
+    calculateDifficultyData,
+    calculateStandardOrAdjustedTimeToTarget,
+} from '../onSite/habitatCreation';
 import {
     calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon,
     lookupFinalTimeToTargetMultiplier,
     enrichWithSpatialRisk,
 } from './common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
+
+export { calculateDifficultyData } from '../onSite/habitatCreation';
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -53,12 +58,23 @@ const calculateFinalTimeToTargetCondition = <
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatCreationInAdvance: number | '30+';
         habitatCreationDelay: number | '30+';
+        distinctivenessScore: number;
+        _habitat: Habitat;
     },
 >(
     data: Data,
 ) => {
     return calculateFinalTimeToTargetConditionCommon({
         ...data,
+        standardOrAdjustedTimeToTarget: calculateStandardOrAdjustedTimeToTarget(
+            data.habitatCreationInAdvance === '30+' ? 30 : data.habitatCreationInAdvance,
+            data.habitatCreationInAdvance,
+            data.habitatCreationDelay === '30+' ? 30 : data.habitatCreationDelay,
+            data.habitatCreationDelay,
+            data.distinctivenessScore,
+            data.timeToTargetCondition,
+            data._habitat.temporalMultipliers.Poor,
+        ),
         advance: data.habitatCreationInAdvance,
         advanceDecimal:
             typeof data.habitatCreationInAdvance === 'number'
@@ -83,77 +99,11 @@ const calculateFinalTimeToTargetCondition = <
  *
  * Corresponds to columns U-X in Excel sheet D-2
  */
-/**
- * Pure calculation: derives all difficulty fields from resolved habitat values.
- */
-export function calculateDifficultyData(input: {
-    habitatType: string;
-    habitatCreationInAdvance: number | '30+';
-    finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
-    standardDifficultyOfCreation: keyof typeof difficulty;
-    technicalDifficultyEnhancement: keyof typeof difficulty;
-    timeToPoorCondition: number | '30+' | 'Not Possible ▲';
-}) {
-    const normalisedHabitatCreationInAdvance =
-        typeof input.habitatCreationInAdvance === 'string' ? 30 : input.habitatCreationInAdvance;
-
-    const excludedHabitats = [
-        'Traditional orchards',
-        'Ornamental lake or pond',
-        'Ponds (non-priority habitat)',
-        'Ruderal/Ephemeral',
-        'Tall forbs',
-        'Developed land; sealed surface',
-    ];
-
-    const hasReachedTargetCondition =
-        normalisedHabitatCreationInAdvance > 0 && input.finalTimeToTargetCondition === 0;
-
-    const hasReachedPoorThreshold =
-        normalisedHabitatCreationInAdvance > 0 &&
-        input.timeToPoorCondition !== 'Not Possible ▲' &&
-        (input.timeToPoorCondition === 0 ||
-            (typeof input.timeToPoorCondition === 'number' &&
-                normalisedHabitatCreationInAdvance >= input.timeToPoorCondition)) &&
-        !hasReachedTargetCondition;
-
-    let appliedDifficultyMultiplier: string;
-    if (hasReachedTargetCondition) {
-        appliedDifficultyMultiplier =
-            'Low Difficulty - only applicable if all habitat created before losses ⚠';
-    } else if (hasReachedPoorThreshold && !excludedHabitats.includes(input.habitatType)) {
-        appliedDifficultyMultiplier = 'Enhancement difficulty applied';
-    } else {
-        appliedDifficultyMultiplier = 'Standard difficulty applied';
-    }
-
-    let finalDifficultyOfCreation: keyof typeof difficulty;
-    if (
-        appliedDifficultyMultiplier ===
-        'Low Difficulty - only applicable if all habitat created before losses ⚠'
-    ) {
-        finalDifficultyOfCreation = 'Low';
-    } else if (appliedDifficultyMultiplier === 'Enhancement difficulty applied') {
-        finalDifficultyOfCreation = input.technicalDifficultyEnhancement;
-    } else {
-        finalDifficultyOfCreation = input.standardDifficultyOfCreation;
-    }
-
-    const difficultyMultiplierApplied = difficulty[finalDifficultyOfCreation];
-
-    return {
-        standardDifficultyOfCreation: input.standardDifficultyOfCreation,
-        appliedDifficultyMultiplier,
-        finalDifficultyOfCreation,
-        difficultyMultiplierApplied,
-        difficultyMultiplierAppliedDecimal: toDecimal(difficultyMultiplierApplied),
-    };
-}
-
 const enrichWithDifficultyData = <
     Data extends {
         broadHabitat: string;
-        habitatType: string;
+        habitatType: CreationHabitatType;
+        standardOrAdjustedTimeToTarget: ReturnType<typeof calculateStandardOrAdjustedTimeToTarget>;
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatCreationInAdvance: number | '30+';
         finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
@@ -167,11 +117,11 @@ const enrichWithDifficultyData = <
         ...data,
         ...calculateDifficultyData({
             habitatType: data.habitatType,
+            standardOrAdjustedTimeToTarget: data.standardOrAdjustedTimeToTarget,
+            timeToTargetCondition: data.timeToTargetCondition,
             habitatCreationInAdvance: data.habitatCreationInAdvance,
-            finalTimeToTargetCondition: data.finalTimeToTargetCondition,
             standardDifficultyOfCreation: habitat.technicalDifficultyCreation,
             technicalDifficultyEnhancement: habitat.technicalDifficultyEnhancement,
-            timeToPoorCondition: habitat.temporalMultipliers['Poor'],
         }),
     };
 };

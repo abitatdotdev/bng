@@ -1,6 +1,7 @@
+import timingPathwayWorkbook from '../timingPathwayWorkbook.fixture.json';
 import { expect, test } from "bun:test";
 import * as v from 'valibot';
-import { offSiteHabitatCreationSchema, type OffSiteHabitatCreationSchema } from "./habitatCreation";
+import { offSiteHabitatCreationSchema, offSiteHabitatCreationUncheckedSchema, type OffSiteHabitatCreationSchema } from "./habitatCreation";
 
 export function fixture(overrides: Partial<OffSiteHabitatCreationSchema> = {}): OffSiteHabitatCreationSchema {
     return {
@@ -374,3 +375,26 @@ test("habitat units delivered - returns 0 when temporal multiplier is undefined"
     expect(result.habitatUnitsDelivered).toBeGreaterThanOrEqual(0)
     expect(result.habitatUnitsDeliveredWithSpatialRisk).toBeGreaterThanOrEqual(0)
 })
+
+
+for (const workbookCase of timingPathwayWorkbook.cases.filter((entry) => entry.sheet === 'D-2')) {
+    test(`${workbookCase.gap ?? 'Workbook control'}: ${workbookCase.id}`, () => {
+        for (const schema of [offSiteHabitatCreationSchema, offSiteHabitatCreationUncheckedSchema]) {
+            const result = v.parse(schema, workbookCase.input);
+            expect(result.finalTimeToTargetCondition).toBe(workbookCase.excel.finalTime);
+            expect(result.finalTimeToTargetMultiplier).toBe(1);
+            expect(result).toMatchObject({
+                timeToTargetCondition: workbookCase.excel.standardTime,
+                standardOrAdjustedTimeToTarget: workbookCase.excel.timingEvidence,
+                appliedDifficultyMultiplier: workbookCase.excel.appliedDifficulty,
+                finalDifficultyOfCreation: workbookCase.excel.finalDifficulty,
+                difficultyMultiplierApplied: workbookCase.excel.difficultyMultiplier,
+            });
+            expect(result.habitatUnitsDelivered).toBeCloseTo(workbookCase.excel.units, 10);
+            expect(result.habitatUnitsDeliveredDecimal.toNumber()).toBe(result.habitatUnitsDelivered);
+            expect(result.difficultyMultiplierAppliedDecimal.toNumber()).toBe(result.difficultyMultiplierApplied);
+            expect(result.habitatUnitsDeliveredWithSpatialRisk).toBeCloseTo(workbookCase.excel.units, 10);
+            expect(result.habitatUnitsDeliveredWithSpatialRiskDecimal.toNumber()).toBe(result.habitatUnitsDeliveredWithSpatialRisk);
+        }
+    });
+}

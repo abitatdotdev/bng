@@ -1,5 +1,6 @@
+import timingPathwayWorkbook from '../timingPathwayWorkbook.fixture.json';
 import { expect, test } from "bun:test";
-import { offSiteHabitatEnhancementSchema, type OffSiteHabitatEnhancementSchema } from "./habitatEnhancement";
+import { offSiteHabitatEnhancementSchema, offSiteHabitatEnhancementUncheckedSchema, type OffSiteHabitatEnhancementSchema } from "./habitatEnhancement";
 import * as v from 'valibot';
 import { describe } from "bun:test";
 
@@ -607,3 +608,36 @@ describe("fixed bugs", () => {
     });
 })
 
+
+
+for (const workbookCase of timingPathwayWorkbook.cases.filter((entry) => entry.sheet === 'D-3')) {
+    test(`${workbookCase.gap ?? 'Workbook control'}: ${workbookCase.id}`, () => {
+        for (const schema of [offSiteHabitatEnhancementSchema, offSiteHabitatEnhancementUncheckedSchema]) {
+            const result = v.parse(schema, workbookCase.input);
+            expect(result.finalTimeToTargetCondition).toBe(workbookCase.excel.finalTime);
+            expect(result.finalTimeToTargetMultiplier).toBe(1);
+            expect(result).toMatchObject({
+                timeToTargetCondition: workbookCase.excel.standardTime,
+                standardOrAdjustedTimeToTargetCondition: workbookCase.excel.timingEvidence,
+                appliedDifficultyMultiplier: workbookCase.excel.appliedDifficulty,
+                finalDifficultyOfEnhancement: workbookCase.excel.finalDifficulty,
+                difficultyMultiplierApplied: workbookCase.excel.difficultyMultiplier,
+            });
+            expect(result.habitatUnitsDelivered).toBeCloseTo(workbookCase.excel.units, 10);
+            expect(result.habitatUnitsDeliveredDecimal.toNumber()).toBe(result.habitatUnitsDelivered);
+            expect(result.difficultyMultiplierAppliedDecimal.toNumber()).toBe(result.difficultyMultiplierApplied);
+            expect(result.habitatUnitsDeliveredWithSpatialRisk).toBeCloseTo(workbookCase.excel.units, 10);
+            expect(result.habitatUnitsDeliveredWithSpatialRiskDecimal.toNumber()).toBe(result.habitatUnitsDeliveredWithSpatialRisk);
+        }
+    });
+}
+
+for (const [advance, delay] of [[2, 3], ['30+', 3], [2, '30+'], ['30+', '30+']] as const) {
+    test(`enhancement timing evidence reports conflicting advance ${advance} and delay ${delay}`, () => {
+        const result = v.parse(offSiteHabitatEnhancementUncheckedSchema, fixture({
+            habitatEnhancedInAdvance: advance,
+            habitatEnhancedDelay: delay,
+        }));
+        expect(result.standardOrAdjustedTimeToTargetCondition).toBe('Error -both advance and delayed habitat creation ▲');
+    });
+}

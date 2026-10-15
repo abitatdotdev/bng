@@ -1,0 +1,427 @@
+{
+  "source": {
+    "filename": "biodiversity-metric (1).xlsm",
+    "sha256": "9a25cba0aec9531927607b7d2145ab7319ef2aeec3ee06e17c709cd0308c5a66",
+    "workbookVersion": 4.1,
+    "originalUnchanged": true
+  },
+  "verification": "2026-10-15T08:39:58.592696+00:00",
+  "cases": [
+    {
+      "id": "supplied-acid-advance-30plus",
+      "gap": "G1",
+      "sheet": "A-2",
+      "input": {
+        "broadHabitat": "Grassland",
+        "habitatType": "Lowland dry acid grassland",
+        "condition": "Moderate",
+        "area": 1,
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "habitatCreationInAdvance": "30+",
+        "habitatCreationDelay": 0
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 16,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 20
+      },
+      "evidenceSheet": "A-2"
+    },
+    {
+      "id": "woodland-creation-advance-30plus",
+      "gap": "G2",
+      "sheet": "A-2",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "area": 1,
+        "habitatCreationInAdvance": "30+",
+        "habitatCreationDelay": 0
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 18,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "A-2"
+    },
+    {
+      "id": "woodland-enhancement-advance-30",
+      "gap": "G3",
+      "sheet": "A-3",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "habitatEnhancedInAdvance": 30,
+        "habitatEnhancedDelay": 0,
+        "baseline": {
+          "broadHabitat": "Woodland and forest",
+          "habitatType": "Lowland mixed deciduous woodland",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "condition": "Poor",
+          "area": 1,
+          "areaEnhanced": 1,
+          "areaRetained": 0,
+          "irreplaceableHabitat": false
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence habitat creation started/in place? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "High",
+        "difficultyMultiplier": 0.33,
+        "units": 9.96,
+        "appliedDifficulty": "Standard difficulty applied",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "A-3"
+    },
+    {
+      "id": "offsite-woodland-creation-advance-30",
+      "gap": "G4",
+      "sheet": "D-2",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "area": 1,
+        "habitatCreationInAdvance": 30,
+        "habitatCreationDelay": 0,
+        "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+        "offSiteReferenceNumber": "GS-01"
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "High",
+        "difficultyMultiplier": 0.33,
+        "units": 5.94,
+        "spatialUnits": 5.94,
+        "appliedDifficulty": "Enhancement difficulty applied",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "D-2"
+    },
+    {
+      "id": "offsite-woodland-enhancement-advance-30",
+      "gap": "G3",
+      "sheet": "D-3",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "habitatEnhancedInAdvance": 30,
+        "habitatEnhancedDelay": 0,
+        "offSiteReferenceNumber": "GS-01",
+        "baseline": {
+          "broadHabitat": "Woodland and forest",
+          "habitatType": "Lowland mixed deciduous woodland",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "condition": "Poor",
+          "area": 1,
+          "areaEnhanced": 1,
+          "areaRetained": 0,
+          "irreplaceableHabitat": false,
+          "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+          "offSiteReferenceNumber": "GS-01"
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence habitat creation started/in place? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "High",
+        "difficultyMultiplier": 0.33,
+        "units": 9.96,
+        "spatialUnits": 9.96,
+        "appliedDifficulty": "Standard difficulty applied",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "D-3"
+    },
+    {
+      "id": "woodland-enhancement-advance-30plus",
+      "gap": null,
+      "sheet": "A-3",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "habitatEnhancedInAdvance": "30+",
+        "habitatEnhancedDelay": 0,
+        "baseline": {
+          "broadHabitat": "Woodland and forest",
+          "habitatType": "Lowland mixed deciduous woodland",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "condition": "Poor",
+          "area": 1,
+          "areaEnhanced": 1,
+          "areaRetained": 0,
+          "irreplaceableHabitat": false
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 18,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "A-3"
+    },
+    {
+      "id": "offsite-woodland-creation-advance-30plus",
+      "gap": null,
+      "sheet": "D-2",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "area": 1,
+        "habitatCreationInAdvance": "30+",
+        "habitatCreationDelay": 0,
+        "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+        "offSiteReferenceNumber": "GS-01"
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 18,
+        "spatialUnits": 18,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "D-2"
+    },
+    {
+      "id": "offsite-woodland-enhancement-advance-30plus",
+      "gap": null,
+      "sheet": "D-3",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "habitatEnhancedInAdvance": "30+",
+        "habitatEnhancedDelay": 0,
+        "offSiteReferenceNumber": "GS-01",
+        "baseline": {
+          "broadHabitat": "Woodland and forest",
+          "habitatType": "Lowland mixed deciduous woodland",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "condition": "Poor",
+          "area": 1,
+          "areaEnhanced": 1,
+          "areaRetained": 0,
+          "irreplaceableHabitat": false,
+          "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+          "offSiteReferenceNumber": "GS-01"
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 18,
+        "spatialUnits": 18,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "D-3"
+    },
+    {
+      "id": "area-zero-standard-creation",
+      "gap": null,
+      "sheet": "A-2",
+      "input": {
+        "broadHabitat": "Urban",
+        "habitatType": "Open mosaic habitats on previously developed land",
+        "condition": "Poor",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "area": 1,
+        "habitatCreationInAdvance": 0,
+        "habitatCreationDelay": 0
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 6,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 0
+      },
+      "evidenceSheet": "A-2"
+    },
+    {
+      "id": "area-zero-standard-enhancement",
+      "gap": "G5",
+      "sheet": "A-3",
+      "input": {
+        "broadHabitat": "Urban",
+        "habitatType": "Open mosaic habitats on previously developed land",
+        "condition": "Poor",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "habitatEnhancedInAdvance": 0,
+        "habitatEnhancedDelay": 0,
+        "baseline": {
+          "broadHabitat": "Urban",
+          "habitatType": "Built linear features",
+          "condition": "N/A - Other",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "irreplaceableHabitat": false,
+          "area": 1,
+          "areaRetained": 0,
+          "areaEnhanced": 1
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 6,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 0
+      },
+      "evidenceSheet": "A-3"
+    },
+    {
+      "id": "offsite-area-zero-standard-creation",
+      "gap": "G6",
+      "sheet": "D-2",
+      "input": {
+        "broadHabitat": "Urban",
+        "habitatType": "Open mosaic habitats on previously developed land",
+        "condition": "Poor",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+        "offSiteReferenceNumber": "GS-01",
+        "area": 1,
+        "habitatCreationInAdvance": 0,
+        "habitatCreationDelay": 0
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 6,
+        "spatialUnits": 6,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 0
+      },
+      "evidenceSheet": "D-2"
+    },
+    {
+      "id": "offsite-area-zero-standard-enhancement",
+      "gap": "G6",
+      "sheet": "D-3",
+      "input": {
+        "broadHabitat": "Urban",
+        "habitatType": "Open mosaic habitats on previously developed land",
+        "condition": "Poor",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "offSiteReferenceNumber": "GS-01",
+        "habitatEnhancedInAdvance": 0,
+        "habitatEnhancedDelay": 0,
+        "baseline": {
+          "broadHabitat": "Urban",
+          "habitatType": "Built linear features",
+          "condition": "N/A - Other",
+          "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+          "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+          "offSiteReferenceNumber": "GS-01",
+          "irreplaceableHabitat": false,
+          "area": 1,
+          "areaRetained": 0,
+          "areaEnhanced": 1
+        }
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 6,
+        "spatialUnits": 6,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 0
+      },
+      "evidenceSheet": "D-3"
+    },
+    {
+      "id": "supplied-acid-advance-30plus-formula-counterpart",
+      "gap": "G1",
+      "sheet": "D-2",
+      "input": {
+        "broadHabitat": "Grassland",
+        "habitatType": "Lowland dry acid grassland",
+        "condition": "Moderate",
+        "area": 1,
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "habitatCreationInAdvance": "30+",
+        "habitatCreationDelay": 0,
+        "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+        "offSiteReferenceNumber": "GS-01"
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence that habitat has reached target condition? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "Low",
+        "difficultyMultiplier": 1,
+        "units": 16,
+        "appliedDifficulty": "Low Difficulty - only applicable if all habitat created before losses ⚠",
+        "standardTime": 20
+      },
+      "evidenceSheet": "A-2"
+    },
+    {
+      "id": "offsite-woodland-creation-advance-30-formula-counterpart",
+      "gap": "G4",
+      "sheet": "A-2",
+      "input": {
+        "broadHabitat": "Woodland and forest",
+        "habitatType": "Lowland mixed deciduous woodland",
+        "strategicSignificance": "Area/compensation not in local strategy/ no local strategy",
+        "condition": "Good",
+        "area": 1,
+        "habitatCreationInAdvance": 30,
+        "habitatCreationDelay": 0,
+        "spatialRiskCategory": "Compensation inside LPA boundary or NCA of impact site",
+        "offSiteReferenceNumber": "GS-01"
+      },
+      "excel": {
+        "timingEvidence": "Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠",
+        "finalTime": 0,
+        "finalDifficulty": "High",
+        "difficultyMultiplier": 0.33,
+        "units": 5.94,
+        "spatialUnits": 5.94,
+        "appliedDifficulty": "Enhancement difficulty applied",
+        "standardTime": "30+"
+      },
+      "evidenceSheet": "D-2"
+    }
+  ]
+}

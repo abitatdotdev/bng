@@ -1,8 +1,10 @@
+import timingPathwayWorkbook from '../timingPathwayWorkbook.fixture.json';
 import { expect, test, describe } from "bun:test";
 import * as v from 'valibot';
 import {
     enrichWithDifficultyData,
     onSiteHabitatCreationSchema,
+    onSiteHabitatCreationUncheckedSchema,
     type OnSiteHabitatCreationSchema,
     calculateAppliedDifficultyMultiplier,
     calculateFinalDifficultyOfCreation,
@@ -530,7 +532,7 @@ describe("calculateStandardOrAdjustedTimeToTarget", () => {
         expect(result).toEqual("Check details- Delay in starting habitat in required condition? ⚠");
     });
 
-    test("checks if habitat creation started when advance is 30+", () => {
+    test("reaches target when both standard time and advance are 30+", () => {
         const result = calculateStandardOrAdjustedTimeToTarget(
             30, // normalisedHabitatCreationInAdvance
             "30+", // habitatCreationInAdvance
@@ -540,8 +542,7 @@ describe("calculateStandardOrAdjustedTimeToTarget", () => {
             "30+", // timeToTargetCondition - both are 30+
             5 // timeToPoorCondition
         );
-        // Poor threshold (5) is checked first, and 30 >= 5, so Poor condition check applies
-        expect(result).toEqual("Check details - Is there evidence habitat creation started and the threshold for Poor condition reached? ⚠");
+        expect(result).toEqual("Check details - Is there evidence that habitat has reached target condition? ⚠");
     });
 
     test("returns standard time applied as default", () => {
@@ -727,12 +728,11 @@ describe("calculateFinalDifficultyOfCreation", () => {
         const result = calculateFinalDifficultyOfCreation(
             "Standard difficulty applied",
             "30+", // timeToTargetCondition
-            5, // habitatCreationInAdvance - numeric comparison with "30+" fails
+            5, // habitatCreationInAdvance
             "High", // standardDifficultyOfCreation
             "Medium" // technicalDifficultyEnhancement
         );
-        // "30+" > 5 comparison fails, condition is false, returns enhancement difficulty
-        expect(result).toEqual("Medium");
+        expect(result).toEqual("High");
     });
 
     test("handles 30+ habitatCreationInAdvance with numeric timeToTargetCondition", () => {
@@ -885,3 +885,24 @@ describe("real bugs", () => {
         expect(parsed.finalTimeToTargetCondition).toEqual(1)
     })
 })
+
+
+for (const workbookCase of timingPathwayWorkbook.cases.filter((entry) => entry.sheet === 'A-2')) {
+    test(`${workbookCase.gap ?? 'Workbook control'}: ${workbookCase.id}`, () => {
+        for (const schema of [onSiteHabitatCreationSchema, onSiteHabitatCreationUncheckedSchema]) {
+            const result = v.parse(schema, workbookCase.input);
+            expect(result.finalTimeToTargetCondition).toBe(workbookCase.excel.finalTime);
+            expect(result.finalTimeToTargetMultiplier).toBe(1);
+            expect(result).toMatchObject({
+                timeToTargetCondition: workbookCase.excel.standardTime,
+                standardOrAdjustedTimeToTarget: workbookCase.excel.timingEvidence,
+                appliedDifficultyMultiplier: workbookCase.excel.appliedDifficulty,
+                finalDifficultyOfCreation: workbookCase.excel.finalDifficulty,
+                difficultyMultiplierApplied: workbookCase.excel.difficultyMultiplier,
+            });
+            expect(result.habitatUnitsDelivered).toBeCloseTo(workbookCase.excel.units, 10);
+            expect(result.habitatUnitsDeliveredDecimal.toNumber()).toBe(result.habitatUnitsDelivered);
+            expect(result.difficultyMultiplierAppliedDecimal.toNumber()).toBe(result.difficultyMultiplierApplied);
+        }
+    });
+}

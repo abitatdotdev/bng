@@ -1,7 +1,9 @@
 import { expect, test } from "bun:test";
 import * as v from 'valibot';
+import { Decimal } from '../decimal';
 import {
     onSiteHedgerowEnhancementSchema,
+    onSiteHedgerowEnhancementUncheckedSchema,
     type OnSiteHedgerowEnhancementSchema
 } from "./hedgerowEnhancement";
 import type { OnSiteHedgerowBaseline } from "./hedgerowBaseline";
@@ -524,4 +526,108 @@ test('enhancement delayed over 30 years preserves its temporal adjustment', () =
     expect(result.finalTimeToTargetCondition).toBe('30+');
     expect(result.temporalMultiplier).toBe(0.3197967361);
     expect(Math.abs(result.hedgerowUnitsDelivered - 2.6395934722)).toBeLessThanOrEqual(1e-8);
+});
+
+test('workbook G8: 30+ delay requests timing evidence and preserves delivered units', () => {
+    const baseline = createBaseline({
+        habitatType: 'Line of trees',
+        condition: 'Poor',
+        conditionScore: 1,
+        distinctivenessScore: 2,
+        distinctiveness: 'Low',
+        length: 0.2,
+        lengthEnhanced: 0.2,
+        lengthLost: 0,
+        strategicSignificanceMultiplier: 1,
+        unitsEnhanced: 0.4,
+        totalHedgerowUnits: 0.4,
+    });
+    const result = v.parse(onSiteHedgerowEnhancementSchema, fixture({
+        baseline,
+        habitatType: 'Line of trees',
+        condition: 'Good',
+        strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+        hedgerowEnhancedDelay: '30+',
+    }));
+    const unchecked = v.parse(onSiteHedgerowEnhancementUncheckedSchema, fixture({
+        baseline,
+        habitatType: 'Line of trees',
+        condition: 'Good',
+        strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+        hedgerowEnhancedDelay: '30+',
+    }));
+
+    expect(result.standardOrAdjustedTimeToTargetCondition).toBe(
+        'Check details- Delay in starting habitat in required condition? ⚠',
+    );
+    expect(result.finalTimeToTargetCondition).toBe('30+');
+    expect(result.temporalMultiplier).toBe(0.3197967361);
+    expect(result.hedgerowUnitsDelivered).toBeCloseTo(0.65583738888, 10);
+    expect(unchecked.standardOrAdjustedTimeToTargetCondition).toBe(
+        result.standardOrAdjustedTimeToTargetCondition,
+    );
+    expect(unchecked.finalTimeToTargetCondition).toBe(result.finalTimeToTargetCondition);
+    expect(unchecked.finalTimeToTargetConditionDecimal).toBe(result.finalTimeToTargetConditionDecimal);
+    const temporalMultiplierDecimal = unchecked.temporalMultiplierDecimal;
+    if (!Decimal.isDecimal(temporalMultiplierDecimal) || typeof result.temporalMultiplier !== 'number') {
+        throw new Error('Expected numeric timing multiplier and Decimal companion');
+    }
+    expect(temporalMultiplierDecimal.toNumber()).toBeCloseTo(result.temporalMultiplier, 10);
+    expect(unchecked.hedgerowUnitsDeliveredDecimal.toNumber()).toBeCloseTo(
+        result.hedgerowUnitsDelivered,
+        10,
+    );
+});
+
+test('workbook B-3 timing evidence distinguishes advance branches and unchanged timing', () => {
+    const baseline = createBaseline({
+        habitatType: 'Line of trees',
+        condition: 'Poor',
+        conditionScore: 1,
+        distinctivenessScore: 2,
+        distinctiveness: 'Low',
+        strategicSignificanceMultiplier: 1,
+    });
+    const input = (overrides: Partial<OnSiteHedgerowEnhancementSchema> = {}) => fixture({
+        baseline,
+        habitatType: 'Line of trees',
+        condition: 'Good',
+        strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+        ...overrides,
+    });
+
+    const ordinaryAdvance = v.parse(onSiteHedgerowEnhancementSchema, input({
+        hedgerowEnhancedInAdvance: 5,
+    }));
+    expect(ordinaryAdvance.standardOrAdjustedTimeToTargetCondition).toBe(
+        'Check details - Is there evidence habitat creation started/in place? ⚠',
+    );
+    expect(ordinaryAdvance.finalTimeToTargetCondition).toBe(25);
+    const ordinaryAdvanceFinalTimeDecimal = ordinaryAdvance.finalTimeToTargetConditionDecimal;
+    if (!Decimal.isDecimal(ordinaryAdvanceFinalTimeDecimal)) {
+        throw new Error('Expected a Decimal companion for numeric final time');
+    }
+    expect(ordinaryAdvanceFinalTimeDecimal.toNumber()).toBe(25);
+
+    const targetReached = v.parse(onSiteHedgerowEnhancementSchema, input({
+        hedgerowEnhancedInAdvance: 30,
+    }));
+    expect(targetReached.standardOrAdjustedTimeToTargetCondition).toBe(
+        'Check details - Is there evidence that habitat has reached target condition? ⚠',
+    );
+    expect(targetReached.finalTimeToTargetCondition).toBe(0);
+
+    const unchanged = v.parse(onSiteHedgerowEnhancementSchema, input());
+    expect(unchanged.standardOrAdjustedTimeToTargetCondition).toBe(
+        'Standard time to target condition applied',
+    );
+    expect(unchanged.finalTimeToTargetCondition).toBe(30);
+
+    const conflict = v.parse(onSiteHedgerowEnhancementUncheckedSchema, input({
+        hedgerowEnhancedInAdvance: 5,
+        hedgerowEnhancedDelay: 2,
+    }));
+    expect(conflict.standardOrAdjustedTimeToTargetCondition).toBe(
+        'Error -both advance and delayed habitat creation ▲',
+    );
 });
