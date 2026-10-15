@@ -35,7 +35,22 @@ const inputSchema = v.object({
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
+    offSiteReferenceNumber: v.optional(v.pipe(v.string(), v.description('Independent off-site gain-site reference (F-3 AT).'))),
 });
+
+function excludeUnreferencedRawUnits<T extends {
+    baseline: { spatialRiskCategory: string };
+    offSiteReferenceNumber?: string;
+    watercourseUnitsDelivered: number;
+    watercourseUnitsDeliveredDecimal: Decimal;
+}>(data: T): T {
+    if (!data.baseline.spatialRiskCategory || data.offSiteReferenceNumber) return data;
+    return {
+        ...data,
+        watercourseUnitsDelivered: 0,
+        watercourseUnitsDeliveredDecimal: new Decimal(0),
+    };
+}
 
 export const offSiteWatercourseEnhancementSchema = v.pipe(
     inputSchema,
@@ -65,6 +80,14 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
                 (typeof s.watercourseEnhancedDelay === 'string' || s.watercourseEnhancedDelay > 0)
             ),
         'Cannot have both watercourse enhanced in advance and delay in starting watercourse enhancement',
+    ),
+
+    v.forward(
+        v.check(
+            (s) => !s.baseline.spatialRiskCategory || Boolean(s.offSiteReferenceNumber),
+            'Off-site reference required ▲',
+        ),
+        ['offSiteReferenceNumber'],
     ),
 
     // Extract baseline data and length
@@ -182,6 +205,8 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
         enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory }),
     ),
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
+    // F-3 AP requires its own reference; AO calculates spatial units independently.
+    safeTransform(excludeUnreferencedRawUnits),
 );
 
 /**

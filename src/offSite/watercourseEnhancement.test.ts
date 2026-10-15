@@ -44,6 +44,7 @@ function createBaseline(overrides: Partial<OffSiteWatercourseBaseline> = {}): Of
 export function fixture(overrides: Partial<OffSiteWatercourseEnhancementSchema> = {}): OffSiteWatercourseEnhancementSchema {
     return {
         baseline: createBaseline(),
+        offSiteReferenceNumber: "enhancement-site",
         watercourseType: "Ditches",
         condition: "Moderate",
         strategicSignificance: "Location ecologically desirable but not in local strategy",

@@ -29,7 +29,18 @@ const inputSchema = v.object({
     userComments: freeTextSchema,
     planningAuthorityComments: freeTextSchema,
     habitatReferenceNumber: freeTextSchema,
+    offSiteReferenceNumber: v.optional(v.pipe(v.string(), v.description('Independent off-site gain-site reference (F-2 AG).'))),
 });
+
+function excludeUnreferencedRawUnits<T extends {
+    spatialRiskCategory: string;
+    offSiteReferenceNumber?: string;
+    unitsDelivered: number;
+    unitsDeliveredDecimal: Decimal;
+}>(data: T): T {
+    if (!data.spatialRiskCategory || data.offSiteReferenceNumber) return data;
+    return { ...data, unitsDelivered: 0, unitsDeliveredDecimal: new Decimal(0) };
+}
 
 /**
  * Enriches watercourse creation data with spatial risk multiplier
@@ -145,6 +156,13 @@ export const offSiteWatercourseCreationSchema = v.pipe(
     ),
     // Enrich with spatial risk multiplier
     v.transform(enrichWithSpatialRiskMultiplier),
+    v.forward(
+        v.check(
+            (s) => !s.spatialRiskCategory || Boolean(s.offSiteReferenceNumber),
+            'Off-site reference required ▲',
+        ),
+        ['offSiteReferenceNumber'],
+    ),
     // Calculate temporal adjustments
     v.transform(enrichWithTemporalData),
     // Calculate difficulty multiplier
@@ -182,4 +200,6 @@ export const offSiteWatercourseCreationUncheckedSchema = v.pipe(
     safeTransform(enrichCreationWithEncroachmentData),
     safeTransform(enrichWithUnitsDelivered),
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
+    // F-2 AC requires a reference; AB calculates spatial units independently.
+    safeTransform(excludeUnreferencedRawUnits),
 );

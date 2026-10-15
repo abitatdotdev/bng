@@ -19,6 +19,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-001',
         };
 
@@ -43,6 +44,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-001',
         };
 
@@ -62,6 +64,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-002',
         };
 
@@ -81,6 +84,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-002',
         };
 
@@ -102,6 +106,7 @@ describe('offSiteWatercourseCreationSchema', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-003',
         };
 
@@ -128,6 +133,7 @@ describe('offSiteWatercourseCreationSchema', () => {
                 spatialRiskCategory,
                 userComments: '',
                 planningAuthorityComments: '',
+                offSiteReferenceNumber: 'gain-site',
                 habitatReferenceNumber: 'WC-001',
             };
 
@@ -151,6 +157,7 @@ describe('full schema integration tests', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-004',
         };
 
@@ -178,6 +185,7 @@ describe('full schema integration tests', () => {
             spatialRiskCategory: 'Within waterbody catchment',
             userComments: '',
             planningAuthorityComments: '',
+            offSiteReferenceNumber: 'gain-site',
             habitatReferenceNumber: 'WC-005',
         };
 

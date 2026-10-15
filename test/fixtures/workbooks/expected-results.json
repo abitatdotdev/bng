@@ -7,7 +7,7 @@
       "description": "combines retained, created and enhanced habitat, hedgerow and watercourse units",
       "sourceCase": "all-onsite-controls",
       "sourceSha256": "d27b25a9920699650cea4db4870dd21dcc3409435491219ee1a907f91b8a7f83",
-      "fixtureSha256": "ed014c718322371e98c3ba8ad604e4549b46a90b8c5af0c2cdbcf5b0e29cce30",
+      "fixtureSha256": "03f925cbfc5bc5f380b6c5e8250c379f637deae433cdecc96b519070a927f20f",
       "comparisons": [
         {
           "sheet": "A-1 On-Site Habitat Baseline",
@@ -100,7 +100,7 @@
       "description": "delivers undiscounted hedgerow units when advance creation exceeds the target time",
       "sourceCase": "hedgerow-over-advance",
       "sourceSha256": "2b41b74406ccadbc65319cb82f2cd0e94c0825b50a418ab0d55ea4a8ca761edf",
-      "fixtureSha256": "a9a0548e3cd02403831e30dd30da338452e9830f42a2ff4061fd2fb16c9b02e6",
+      "fixtureSha256": "634cf61c6672d5980335c35e13031fcd3e2c6cbdab8de73efc9b1b6e03293649",
       "comparisons": [
         {
           "sheet": "B-2 On-Site Hedge Creation",
@@ -123,7 +123,7 @@
       "description": "uses the 30-year multiplier for hedgerow creation with a 25-year delay",
       "sourceCase": "hedgerow-exactly-30",
       "sourceSha256": "7ccbb408c36ffb7af2e7754926b7fe506ab7e939ebe1c4ac7f255ac547541280",
-      "fixtureSha256": "965fa2288f9ea5116a11a6f8e0b1d77c170af1d58aafca616ac153e01ca243a2",
+      "fixtureSha256": "c917e0f240daef0633e2c18b9089d72513fd7e75f1e627437fe191748eca77c0",
       "comparisons": [
         {
           "sheet": "B-2 On-Site Hedge Creation",
@@ -146,7 +146,7 @@
       "description": "reduces a 30+ year tree-line target to 29 years after one year of advance creation",
       "sourceCase": "hedgerow-standard-30-plus",
       "sourceSha256": "b5c9f4e1de94530ec07cea4769e868f182feee57e0dcaa42e71f0e9e11a96635",
-      "fixtureSha256": "557f0362f9d2a1df5d87091167bf1d4a6ffa6eb881fd048bb6feb409645a2013",
+      "fixtureSha256": "2553c21008c46a4d9d3a5732e8b2869462fc0fa17ebcd1fe1d591d42d2703082",
       "comparisons": [
         {
           "sheet": "B-2 On-Site Hedge Creation",
@@ -169,7 +169,7 @@
       "description": "preserves the temporal adjustment for hedgerow enhancement delayed over 30 years",
       "sourceCase": "hedgerow-enhancement-30-plus",
       "sourceSha256": "cf105a08dd19fa6ff1e5c8433e5059bdd5b0b3739481e2f9f8f55caf145dded5",
-      "fixtureSha256": "b5576da361c4e641efa1eac0583bc6b4983fd276f925a0270441409c3c31c990",
+      "fixtureSha256": "ecff3b06471bbf01f969ee90b88a973f8ddd9fb716b71ce07c1d9df961a24e24",
       "comparisons": [
         {
           "sheet": "B-3 On-Site Hedge Enhancement",
@@ -192,7 +192,7 @@
       "description": "uses the over-30-year multiplier for delayed watercourse creation",
       "sourceCase": "watercourse-creation-30-plus",
       "sourceSha256": "e928d6613bff31551e8e3e35f70fb971b8e906dcc0a02c5b3c5e9e6a3cc69321",
-      "fixtureSha256": "e188d79537549b404708ca889d853d561e16f27cd7e28a022cbb23b785957dbb",
+      "fixtureSha256": "ec7b7b9545220f512f9e6931de46be085eb7ea3b9993c2ef6bbc84ba1134c639",
       "comparisons": [
         {
           "sheet": "C-2 On-Site WaterC' Creation",
@@ -215,7 +215,7 @@
       "description": "includes bespoke compensation for lost on-site priority watercourse units",
       "sourceCase": "onsite-watercourse-compensation",
       "sourceSha256": "0f5f7cb27e79bd4483f325ce61464538ae9150627ca54df8fcdbcce195651ce1",
-      "fixtureSha256": "176ecac537ffdca677ce27f906481cfac2942d50cfa1ab8e74f570e48c36bab8",
+      "fixtureSha256": "bc53a67a41ab7a21889939341ab8ea9cfed76be1aede6cd7f2f1d293e34f51b7",
       "comparisons": [
         {
           "sheet": "C-1 On-Site WaterC' Baseline",
@@ -238,7 +238,7 @@
       "description": "includes bespoke compensation for lost off-site priority watercourse units",
       "sourceCase": "offsite-watercourse-compensation",
       "sourceSha256": "428b521c802d46b02f94ef60db71adfd0f75728f99d05590c85e9a56648821c9",
-      "fixtureSha256": "febb639f0ee960487cb96b3e06e2d48402a6b780277874ccc0d8355295ca829f",
+      "fixtureSha256": "ce860ee65f25cb7f6a23d048e7b947b33ea3a409044c471e3d92a7cc10d744f7",
       "comparisons": [
         {
           "sheet": "Headline Results",
@@ -254,7 +254,7 @@
       "description": "keeps off-site habitat losses in combined net unit change",
       "sourceCase": "negative-offsite-change",
       "sourceSha256": "b2f37af09651d27329140298dfe1f2ff385172f2a89c7128c3fa83633869a4cd",
-      "fixtureSha256": "f6952e2e6ebe8488a81c62d79b4c18bc95c81d01c2066eefee2d1bb598c186f4",
+      "fixtureSha256": "f11499c391b5aa0584d118fa14696a75a0e7711543397c8a7eb1079a0fe4c6b9",
       "comparisons": [
         {
           "sheet": "Headline Results",
@@ -277,7 +277,7 @@
       "description": "allows intertidal hard structures to offset medium intertidal sediment losses",
       "sourceCase": "intertidal-medium-trading",
       "sourceSha256": "b8c6bd3d4c75be70ee9cf09d641852273d0c4df7e199f8bc79d8783859320ed0",
-      "fixtureSha256": "96b68e94b30c92facb03eda65794bdd7caf238d54e86a072c8244e8da5a9c6ae",
+      "fixtureSha256": "a1a8adc461f8d22c236077d395a34a4850ce767164d4c905fbc98fd45e1cc1ec",
       "comparisons": [
         {
           "sheet": "Trading Summary Area Habitats",
@@ -300,7 +300,7 @@
       "description": "reads all 192 retained hedgerows including entries beyond row 200",
       "sourceCase": "parser-row-201",
       "sourceSha256": "adf78593a049924b03c97f9cf43d001b6715d2aa13a2b902243665c156a910e9",
-      "fixtureSha256": "636ddecb19dbcb38a6ed43fab4e240ef629531d688bb06c34d35e0ea0f35745d",
+      "fixtureSha256": "8c9228dfb99ec9570cc579978c93afb89450eceab56392abfbc6a43a47e0561c",
       "comparisons": [
         {
           "sheet": "Headline Results",

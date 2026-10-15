@@ -372,6 +372,7 @@ export const offSiteWatercourseCreationSpec = {
         userComments: { column: 'AD', header: 'User comments' },
         planningAuthorityComments: { column: 'AE', header: 'Planning authority' },
         habitatReferenceNumber: { column: 'AF', header: 'Habitat reference' },
+        offSiteReferenceNumber: { column: 'AG', header: 'Off-site reference' },
     },
 } as const satisfies SheetSpec;
 
@@ -392,6 +393,7 @@ export const offSiteWatercourseEnhancementSpec = {
         userComments: { column: 'AQ', header: 'User comments' },
         planningAuthorityComments: { column: 'AR', header: 'Planning authority' },
         habitatReferenceNumber: { column: 'AS', header: 'Habitat reference' },
+        offSiteReferenceNumber: { column: 'AT', header: 'Off-site reference' },
     },
 } as const satisfies SheetSpec;
 

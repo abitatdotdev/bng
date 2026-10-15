@@ -7,3 +7,5 @@ The parser tests in `src/parsers/parseFile.test.ts` and `test/parseFileStream.te
 `expected-results.json` records expected values, original formulas and source hashes. Numeric assertions use tolerance `1e-8`. Workbook display labels `"0.00"` and `"Yes ✓"` correspond to numeric zero and boolean true in the public API. Timing sentinels are compared exactly.
 
 To regenerate the data, run `bun scripts/importWorkbookFixtures.ts [writer-worktree]` (defaults to `../intel-onsite-metric-writer`). Only this optional importer requires external Excel files. It verifies their original hashes, reads them without changes and writes JSON.
+
+The watercourse-reference follow-up restores the previously omitted F-2 `AG11` and F-3 `AT11` header cells (`Off-site reference`) in these sparse snapshots. Fixture hashes reflect those added headers; source hashes and saved calculation comparisons remain unchanged. Independent-reference parser tests construct their input rows in memory and do not claim fresh Excel recalculation.

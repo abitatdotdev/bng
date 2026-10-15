@@ -358,6 +358,7 @@ export function parseOffSiteWatercourseCreationRow(sheet: SheetView, dataRow: nu
         userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
         planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
         habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) ?? ""),
     };
 }
 
@@ -380,5 +381,6 @@ export function parseOffSiteWatercourseEnhancementRow(baselineSheet: SheetView, 
         userComments: String(getCellValue(sheet, dataRow, c.userComments.column) || ""),
         planningAuthorityComments: String(getCellValue(sheet, dataRow, c.planningAuthorityComments.column) || ""),
         habitatReferenceNumber: String(getCellValue(sheet, dataRow, c.habitatReferenceNumber.column) || ""),
+        offSiteReferenceNumber: String(getCellValue(sheet, dataRow, c.offSiteReferenceNumber.column) ?? ""),
     }
 }
