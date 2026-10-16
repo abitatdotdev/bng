@@ -41,6 +41,7 @@ export type {
     WatercourseEnhancementMovementState,
 } from './calculationAvailability';
 
+export { calculateAreaReconciliation, countsTowardsSiteArea } from './areaReconciliation';
 export type {
     HedgerowOffSiteAvailability,
     HedgerowEnhancementQuality,
