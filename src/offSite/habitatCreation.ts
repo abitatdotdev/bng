@@ -28,6 +28,7 @@ import {
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 import { applyHabitatCreationTimingAvailability } from '../calculationAvailability';
 import { applyAreaRawReferenceAvailability } from '../areaCalculationRules';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 
 export { calculateDifficultyData } from '../onSite/habitatCreation';
 
@@ -60,7 +61,7 @@ const calculateFinalTimeToTargetCondition = <
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatCreationInAdvance: number | '30+';
         habitatCreationDelay: number | '30+';
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         _habitat: Habitat;
     },
 >(
@@ -154,8 +155,8 @@ const enrichWithHabitatUnitsDelivered = <
         areaDecimal: Decimal;
         distinctivenessScore: number;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         finalTimeToTargetMultiplier: number | undefined;

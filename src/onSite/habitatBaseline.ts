@@ -1,4 +1,4 @@
-import { Decimal, toDecimal } from '../decimal';
+import { Decimal, toDecimal, type Quantity } from '../decimal';
 import * as v from 'valibot';
 
 import { broadHabitatSchema } from '../broadHabitats';
@@ -17,6 +17,7 @@ import {
 } from '../schemaUtils';
 import { calculateBaselineUnits, calculateTotalHabitatUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
 import { areaBaselineAvailability } from '../areaCalculationRules';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
@@ -155,10 +156,10 @@ export function enrichWithBaselineUnitsData<
         areaRetainedDecimal: Decimal;
         areaEnhanced: number;
         areaEnhancedDecimal: Decimal;
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         requiredAction?: SuggestedTradingActions;
@@ -189,10 +190,10 @@ function enrichWithTotalHabitatUnits<Data extends {
     baselineUnitsRetainedDecimal: Decimal;
     baselineUnitsEnhanced: number;
     baselineUnitsEnhancedDecimal: Decimal;
-    distinctivenessScore: number;
+    distinctivenessScore: AreaDistinctivenessScore;
     distinctivenessScoreDecimal: Decimal;
-    conditionScore: number;
-    conditionScoreDecimal: Decimal;
+    conditionScore: HabitatConditionScore | undefined;
+    conditionScoreDecimal: Decimal | undefined;
     strategicSignificanceMultiplier: number;
     strategicSignificanceMultiplierDecimal: Decimal;
     areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;

@@ -68,16 +68,16 @@ test("enrichWithBaselineUnitsData calculations", () => {
         areaEnhancedDecimal: new Decimal(3),
         distinctivenessScore: 2,
         distinctivenessScoreDecimal: new Decimal(2),
-        conditionScore: 0.8,
-        conditionScoreDecimal: new Decimal(0.8),
+        conditionScore: 1,
+        conditionScoreDecimal: new Decimal(1),
         strategicSignificanceMultiplier: 1.5,
         strategicSignificanceMultiplierDecimal: new Decimal(1.5),
-    };
+    } as const;
 
     const result = enrichWithBaselineUnitsData(inputData);
 
-    expect(result.baselineUnitsRetained).toEqual(14.4);
-    expect(result.baselineUnitsEnhanced).toEqual(7.2);
+    expect(result.baselineUnitsRetained).toEqual(18);
+    expect(result.baselineUnitsEnhanced).toEqual(9);
     expect(result.areaHabitatLost).toEqual(10 - 6 - 3);
     expect(result).toMatchObject(inputData);
 });
@@ -91,13 +91,13 @@ test("enrichWithBaselineUnitsData with zero areas", () => {
         areaRetainedDecimal: new Decimal(0),
         areaEnhanced: 0,
         areaEnhancedDecimal: new Decimal(0),
-        distinctivenessScore: 1,
-        distinctivenessScoreDecimal: new Decimal(1),
+        distinctivenessScore: 2,
+        distinctivenessScoreDecimal: new Decimal(2),
         conditionScore: 1,
         conditionScoreDecimal: new Decimal(1),
         strategicSignificanceMultiplier: 1,
         strategicSignificanceMultiplierDecimal: new Decimal(1),
-    };
+    } as const;
 
     const result = enrichWithBaselineUnitsData(inputData);
 
@@ -115,17 +115,17 @@ test("enrichWithBaselineUnitsData full retention", () => {
         areaRetainedDecimal: new Decimal(8),
         areaEnhanced: 0,
         areaEnhancedDecimal: new Decimal(0),
-        distinctivenessScore: 3,
-        distinctivenessScoreDecimal: new Decimal(3),
-        conditionScore: 0.9,
-        conditionScoreDecimal: new Decimal(0.9),
+        distinctivenessScore: 4,
+        distinctivenessScoreDecimal: new Decimal(4),
+        conditionScore: 1,
+        conditionScoreDecimal: new Decimal(1),
         strategicSignificanceMultiplier: 2,
         strategicSignificanceMultiplierDecimal: new Decimal(2),
-    };
+    } as const;
 
     const result = enrichWithBaselineUnitsData(inputData);
 
-    expect(result.baselineUnitsRetained).toEqual(8 * 3 * 0.9 * 2);
+    expect(result.baselineUnitsRetained).toEqual(8 * 4 * 1 * 2);
     expect(result.baselineUnitsEnhanced).toEqual(0);
     expect(result.areaHabitatLost).toEqual(0);
 });
@@ -139,13 +139,13 @@ test("enrichWithBaselineUnitsData zero when irreplaceable", () => {
         areaRetainedDecimal: new Decimal(7),
         areaEnhanced: 0,
         areaEnhancedDecimal: new Decimal(0),
-        distinctivenessScore: 3,
-        distinctivenessScoreDecimal: new Decimal(3),
-        conditionScore: 0.9,
-        conditionScoreDecimal: new Decimal(0.9),
+        distinctivenessScore: 4,
+        distinctivenessScoreDecimal: new Decimal(4),
+        conditionScore: 1,
+        conditionScoreDecimal: new Decimal(1),
         strategicSignificanceMultiplier: 2,
         strategicSignificanceMultiplierDecimal: new Decimal(2),
-    };
+    } as const;
 
     const result = enrichWithBaselineUnitsData(inputData);
 

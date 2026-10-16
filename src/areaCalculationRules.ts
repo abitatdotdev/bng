@@ -1,276 +1,395 @@
 import { Decimal, type Quantity, toDecimal } from './decimal';
+import type {
+    AreaBaselineAvailability,
+    AreaBaselineRuleInput,
+    AreaConditionChange,
+    AreaCreationAvailability,
+    AreaCreationTimingState,
+    AreaDistinctivenessChange,
+    AreaEnhancementAvailability,
+    AreaEnhancementAvailabilityInput,
+    AreaEnhancementAvailabilityOptions,
+    AreaEnhancementMessage,
+    AreaEnhancementMovementInput,
+    AreaEnhancementMovementResult,
+    AreaMovementError,
+} from './areaCalculationTypes';
+import type { SpatialRiskCategory } from './spatialRisk';
+
+export type { AreaBaselineAvailability } from './areaCalculationTypes';
 
 export const areaCalculationAvailabilityKey = 'areaCalculationAvailability' as const;
 
-export type AreaBaselineAvailability = {
-    areaHabitatLost: boolean;
-    unitsLost: boolean;
-    totalHabitatUnits: boolean;
-    totalHabitatUnitsSRM: boolean;
-    vhdhBespokeCompensationUnits: boolean;
-    unavailableResults: Partial<Record<string, 'check-data' | 'blank'>>;
-    rule?: string;
-    message?: string;
-    lossReason?: 'alternative-compensation' | 'bespoke-compensation-pending';
-    lossMessage?: string;
+type AreaBaselineCalculationInput = AreaBaselineRuleInput & {
+    area: Quantity;
+    areaRetained: Quantity;
+    areaEnhanced: Quantity;
+    areaDecimal?: Decimal;
+    areaRetainedDecimal?: Decimal;
+    areaEnhancedDecimal?: Decimal;
 };
 
-export function isAreaAllocationOverrun(input: {
-    area: Quantity;
-    areaRetained: Quantity;
-    areaEnhanced: Quantity;
-    areaDecimal?: Decimal;
-    areaRetainedDecimal?: Decimal;
-    areaEnhancedDecimal?: Decimal;
-}) {
-    return new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
-        .plus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
-        .greaterThan(input.areaDecimal ?? toDecimal(input.area));
+type AreaEnhancementUnitRow = {
+    habitatUnitsDelivered: number;
+    habitatUnitsDeliveredDecimal: Decimal;
+    habitatUnitsDeliveredWithSpatialRisk?: number;
+    habitatUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
+    offSiteReferenceNumber?: string;
+    areaCalculationAvailability?: AreaEnhancementAvailability;
+};
+
+type AreaCreationUnitRow = {
+    habitatUnitsDelivered: number;
+    habitatUnitsDeliveredDecimal: Decimal;
+    offSiteReferenceNumber?: string;
+    spatialRiskCategory?: SpatialRiskCategory;
+    areaCalculationAvailability?: AreaCreationAvailability;
+    creationTiming?: AreaCreationTimingState;
+};
+
+function areaAmount(value: Quantity, decimalValue?: Decimal): Decimal {
+    return decimalValue ?? toDecimal(value);
 }
 
-export function areaBaselineAvailability(input: {
-    area: Quantity;
-    areaRetained: Quantity;
-    areaEnhanced: Quantity;
-    areaDecimal?: Decimal;
-    areaRetainedDecimal?: Decimal;
-    areaEnhancedDecimal?: Decimal;
-    irreplaceableHabitat: boolean;
-    bespokeCompensationAgreed?: string;
-    requiredAction?: string;
-    offSiteReferenceNumber?: string;
-    offSite?: boolean;
-}) {
-    const overrun = isAreaAllocationOverrun(input);
-    const hasLoss = new Decimal(input.areaDecimal ?? toDecimal(input.area))
-        .minus(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
-        .minus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
-        .greaterThan(0);
-    const compensationApplies = input.requiredAction === 'Same habitat required – bespoke compensation option ⚠' ||
-        input.requiredAction === 'Bespoke compensation likely to be required';
-    const compensationBlocksLoss = compensationApplies && (
-        input.bespokeCompensationAgreed === 'Yes' || input.bespokeCompensationAgreed === 'Pending'
-    );
-    const referencePresent = input.offSiteReferenceNumber !== '' && input.offSiteReferenceNumber !== undefined;
-    const compensationUnacceptable = input.irreplaceableHabitat && hasLoss &&
-        input.bespokeCompensationAgreed !== 'Yes' && input.bespokeCompensationAgreed !== 'Pending';
-    const lossReason = !overrun && compensationApplies
-        ? input.bespokeCompensationAgreed === 'Yes'
-            ? 'alternative-compensation' as const
-            : input.bespokeCompensationAgreed === 'Pending'
-                ? 'bespoke-compensation-pending' as const
-                : undefined
-        : undefined;
-    const lossMessage = lossReason === 'alternative-compensation'
-        ? 'Alternative Compensation ✓'
-        : lossReason === 'bespoke-compensation-pending'
-            ? input.offSite
-                ? 'Bespoke compensation must be agreed  ▲'
-                : 'Bespoke compensation must be agreed ▲'
-            : undefined;
-    const totalAvailable = !(input.offSite && !referencePresent) && !compensationUnacceptable;
-    const lossAvailable = !overrun && !(hasLoss && compensationBlocksLoss);
-    const creditAvailable = true;
+export function isAreaAllocationOverrun(input: Pick<AreaBaselineCalculationInput, 'area' | 'areaRetained' | 'areaEnhanced' | 'areaDecimal' | 'areaRetainedDecimal' | 'areaEnhancedDecimal'>): boolean {
+    const allocated = areaAmount(input.areaRetained, input.areaRetainedDecimal)
+        .plus(areaAmount(input.areaEnhanced, input.areaEnhancedDecimal));
+    return allocated.greaterThan(areaAmount(input.area, input.areaDecimal));
+}
 
-    const unavailableResults: Partial<Record<string, 'check-data' | 'blank'>> = {};
+function hasAreaBaselineLoss(input: AreaBaselineCalculationInput): boolean {
+    return areaAmount(input.area, input.areaDecimal)
+        .minus(areaAmount(input.areaRetained, input.areaRetainedDecimal))
+        .minus(areaAmount(input.areaEnhanced, input.areaEnhancedDecimal))
+        .greaterThan(0);
+}
+
+function baselineCompensationApplies(input: AreaBaselineRuleInput): boolean {
+    return input.requiredAction === 'Same habitat required – bespoke compensation option ⚠' ||
+        input.requiredAction === 'Bespoke compensation likely to be required';
+}
+
+function baselineCompensationBlocksLoss(input: AreaBaselineRuleInput): boolean {
+    if (!baselineCompensationApplies(input)) return false;
+    return input.bespokeCompensationAgreed === 'Yes' || input.bespokeCompensationAgreed === 'Pending';
+}
+
+function isBaselineReferencePresent(reference: string | undefined): boolean {
+    return reference !== '' && reference !== undefined;
+}
+
+function compensationLossState(input: AreaBaselineCalculationInput): Pick<AreaBaselineAvailability, 'lossReason' | 'lossMessage'> {
+    if (isAreaAllocationOverrun(input) || !baselineCompensationApplies(input)) return {};
+
+    if (input.bespokeCompensationAgreed === 'Yes') {
+        return { lossReason: 'alternative-compensation', lossMessage: 'Alternative Compensation ✓' };
+    }
+
+    if (input.bespokeCompensationAgreed !== 'Pending') return {};
+
+    return input.offSite
+        ? { lossReason: 'bespoke-compensation-pending', lossMessage: 'Bespoke compensation must be agreed  ▲' }
+        : { lossReason: 'bespoke-compensation-pending', lossMessage: 'Bespoke compensation must be agreed ▲' };
+}
+
+function baselineUncompensatedLoss(input: AreaBaselineCalculationInput, hasLoss: boolean): boolean {
+    if (!input.irreplaceableHabitat || !hasLoss) return false;
+    return input.bespokeCompensationAgreed !== 'Yes' && input.bespokeCompensationAgreed !== 'Pending';
+}
+
+function baselineUnavailableResults(
+    input: AreaBaselineCalculationInput,
+    overrun: boolean,
+    totalAvailable: boolean,
+    lossAvailable: boolean,
+): AreaBaselineAvailability['unavailableResults'] {
+    const unavailableResults: AreaBaselineAvailability['unavailableResults'] = {};
+
     if (overrun) {
         unavailableResults.areaHabitatLost = 'check-data';
         unavailableResults.unitsLost = 'check-data';
     }
     if (!lossAvailable) unavailableResults.unitsLost = 'check-data';
     if (!totalAvailable) unavailableResults.totalHabitatUnits = 'blank';
-    if (!totalAvailable && input.requiredAction === 'Bespoke compensation likely to be required') {
+    if (
+        !totalAvailable &&
+        input.requiredAction === 'Bespoke compensation likely to be required'
+    ) {
         unavailableResults.totalHabitatUnitsSRM = 'blank';
     }
-    if (!creditAvailable || !totalAvailable) unavailableResults.vhdhBespokeCompensationUnits = 'blank';
+    if (!totalAvailable) unavailableResults.vhdhBespokeCompensationUnits = 'blank';
 
-    return {
-        areaHabitatLost: !overrun,
-        unitsLost: lossAvailable,
-        totalHabitatUnits: totalAvailable,
-        totalHabitatUnitsSRM: !(input.offSite && !referencePresent && input.requiredAction === 'Bespoke compensation likely to be required'),
-        vhdhBespokeCompensationUnits: creditAvailable && totalAvailable,
-        unavailableResults,
-        rule: overrun ? 'allocation-overrun' : compensationUnacceptable ? 'irreplaceable-loss-uncompensated' : undefined,
-        message: overrun ? 'Error in Areas ▲' : compensationUnacceptable ? 'Any loss unacceptable' : undefined,
-        lossReason,
-        lossMessage,
-    } satisfies AreaBaselineAvailability;
+    return unavailableResults;
 }
 
-export function isAreaReferencePresent(reference: string | undefined) {
+export function areaBaselineAvailability(input: AreaBaselineCalculationInput): AreaBaselineAvailability {
+    const overrun = isAreaAllocationOverrun(input);
+    const hasLoss = hasAreaBaselineLoss(input);
+    const compensationBlocksLoss = baselineCompensationBlocksLoss(input);
+    const referencePresent = isBaselineReferencePresent(input.offSiteReferenceNumber);
+    const compensationUnacceptable = baselineUncompensatedLoss(input, hasLoss);
+    const totalAvailable = !(input.offSite && !referencePresent) && !compensationUnacceptable;
+    const lossAvailable = !overrun && !(hasLoss && compensationBlocksLoss);
+    const totalHabitatUnitsSRMAvailable = !(
+        input.offSite &&
+        !referencePresent &&
+        input.requiredAction === 'Bespoke compensation likely to be required'
+    );
+    const unavailableResults = baselineUnavailableResults(input, overrun, totalAvailable, lossAvailable);
+    const lossState = compensationLossState(input);
+
+    if (overrun) {
+        return {
+            areaHabitatLost: false,
+            unitsLost: false,
+            totalHabitatUnits: totalAvailable,
+            totalHabitatUnitsSRM: totalHabitatUnitsSRMAvailable,
+            vhdhBespokeCompensationUnits: totalAvailable,
+            unavailableResults,
+            rule: 'allocation-overrun',
+            message: 'Error in Areas ▲',
+            ...lossState,
+        };
+    }
+
+    if (compensationUnacceptable) {
+        return {
+            areaHabitatLost: true,
+            unitsLost: lossAvailable,
+            totalHabitatUnits: false,
+            totalHabitatUnitsSRM: totalHabitatUnitsSRMAvailable,
+            vhdhBespokeCompensationUnits: false,
+            unavailableResults,
+            rule: 'irreplaceable-loss-uncompensated',
+            message: 'Any loss unacceptable',
+            ...lossState,
+        };
+    }
+
+    return {
+        areaHabitatLost: true,
+        unitsLost: lossAvailable,
+        totalHabitatUnits: totalAvailable,
+        totalHabitatUnitsSRM: totalHabitatUnitsSRMAvailable,
+        vhdhBespokeCompensationUnits: totalAvailable,
+        unavailableResults,
+        ...lossState,
+    };
+}
+
+export function isAreaReferencePresent(reference: string | undefined): boolean {
     return reference !== '' && reference !== undefined;
 }
 
-export function hasAreaEnhancementTimingConflict(advance: number | '30+', delay: number | '30+') {
-    return (advance === '30+' || advance > 0) && (delay === '30+' || delay > 0);
+export function hasAreaEnhancementTimingConflict(advance: number | '30+', delay: number | '30+'): boolean {
+    const hasAdvance = advance === '30+' || advance > 0;
+    const hasDelay = delay === '30+' || delay > 0;
+    return hasAdvance && hasDelay;
 }
 
-export function calculateAreaEnhancementMovement(input: {
-    requiredAction: string;
-    baselineLabel: string;
-    proposedLabel: string;
-    baselineBroadHabitat: string;
-    proposedBroadHabitat: string;
-    proposedHabitatType: string;
-    baselineDistinctivenessCategory: string;
-    proposedDistinctivenessCategory: string;
-    baselineDistinctivenessScore: number;
-    proposedDistinctivenessScore: number;
-    baselineCondition: string;
-    proposedCondition: string;
-    baselineConditionScore: number;
-    proposedConditionScore: number;
-    irreplaceableHabitat: boolean;
-    offSite: boolean;
-}) {
-    const sameAction = input.requiredAction;
-    const differentHabitat = input.baselineLabel !== input.proposedLabel;
-    const sameDistinctiveness = input.baselineDistinctivenessScore === input.proposedDistinctivenessScore;
-    const scoreReduced = input.proposedDistinctivenessScore < input.baselineDistinctivenessScore;
-    let movementError: string | undefined;
-    if (sameAction.startsWith('Same d') && scoreReduced) {
-        movementError = 'Error - Trading rules not satisfied ▲';
-    } else if (
-        sameAction.startsWith('Same b') &&
+function isSameDistinctivenessTradingAction(action: AreaEnhancementMovementInput['requiredAction']): boolean {
+    return action.startsWith('Same d');
+}
+
+function isSameBroadHabitatTradingAction(action: AreaEnhancementMovementInput['requiredAction']): boolean {
+    return action.startsWith('Same b');
+}
+
+function isSameHabitatTradingAction(action: AreaEnhancementMovementInput['requiredAction']): boolean {
+    return action.startsWith('Same h');
+}
+
+function isBespokeTradingAction(action: AreaEnhancementMovementInput['requiredAction']): boolean {
+    return action.startsWith('Bespok');
+}
+
+function hasReducedDistinctiveness(input: AreaEnhancementMovementInput): boolean {
+    return input.proposedDistinctivenessScore < input.baselineDistinctivenessScore;
+}
+
+function isOffSiteWoodlandOtherException(input: AreaEnhancementMovementInput): boolean {
+    return input.offSite &&
+        input.baselineLabel.slice(0, 27) === 'Woodland and forest - Other' &&
+        input.proposedBroadHabitat.slice(0, 8) === 'Woodland';
+}
+
+function isAllowedBespokeWoodlandReplacement(input: AreaEnhancementMovementInput): boolean {
+    return input.offSite && input.baselineLabel.slice(0, 27) === 'Woodland and forest - Other';
+}
+
+function calculateMovementError(input: AreaEnhancementMovementInput): AreaMovementError | undefined {
+    const reduced = hasReducedDistinctiveness(input);
+
+    if (isSameDistinctivenessTradingAction(input.requiredAction) && reduced) {
+        return 'Error - Trading rules not satisfied ▲';
+    }
+    if (
+        isSameBroadHabitatTradingAction(input.requiredAction) &&
         input.baselineBroadHabitat.slice(0, 5) !== input.proposedBroadHabitat.slice(0, 5) &&
-        scoreReduced
+        reduced
     ) {
-        movementError = 'Error - Trading rules not satisfied ▲';
-    } else if (sameAction.startsWith('Same h') && differentHabitat) {
-        movementError = 'Error - Trading rules not satisfied ▲';
-    } else if (
-        sameAction.startsWith('Bespok') &&
-        differentHabitat &&
-        !(input.offSite && input.baselineLabel.slice(0, 27) === 'Woodland and forest - Other')
+        return 'Error - Trading rules not satisfied ▲';
+    }
+    if (isSameHabitatTradingAction(input.requiredAction) && input.baselineLabel !== input.proposedLabel) {
+        return 'Error - Trading rules not satisfied ▲';
+    }
+    if (
+        isBespokeTradingAction(input.requiredAction) &&
+        input.baselineLabel !== input.proposedLabel &&
+        !isAllowedBespokeWoodlandReplacement(input)
     ) {
-        movementError = 'Error - Trading rules not satisfied ▲';
-    } else if (scoreReduced) {
-        movementError = 'Error Trading Down ▲';
-    } else if (
+        return 'Error - Trading rules not satisfied ▲';
+    }
+    if (reduced) return 'Error Trading Down ▲';
+    if (
         input.proposedHabitatType === 'Littoral seagrass' &&
-        ![
-            'Intertidal sediment - Littoral seagrass',
-            'Intertidal sediment - Littoral sand',
-        ].includes(input.baselineLabel)
+        input.baselineLabel !== 'Intertidal sediment - Littoral seagrass' &&
+        input.baselineLabel !== 'Intertidal sediment - Littoral sand'
     ) {
-        movementError = 'Error - Enhancement not possible ▲';
-    } else if (
+        return 'Error - Enhancement not possible ▲';
+    }
+    if (
         input.proposedHabitatType === 'Artificial hard structures with integrated greening of grey infrastructure (IGGI)' &&
-        ![
-            'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)',
-            'Intertidal hard structures - Artificial hard structures',
-            'Intertidal hard structures - Artificial features of hard structures',
-        ].includes(input.baselineLabel)
+        input.baselineLabel !== 'Intertidal hard structures - Artificial hard structures with integrated greening of grey infrastructure (IGGI)' &&
+        input.baselineLabel !== 'Intertidal hard structures - Artificial hard structures' &&
+        input.baselineLabel !== 'Intertidal hard structures - Artificial features of hard structures'
     ) {
-        movementError = 'Error - Enhancement not possible ▲';
+        return 'Error - Enhancement not possible ▲';
     }
 
-    const distinctivenessChange = movementError ?? `${input.baselineDistinctivenessCategory} - ${input.proposedDistinctivenessCategory}`;
-    const specialWoodland = input.offSite && input.baselineLabel.slice(0, 27) === 'Woodland and forest - Other' &&
-        input.proposedBroadHabitat.slice(0, 8) === 'Woodland';
-    let conditionChange: string;
+    return undefined;
+}
+
+function distinctivenessMovementLabel(
+    input: AreaEnhancementMovementInput,
+    error: AreaMovementError | undefined,
+): AreaDistinctivenessChange {
+    if (error) return error;
+    return `${input.baselineDistinctivenessCategory} - ${input.proposedDistinctivenessCategory}`;
+}
+
+function calculateConditionChange(
+    input: AreaEnhancementMovementInput,
+    distinctivenessChange: AreaDistinctivenessChange,
+): AreaConditionChange {
+    const differentHabitat = input.baselineLabel !== input.proposedLabel;
+    const sameDistinctiveness = input.baselineDistinctivenessScore === input.proposedDistinctivenessScore;
+    const specialWoodland = isOffSiteWoodlandOtherException(input);
+
     if (!specialWoodland && input.irreplaceableHabitat && differentHabitat) {
-        conditionChange = 'Error you cannot replace an irreplaceable habitat ▲';
-    } else if (
+        return 'Error you cannot replace an irreplaceable habitat ▲';
+    }
+    if (
         input.baselineLabel.slice(0, 55) !== input.proposedLabel.slice(0, 55) &&
         distinctivenessChange === 'High - High'
     ) {
-        conditionChange = 'Error - Not like for like ▲';
-    } else if (sameDistinctiveness && input.baselineConditionScore > input.proposedConditionScore) {
-        conditionChange = 'Error - Can not reduce condition ▲';
-    } else if (
+        return 'Error - Not like for like ▲';
+    }
+    const conditionReduced = input.baselineConditionScore !== undefined &&
+        input.proposedConditionScore !== undefined &&
+        input.baselineConditionScore > input.proposedConditionScore;
+
+    if (sameDistinctiveness && conditionReduced) {
+        return 'Error - Can not reduce condition ▲';
+    }
+    if (
         !specialWoodland &&
         sameDistinctiveness &&
         input.baselineConditionScore === input.proposedConditionScore
     ) {
-        conditionChange = 'Error - No enhancement ▲';
-    } else if (input.baselineConditionScore > input.proposedConditionScore) {
-        conditionChange = 'Error - condition cannot be reduced ▲';
-    } else if (scoreReduced) {
-        conditionChange = 'Error Trading Down ▲';
-    } else if (differentHabitat && input.baselineDistinctivenessScore < input.proposedDistinctivenessScore) {
-        conditionChange = `Lower Distinctiveness Habitat - ${input.proposedCondition}`;
-    } else {
-        conditionChange = `${input.baselineCondition} - ${input.proposedCondition}`;
+        return 'Error - No enhancement ▲';
     }
+    if (conditionReduced) {
+        return 'Error - condition cannot be reduced ▲';
+    }
+    if (hasReducedDistinctiveness(input)) return 'Error Trading Down ▲';
+    if (differentHabitat && input.baselineDistinctivenessScore < input.proposedDistinctivenessScore) {
+        return `Lower Distinctiveness Habitat - ${input.proposedCondition}`;
+    }
+
+    return `${input.baselineCondition} - ${input.proposedCondition}`;
+}
+
+export function calculateAreaEnhancementMovement(input: AreaEnhancementMovementInput): AreaEnhancementMovementResult {
+    const movementError = calculateMovementError(input);
+    const distinctivenessChange = distinctivenessMovementLabel(input, movementError);
+    const conditionChange = calculateConditionChange(input, distinctivenessChange);
+
     return {
         distinctivenessChange,
         conditionChange,
         enhancementPathway: conditionChange,
-        movementAllowed: !movementError,
+        movementAllowed: movementError === undefined,
         conditionAllowed: !conditionChange.startsWith('Error'),
     };
 }
 
-export function areaEnhancementAvailability(input: {
-    movementAllowed: boolean;
-    conditionAllowed: boolean;
-    timingAllowed: boolean;
-    rawReferencePresent?: boolean;
-}) {
+export function areaEnhancementAvailability(input: AreaEnhancementAvailabilityInput): AreaEnhancementAvailability {
     const semanticallyAvailable = input.movementAllowed && input.conditionAllowed && input.timingAllowed;
+    const rawAvailable = semanticallyAvailable && input.rawReferencePresent !== false;
+
     return {
-        habitatUnitsDelivered: semanticallyAvailable && input.rawReferencePresent !== false,
+        habitatUnitsDelivered: rawAvailable,
         habitatUnitsDeliveredWithSpatialRisk: semanticallyAvailable,
+        unavailableResults: unavailableEnhancementResults(semanticallyAvailable, rawAvailable, true),
     };
 }
 
-export function applyAreaEnhancementAvailability<T extends {
-    habitatUnitsDelivered: number;
-    habitatUnitsDeliveredDecimal: Decimal;
-    habitatUnitsDeliveredWithSpatialRisk?: number;
-    habitatUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
-    areaCalculationAvailability?: Record<string, unknown>;
-    offSiteReferenceNumber?: string;
-}>(data: T, input: {
-    movementAllowed: boolean;
-    conditionAllowed: boolean;
-    timingAllowed: boolean;
-    requiresReference?: boolean;
-    preserveSpatialContribution?: boolean;
-    rawContributionAllowed?: boolean;
-}) {
+function unavailableEnhancementResults(
+    semanticallyAvailable: boolean,
+    rawAvailable: boolean,
+    includeSpatialResult: boolean,
+): AreaEnhancementAvailability['unavailableResults'] {
+    const unavailableResults: AreaEnhancementAvailability['unavailableResults'] = {};
+    if (!rawAvailable) unavailableResults.habitatUnitsDelivered = 'blank';
+    if (includeSpatialResult && !semanticallyAvailable) {
+        unavailableResults.habitatUnitsDeliveredWithSpatialRisk = 'blank';
+    }
+    return unavailableResults;
+}
+
+function areaEnhancementRule(input: AreaEnhancementAvailabilityOptions, rawReferencePresent: boolean): AreaEnhancementAvailability['rule'] {
+    if (!input.movementAllowed) return 'invalid-enhancement-movement';
+    if (input.rawContributionAllowed === false) return 'irreplaceable-individual-tree-enhancement';
+    if (!input.conditionAllowed) return 'invalid-enhancement-condition';
+    if (!input.timingAllowed) return 'enhancement-timing-conflict';
+    if (!rawReferencePresent) return 'off-site-reference-required';
+    return undefined;
+}
+
+function areaEnhancementRuleMessage(rule: AreaEnhancementAvailability['rule']): AreaEnhancementMessage | undefined {
+    if (rule === 'irreplaceable-individual-tree-enhancement') {
+        return 'Error - you cannot enhance irreplaceable individual trees ▲';
+    }
+    if (rule === 'off-site-reference-required') return 'Off-site reference required ▲';
+    if (rule === 'enhancement-timing-conflict') return 'Error -both advance and delayed habitat creation ▲';
+    if (rule === 'invalid-enhancement-condition') return 'Error - condition cannot be reduced ▲';
+    if (rule === 'invalid-enhancement-movement') return 'Check Data ⚠';
+    return undefined;
+}
+
+export function applyAreaEnhancementAvailability<T extends AreaEnhancementUnitRow>(
+    data: T,
+    input: AreaEnhancementAvailabilityOptions,
+) {
     const rawReferencePresent = !input.requiresReference || isAreaReferencePresent(data.offSiteReferenceNumber);
-    const availability = areaEnhancementAvailability({
-        ...input,
-        rawReferencePresent,
-    });
+    const availability = areaEnhancementAvailability({ ...input, rawReferencePresent });
+
     if (input.preserveSpatialContribution && data.habitatUnitsDeliveredWithSpatialRisk !== undefined) {
         availability.habitatUnitsDeliveredWithSpatialRisk = input.timingAllowed && input.movementAllowed;
     }
-    const unavailableResults: Partial<Record<string, 'check-data' | 'blank'>> = {};
-    if (!input.movementAllowed || !input.conditionAllowed || !input.timingAllowed) {
-        unavailableResults.habitatUnitsDelivered = 'blank';
-        if (data.habitatUnitsDeliveredWithSpatialRisk !== undefined && !input.preserveSpatialContribution) {
-            unavailableResults.habitatUnitsDeliveredWithSpatialRisk = 'blank';
-        }
-    }
-    if (!rawReferencePresent || input.rawContributionAllowed === false) unavailableResults.habitatUnitsDelivered = 'blank';
-    const rule = !input.movementAllowed
-        ? 'invalid-enhancement-movement'
-        : input.rawContributionAllowed === false
-          ? 'irreplaceable-individual-tree-enhancement'
-        : !input.conditionAllowed
-          ? 'invalid-enhancement-condition'
-          : !input.timingAllowed
-            ? 'enhancement-timing-conflict'
-            : !rawReferencePresent
-              ? 'off-site-reference-required'
-              : undefined;
-    const message = rule === 'irreplaceable-individual-tree-enhancement'
-        ? 'Error - you cannot enhance irreplaceable individual trees ▲'
-        : rule === 'off-site-reference-required'
-        ? 'Off-site reference required ▲'
-        : rule === 'enhancement-timing-conflict'
-          ? 'Error -both advance and delayed habitat creation ▲'
-          : rule === 'invalid-enhancement-condition'
-            ? 'Error - condition cannot be reduced ▲'
-            : rule === 'invalid-enhancement-movement'
-              ? 'Check Data ⚠'
-              : undefined;
-    const rawAvailable = availability.habitatUnitsDelivered && input.rawContributionAllowed !== false;
+
+    const rawContributionAllowed = input.rawContributionAllowed !== false;
+    const rawAvailable = availability.habitatUnitsDelivered && rawContributionAllowed;
     const spatialAvailable = availability.habitatUnitsDeliveredWithSpatialRisk;
+    const unavailableResults = unavailableEnhancementResults(
+        spatialAvailable,
+        rawAvailable,
+        !input.preserveSpatialContribution,
+    );
+    const rule = areaEnhancementRule(input, rawReferencePresent);
+    const message = areaEnhancementRuleMessage(rule);
+
     return {
         ...data,
         ...(rawAvailable ? {} : { habitatUnitsDelivered: 0, habitatUnitsDeliveredDecimal: toDecimal(0) }),
@@ -284,45 +403,53 @@ export function applyAreaEnhancementAvailability<T extends {
             unavailableResults,
             rule,
             message,
-        },
+        } satisfies AreaEnhancementAvailability,
     };
 }
 
-export function applyAreaRawReferenceAvailability<T extends {
-    habitatUnitsDelivered: number;
-    habitatUnitsDeliveredDecimal: Decimal;
-    offSiteReferenceNumber?: string;
-    spatialRiskCategory?: string;
-    areaCalculationAvailability?: Record<string, unknown>;
-    creationTiming?: {
-        rule?: string;
-        status?: string;
-        message?: string;
-        unavailableResults?: Partial<Record<string, 'check-data' | 'blank'>>;
+function creationUnavailableResults(
+    timingResults: AreaCreationTimingState['unavailableResults'] | undefined,
+    areaResults: AreaCreationAvailability['unavailableResults'] | undefined,
+    missingReference: boolean,
+): AreaCreationAvailability['unavailableResults'] {
+    return {
+        ...timingResults,
+        ...areaResults,
+        ...(missingReference ? { habitatUnitsDelivered: 'blank' } : {}),
     };
-}>(data: T) {
+}
+
+function areaCreationReferenceMessage(
+    missingReference: boolean,
+): AreaCreationAvailability['message'] {
+    if (missingReference) return 'Off-site reference required ▲';
+    return undefined;
+}
+
+export function applyAreaRawReferenceAvailability<T extends AreaCreationUnitRow>(data: T) {
     const missingReference = Boolean(data.spatialRiskCategory) && !isAreaReferencePresent(data.offSiteReferenceNumber);
-    const currentAvailability = data.areaCalculationAvailability ?? {};
-    const currentUnavailableResults = currentAvailability.unavailableResults as
-        | Partial<Record<string, 'check-data' | 'blank'>>
-        | undefined;
-    const unavailableResults: Partial<Record<string, 'check-data' | 'blank'>> = {
-        ...data.creationTiming?.unavailableResults,
-        ...currentUnavailableResults,
-        ...(missingReference ? { habitatUnitsDelivered: 'blank' as const } : {}),
-    };
-    const availability = {
-        ...data.creationTiming,
-        ...currentAvailability,
+    const unavailableResults = creationUnavailableResults(
+        data.creationTiming?.unavailableResults,
+        data.areaCalculationAvailability?.unavailableResults,
+        missingReference,
+    );
+    const rule = missingReference
+        ? 'off-site-reference-required'
+        : data.areaCalculationAvailability?.rule ?? data.creationTiming?.rule;
+    const message = areaCreationReferenceMessage(missingReference) ??
+        data.areaCalculationAvailability?.message ?? data.creationTiming?.message;
+    const availability: AreaCreationAvailability = {
+        ...data.areaCalculationAvailability,
         habitatUnitsDelivered: !missingReference && unavailableResults.habitatUnitsDelivered !== 'blank',
         habitatUnitsDeliveredWithSpatialRisk: unavailableResults.habitatUnitsDeliveredWithSpatialRisk !== 'blank',
         unavailableResults,
-        ...(missingReference ? {
-            rule: 'off-site-reference-required',
-            message: 'Off-site reference required ▲',
-        } : {}),
+        ...(rule ? { rule } : {}),
+        ...(data.creationTiming?.status ? { status: data.creationTiming.status } : {}),
+        ...(message ? { message } : {}),
     };
+
     if (!missingReference) return { ...data, areaCalculationAvailability: availability };
+
     return {
         ...data,
         habitatUnitsDelivered: 0,

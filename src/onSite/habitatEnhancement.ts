@@ -1,7 +1,7 @@
 import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
-import { broadHabitatSchema } from '../broadHabitats';
-import { enhancedHabitatType } from '../habitatTypes';
+import { broadHabitatSchema, type BroadHabitat } from '../broadHabitats';
+import { enhancedHabitatType, type EnhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import {
@@ -29,6 +29,11 @@ import {
     calculateAreaEnhancementMovement,
     hasAreaEnhancementTimingConflict,
 } from '../areaCalculationRules';
+import type { AreaEnhancementMovementRow } from '../areaCalculationTypes';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
+import type { Condition } from '../conditions';
+import type { DistinctivenessCategory } from '../distinctivenessCategories';
+import type { HabitatLabel } from '../habitats';
 
 const inputSchema = v.object({
     baseline: onSiteHabitatBaselineSchema,
@@ -214,8 +219,8 @@ export function calculateEnhancementDifficulty(input: {
 
 const determineEnhancementDifficulty = <
     Data extends {
-        broadHabitat: string;
-        habitatType: string;
+        broadHabitat: BroadHabitat;
+        habitatType: EnhancedHabitatType;
         timeToTargetCondition: number | '30+' | 'Not Possible ▲';
         habitatEnhancedInAdvance: number | '30+';
         finalTimeToTargetCondition: number | '30+' | 'Not Possible ▲';
@@ -224,7 +229,7 @@ const determineEnhancementDifficulty = <
 >(
     data: Data,
 ) => {
-    const habitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+    const habitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
 
     return {
         ...data,
@@ -245,16 +250,16 @@ const determineEnhancementDifficulty = <
  * Pure calculation: derives distinctivenessChange and conditionChange labels.
  */
 export function calculateDistinctivenessAndConditionChange(input: {
-    baselineDistinctivenessCategory: string;
-    baselineLabel: string;
-    baselineCondition: string;
-    baselineDistinctivenessScore: number;
+    baselineDistinctivenessCategory: DistinctivenessCategory;
+    baselineLabel: HabitatLabel;
+    baselineCondition: Condition;
+    baselineDistinctivenessScore: AreaDistinctivenessScore;
     baselineDistinctivenessScoreDecimal?: Decimal;
-    proposedLabel: string;
-    proposedDistinctiveness: string;
-    proposedDistinctivenessScore: number;
+    proposedLabel: HabitatLabel;
+    proposedDistinctiveness: DistinctivenessCategory;
+    proposedDistinctivenessScore: AreaDistinctivenessScore;
     proposedDistinctivenessScoreDecimal?: Decimal;
-    condition: string;
+    condition: Condition;
 }) {
     const distinctivenessChange = `${input.baselineDistinctivenessCategory} - ${input.proposedDistinctiveness}`;
 
@@ -273,18 +278,18 @@ export function calculateDistinctivenessAndConditionChange(input: {
 
 const addDistinctivenessAndConditionChange = <
     Data extends {
-        baseline: any;
-        _baselineHabitat: any;
-        broadHabitat: string;
-        habitatType: string;
-        condition: string;
-        distinctiveness: string;
-        distinctivenessScore: number;
+        baseline: OnSiteHabitatBaseline;
+        _baselineHabitat: Habitat;
+        broadHabitat: BroadHabitat;
+        habitatType: EnhancedHabitatType;
+        condition: Condition;
+        distinctiveness: DistinctivenessCategory;
+        distinctivenessScore: AreaDistinctivenessScore;
     },
 >(
     data: Data,
 ) => {
-    const proposedHabitat = habitatByBroadAndType(data.broadHabitat as any, data.habitatType as any)!;
+    const proposedHabitat = habitatByBroadAndType(data.broadHabitat, data.habitatType)!;
     return {
         ...data,
         ...calculateDistinctivenessAndConditionChange({
@@ -301,18 +306,7 @@ const addDistinctivenessAndConditionChange = <
     };
 };
 
-const applyWorkbookAreaEnhancementMovement = <
-    Data extends {
-        baseline: OnSiteHabitatBaseline;
-        _baselineHabitat: Habitat;
-        _habitat: Habitat;
-        condition: string;
-        conditionScore: number;
-        broadHabitat: string;
-        habitatType: string;
-        distinctivenessScore: number;
-    },
->(data: Data) => ({
+const applyWorkbookAreaEnhancementMovement = <Data extends AreaEnhancementMovementRow>(data: Data) => ({
     ...data,
     ...calculateAreaEnhancementMovement({
         requiredAction: data.baseline.requiredAction,
@@ -350,17 +344,17 @@ const applyWorkbookAreaEnhancementMovement = <
 const enrichWithEnhancementUnitsDelivered = <
     Data extends {
         baseline: OnSiteHabitatBaseline;
-        broadHabitat: string;
-        habitatType: string;
+        broadHabitat: BroadHabitat;
+        habitatType: EnhancedHabitatType;
         area: number;
         areaDecimal: Decimal;
-        _baselineHabitat: any;
-        _baselineCondition: number;
-        _baselineConditionDecimal: Decimal;
-        distinctivenessScore: number;
+        _baselineHabitat: Habitat;
+        _baselineCondition: HabitatConditionScore | undefined;
+        _baselineConditionDecimal: Decimal | undefined;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         finalTimeToTargetMultiplier: number | undefined;
@@ -491,7 +485,7 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
         const proposedD = data.distinctivenessScore;
 
         // Cannot reduce condition
-        if (baselineCondition > proposedCondition) {
+        if (baselineCondition !== undefined && proposedCondition !== undefined && baselineCondition > proposedCondition) {
             return false;
         }
 

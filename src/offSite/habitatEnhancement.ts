@@ -1,7 +1,7 @@
 import { type Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { broadHabitatSchema } from '../broadHabitats';
-import { enhancedHabitatType } from '../habitatTypes';
+import { enhancedHabitatType, type EnhancedHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import {
@@ -12,8 +12,12 @@ import {
     safeTransform,
     yearsSchema,
 } from '../schemaUtils';
-import { offSiteHabitatBaselineSchema, offSiteHabitatBaselineUncheckedSchema } from './habitatBaseline';
-import { habitatByBroadAndType } from '../habitats';
+import {
+    offSiteHabitatBaselineSchema,
+    offSiteHabitatBaselineUncheckedSchema,
+    type OffSiteHabitatBaseline,
+} from './habitatBaseline';
+import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateAreaEnhancementTimingEvidence } from '../areaTiming';
 import {
@@ -28,6 +32,9 @@ import {
     calculateAreaEnhancementMovement,
     hasAreaEnhancementTimingConflict,
 } from '../areaCalculationRules';
+import type { AreaEnhancementMovementRow } from '../areaCalculationTypes';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
+import type { BroadHabitat } from '../broadHabitats';
 
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
@@ -157,18 +164,7 @@ const addEnhancementPathway = <
     };
 };
 
-const applyWorkbookAreaEnhancementMovement = <
-    Data extends {
-        baseline: any;
-        _baselineHabitat: any;
-        _habitat: any;
-        condition: string;
-        conditionScore: number;
-        broadHabitat: string;
-        habitatType: string;
-        distinctivenessScore: number;
-    },
->(data: Data) => ({
+const applyWorkbookAreaEnhancementMovement = <Data extends AreaEnhancementMovementRow>(data: Data) => ({
     ...data,
     ...calculateAreaEnhancementMovement({
         requiredAction: data.baseline.requiredAction,
@@ -363,17 +359,17 @@ const enrichWithSpatialRiskData = <
  */
 const enrichWithEnhancementUnitsDelivered = <
     Data extends {
-        baseline: any;
-        _habitat: any;
+        baseline: OffSiteHabitatBaseline;
+        _habitat: Habitat;
         area: number;
         areaDecimal: Decimal;
-        _baselineHabitat: any;
-        _baselineCondition: number;
-        _baselineConditionDecimal: Decimal;
-        distinctivenessScore: number;
+        _baselineHabitat: Habitat;
+        _baselineCondition: HabitatConditionScore | undefined;
+        _baselineConditionDecimal: Decimal | undefined;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         finalTimeToTargetMultiplier: number | undefined;
@@ -500,7 +496,7 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
         const proposedD = data.distinctivenessScore;
 
         // Cannot reduce condition
-        if (baselineCondition > proposedCondition) {
+        if (baselineCondition !== undefined && proposedCondition !== undefined && baselineCondition > proposedCondition) {
             return false;
         }
 

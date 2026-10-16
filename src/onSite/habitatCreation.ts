@@ -21,6 +21,7 @@ import { hasAreaHabitatReachedTarget } from '../areaTiming';
 import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 import { applyHabitatCreationTimingAvailability } from '../calculationAvailability';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -351,8 +352,8 @@ export function calculateDifficultyMultiplierApplied(
 const enrichWithHabitatUnitsDelivered = <
     Data extends {
         area: number;
-        distinctivenessScore: number;
-        conditionScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
+        conditionScore: HabitatConditionScore | undefined;
         strategicSignificanceMultiplier: number;
         finalTimeToTargetMultiplier: number | undefined;
         difficultyMultiplierApplied: number;

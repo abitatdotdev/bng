@@ -3,6 +3,12 @@ import type { BespokeCompensation } from './bespokeCompensation';
 import type { SuggestedTradingActions } from './distinctivenessCategories';
 import { isAreaAllocationOverrun } from './areaCalculationRules';
 
+function conditionScoreDecimal(score: Quantity | undefined, decimalScore?: Decimal): Decimal {
+    if (decimalScore !== undefined) return decimalScore;
+    if (score === undefined) throw new Error('Habitat condition score is unavailable');
+    return toDecimal(score);
+}
+
 /**
  * Pure calculation: derives baseline units retained/enhanced and area habitat lost.
  *
@@ -20,7 +26,7 @@ export function calculateBaselineUnits(input: {
     areaEnhancedDecimal?: Decimal;
     distinctivenessScore: Quantity;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: Quantity;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: Quantity;
     strategicSignificanceMultiplierDecimal?: Decimal;
@@ -115,7 +121,7 @@ export function calculateTotalHabitatUnits(input: {
     baselineUnitsEnhancedDecimal?: Decimal;
     distinctivenessScore: Quantity;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: Quantity;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: Quantity;
     strategicSignificanceMultiplierDecimal?: Decimal;
@@ -171,7 +177,7 @@ export function calculateHabitatUnitsDelivered(input: {
     areaDecimal?: Decimal;
     distinctivenessScore: Quantity;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: Quantity;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: Quantity;
     strategicSignificanceMultiplierDecimal?: Decimal;
@@ -184,7 +190,7 @@ export function calculateHabitatUnitsDelivered(input: {
 }) {
     const habitatUnitsDelivered = new Decimal(input.areaDecimal ?? toDecimal(input.area))
         .mul(input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore))
-        .mul(input.conditionScoreDecimal ?? toDecimal(input.conditionScore))
+        .mul(conditionScoreDecimal(input.conditionScore, input.conditionScoreDecimal))
         .mul(input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier))
         .mul(
             input.finalTimeToTargetMultiplierDecimal ??
@@ -220,11 +226,11 @@ export function calculateEnhancementUnitsDelivered(input: {
     areaDecimal?: Decimal;
     baselineDistinctivenessScore: Quantity;
     baselineDistinctivenessScoreDecimal?: Decimal;
-    baselineConditionScore: Quantity;
+    baselineConditionScore: Quantity | undefined;
     baselineConditionScoreDecimal?: Decimal;
     distinctivenessScore: Quantity;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: Quantity;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: Quantity;
     strategicSignificanceMultiplierDecimal?: Decimal;
@@ -238,9 +244,9 @@ export function calculateEnhancementUnitsDelivered(input: {
     const area = input.areaDecimal ?? toDecimal(input.area);
     const baselineD =
         input.baselineDistinctivenessScoreDecimal ?? toDecimal(input.baselineDistinctivenessScore);
-    const baselineC = input.baselineConditionScoreDecimal ?? toDecimal(input.baselineConditionScore);
+    const baselineC = conditionScoreDecimal(input.baselineConditionScore, input.baselineConditionScoreDecimal);
     const proposedD = input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore);
-    const proposedC = input.conditionScoreDecimal ?? toDecimal(input.conditionScore);
+    const proposedC = conditionScoreDecimal(input.conditionScore, input.conditionScoreDecimal);
     const strategic =
         input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier);
     const difficulty =

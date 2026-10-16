@@ -52,4 +52,10 @@ export type {
     WatercourseOffSiteAvailability,
     WatercourseEnhancementUnitReview,
 } from './linearRuleAvailability';
-export type { AreaBaselineAvailability } from './areaCalculationRules';
+export type {
+    AreaBaselineAvailability,
+    AreaCreationAvailability,
+    AreaEnhancementAvailability,
+    AreaEnhancementMovementInput,
+    AreaEnhancementMovementResult,
+} from './areaCalculationTypes';

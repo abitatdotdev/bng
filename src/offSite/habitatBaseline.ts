@@ -1,4 +1,4 @@
-import { Decimal, toDecimal } from '../decimal';
+import { Decimal, toDecimal, type Quantity } from '../decimal';
 import * as v from 'valibot';
 
 import { broadHabitatSchema } from '../broadHabitats';
@@ -24,6 +24,13 @@ import {
     calculateVhdhBespokeCompensationUnits,
 } from '../habitatCalc';
 import { areaBaselineAvailability } from '../areaCalculationRules';
+import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
+
+function toConditionScoreDecimal(score: Quantity | undefined, decimalScore?: Decimal): Decimal {
+    if (decimalScore !== undefined) return decimalScore;
+    if (score === undefined) throw new Error('Habitat condition score is unavailable');
+    return toDecimal(score);
+}
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -172,10 +179,10 @@ export function enrichWithBaselineUnitsData<
         areaRetainedDecimal: Decimal;
         areaEnhanced: number;
         areaEnhancedDecimal: Decimal;
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         broadHabitat: string;
@@ -211,7 +218,7 @@ export function calculateTotalHabitatUnitsSRM(input: {
     baselineUnitsEnhancedDecimal?: Decimal;
     distinctivenessScore: number;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: number;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: number;
     strategicSignificanceMultiplierDecimal?: Decimal;
@@ -240,7 +247,7 @@ export function calculateTotalHabitatUnitsSRM(input: {
     } else {
         totalHabitatUnitsSRM = new Decimal(input.areaDecimal ?? toDecimal(input.area))
             .mul(input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore))
-            .mul(input.conditionScoreDecimal ?? toDecimal(input.conditionScore))
+            .mul(toConditionScoreDecimal(input.conditionScore, input.conditionScoreDecimal))
             .mul(
                 input.strategicSignificanceMultiplierDecimal ??
                     toDecimal(input.strategicSignificanceMultiplier),
@@ -267,10 +274,10 @@ export function enrichWithTotalHabitatUnitsSRM<
         baselineUnitsRetainedDecimal: Decimal;
         baselineUnitsEnhanced: number;
         baselineUnitsEnhancedDecimal: Decimal;
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         spatialRiskMultiplier: number;
@@ -300,10 +307,10 @@ export function enrichWithTotalHabitatUnits<
         baselineUnitsRetainedDecimal: Decimal;
         baselineUnitsEnhanced: number;
         baselineUnitsEnhancedDecimal: Decimal;
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         requiredAction: SuggestedTradingActions;
@@ -401,7 +408,7 @@ export function calculateBaselineUnitsRetainedSRM(input: {
     areaRetainedDecimal?: Decimal;
     distinctivenessScore: number;
     distinctivenessScoreDecimal?: Decimal;
-    conditionScore: number;
+    conditionScore: Quantity | undefined;
     conditionScoreDecimal?: Decimal;
     vhdhBespokeCompensationUnits: number;
     vhdhBespokeCompensationUnitsDecimal?: Decimal;
@@ -417,7 +424,7 @@ export function calculateBaselineUnitsRetainedSRM(input: {
         input.areaRetainedDecimal ?? toDecimal(input.areaRetained),
     )
         .mul(input.distinctivenessScoreDecimal ?? toDecimal(input.distinctivenessScore))
-        .mul(input.conditionScoreDecimal ?? toDecimal(input.conditionScore))
+        .mul(toConditionScoreDecimal(input.conditionScore, input.conditionScoreDecimal))
         .mul(input.strategicSignificanceMultiplierDecimal ?? toDecimal(input.strategicSignificanceMultiplier))
         .mul(input.spatialRiskMultiplierDecimal ?? toDecimal(input.spatialRiskMultiplier))
         .plus(
@@ -437,10 +444,10 @@ export function enrichWithBaselineUnitsRetainedSRM<
         irreplaceableHabitat: boolean;
         areaRetained: number;
         areaRetainedDecimal: Decimal;
-        distinctivenessScore: number;
+        distinctivenessScore: AreaDistinctivenessScore;
         distinctivenessScoreDecimal: Decimal;
-        conditionScore: number;
-        conditionScoreDecimal: Decimal;
+        conditionScore: HabitatConditionScore | undefined;
+        conditionScoreDecimal: Decimal | undefined;
         vhdhBespokeCompensationUnits: number;
         vhdhBespokeCompensationUnitsDecimal: Decimal;
         strategicSignificanceMultiplier: number;

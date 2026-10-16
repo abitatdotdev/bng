@@ -13,6 +13,7 @@ import {
 import { distinctivenessCategories, type SuggestedTradingActions } from './distinctivenessCategories';
 import type { BespokeCompensation } from './bespokeCompensation';
 import { calculateTotalHabitatUnits } from './habitatCalc';
+import type { HabitatConditionScore } from './areaCalculationTypes';
 
 /**
  * Like `v.transform`, but silently passes the input through unchanged if the
@@ -103,9 +104,8 @@ type EnrichedHabitatData = {
     distinctiveness: Habitat['distinctivenessCategory'];
     distinctivenessScore: Habitat['distinctivenessScore'];
     distinctivenessScoreDecimal: Decimal;
-    // @ts-ignore-line
-    conditionScore: Habitat['conditions'][Condition];
-    conditionScoreDecimal: Decimal;
+    conditionScore: HabitatConditionScore | undefined;
+    conditionScoreDecimal: Decimal | undefined;
     strategicSignificanceCategory: StrategicSignificance['significance'];
     strategicSignificanceMultiplier: StrategicSignificance['multiplier'];
     strategicSignificanceMultiplierDecimal: Decimal;
@@ -135,7 +135,7 @@ export const enrichWithHabitatData = <
     }
     if (!habitat) throw new Error(`Unknown habitat: ${data.broadHabitat} / ${data.habitatType}`);
 
-    const conditionScore = (habitat.conditions as Record<Condition, number>)[data.condition];
+    const conditionScore = getHabitatConditionScore(habitat, data.condition);
     return {
         ...data,
         _habitat: habitat,
@@ -143,8 +143,7 @@ export const enrichWithHabitatData = <
         distinctivenessScore: habitat.distinctivenessScore,
         distinctivenessScoreDecimal: toDecimal(habitat.distinctivenessScore),
         conditionScore,
-        conditionScoreDecimal:
-            typeof conditionScore === 'number' ? toDecimal(conditionScore) : conditionScore,
+        conditionScoreDecimal: conditionScore === undefined ? undefined : toDecimal(conditionScore),
         strategicSignificanceCategory: getStrategicSignificance(data.strategicSignificance).significance,
         strategicSignificanceMultiplier: getStrategicSignificance(data.strategicSignificance).multiplier,
         strategicSignificanceMultiplierDecimal: toDecimal(
@@ -155,6 +154,11 @@ export const enrichWithHabitatData = <
             : habitat.distinctivenessTradingRules,
     };
 };
+
+function getHabitatConditionScore(habitat: Habitat, condition: Condition): HabitatConditionScore | undefined {
+    const conditions = habitat.conditions as Partial<Record<Condition, HabitatConditionScore>>;
+    return conditions[condition];
+}
 
 export const enrichWithCreationData = <
     Data extends {
@@ -207,7 +211,7 @@ export function addTotalHabitatUnits<
         baselineUnitsEnhancedDecimal?: Decimal;
         distinctivenessScore: number;
         distinctivenessScoreDecimal?: Decimal;
-        conditionScore: number;
+        conditionScore: Quantity | undefined;
         conditionScoreDecimal?: Decimal;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal?: Decimal;
