@@ -170,7 +170,15 @@ for (const { name, api } of entrypoints) {
             expect(fullTrading.hedgerows).toEqual(withoutTrading.hedgerows);
             const fullHeadline = api.headlineResults(unchecked.features, fullTrading);
             const withoutHeadline = api.headlineResults(withoutForbidden.features, withoutTrading);
-            expect(fullHeadline).toEqual(withoutHeadline);
+            const { aggregateAvailability: fullAvailability, ...fullResults } = fullHeadline;
+            const { aggregateAvailability: withoutAvailability, ...withoutResults } = withoutHeadline;
+            expect(fullResults).toEqual(withoutResults);
+            const aggregateSheet = offSite ? 'E-3' : 'B-3';
+            expect(
+                fullAvailability.inputTotals[aggregateSheet].length.valueDecimal
+                    .minus(withoutAvailability.inputTotals[aggregateSheet].length.valueDecimal)
+                    .toFixed(),
+            ).toBe('0.2');
 
             const fullByType = api.valuesByHedgerow(unchecked.features);
             const withoutByType = api.valuesByHedgerow(withoutForbidden.features);

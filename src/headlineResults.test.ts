@@ -86,6 +86,121 @@ export function emptyTradingSummary(): TradingSummaries {
     };
 }
 
+describe("headline aggregate availability", () => {
+    test("D-1 overrun retains baseline SUM values and propagates gated post totals", () => {
+        const { features, issues } = featuresFromInput({
+            offSiteHabitatBaselines: [{
+                broadHabitat: 'Grassland',
+                habitatType: 'Other neutral grassland',
+                area: 1,
+                strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
+                condition: 'Moderate',
+                irreplaceableHabitat: false,
+                spatialRiskCategory: 'Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA',
+                areaRetained: 1.1,
+                areaEnhanced: 0,
+                offSiteReferenceNumber: 'OFF-001',
+            }],
+        }, { validate: false });
+
+        const result = headlineResults(features, emptyTradingSummary());
+
+        expect(issues.offSiteHabitatBaselines).toBeUndefined();
+        expect(result.offSiteHabitatBaseline).toBe(8);
+        expect(result.aggregateAvailability.inputTotals['D-1']!.totalHabitatUnits!.value).toBe(8);
+        expect(result.aggregateAvailability.inputTotals['D-1']!.totalHabitatUnitsSRM!.value).toBe(4);
+        expect(result.aggregateAvailability.inputTotals['D-1']!.baselineUnitsRetained!.available).toBe(false);
+        expect(result.aggregateAvailability.inputTotals['D-1']!.baselineUnitsEnhanced!.available).toBe(false);
+        expect(result.aggregateAvailability.headline.baseline.offSite.habitat).toBe(true);
+        expect(result.aggregateAvailability.headline.postIntervention.offSite.habitat).toBe(false);
+        expect(result.ratioAvailability.offSite.habitat).toBe('check-data');
+        expect(result.ratioAvailability.totalNet.habitat).toBe('check-data');
+        expect(result.targetStatuses.totalNetGain.habitat).toBe('check-data');
+    });
+
+    test("includes bespoke watercourse compensation when deciding whether spatial totals feed final net", () => {
+        const input = emptyFixture({
+            offSiteWatercourseBaselines: [{
+                totalWatercourseUnits: 1,
+                totalWatercourseUnitsDecimal: new Decimal(1),
+                totalWatercourseUnitsSRM: 1,
+                totalWatercourseUnitsSRMDecimal: new Decimal(1),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                unitsRetainedWithSRM: 0,
+                unitsRetainedWithSRMDecimal: new Decimal(0),
+                vhdhBespokeCompensationUnits: 2,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(2),
+                spatialRiskMultiplier: 1,
+                spatialRiskMultiplierDecimal: new Decimal(1),
+                watercourseBaselineAvailability: { unavailableResults: { unitsRetainedWithSRM: 'check-data' } },
+            } as never],
+        });
+
+        const result = headlineResults(input, emptyTradingSummary());
+
+        expect(result.aggregateAvailability.inputTotals['F-1']!.vhdhBespokeCompensationUnits!.value).toBe(2);
+        expect(result.aggregateAvailability.headline.postInterventionWithSpatialRisk.offSite.watercourse).toBe(false);
+        expect(result.aggregateAvailability.headline.finalNet.watercourse).toBe(false);
+        expect(result.ratioAvailability.totalNet.watercourse).toBe('check-data');
+    });
+
+    test("does not exempt an unavailable zero-candidate total", () => {
+        const input = emptyFixture({
+            onSiteWatercourseBaselines: [{
+                totalWatercourseUnits: 0,
+                totalWatercourseUnitsDecimal: new Decimal(0),
+                unitsRetained: 0,
+                unitsRetainedDecimal: new Decimal(0),
+                vhdhBespokeCompensationUnits: 0,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                watercourseBaselineAvailability: { retainedExceedsLength: true, unavailableResults: { unitsRetained: 'check-data' } },
+            } as never],
+        });
+
+        const result = headlineResults(input, emptyTradingSummary());
+
+        expect(result.ratioAvailability.onSite.watercourse).toBe('check-data');
+        expect(result.targetStatuses.onSiteNetGain.watercourse).toBe('check-data');
+    });
+
+    test("retained-length errors reach post-intervention ratios and targets while keeping numeric candidates", () => {
+        const input = emptyFixture({
+            onSiteWatercourseBaselines: [{
+                totalWatercourseUnits: 10,
+                totalWatercourseUnitsDecimal: new Decimal(10),
+                unitsRetained: 4,
+                unitsRetainedDecimal: new Decimal(4),
+                vhdhBespokeCompensationUnits: 0,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                watercourseBaselineAvailability: { retainedExceedsLength: true, unavailableResults: { unitsRetained: 'check-data' } },
+            } as never],
+            offSiteWatercourseBaselines: [{
+                totalWatercourseUnits: 10,
+                totalWatercourseUnitsDecimal: new Decimal(10),
+                unitsRetained: 5,
+                unitsRetainedDecimal: new Decimal(5),
+                vhdhBespokeCompensationUnits: 0,
+                vhdhBespokeCompensationUnitsDecimal: new Decimal(0),
+                spatialRiskMultiplier: 1,
+                spatialRiskMultiplierDecimal: new Decimal(1),
+                watercourseBaselineAvailability: { retainedExceedsLength: true, unavailableResults: { unitsRetained: 'check-data' } },
+            } as never],
+        });
+
+        const result = headlineResults(input, emptyTradingSummary());
+
+        expect(result.aggregateAvailability.inputTotals['C-1']!.unitsRetained!.value).toBe(4);
+        expect(result.aggregateAvailability.inputTotals['C-1']!.unitsRetained!.available).toBe(false);
+        expect(result.aggregateAvailability.inputTotals['F-1']!.unitsRetained!.value).toBe(5);
+        expect(result.aggregateAvailability.inputTotals['F-1']!.unitsRetained!.available).toBe(false);
+        expect(result.ratioAvailability.onSite.watercourse).toBe('check-data');
+        expect(result.ratioAvailability.totalNet.watercourse).toBe('check-data');
+        expect(result.targetStatuses.onSiteNetGain.watercourse).toBe('check-data');
+        expect(result.targetStatuses.totalNetGain.watercourse).toBe('check-data');
+    });
+});
+
 describe("calculateOnSiteHabitatBaseline", () => {
     test("returns 0 for empty array", () => {
         const result = calculateOnSiteHabitatBaseline([]);

@@ -42,6 +42,7 @@ export type {
 } from './calculationAvailability';
 
 export { calculateAreaReconciliation, countsTowardsSiteArea } from './areaReconciliation';
+export { calculateWorkbookAggregateAvailability } from './workbookAggregateAvailability';
 export type {
     HedgerowOffSiteAvailability,
     HedgerowEnhancementQuality,

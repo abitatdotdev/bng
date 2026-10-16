@@ -20,6 +20,8 @@ import { offSiteWatercourseBaselineSchema } from './offSite/watercourseBaseline'
 import { offSiteWatercourseCreationSchema } from './offSite/watercourseCreation';
 import { offSiteWatercourseEnhancementSchema } from './offSite/watercourseEnhancement';
 import type { AllFeatures } from './features';
+import { calculateWorkbookAggregateAvailability } from './workbookAggregateAvailability';
+import { calculateAreaReconciliation } from './areaReconciliation';
 import type { TradingSummaries } from './tradingSummaries';
 
 const ZERO = new Decimal(0);
@@ -81,6 +83,34 @@ function netChangeD(baseline: Decimal, postIntervention: Decimal): { unitsD: Dec
     const unitsD = postIntervention.minus(baseline);
     const percentageD = baseline.isZero() ? ZERO : unitsD.div(baseline).mul(100);
     return { unitsD, percentageD };
+}
+
+type MetricUnit = 'habitat' | 'hedgerow' | 'watercourse';
+type RatioStatus = 'available' | 'not-applicable' | 'check-data';
+type TargetStatus = 'exempt' | 'satisfied' | 'below-target' | 'not-applicable' | 'check-data';
+
+function ratioStatus(baseline: Decimal, postIntervention: Decimal, change: Decimal): RatioStatus {
+    if (!baseline.isZero()) return 'available';
+    if (change.isZero()) return 'available';
+    if (postIntervention.isNegative()) return 'check-data';
+    return 'not-applicable';
+}
+
+function finalRatioStatus(baseline: Decimal, change: Decimal): RatioStatus {
+    return baseline.isZero() && !change.isZero() ? 'not-applicable' : 'available';
+}
+
+function targetStatus(
+    baseline: Decimal,
+    postIntervention: Decimal,
+    ratio: Decimal,
+    target: Decimal,
+    status: RatioStatus,
+): TargetStatus {
+    if (status === 'check-data') return 'check-data';
+    if (baseline.isZero() && postIntervention.isZero()) return 'exempt';
+    if (status !== 'available') return status;
+    return ratio.gte(target) ? 'satisfied' : 'below-target';
 }
 
 /**
@@ -713,9 +743,9 @@ function unitSummaryD(
 export function headlineResults(
     features: AllFeatures & { startPage?: { netGainTarget?: Quantity } },
     tradingSummaries: TradingSummaries,
-    options: { netGainTarget?: Quantity } = {},
+    options: { netGainTarget?: Quantity; startPage?: { netGainTarget?: Quantity } } = {},
 ) {
-    const netGainTarget = options.netGainTarget ?? features.startPage?.netGainTarget ?? 0.1;
+    const netGainTarget = options.netGainTarget ?? options.startPage?.netGainTarget ?? features.startPage?.netGainTarget ?? 0.1;
     const targetD = new Decimal(1).plus(netGainTarget);
 
     // On-site baselines (Decimal)
@@ -830,6 +860,52 @@ export function headlineResults(
         hedgerowDecimal: totalNetPercentageChangeHedgerowDecimal,
         watercourse: totalNetPercentageChangeWatercourseDecimal.toNumber(),
         watercourseDecimal: totalNetPercentageChangeWatercourseDecimal,
+    };
+
+    const aggregateAvailability = calculateWorkbookAggregateAvailability(features);
+    const ratioAvailability = {
+        onSite: {
+            habitat: aggregateAvailability.headline.netChange.onSite.habitat ? ratioStatus(onSiteHabitatBaselineD_, onSiteHabitatPostInterventionD_, onSiteHabitatNet.unitsD) : 'check-data',
+            hedgerow: aggregateAvailability.headline.netChange.onSite.hedgerow ? ratioStatus(onSiteHedgerowBaselineD_, onSiteHedgerowPostInterventionD_, onSiteHedgerowNet.unitsD) : 'check-data',
+            watercourse: aggregateAvailability.headline.netChange.onSite.watercourse ? ratioStatus(onSiteWatercourseBaselineD_, onSiteWatercoursePostInterventionD_, onSiteWatercourseNet.unitsD) : 'check-data',
+        },
+        offSite: {
+            habitat: aggregateAvailability.headline.netChange.offSite.habitat ? ratioStatus(offSiteHabitatBaselineD_, offSiteHabitatPostInterventionD_, offSiteHabitatNet.unitsD) : 'check-data',
+            hedgerow: aggregateAvailability.headline.netChange.offSite.hedgerow ? ratioStatus(offSiteHedgerowBaselineD_, offSiteHedgerowPostInterventionD_, offSiteHedgerowNet.unitsD) : 'check-data',
+            watercourse: aggregateAvailability.headline.netChange.offSite.watercourse ? ratioStatus(offSiteWatercourseBaselineD_, offSiteWatercoursePostInterventionD_, offSiteWatercourseNet.unitsD) : 'check-data',
+        },
+        totalNet: {
+            habitat: aggregateAvailability.headline.finalNet.habitat ? finalRatioStatus(onSiteHabitatBaselineD_, totalHabitatD) : 'check-data',
+            hedgerow: aggregateAvailability.headline.finalNet.hedgerow ? finalRatioStatus(onSiteHedgerowBaselineD_, totalHedgerowD) : 'check-data',
+            watercourse: aggregateAvailability.headline.finalNet.watercourse ? finalRatioStatus(onSiteWatercourseBaselineD_, totalWatercourseD) : 'check-data',
+        },
+    } satisfies Record<'onSite' | 'offSite' | 'totalNet', Record<MetricUnit, RatioStatus>>;
+    const targetStatuses = {
+        onSiteNetGain: {
+            habitat: targetStatus(onSiteHabitatBaselineD_, onSiteHabitatPostInterventionD_, onSiteHabitatNet.percentageD.div(100), new Decimal(netGainTarget), ratioAvailability.onSite.habitat),
+            hedgerow: targetStatus(onSiteHedgerowBaselineD_, onSiteHedgerowPostInterventionD_, onSiteHedgerowNet.percentageD.div(100), new Decimal(netGainTarget), ratioAvailability.onSite.hedgerow),
+            watercourse: targetStatus(onSiteWatercourseBaselineD_, onSiteWatercoursePostInterventionD_, onSiteWatercourseNet.percentageD.div(100), new Decimal(netGainTarget), ratioAvailability.onSite.watercourse),
+        },
+        totalNetGain: {
+            habitat: targetStatus(onSiteHabitatBaselineD_, onSiteHabitatPostInterventionD_, totalNetPercentageChangeHabitatDecimal, new Decimal(netGainTarget), ratioAvailability.totalNet.habitat),
+            hedgerow: targetStatus(onSiteHedgerowBaselineD_, onSiteHedgerowPostInterventionD_, totalNetPercentageChangeHedgerowDecimal, new Decimal(netGainTarget), ratioAvailability.totalNet.hedgerow),
+            watercourse: targetStatus(onSiteWatercourseBaselineD_, onSiteWatercoursePostInterventionD_, totalNetPercentageChangeWatercourseDecimal, new Decimal(netGainTarget), ratioAvailability.totalNet.watercourse),
+        },
+    } satisfies Record<'onSiteNetGain' | 'totalNetGain', Record<MetricUnit, TargetStatus>>;
+    const areaReconciliation = calculateAreaReconciliation(features);
+    const workbookNotices = {
+        bespokeCompensationAgreed: [
+            ...features.onSiteHabitatBaselines,
+            ...features.offSiteHabitatBaselines,
+        ].some((row) => row.bespokeCompensationAgreed === 'Yes') || [
+            ...features.onSiteWatercourseBaselines,
+            ...features.offSiteWatercourseBaselines,
+        ].some((row) => row.bespokeCompensation === 'Yes'),
+        creationAreaMismatch: !areaReconciliation.onSite.creationMatchesLoss || !areaReconciliation.offSite.creationMatchesLoss,
+        irreplaceableHabitatPresent: [
+            ...features.onSiteHabitatBaselines,
+            ...features.offSiteHabitatBaselines,
+        ].some((row) => row.irreplaceableHabitat && new Decimal(row.areaDecimal).greaterThan(0)),
     };
 
     // Trading summaries
@@ -978,6 +1054,10 @@ export function headlineResults(
             watercourseDecimal: totalWatercourseD,
         },
         totalNetPercentageChange,
+        ratioAvailability,
+        targetStatuses,
+        aggregateAvailability,
+        workbookNotices,
         tradingRulesSatisfied,
         habitatUnitSummary,
         hedgerowUnitSummary,
