@@ -27,12 +27,6 @@ const exampleMetricsFileNames =
                     // invalid row in C-3 (looks incomplete)
                     'Warrington_2024_012222_FUL.xlsm',
 
-                    // Legacy statutory metric: off-site hedge enhancement decomposes Time-to-Target,
-                    // Temporal Multiplier and Spatial Risk Multiplier differently from the current
-                    // metric. Final hedgerow units match but intermediate fields fail per-row checks.
-                    'Rutland_2024_0645_FUL.xlsm',
-                    'Newark and Sherwood_24_00711_FUL.xlsm',
-
                     // Legacy statutory metric: Individual Trees creation with "30+" Time-to-Target
                     // collapses to final TTT=0 / multiplier=1 in older sheets. The current metric
                     // applies the 30+ multiplier (~0.32), producing different totals.

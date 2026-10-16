@@ -27,6 +27,34 @@ import { headlineResults } from "../src/headlineResults";
 import { tradingSummaries } from "../src/tradingSummaries";
 import { unitShortfall } from "../src/unitShortfall";
 
+function knownE3RegressionValues(fileName: string, dataRow: number) {
+    if (dataRow !== 11) return undefined;
+
+    if (fileName.endsWith("Newark and Sherwood_24_00711_FUL.xlsm")) {
+        return {
+            strategicMultiplier: 1,
+            standardTimeToTarget: 6,
+            finalTimeToTarget: 6,
+            temporalMultiplier: 0.8075396961,
+            difficultyMultiplier: 1,
+            spatialRiskMultiplier: 1,
+        };
+    }
+
+    if (fileName.endsWith("Rutland_2024_0645_FUL.xlsm")) {
+        return {
+            strategicMultiplier: 1,
+            standardTimeToTarget: 2,
+            finalTimeToTarget: 2,
+            temporalMultiplier: 0.931225,
+            difficultyMultiplier: 1,
+            spatialRiskMultiplier: 1,
+        };
+    }
+
+    return undefined;
+}
+
 testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
     const parsed = parseFile(fileName);
     const trading = tradingSummaries(parsed);
@@ -1510,7 +1538,6 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
         });
     });
 
-    // NOTE: this doesn't seem to process any rows in any sheets (not a massive surprise)
     describe("E-3 Off-Site Hedge Enhancement", () => {
         const sheet = getSheet(workbook, 'E-3 Off-Site Hedge Enhancement')!;
         const baselineSheet = getSheet(workbook, 'E-1 Off-Site Hedge Baseline')!;
@@ -1542,26 +1569,44 @@ testExcelFiles(EXCEL_FILES, (workbook, fileName) => {
                 // D (3): Length (km)
                 // R (17): Distinctiveness Score
                 // T (19): Condition Score
-                // V (21): Strategic Significance Multiplier
-                // Y (24): Time to target condition (years)
-                // Z (25): Final time to target condition (years)
-                // AA (26): Temporal multiplier
-                // AB (27): Spatial Risk Multiplier
-                // AD (29): Difficulty multiplier applied
+                // W (22): Strategic Significance Multiplier
+                // X (23): Standard Time to target condition (years)
+                // AB (27): Final time to target condition (years)
+                // AC (28): Final Time to target multiplier
+                // AG (32): Difficulty multiplier applied
+                // AI (34): Spatial Risk Multiplier
                 // AJ (35): Hedgerow Units Delivered With Spatial Risk (with SRM)
                 // AK (36): Hedgerow Units Delivered (without SRM)
 
                 const excelLength = getCellValue(sheet, dataRow, 3); // D
                 const excelDistinctivenessScore = getCellValue(sheet, dataRow, 17); // R
                 const excelConditionScore = getCellValue(sheet, dataRow, 19); // T
-                const excelStrategicMultiplier = getCellValue(sheet, dataRow, 21); // V
-                const excelTimeToTarget = getCellValue(sheet, dataRow, 24); // Y
-                const excelFinalTimeToTarget = getCellValue(sheet, dataRow, 25); // Z
-                const excelTemporalMultiplier = getCellValue(sheet, dataRow, 26); // AA
-                const excelSpatialRiskMultiplier = getCellValue(sheet, dataRow, 27); // AB
-                const excelDifficultyMultiplier = getCellValue(sheet, dataRow, 29); // AD
+                const excelStrategicMultiplier = getCellValue(sheet, dataRow, 22); // W
+                const excelTimeToTarget = getCellValue(sheet, dataRow, 23); // X
+                const excelFinalTimeToTarget = getCellValue(sheet, dataRow, 27); // AB
+                const excelTemporalMultiplier = getCellValue(sheet, dataRow, 28); // AC
+                const excelSpatialRiskMultiplier = getCellValue(sheet, dataRow, 34); // AI
+                const excelDifficultyMultiplier = getCellValue(sheet, dataRow, 32); // AG
                 const excelHedgerowUnitsDeliveredWithSpatialRisk = getCellValue(sheet, dataRow, 35); // AJ
                 const excelHedgerowUnitsDelivered = getCellValue(sheet, dataRow, 36); // AK
+
+                const expectedRegressionRow = knownE3RegressionValues(fileName, dataRow);
+                if (expectedRegressionRow) {
+                    const regressionComparisons: [unknown, number, string][] = [
+                        [excelStrategicMultiplier, expectedRegressionRow.strategicMultiplier, "Strategic multiplier"],
+                        [excelTimeToTarget, expectedRegressionRow.standardTimeToTarget, "Standard time to target"],
+                        [excelFinalTimeToTarget, expectedRegressionRow.finalTimeToTarget, "Final time to target"],
+                        [excelTemporalMultiplier, expectedRegressionRow.temporalMultiplier, "Temporal multiplier"],
+                        [excelDifficultyMultiplier, expectedRegressionRow.difficultyMultiplier, "Difficulty multiplier"],
+                        [excelSpatialRiskMultiplier, expectedRegressionRow.spatialRiskMultiplier, "Spatial risk multiplier"],
+                    ];
+                    regressionComparisons.forEach(([value, expected, field]) => {
+                        expect(typeof value).toBe("number");
+                        if (typeof value === "number") {
+                            expectCloseTo(value, expected, 0.0001, field);
+                        }
+                    });
+                }
 
                 // Compare values - only log on failure
                 try {
