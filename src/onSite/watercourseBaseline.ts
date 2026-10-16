@@ -1,4 +1,4 @@
-import { Decimal, toDecimal } from '../decimal';
+import { Decimal } from '../decimal';
 import * as v from 'valibot';
 
 import { allWatercourses } from '../watercourses';
@@ -14,7 +14,13 @@ import {
     enrichWithUnitsLost,
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
-import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
+import { bespokeCompensationSchema } from '../bespokeCompensation';
+import { enrichWithVhdhBespokeCompensationUnits } from '../watercourseBaselineCalculations';
+
+export {
+    calculateVhdhBespokeCompensationUnits,
+    enrichWithVhdhBespokeCompensationUnits,
+} from '../watercourseBaselineCalculations';
 
 const inputSchema = v.object({
     watercourseType: watercourseTypeSchema,
@@ -120,44 +126,3 @@ export const onSiteWatercourseBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithVhdhBespokeCompensationUnits),
     safeTransform(applyOnSiteWatercourseBaselineAvailability),
 );
-/*
- * Pure calculation of hidden cell AT, used later in the headline results.
- */
-export function calculateVhdhBespokeCompensationUnits(input: {
-    bespokeCompensation: BespokeCompensation;
-    tradingRules: (typeof allWatercourses)[keyof typeof allWatercourses]['tradingRules'];
-    totalWatercourseUnits: number;
-    totalWatercourseUnitsDecimal?: Decimal;
-    unitsRetained: number;
-    unitsRetainedDecimal?: Decimal;
-    unitsEnhanced: number;
-    unitsEnhancedDecimal?: Decimal;
-}) {
-    const vhdhBespokeCompensationUnits =
-        (input.bespokeCompensation === 'Yes' || input.bespokeCompensation === 'Pending') &&
-        input.tradingRules === 'Same habitat required – bespoke compensation option ⚠'
-            ? new Decimal(input.totalWatercourseUnitsDecimal ?? toDecimal(input.totalWatercourseUnits))
-                  .minus(input.unitsRetainedDecimal ?? toDecimal(input.unitsRetained))
-                  .minus(input.unitsEnhancedDecimal ?? toDecimal(input.unitsEnhanced))
-            : 0;
-
-    return {
-        vhdhBespokeCompensationUnits: toDecimal(vhdhBespokeCompensationUnits).toNumber(),
-        vhdhBespokeCompensationUnitsDecimal: toDecimal(vhdhBespokeCompensationUnits),
-    };
-}
-
-export function enrichWithVhdhBespokeCompensationUnits<
-    Data extends {
-        bespokeCompensation: BespokeCompensation;
-        tradingRules: (typeof allWatercourses)[keyof typeof allWatercourses]['tradingRules'];
-        totalWatercourseUnits: number;
-        totalWatercourseUnitsDecimal: Decimal;
-        unitsRetained: number;
-        unitsRetainedDecimal: Decimal;
-        unitsEnhanced: number;
-        unitsEnhancedDecimal: Decimal;
-    },
->(data: Data) {
-    return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
-}

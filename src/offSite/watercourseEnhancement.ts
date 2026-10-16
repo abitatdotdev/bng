@@ -21,7 +21,7 @@ import {
     enrichEnhancementWithEncroachmentData,
     calculateEnhancementUnitsDelivered,
 } from '../watercourses/shared';
-import { enrichWithWatercourseSpatialRisk } from './common';
+import { enrichWithWatercourseSpatialRisk } from './watercourseSpatialRisk';
 import {
     applyOffSiteWatercourseEnhancementAvailability,
     applyOffSiteWatercourseEnhancementReferenceAvailability,

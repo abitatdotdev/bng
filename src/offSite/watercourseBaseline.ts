@@ -7,7 +7,7 @@ import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { watercourseSpatialRiskCategorySchema } from '../spatialRisk';
-import { enrichWithWatercourseSpatialRisk } from './common';
+import { enrichWithWatercourseSpatialRisk } from './watercourseSpatialRisk';
 
 import {
     enrichWithBaselineWatercourseData,
@@ -16,7 +16,7 @@ import {
     enrichWithUnitsLost,
 } from '../watercourses/shared';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
-import { enrichWithVhdhBespokeCompensationUnits } from '../onSite/watercourseBaseline';
+import { enrichWithVhdhBespokeCompensationUnits } from '../watercourseBaselineCalculations';
 import { fuzzyPicklist } from '../valibotPipes';
 
 const inputSchema = v.object({
