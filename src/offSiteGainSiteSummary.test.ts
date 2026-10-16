@@ -188,6 +188,36 @@ describe('calculateOffSiteGainSiteSummary', () => {
         expect(totalFor('<>A*')).toBe(75);
     });
 
+    test('matches text comparison operators over the workbook reference source set', () => {
+        const source: OffSiteGainSiteContribution[] = [
+            { reference: 'A', baseline: 1 },
+            { reference: 'a', baseline: 2 },
+            { reference: ' A', baseline: 3 },
+            { reference: ' ', baseline: 4 },
+            { reference: '*', baseline: 5 },
+            { reference: '?', baseline: 6 },
+            { reference: '~', baseline: 7 },
+            { reference: '0', baseline: 8 },
+            { reference: '01', baseline: 9 },
+            { reference: '1', baseline: 10 },
+            { reference: '10', baseline: 11 },
+            { reference: 'B', baseline: 12 },
+        ];
+        const criteria = ['=A', '<>A', '>A', '>=A', '<B', '<=B'];
+        const results = calculateOffSiteGainSiteSummary([
+            ...source,
+            ...criteria.map((reference) => ({ reference, baseline: 0 })),
+        ]);
+        const totalFor = (reference: string) => results.find((result) => result.reference === reference)?.baseline;
+
+        expect(totalFor('=A')).toBe(3);
+        expect(totalFor('<>A')).toBe(75);
+        expect(totalFor('>A')).toBe(12);
+        expect(totalFor('>=A')).toBe(15);
+        expect(totalFor('<B')).toBe(66);
+        expect(totalFor('<=B')).toBe(78);
+    });
+
     test('matches the workbook empty-operand not-equal criterion', () => {
         const result = calculateOffSiteGainSiteSummary([
             { reference: 'A', baseline: 2 },
