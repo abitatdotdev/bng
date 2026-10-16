@@ -18,6 +18,7 @@ export { getStrategicSignificance } from './strategicSignificanceSchema';
 import { allHabitats } from './habitats';
 import { allHedgerows } from './hedgerows';
 import { allWatercourses } from './watercourses';
+import type { AllFeatures } from './features';
 
 export const data = {
     habitats: allHabitats,
@@ -35,23 +36,30 @@ export type {
     HedgerowEnhancementUnavailableResult,
 } from './hedgerowEnhancementMovementGate';
 
-export type {
-    HabitatCreationTimingState,
-    EnhancementConditionState,
-    WatercourseEnhancementMovementState,
-} from './calculationAvailability';
-
 export { calculateAreaReconciliation, countsTowardsSiteArea } from './areaReconciliation';
 export { calculateWorkbookAggregateAvailability } from './workbookAggregateAvailability';
-export type {
-    HedgerowOffSiteAvailability,
-    HedgerowEnhancementQuality,
-    HedgerowBaselineAvailability,
-    LinearTimingAvailability,
-    WatercourseBaselineAvailability,
-    WatercourseOffSiteAvailability,
-    WatercourseEnhancementUnitReview,
-} from './linearRuleAvailability';
+
+type HabitatCreation = AllFeatures['onSiteHabitatCreations'][number] | AllFeatures['offSiteHabitatCreations'][number];
+type HedgerowEnhancement = AllFeatures['onSiteHedgerowEnhancements'][number] | AllFeatures['offSiteHedgerowEnhancements'][number];
+type WatercourseEnhancement = AllFeatures['onSiteWatercourseEnhancements'][number] | AllFeatures['offSiteWatercourseEnhancements'][number];
+type WatercourseCreation = AllFeatures['onSiteWatercourseCreations'][number] | AllFeatures['offSiteWatercourseCreations'][number];
+type OffSiteHedgerowDelivery = AllFeatures['offSiteHedgerowCreations'][number] | AllFeatures['offSiteHedgerowEnhancements'][number];
+type OffSiteWatercourseDelivery = AllFeatures['offSiteWatercourseCreations'][number] | AllFeatures['offSiteWatercourseEnhancements'][number];
+
+export type HabitatCreationTimingState = HabitatCreation['creationTiming'];
+export type EnhancementConditionState = (HedgerowEnhancement | WatercourseEnhancement)['enhancementCondition'];
+export type WatercourseEnhancementMovementState = WatercourseEnhancement['enhancementMovement'];
+export type HedgerowOffSiteAvailability = OffSiteHedgerowDelivery['hedgerowOffSiteAvailability'];
+export type HedgerowEnhancementQuality = HedgerowEnhancement['hedgerowEnhancementQuality'];
+export type HedgerowBaselineAvailability = (
+    AllFeatures['onSiteHedgerowBaselines'][number] | AllFeatures['offSiteHedgerowBaselines'][number]
+)['hedgerowBaselineAvailability'];
+export type LinearTimingAvailability = (HedgerowEnhancement | WatercourseCreation | WatercourseEnhancement)['linearTimingAvailability'];
+export type WatercourseBaselineAvailability = (
+    AllFeatures['onSiteWatercourseBaselines'][number] | AllFeatures['offSiteWatercourseBaselines'][number]
+)['watercourseBaselineAvailability'];
+export type WatercourseOffSiteAvailability = OffSiteWatercourseDelivery['watercourseOffSiteAvailability'];
+export type { WatercourseEnhancementUnitReview } from './watercourseAvailability';
 export type {
     AreaBaselineAvailability,
     AreaCreationAvailability,
