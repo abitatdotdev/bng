@@ -20,7 +20,7 @@ import {
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
 import { calculateAreaEnhancementTimingEvidence } from '../areaTiming';
-import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
+import { lookupFinalTimeToTargetMultiplier } from '../areaTiming';
 
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';

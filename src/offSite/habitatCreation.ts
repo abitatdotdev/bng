@@ -16,20 +16,23 @@ import {
 } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
+import { calculateDifficultyData, calculateStandardOrAdjustedTimeToTarget } from '../areaCreationCalculations';
 import {
-    calculateDifficultyData,
-    calculateStandardOrAdjustedTimeToTarget,
-} from '../onSite/habitatCreation';
-import {
-    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon,
+    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionShared,
     lookupFinalTimeToTargetMultiplier,
-    enrichWithSpatialRisk,
-} from './common';
+} from '../areaTiming';
+import { enrichWithSpatialRisk } from './spatialRisk';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
 import { applyOffSiteHabitatCreationAvailability } from './habitatAvailability';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 
-export { calculateDifficultyData } from '../onSite/habitatCreation';
+export {
+    calculateAppliedDifficultyMultiplier,
+    calculateDifficultyData,
+    calculateDifficultyMultiplierApplied,
+    calculateFinalDifficultyOfCreation,
+    calculateStandardOrAdjustedTimeToTarget,
+} from '../areaCreationCalculations';
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -66,7 +69,7 @@ const calculateFinalTimeToTargetCondition = <
 >(
     data: Data,
 ) => {
-    return calculateFinalTimeToTargetConditionCommon({
+    return calculateFinalTimeToTargetConditionShared({
         ...data,
         standardOrAdjustedTimeToTarget: calculateStandardOrAdjustedTimeToTarget(
             data.habitatCreationInAdvance === '30+' ? 30 : data.habitatCreationInAdvance,

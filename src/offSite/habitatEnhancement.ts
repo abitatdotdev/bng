@@ -19,12 +19,12 @@ import {
 } from './habitatBaseline';
 import { habitatByBroadAndType, type Habitat } from '../habitats';
 import { difficulty } from '../difficulty';
-import { calculateAreaEnhancementTimingEvidence } from '../areaTiming';
 import {
-    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionCommon,
+    calculateAreaEnhancementTimingEvidence,
+    calculateFinalTimeToTargetCondition as calculateFinalTimeToTargetConditionShared,
     lookupFinalTimeToTargetMultiplier,
-    enrichWithSpatialRisk,
-} from './common';
+} from '../areaTiming';
+import { enrichWithSpatialRisk } from './spatialRisk';
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 import { applyOffSiteHabitatEnhancementAvailability, calculateOffSiteAreaEnhancementMovement } from './habitatAvailability';
@@ -237,7 +237,7 @@ const calculateFinalTimeToTargetCondition = <
 >(
     data: Data,
 ) => {
-    return calculateFinalTimeToTargetConditionCommon({
+    return calculateFinalTimeToTargetConditionShared({
         ...data,
         standardOrAdjustedTimeToTargetCondition: calculateAreaEnhancementTimingEvidence(
             data.timeToTargetCondition,

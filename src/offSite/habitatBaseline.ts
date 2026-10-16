@@ -16,7 +16,7 @@ import {
 } from '../schemaUtils';
 import { spatialRiskCategorySchema } from '../spatialRisk';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
-import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './common';
+import { enrichWithSpatialRisk as enrichWithSpatialRiskMultiplier } from './spatialRisk';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
 import {
     calculateBaselineUnits,
