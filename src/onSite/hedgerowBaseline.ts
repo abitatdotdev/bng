@@ -106,13 +106,7 @@ export function enrichWithHedgerowData<
 >(data: Data) {
     const hedgerow = allHedgerows[data.habitatType];
 
-    // Get condition score - hedgerows use simplified scoring
-    // Based on the metric: Good = 3, Moderate = 2, Poor = 1
-    const conditionScoreMap: Record<HedgerowCondition, number> = {
-        Good: 3,
-        Moderate: 2,
-        Poor: 1,
-    };
+    const conditionScore = hedgerow.conditions[data.condition];
 
     const strategicSignificance = getStrategicSignificance(data.strategicSignificance);
 
@@ -121,8 +115,8 @@ export function enrichWithHedgerowData<
         distinctiveness: hedgerow.distinctivenessCategory,
         distinctivenessScore: hedgerow.distinctivenessScore,
         distinctivenessScoreDecimal: toDecimal(hedgerow.distinctivenessScore),
-        conditionScore: conditionScoreMap[data.condition],
-        conditionScoreDecimal: toDecimal(conditionScoreMap[data.condition]),
+        conditionScore,
+        conditionScoreDecimal: toDecimal(conditionScore),
         strategicSignificanceCategory: strategicSignificance.significance,
         strategicSignificanceMultiplier: strategicSignificance.multiplier,
         strategicSignificanceMultiplierDecimal: toDecimal(strategicSignificance.multiplier),

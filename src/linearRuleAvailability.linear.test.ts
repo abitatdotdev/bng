@@ -3,17 +3,67 @@ import { Decimal } from './decimal';
 import { onSiteWatercourseCreationUncheckedSchema } from './onSite/watercourseCreation';
 import * as v from 'valibot';
 import {
+    addLinearTimingGuidance,
     applyHedgerowBaselineAvailability,
+    applyHedgerowEnhancementQuality,
     applyHedgerowOffSiteAvailability,
     applyLinearTimingAvailability,
+    applyWatercourseCreationTimingAvailability,
     applyWatercourseEnhancementUnitReview,
     applyWatercourseBaselineAvailability,
 } from './linearRuleAvailability';
 
 describe('linear calculation availability', () => {
+    it('marks unchanged hedgerow quality unavailable and keeps improved quality numeric', () => {
+        const unchanged = applyHedgerowEnhancementQuality({
+            baseline: { habitatType: 'Species-rich native hedgerow with trees - associated with bank or ditch', condition: 'Moderate', distinctivenessScore: 8, conditionScore: 2 },
+            habitatType: 'Species-rich native hedgerow with trees - associated with bank or ditch',
+            condition: 'Moderate',
+            distinctivenessScore: 8,
+            conditionScore: 2,
+            timeToTargetCondition: 4,
+            temporalMultiplier: 1.2,
+            appliedDifficultyMultiplier: 0.8,
+            finalDifficultyOfEnhancement: 'Low',
+            hedgerowUnitsDelivered: 3,
+            hedgerowUnitsDeliveredDecimal: new Decimal(3),
+            hedgerowUnitsDeliveredWithSpatialRisk: 2.4,
+            hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal('2.4'),
+        }, true);
+        expect(unchanged.hedgerowEnhancementQuality.status).toBe('no-enhancement');
+        expect(unchanged.hedgerowEnhancementQuality.unavailableResults).toMatchObject({
+            timeToTargetCondition: 'check-data',
+            temporalMultiplier: 'check-data',
+            appliedDifficultyMultiplier: 'check-data',
+            finalDifficultyOfEnhancement: 'check-data',
+            hedgerowUnitsDelivered: 'blank',
+            hedgerowUnitsDeliveredWithSpatialRisk: 'blank',
+        });
+        expect(unchanged.hedgerowUnitsDelivered).toBe(0);
+        expect(unchanged.hedgerowUnitsDeliveredDecimal.isZero()).toBe(true);
+        expect(unchanged.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
+        expect(unchanged.hedgerowUnitsDeliveredWithSpatialRiskDecimal.isZero()).toBe(true);
+        expect(unchanged.timeToTargetCondition).toBe(4);
+        expect(unchanged.temporalMultiplier).toBe(1.2);
+
+        const improved = applyHedgerowEnhancementQuality({
+            ...unchanged,
+            baseline: { ...unchanged.baseline, condition: 'Poor', conditionScore: 1 },
+            condition: 'Good',
+            conditionScore: 3,
+            hedgerowUnitsDelivered: 3,
+            hedgerowUnitsDeliveredDecimal: new Decimal(3),
+            hedgerowUnitsDeliveredWithSpatialRisk: 2.4,
+            hedgerowUnitsDeliveredWithSpatialRiskDecimal: new Decimal('2.4'),
+        }, true);
+        expect(improved.hedgerowEnhancementQuality.status).toBe('allowed');
+        expect(improved.hedgerowUnitsDelivered).toBe(3);
+        expect(improved.hedgerowUnitsDeliveredWithSpatialRisk).toBe(2.4);
+    });
+
     it('keeps off-site raw and spatial hedge results independent', () => {
         const base = {
-            spatialRiskCategory: 'Low',
+            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site' as const,
             hedgerowUnitsDelivered: 4,
             hedgerowUnitsDeliveredDecimal: new Decimal(4),
             hedgerowUnitsDeliveredWithSpatialRisk: 3,
@@ -27,6 +77,29 @@ describe('linear calculation availability', () => {
         const missingRisk = applyHedgerowOffSiteAvailability({ ...base, offSiteReferenceNumber: 'REF-1', spatialRiskCategory: undefined });
         expect(missingRisk.hedgerowUnitsDelivered).toBe(0);
         expect(missingRisk.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
+    });
+
+    it('selects timing guidance by the workbook precedence for standard, advance and delay', () => {
+        const source = { standardTimeToTargetCondition: 5 };
+        expect(addLinearTimingGuidance(source).standardOrAdjustedTimeToTargetCondition)
+            .toBe('Standard time to target condition applied');
+        expect(addLinearTimingGuidance({ ...source, habitatCreatedInAdvance: 5 })
+            .standardOrAdjustedTimeToTargetCondition)
+            .toBe('Check details - Is there evidence that habitat has reached target condition? ⚠');
+        expect(addLinearTimingGuidance({ ...source, habitatCreatedInAdvance: 2 })
+            .standardOrAdjustedTimeToTargetCondition)
+            .toBe('Check details - Is there evidence habitat creation started/in place? ⚠');
+        expect(addLinearTimingGuidance({ ...source, delayInStarting: 1 })
+            .standardOrAdjustedTimeToTargetCondition)
+            .toBe('Check details- Delay in starting habitat in required condition? ⚠');
+        expect(addLinearTimingGuidance({ ...source, habitatCreatedInAdvance: 1, delayInStarting: 1 })
+            .standardOrAdjustedTimeToTargetCondition)
+            .toBe('Error -both advance and delayed habitat creation ▲');
+        expect(addLinearTimingGuidance({ ...source, habitatCreatedInAdvance: '30+' })
+            .standardOrAdjustedTimeToTargetCondition)
+            .toBe('Check details - Is there evidence that habitat has reached target condition? ⚠');
+        expect(addLinearTimingGuidance({ timeToTargetCondition: 'N/A' }))
+            .not.toHaveProperty('standardOrAdjustedTimeToTargetCondition');
     });
 
     it('gates numeric hedge conflicts while preserving sentinel and overflow results', () => {
@@ -57,6 +130,31 @@ describe('linear calculation availability', () => {
         expect(result.watercourseUnitsDeliveredWithSpatialRisk).toBe(0);
     });
 
+    it('zeros only the conflicted water creation contribution and keeps allowed sentinels', () => {
+        const source = {
+            habitatCreatedInAdvance: 1 as const,
+            delayInStarting: 1 as const,
+            unitsDelivered: 6,
+            unitsDeliveredDecimal: new Decimal(6),
+            netUnitChangeWithSpatialRisk: 4.5,
+            netUnitChangeWithSpatialRiskDecimal: new Decimal('4.5'),
+        };
+        const conflict = applyWatercourseCreationTimingAvailability(source, true);
+        expect(conflict.unitsDelivered).toBe(0);
+        expect(conflict.unitsDeliveredDecimal.isZero()).toBe(true);
+        expect(conflict.netUnitChangeWithSpatialRisk).toBe(0);
+        expect(conflict.linearTimingAvailability.unavailableResults.appliedDifficulty).toBe('check-data');
+
+        const sentinel = applyWatercourseCreationTimingAvailability({
+            ...source,
+            habitatCreatedInAdvance: 0,
+            delayInStarting: '30+',
+        }, true);
+        expect(sentinel.unitsDelivered).toBe(6);
+        expect(sentinel.netUnitChangeWithSpatialRisk).toBe(4.5);
+        expect(sentinel.linearTimingAvailability.status).toBe('allowed');
+    });
+
     it('keeps water creation difficulty candidates while marking only the guidance result unavailable', () => {
         const result = v.parse(onSiteWatercourseCreationUncheckedSchema, {
             watercourseType: 'Ditches',
@@ -82,9 +180,10 @@ describe('linear calculation availability', () => {
 
     it('uses exact Decimal lengths and keeps allocation result gates selective', () => {
         const base = {
-            watercourseType: 'Priority habitat',
-            watercourseEncroachment: 'No encroachment',
-            riparianEncroachment: 'No encroachment',
+            watercourseType: 'Priority habitat' as const,
+            condition: 'Good' as const,
+            watercourseEncroachment: 'No Encroachment' as const,
+            riparianEncroachment: 'No Encroachment/ No Encroachment' as const,
             length: 1,
             lengthDecimal: new Decimal(1),
             lengthRetained: 0,
@@ -159,9 +258,9 @@ describe('linear calculation availability', () => {
 
         const invalidEncroachment = applyWatercourseBaselineAvailability({
             ...base,
-            watercourseType: 'Culvert',
-            watercourseEncroachment: 'No encroachment',
-            riparianEncroachment: 'No encroachment',
+            watercourseType: 'Culvert' as const,
+            watercourseEncroachment: 'No Encroachment',
+            riparianEncroachment: 'No Encroachment/ No Encroachment',
             lengthLost: 0.5,
             lengthLostDecimal: new Decimal('0.5'),
             unitsLost: 4,
@@ -173,6 +272,8 @@ describe('linear calculation availability', () => {
 
     it('reports hedgerow baseline allocation without erasing row candidates', () => {
         const result = applyHedgerowBaselineAvailability({
+            habitatType: 'Species-rich native hedgerow',
+            condition: 'Good',
             length: 1,
             lengthDecimal: new Decimal(1),
             lengthRetained: 2,
@@ -183,6 +284,34 @@ describe('linear calculation availability', () => {
         });
         expect(result.hedgerowBaselineAvailability.status).toBe('over-allocated');
         expect(result.unitsRetained).toBe(8);
+    });
+
+    it('distinguishes missing off-site risk blanks from missing-reference errors', () => {
+        const row = {
+            habitatType: 'Species-rich native hedgerow' as const,
+            condition: 'Good' as const,
+            length: 1,
+            lengthDecimal: new Decimal(1),
+            lengthRetained: 0.2,
+            lengthRetainedDecimal: new Decimal('0.2'),
+            lengthEnhanced: 0,
+            lengthEnhancedDecimal: new Decimal(0),
+            unitsLost: 0.8,
+            unitsLostDecimal: new Decimal('0.8'),
+        };
+        const missingRisk = applyHedgerowBaselineAvailability(row, true);
+        expect(missingRisk.hedgerowBaselineAvailability.missingSpatialRisk).toBe(true);
+        expect(missingRisk.hedgerowBaselineAvailability.unavailableResults.unitsLost).toBe('blank');
+        expect(missingRisk.unitsLost).toBe(0);
+        expect(missingRisk.hedgerowBaselineAvailability.unitsLostError).toBe(false);
+
+        const missingReference = applyHedgerowBaselineAvailability({
+            ...row,
+            spatialRiskCategory: 'Compensation inside LPA boundary or NCA of impact site' as const,
+        }, true);
+        expect(missingReference.hedgerowBaselineAvailability.missingOffSiteReference).toBe(true);
+        expect(missingReference.hedgerowBaselineAvailability.unavailableResults.unitsLost).toBe('check-data');
+        expect(missingReference.hedgerowBaselineAvailability.unitsLostError).toBe(true);
     });
 
     it('compares watercourse delivery against the workbook baseline requirement without changing delivery', () => {

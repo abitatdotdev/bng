@@ -1,6 +1,16 @@
 import { Decimal } from './decimal';
+import type { HedgerowCondition } from './hedgerowCondition';
+import type { Hedgerow, HedgerowLabel } from './hedgerows';
+import type { SpatialRiskCategory, WatercourseSpatialRiskCategory } from './spatialRisk';
+import type { Watercourse } from './watercourses';
+import type { WatercourseType } from './watercourseType';
+import type { WatercourseEncroachment, RiparianEncroachment } from './watercourseEncroachment';
+import type { WatercourseCondition } from './watercourseCondition';
+import type { EnhancementConditionState, WatercourseEnhancementMovementState } from './calculationAvailability';
 
 type Availability = 'blank' | 'check-data';
+type HedgerowDistinctivenessScore = Hedgerow['distinctivenessScore'];
+type HedgerowConditionScore = Hedgerow['conditions'][HedgerowCondition];
 
 export type HedgerowOffSiteAvailability = {
     rule: 'hedgerow-off-site-availability';
@@ -24,6 +34,8 @@ export type LinearTimingAvailability = {
 export type WatercourseCreationTimingAvailability = Omit<LinearTimingAvailability, 'unavailableResults'> & {
     unavailableResults: LinearTimingAvailability['unavailableResults'] & {
         appliedDifficulty?: Availability;
+        unitsDelivered?: Availability;
+        netUnitChangeWithSpatialRisk?: Availability;
     };
 };
 
@@ -51,6 +63,15 @@ export type WatercourseEnhancementUnitReview = {
     deficitDecimal: Decimal;
 };
 
+type EnhancementUnavailableResults = Partial<Record<
+    | 'watercourseUnitsDelivered'
+    | 'unitsDelivered'
+    | 'hedgerowUnitsDelivered'
+    | 'watercourseUnitsDeliveredWithSpatialRisk'
+    | 'hedgerowUnitsDeliveredWithSpatialRisk',
+    Availability
+>>;
+
 export type HedgerowBaselineAvailability = {
     rule: 'hedgerow-baseline-allocation';
     status: 'allowed' | 'over-allocated';
@@ -70,38 +91,90 @@ export type LinearTimingGuidance =
     | 'Check details- Delay in starting habitat in required condition? ⚠'
     | 'Standard time to target condition applied';
 
-function zeroResults<T extends object>(data: T, fields: readonly string[]): T {
-    const result = { ...data } as Record<string, unknown>;
-    for (const field of fields) {
-        result[field] = 0;
-        result[`${field}Decimal`] = new Decimal(0);
+const ZEROABLE_RESULT_FIELDS = [
+    ['lengthLost', 'lengthLostDecimal'],
+    ['unitsLost', 'unitsLostDecimal'],
+    ['totalHedgerowUnits', 'totalHedgerowUnitsDecimal'],
+    ['totalHedgerowUnitsSRM', 'totalHedgerowUnitsSRMDecimal'],
+    ['unitsRetainedWithSRM', 'unitsRetainedWithSRMDecimal'],
+    ['hedgerowUnitsDelivered', 'hedgerowUnitsDeliveredDecimal'],
+    ['hedgerowUnitsDeliveredWithSpatialRisk', 'hedgerowUnitsDeliveredWithSpatialRiskDecimal'],
+    ['totalWatercourseUnits', 'totalWatercourseUnitsDecimal'],
+    ['totalWatercourseUnitsSRM', 'totalWatercourseUnitsSRMDecimal'],
+    ['unitsRetained', 'unitsRetainedDecimal'],
+    ['unitsEnhanced', 'unitsEnhancedDecimal'],
+    ['vhdhBespokeCompensationUnits', 'vhdhBespokeCompensationUnitsDecimal'],
+    ['watercourseUnitsDelivered', 'watercourseUnitsDeliveredDecimal'],
+    ['watercourseUnitsDeliveredWithSpatialRisk', 'watercourseUnitsDeliveredWithSpatialRiskDecimal'],
+    ['unitsDelivered', 'unitsDeliveredDecimal'],
+    ['netUnitChangeWithSpatialRisk', 'netUnitChangeWithSpatialRiskDecimal'],
+] as const;
+
+type ZeroableResult = (typeof ZEROABLE_RESULT_FIELDS)[number][0];
+type ZeroableResultPair = {
+    [Field in ZeroableResult]: readonly [Field, `${Field}Decimal`];
+}[ZeroableResult];
+const ZEROABLE_RESULT_PAIRS: readonly ZeroableResultPair[] = ZEROABLE_RESULT_FIELDS;
+type AvailabilityResult =
+    | ZeroableResult
+    | 'timeToTargetCondition'
+    | 'finalTimeToTargetCondition'
+    | 'temporalMultiplier'
+    | 'appliedDifficultyMultiplier'
+    | 'finalDifficultyOfEnhancement'
+    | 'appliedDifficulty';
+type AvailabilityMap = Partial<Record<AvailabilityResult, Availability>>;
+
+function zeroUnavailableResults<T extends object>(data: T, unavailableResults: AvailabilityMap): T {
+    const result = { ...data };
+    for (const [field, decimalField] of ZEROABLE_RESULT_PAIRS) {
+        if (unavailableResults[field] === undefined) continue;
+        Object.assign(result, { [field]: 0, [decimalField]: new Decimal(0) });
     }
-    return result as T;
+    return result;
 }
 
+type TimingYear = number | '30+';
+type TimingStandard = TimingYear | 'N/A' | 'Not Possible ▲' | 'Not possible ▲';
+type TimingGuidanceInput = {
+    standardTimeToTargetCondition?: TimingStandard;
+    standardTimeToTarget?: TimingStandard;
+    timeToTargetCondition?: TimingStandard;
+    habitatCreatedInAdvance?: TimingYear;
+    hedgerowEnhancedInAdvance?: TimingYear;
+    watercourseEnhancedInAdvance?: TimingYear;
+    delayInStartingHabitatCreation?: TimingYear;
+    delayInStarting?: TimingYear;
+    hedgerowEnhancedDelay?: TimingYear;
+    watercourseEnhancedDelay?: TimingYear;
+};
+
 export function addLinearTimingGuidance<T extends object>(
-    data: T,
+    data: T & TimingGuidanceInput,
 ): T & { standardOrAdjustedTimeToTargetCondition?: LinearTimingGuidance } {
-    const fields = data as Record<string, unknown>;
-    const standard = fields.standardTimeToTargetCondition ?? fields.standardTimeToTarget ?? fields.timeToTargetCondition;
-    if (standard === undefined || standard === 'N/A' || typeof standard !== 'number' && standard !== '30+') return data;
-    const advance = fields.habitatCreatedInAdvance ?? fields.hedgerowEnhancedInAdvance ?? fields.watercourseEnhancedInAdvance ?? 0;
-    const delay = fields.delayInStartingHabitatCreation ?? fields.delayInStarting ?? fields.hedgerowEnhancedDelay ?? fields.watercourseEnhancedDelay ?? 0;
-    const positive = (value: unknown) => value === '30+' || typeof value === 'number' && value > 0;
-    let guidance: LinearTimingGuidance = 'Standard time to target condition applied';
-    if (positive(advance) && positive(delay)) {
-        guidance = 'Error -both advance and delayed habitat creation ▲';
-    } else if (advance === '30+' || (typeof standard === 'number' && typeof advance === 'number' && advance >= standard)) {
-        guidance = 'Check details - Is there evidence that habitat has reached target condition? ⚠';
-    } else if (positive(advance)) {
-        guidance = 'Check details - Is there evidence habitat creation started/in place? ⚠';
-    } else if (positive(delay)) {
-        guidance = 'Check details- Delay in starting habitat in required condition? ⚠';
-    }
+    const standard = data.standardTimeToTargetCondition ?? data.standardTimeToTarget ?? data.timeToTargetCondition;
+    if (standard === undefined || (typeof standard !== 'number' && standard !== '30+')) return data;
+    const advance = data.habitatCreatedInAdvance ?? data.hedgerowEnhancedInAdvance ?? data.watercourseEnhancedInAdvance ?? 0;
+    const delay = data.delayInStartingHabitatCreation ?? data.delayInStarting ?? data.hedgerowEnhancedDelay ?? data.watercourseEnhancedDelay ?? 0;
+    const guidance = linearTimingGuidance(standard, advance, delay);
     return { ...data, standardOrAdjustedTimeToTargetCondition: guidance };
 }
 
-export function applyHedgerowBaselineAvailability<T extends {
+function linearTimingGuidance(standard: TimingYear, advance: TimingYear, delay: TimingYear): LinearTimingGuidance {
+    const advanceIsPositive = advance === '30+' || advance > 0;
+    const delayIsPositive = delay === '30+' || delay > 0;
+    if (advanceIsPositive && delayIsPositive) return 'Error -both advance and delayed habitat creation ▲';
+    if (advance === '30+' || (typeof advance === 'number' && typeof standard === 'number' && advance >= standard)) {
+        return 'Check details - Is there evidence that habitat has reached target condition? ⚠';
+    }
+    if (advanceIsPositive) return 'Check details - Is there evidence habitat creation started/in place? ⚠';
+    if (delayIsPositive) return 'Check details- Delay in starting habitat in required condition? ⚠';
+    return 'Standard time to target condition applied';
+}
+
+export function applyHedgerowBaselineAvailability<T extends object>(data: T & {
+    habitatType: HedgerowLabel;
+    condition: HedgerowCondition;
     length: number;
     lengthDecimal: Decimal;
     lengthRetained: number;
@@ -118,23 +191,18 @@ export function applyHedgerowBaselineAvailability<T extends {
     totalHedgerowUnitsSRMDecimal?: Decimal;
     unitsRetainedWithSRM?: number;
     unitsRetainedWithSRMDecimal?: Decimal;
-    spatialRiskCategory?: string;
+    spatialRiskCategory?: SpatialRiskCategory;
     offSiteReferenceNumber?: string;
-}>(data: T, offSite = false): T & { hedgerowBaselineAvailability: HedgerowBaselineAvailability } {
+}, offSite = false): T & { hedgerowBaselineAvailability: HedgerowBaselineAvailability } {
     const overAllocated = data.lengthRetainedDecimal.plus(data.lengthEnhancedDecimal).gt(data.lengthDecimal);
     const missingSpatialRisk = offSite && !data.spatialRiskCategory;
     const missingOffSiteReference = offSite && !!data.spatialRiskCategory && !data.offSiteReferenceNumber;
-    const unavailableResults: HedgerowBaselineAvailability['unavailableResults'] = {
-        ...(overAllocated ? { lengthLost: 'check-data' as const, unitsLost: 'check-data' as const } : {}),
-        ...(offSite && overAllocated
-            ? { totalHedgerowUnits: 'check-data' as const }
-            : offSite && (missingSpatialRisk || missingOffSiteReference)
-              ? { totalHedgerowUnits: 'blank' as const }
-              : {}),
-        ...(missingSpatialRisk ? { totalHedgerowUnitsSRM: 'blank' as const, unitsRetainedWithSRM: 'blank' as const } : {}),
-        ...(missingOffSiteReference ? { unitsLost: 'check-data' as const } : {}),
-        ...(missingSpatialRisk ? { unitsLost: 'blank' as const } : {}),
-    };
+    const unavailableResults = hedgerowBaselineUnavailableResults(
+        overAllocated,
+        offSite,
+        missingSpatialRisk,
+        missingOffSiteReference,
+    );
     const state: HedgerowBaselineAvailability = {
         rule: 'hedgerow-baseline-allocation',
         status: overAllocated ? 'over-allocated' : 'allowed',
@@ -146,20 +214,42 @@ export function applyHedgerowBaselineAvailability<T extends {
         ...(overAllocated ? { message: 'Retained and enhanced lengths cannot exceed total length' as const } : {}),
         unavailableResults,
     };
-    const normalized = overAllocated
-        ? zeroResults({ ...data, hedgerowBaselineAvailability: state }, ['lengthLost', 'unitsLost'])
-        : { ...data, hedgerowBaselineAvailability: state };
-    return zeroResults(normalized, Object.keys(unavailableResults).filter((field) => field !== 'lengthLost'));
+    const normalized = { ...data, hedgerowBaselineAvailability: state };
+    return zeroUnavailableResults(normalized, unavailableResults);
 }
 
-export function applyHedgerowOffSiteAvailability<T extends {
-    spatialRiskCategory?: string;
+function hedgerowBaselineUnavailableResults(
+    overAllocated: boolean,
+    offSite: boolean,
+    missingSpatialRisk: boolean,
+    missingOffSiteReference: boolean,
+): HedgerowBaselineAvailability['unavailableResults'] {
+    const unavailableResults: HedgerowBaselineAvailability['unavailableResults'] = {};
+    if (overAllocated) {
+        unavailableResults.lengthLost = 'check-data';
+        unavailableResults.unitsLost = 'check-data';
+    }
+    if (offSite && overAllocated) unavailableResults.totalHedgerowUnits = 'check-data';
+    if (offSite && !overAllocated && (missingSpatialRisk || missingOffSiteReference)) {
+        unavailableResults.totalHedgerowUnits = 'blank';
+    }
+    if (missingSpatialRisk) {
+        unavailableResults.totalHedgerowUnitsSRM = 'blank';
+        unavailableResults.unitsRetainedWithSRM = 'blank';
+        unavailableResults.unitsLost = 'blank';
+    }
+    if (missingOffSiteReference) unavailableResults.unitsLost = 'check-data';
+    return unavailableResults;
+}
+
+export function applyHedgerowOffSiteAvailability<T extends object>(data: T & {
+    spatialRiskCategory?: SpatialRiskCategory;
     offSiteReferenceNumber?: string;
     hedgerowUnitsDelivered: number;
     hedgerowUnitsDeliveredDecimal: Decimal;
     hedgerowUnitsDeliveredWithSpatialRisk?: number;
     hedgerowUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
-}>(data: T): T & { hedgerowOffSiteAvailability: HedgerowOffSiteAvailability } {
+}): T & { hedgerowOffSiteAvailability: HedgerowOffSiteAvailability } {
     const unavailableResults: HedgerowOffSiteAvailability['unavailableResults'] = {};
     if (!data.spatialRiskCategory) {
         unavailableResults.hedgerowUnitsDelivered = 'blank';
@@ -168,18 +258,25 @@ export function applyHedgerowOffSiteAvailability<T extends {
         unavailableResults.hedgerowUnitsDelivered = 'blank';
     }
     const state = { rule: 'hedgerow-off-site-availability' as const, unavailableResults };
-    return zeroResults({ ...data, hedgerowOffSiteAvailability: state }, Object.keys(unavailableResults));
+    return zeroUnavailableResults({ ...data, hedgerowOffSiteAvailability: state }, unavailableResults);
 }
 
-export function applyHedgerowEnhancementQuality<T extends {
-    baseline: { distinctivenessScore: number; conditionScore: number };
-    distinctivenessScore: number;
-    conditionScore: number;
+export function applyHedgerowEnhancementQuality<T extends object>(data: T & {
+    baseline: {
+        habitatType: HedgerowLabel;
+        condition: HedgerowCondition;
+        distinctivenessScore: HedgerowDistinctivenessScore;
+        conditionScore: HedgerowConditionScore;
+    };
+    habitatType: HedgerowLabel;
+    condition: HedgerowCondition;
+    distinctivenessScore: HedgerowDistinctivenessScore;
+    conditionScore: HedgerowConditionScore;
     hedgerowUnitsDelivered: number;
     hedgerowUnitsDeliveredDecimal: Decimal;
     hedgerowUnitsDeliveredWithSpatialRisk?: number;
     hedgerowUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
-}>(data: T, offSite: boolean): T & { hedgerowEnhancementQuality: HedgerowEnhancementQuality } {
+}, offSite: boolean): T & { hedgerowEnhancementQuality: HedgerowEnhancementQuality } {
     const noEnhancement = data.baseline.distinctivenessScore === data.distinctivenessScore &&
         data.baseline.conditionScore === data.conditionScore;
     const unavailableResults: HedgerowEnhancementQuality['unavailableResults'] = noEnhancement ? {
@@ -197,12 +294,13 @@ export function applyHedgerowEnhancementQuality<T extends {
         ...(noEnhancement ? { message: 'Error - No enhancement ▲' as const } : {}),
         unavailableResults,
     };
-    return zeroResults({ ...data, hedgerowEnhancementQuality: state }, Object.keys(unavailableResults).filter((key) => key.startsWith('hedgerowUnits')));
+    return zeroUnavailableResults({ ...data, hedgerowEnhancementQuality: state }, unavailableResults);
 }
 
-export function applyLinearTimingAvailability<T extends {
-    timeToTargetCondition?: number | string;
-    finalTimeToTargetCondition?: number | string;
+export function applyLinearTimingAvailability<T extends object>(
+    data: T & {
+    timeToTargetCondition?: TimingStandard;
+    finalTimeToTargetCondition?: TimingStandard;
     watercourseUnitsDelivered?: number;
     watercourseUnitsDeliveredDecimal?: Decimal;
     watercourseUnitsDeliveredWithSpatialRisk?: number;
@@ -211,8 +309,7 @@ export function applyLinearTimingAvailability<T extends {
     hedgerowUnitsDeliveredDecimal?: Decimal;
     hedgerowUnitsDeliveredWithSpatialRisk?: number;
     hedgerowUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
-}>(
-    data: T,
+    },
     kind: 'hedgerow' | 'watercourse',
     offSite: boolean,
     advance: number | '30+',
@@ -222,29 +319,44 @@ export function applyLinearTimingAvailability<T extends {
     const hedgeFinalIsAvailable =
         advance === '30+' || delay === '30+' || data.finalTimeToTargetCondition === '30+';
     const forbidden = bothPositive && (kind === 'watercourse' || !hedgeFinalIsAvailable);
-    const fields = kind === 'hedgerow'
-        ? ['hedgerowUnitsDelivered', ...(offSite ? ['hedgerowUnitsDeliveredWithSpatialRisk'] : [])]
-        : ['watercourseUnitsDelivered', ...(offSite ? ['watercourseUnitsDeliveredWithSpatialRisk'] : [])];
-    const unavailableResults: LinearTimingAvailability['unavailableResults'] = forbidden ? {
-        finalTimeToTargetCondition: 'check-data',
-        temporalMultiplier: 'check-data',
-        appliedDifficultyMultiplier: 'check-data',
-        ...(kind === 'hedgerow' ? { finalDifficultyOfEnhancement: 'check-data' as const } : {}),
-        ...Object.fromEntries(fields.map((field) => [field, 'blank' as const])),
-    } : {};
+    const unavailableResults: LinearTimingAvailability['unavailableResults'] = forbidden
+        ? timingUnavailableResults(kind, offSite)
+        : {};
     const state: LinearTimingAvailability = {
         rule: 'linear-timing-conflict',
         status: forbidden ? 'forbidden' : 'allowed',
         ...(forbidden ? { message: 'Error -both advance and delayed habitat creation ▲' as const } : {}),
         unavailableResults,
     };
-    return zeroResults({ ...data, linearTimingAvailability: state }, forbidden ? fields : []);
+    return zeroUnavailableResults({ ...data, linearTimingAvailability: state }, unavailableResults);
 }
 
-export function applyWatercourseBaselineAvailability<T extends {
-    watercourseType: string;
-    watercourseEncroachment: string;
-    riparianEncroachment: string;
+function timingUnavailableResults(kind: 'hedgerow' | 'watercourse', offSite: boolean): LinearTimingAvailability['unavailableResults'] {
+    const shared = {
+        finalTimeToTargetCondition: 'check-data' as const,
+        temporalMultiplier: 'check-data' as const,
+        appliedDifficultyMultiplier: 'check-data' as const,
+    };
+    if (kind === 'hedgerow') {
+        return {
+            ...shared,
+            finalDifficultyOfEnhancement: 'check-data',
+            hedgerowUnitsDelivered: 'blank',
+            ...(offSite ? { hedgerowUnitsDeliveredWithSpatialRisk: 'blank' as const } : {}),
+        };
+    }
+    return {
+        ...shared,
+        watercourseUnitsDelivered: 'blank',
+        ...(offSite ? { watercourseUnitsDeliveredWithSpatialRisk: 'blank' as const } : {}),
+    };
+}
+
+export function applyWatercourseBaselineAvailability<T extends object>(data: T & {
+    watercourseType: WatercourseType;
+    condition: WatercourseCondition;
+    watercourseEncroachment: WatercourseEncroachment;
+    riparianEncroachment: RiparianEncroachment;
     length: number;
     lengthDecimal?: Decimal;
     lengthRetained: number;
@@ -267,11 +379,12 @@ export function applyWatercourseBaselineAvailability<T extends {
     vhdhBespokeCompensationUnitsDecimal: Decimal;
     unitsRetainedWithSRM?: number;
     unitsRetainedWithSRMDecimal?: Decimal;
-}>(data: T): T & { watercourseBaselineAvailability: WatercourseBaselineAvailability } {
-    const isCulvert = data.watercourseType === 'Culvert';
-    const invalidEncroachment =
-        (isCulvert && (data.watercourseEncroachment !== 'N/A - Culvert' || data.riparianEncroachment !== 'N/A - Culvert')) ||
-        (!isCulvert && (data.watercourseEncroachment === 'N/A - Culvert' || data.riparianEncroachment === 'N/A - Culvert'));
+}): T & { watercourseBaselineAvailability: WatercourseBaselineAvailability } {
+    const invalidEncroachment = hasInvalidWatercourseEncroachment(
+        data.watercourseType,
+        data.watercourseEncroachment,
+        data.riparianEncroachment,
+    );
     const length = new Decimal(data.lengthDecimal ?? data.length);
     const lengthRetained = new Decimal(data.lengthRetainedDecimal ?? data.lengthRetained);
     const lengthEnhanced = new Decimal(data.lengthEnhancedDecimal ?? data.lengthEnhanced);
@@ -279,75 +392,124 @@ export function applyWatercourseBaselineAvailability<T extends {
     const splitAllocation = overAllocated && lengthRetained.gt(0) && lengthEnhanced.gt(0);
     const excessiveRetained = lengthRetained.gt(length);
     const unitsLostUnavailable = excessiveRetained || splitAllocation;
-    const unavailableResults: WatercourseBaselineAvailability['unavailableResults'] = invalidEncroachment
-        ? { totalWatercourseUnits: 'blank', ...(data.totalWatercourseUnitsSRM !== undefined ? { totalWatercourseUnitsSRM: 'blank' as const } : {}), unitsRetained: 'blank', ...(data.unitsRetainedWithSRM !== undefined ? { unitsRetainedWithSRM: 'blank' as const } : {}), unitsEnhanced: 'blank', unitsLost: 'check-data', vhdhBespokeCompensationUnits: 'blank' }
-        : {
-            ...(splitAllocation ? { totalWatercourseUnits: 'blank' as const, ...(data.totalWatercourseUnitsSRM !== undefined ? { totalWatercourseUnitsSRM: 'blank' as const } : {}) } : {}),
-            ...(excessiveRetained ? { unitsRetained: 'blank' as const, ...(data.unitsRetainedWithSRM !== undefined ? { unitsRetainedWithSRM: 'blank' as const } : {}) } : {}),
-            ...(unitsLostUnavailable ? { unitsLost: 'check-data' as const } : {}),
-        };
+    const unavailableResults = watercourseBaselineUnavailableResults(
+        invalidEncroachment,
+        splitAllocation,
+        excessiveRetained,
+        unitsLostUnavailable,
+        data.totalWatercourseUnitsSRM !== undefined,
+        data.unitsRetainedWithSRM !== undefined,
+    );
     const lengthLost = Decimal.max(0, data.lengthLostDecimal);
     const normalized = { ...data, lengthLost: lengthLost.toNumber(), lengthLostDecimal: lengthLost };
     const state: WatercourseBaselineAvailability = { rule: 'watercourse-baseline-availability', invalidEncroachment, overAllocated, splitAllocation, retainedExceedsLength: excessiveRetained, unitsLostUnavailable, unavailableResults };
-    return zeroResults({ ...normalized, watercourseBaselineAvailability: state }, Object.keys(unavailableResults));
+    return zeroUnavailableResults({ ...normalized, watercourseBaselineAvailability: state }, unavailableResults);
 }
 
-export function applyWatercourseOffSiteAvailability<T extends {
+function hasInvalidWatercourseEncroachment(
+    watercourseType: WatercourseType,
+    watercourseEncroachment: WatercourseEncroachment,
+    riparianEncroachment: RiparianEncroachment,
+): boolean {
+    const isCulvert = watercourseType === 'Culvert';
+    const hasCulvertValue = watercourseEncroachment === 'N/A - Culvert' || riparianEncroachment === 'N/A - Culvert';
+    if (isCulvert) return watercourseEncroachment !== 'N/A - Culvert' || riparianEncroachment !== 'N/A - Culvert';
+    return hasCulvertValue;
+}
+
+function watercourseBaselineUnavailableResults(
+    invalidEncroachment: boolean,
+    splitAllocation: boolean,
+    retainedExceedsLength: boolean,
+    unitsLostUnavailable: boolean,
+    hasSpatialRiskTotal: boolean,
+    hasRetainedSpatialRiskTotal: boolean,
+): WatercourseBaselineAvailability['unavailableResults'] {
+    if (invalidEncroachment) {
+        return {
+            totalWatercourseUnits: 'blank',
+            ...(hasSpatialRiskTotal ? { totalWatercourseUnitsSRM: 'blank' as const } : {}),
+            unitsRetained: 'blank',
+            ...(hasRetainedSpatialRiskTotal ? { unitsRetainedWithSRM: 'blank' as const } : {}),
+            unitsEnhanced: 'blank',
+            unitsLost: 'check-data',
+            vhdhBespokeCompensationUnits: 'blank',
+        };
+    }
+
+    const unavailableResults: WatercourseBaselineAvailability['unavailableResults'] = {};
+    if (splitAllocation) {
+        unavailableResults.totalWatercourseUnits = 'blank';
+        if (hasSpatialRiskTotal) unavailableResults.totalWatercourseUnitsSRM = 'blank';
+    }
+    if (retainedExceedsLength) {
+        unavailableResults.unitsRetained = 'blank';
+        if (hasRetainedSpatialRiskTotal) unavailableResults.unitsRetainedWithSRM = 'blank';
+    }
+    if (unitsLostUnavailable) unavailableResults.unitsLost = 'check-data';
+    return unavailableResults;
+}
+
+export function applyWatercourseOffSiteAvailability<T extends object>(data: T & {
     offSiteReferenceNumber?: string;
     watercourseUnitsDelivered: number;
     watercourseUnitsDeliveredDecimal: Decimal;
     watercourseUnitsDeliveredWithSpatialRisk?: number;
     watercourseUnitsDeliveredWithSpatialRiskDecimal?: Decimal;
-}>(data: T): T & { watercourseOffSiteAvailability: WatercourseOffSiteAvailability } {
+}): T & { watercourseOffSiteAvailability: WatercourseOffSiteAvailability } {
     const unavailableResults: WatercourseOffSiteAvailability['unavailableResults'] = data.offSiteReferenceNumber
         ? {}
         : { watercourseUnitsDelivered: 'blank' };
     const state = { rule: 'watercourse-off-site-availability' as const, unavailableResults };
-    return zeroResults({ ...data, watercourseOffSiteAvailability: state }, Object.keys(unavailableResults));
+    return zeroUnavailableResults({ ...data, watercourseOffSiteAvailability: state }, unavailableResults);
 }
 
-export function applyWatercourseCreationTimingAvailability<T extends {
+export function applyWatercourseCreationTimingAvailability<T extends object>(data: T & {
     habitatCreatedInAdvance: number | '30+';
     delayInStarting: number | '30+';
     unitsDelivered: number;
     unitsDeliveredDecimal: Decimal;
     netUnitChangeWithSpatialRisk?: number;
     netUnitChangeWithSpatialRiskDecimal?: Decimal;
-}>(data: T, offSite: boolean): T & { linearTimingAvailability: WatercourseCreationTimingAvailability } {
+}, offSite: boolean): T & { linearTimingAvailability: WatercourseCreationTimingAvailability } {
     const forbidden = (data.habitatCreatedInAdvance === '30+' || data.habitatCreatedInAdvance > 0) &&
         (data.delayInStarting === '30+' || data.delayInStarting > 0);
-    const fields = ['unitsDelivered', ...(offSite ? ['netUnitChangeWithSpatialRisk'] : [])];
-    const unavailableResults: WatercourseCreationTimingAvailability['unavailableResults'] = forbidden ? {
-        finalTimeToTargetCondition: 'check-data',
-        temporalMultiplier: 'check-data',
-        appliedDifficulty: 'check-data',
-        ...Object.fromEntries(fields.map((field) => [field, 'blank' as const])),
-    } : {};
+    const unavailableResults: WatercourseCreationTimingAvailability['unavailableResults'] = forbidden
+        ? {
+              finalTimeToTargetCondition: 'check-data',
+              temporalMultiplier: 'check-data',
+              appliedDifficulty: 'check-data',
+              unitsDelivered: 'blank' as const,
+              ...(offSite ? { netUnitChangeWithSpatialRisk: 'blank' as const } : {}),
+          }
+        : {};
     const state: WatercourseCreationTimingAvailability = {
         rule: 'linear-timing-conflict',
         status: forbidden ? 'forbidden' : 'allowed',
         ...(forbidden ? { message: 'Error -both advance and delayed habitat creation ▲' as const } : {}),
         unavailableResults,
     };
-    return zeroResults({ ...data, linearTimingAvailability: state }, forbidden ? fields : []);
+    return zeroUnavailableResults({ ...data, linearTimingAvailability: state }, unavailableResults);
 }
 
-export function applyWatercourseCreationReferenceAvailability<T extends {
+export function applyWatercourseCreationReferenceAvailability<T extends object>(data: T & {
     offSiteReferenceNumber?: string;
     unitsDelivered: number;
     unitsDeliveredDecimal: Decimal;
     netUnitChangeWithSpatialRisk?: number;
     netUnitChangeWithSpatialRiskDecimal?: Decimal;
-}>(data: T): T & { watercourseOffSiteAvailability: WatercourseOffSiteAvailability } {
+}): T & { watercourseOffSiteAvailability: WatercourseOffSiteAvailability } {
     const unavailableResults: WatercourseOffSiteAvailability['unavailableResults'] = data.offSiteReferenceNumber
         ? {}
         : { unitsDelivered: 'blank' };
     const state = { rule: 'watercourse-off-site-availability' as const, unavailableResults };
-    return zeroResults({ ...data, watercourseOffSiteAvailability: state }, ['unitsDelivered'].filter((field) => unavailableResults[field as 'unitsDelivered']));
+    return zeroUnavailableResults({ ...data, watercourseOffSiteAvailability: state }, unavailableResults);
 }
 
-export function applyWatercourseEnhancementUnitReview<T extends {
+export function applyWatercourseEnhancementUnitReview<T extends object>(data: T & {
     baseline: {
+        watercourseType?: WatercourseType;
+        condition?: WatercourseCondition;
         length: number;
         lengthDecimal?: Decimal;
         lengthRetained: number;
@@ -364,23 +526,21 @@ export function applyWatercourseEnhancementUnitReview<T extends {
             unavailableResults?: Partial<Record<'totalWatercourseUnits' | 'unitsRetained' | 'unitsEnhanced', Availability>>;
         };
     };
+    watercourseType?: WatercourseType;
+    condition?: WatercourseCondition;
     watercourseUnitsDelivered: number;
     watercourseUnitsDeliveredDecimal: Decimal;
-    enhancementCondition?: { unavailableResults?: Record<string, Availability> };
-    enhancementMovement?: { unavailableResults?: Record<string, Availability> };
-    linearTimingAvailability?: { unavailableResults?: Record<string, Availability> };
-    watercourseOffSiteAvailability?: { unavailableResults?: Record<string, Availability> };
-}>(data: T): T & { enhancementUnitReview: WatercourseEnhancementUnitReview } {
+    enhancementCondition?: { unavailableResults?: EnhancementConditionState['unavailableResults'] };
+    enhancementMovement?: { unavailableResults?: WatercourseEnhancementMovementState['unavailableResults'] };
+    linearTimingAvailability?: { unavailableResults?: EnhancementUnavailableResults & LinearTimingAvailability['unavailableResults'] };
+    watercourseOffSiteAvailability?: { unavailableResults?: EnhancementUnavailableResults & WatercourseOffSiteAvailability['unavailableResults'] };
+}): T & { enhancementUnitReview: WatercourseEnhancementUnitReview } {
     const baseline = data.baseline;
     const baselineAvailability = baseline.watercourseBaselineAvailability?.unavailableResults ?? {};
-    const deliveryUnavailable = [
-        data.enhancementCondition?.unavailableResults,
-        data.enhancementMovement?.unavailableResults,
-        data.linearTimingAvailability?.unavailableResults,
-        data.watercourseOffSiteAvailability?.unavailableResults,
-    ].some((availability) =>
-        availability?.watercourseUnitsDelivered !== undefined || availability?.unitsDelivered !== undefined,
-    );
+    const deliveryUnavailable = hasUnavailableWatercourseDelivery(data.enhancementCondition?.unavailableResults) ||
+        hasUnavailableWatercourseDelivery(data.enhancementMovement?.unavailableResults) ||
+        hasUnavailableWatercourseDelivery(data.linearTimingAvailability?.unavailableResults) ||
+        hasUnavailableWatercourseDelivery(data.watercourseOffSiteAvailability?.unavailableResults);
     const unavailable = deliveryUnavailable ||
         baselineAvailability.totalWatercourseUnits !== undefined ||
         baselineAvailability.unitsRetained !== undefined ||
@@ -393,17 +553,9 @@ export function applyWatercourseEnhancementUnitReview<T extends {
     const enhancedUnits = new Decimal(baseline.unitsEnhancedDecimal ?? baseline.unitsEnhanced);
     const overEnhancedUnits = enhancedUnits.gt(fullUnits);
     const overAllocated = lengthRetained.plus(lengthEnhanced).gt(length);
-    const requiredUnitsDecimal = overEnhancedUnits
-        ? fullUnits
-        : overAllocated
-          ? fullUnits.minus(retainedUnits)
-          : enhancedUnits;
+    const requiredUnitsDecimal = requiredEnhancementUnits(overEnhancedUnits, overAllocated, fullUnits, retainedUnits, enhancedUnits);
     const deficitDecimal = Decimal.max(0, requiredUnitsDecimal.minus(data.watercourseUnitsDeliveredDecimal));
-    const status = unavailable
-        ? 'unavailable'
-        : requiredUnitsDecimal.gt(data.watercourseUnitsDeliveredDecimal)
-          ? 'review'
-          : 'clear';
+    const status = enhancementUnitReviewStatus(unavailable, requiredUnitsDecimal, data.watercourseUnitsDeliveredDecimal);
     return {
         ...data,
         enhancementUnitReview: {
@@ -415,4 +567,30 @@ export function applyWatercourseEnhancementUnitReview<T extends {
             deficitDecimal,
         },
     };
+}
+
+function enhancementUnitReviewStatus(
+    unavailable: boolean,
+    requiredUnits: Decimal,
+    deliveredUnits: Decimal,
+): WatercourseEnhancementUnitReview['status'] {
+    if (unavailable) return 'unavailable';
+    if (requiredUnits.gt(deliveredUnits)) return 'review';
+    return 'clear';
+}
+
+function hasUnavailableWatercourseDelivery(availability: EnhancementUnavailableResults | undefined): boolean {
+    return availability?.watercourseUnitsDelivered !== undefined || availability?.unitsDelivered !== undefined;
+}
+
+function requiredEnhancementUnits(
+    enhancedUnitsExceedFullBaseline: boolean,
+    allocationExceedsLength: boolean,
+    fullBaselineUnits: Decimal,
+    retainedUnits: Decimal,
+    enhancedUnits: Decimal,
+): Decimal {
+    if (enhancedUnitsExceedFullBaseline) return fullBaselineUnits;
+    if (allocationExceedsLength) return fullBaselineUnits.minus(retainedUnits);
+    return enhancedUnits;
 }
