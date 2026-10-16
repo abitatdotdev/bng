@@ -1,6 +1,7 @@
 import timingPathwayWorkbook from '../timingPathwayWorkbook.fixture.json';
 import { expect, test } from "bun:test";
 import { offSiteHabitatEnhancementSchema, offSiteHabitatEnhancementUncheckedSchema, type OffSiteHabitatEnhancementSchema } from "./habitatEnhancement";
+import { onSiteHabitatEnhancementUncheckedSchema } from "../onSite/habitatEnhancement";
 import * as v from 'valibot';
 import { describe } from "bun:test";
 
@@ -37,6 +38,7 @@ export function fixture(overrides: Partial<OffSiteHabitatEnhancementSchema> = {}
         habitatType: "Lowland mixed deciduous woodland",
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         condition: "Good",  // Enhancing from Poor to Good
+        offSiteReferenceNumber: "OFF-001",
         ...overrides,
     }
 }
@@ -606,6 +608,112 @@ describe("fixed bugs", () => {
         expect(parsed.finalTimeToTargetMultiplier).toBeCloseTo(0.586)
         expect(parsed.habitatUnitsDelivered).toBeCloseTo(0.63)
     });
+
+test("irreplaceable tree replacement keeps spatial AP available while raw AQ is unavailable", () => {
+    const parsed = v.parse(offSiteHabitatEnhancementUncheckedSchema, fixture({
+        baseline: {
+            broadHabitat: "Individual trees",
+            habitatType: "Rural tree",
+            area: 1,
+            strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+            spatialRiskCategory: "Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA",
+            condition: "Poor",
+            irreplaceableHabitat: true,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+            bespokeCompensationAgreed: "Yes",
+        },
+        broadHabitat: "Individual trees",
+        habitatType: "Rural tree",
+        condition: "Good",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        offSiteReferenceNumber: "OFF-001",
+        habitatEnhancedInAdvance: 0,
+        habitatEnhancedDelay: 0,
+    }));
+    expect(parsed.areaCalculationAvailability.habitatUnitsDelivered).toBeFalse();
+    expect(parsed.areaCalculationAvailability.habitatUnitsDeliveredWithSpatialRisk).toBeTrue();
+    expect(parsed.habitatUnitsDelivered).toEqual(0);
+    expect(parsed.habitatUnitsDeliveredWithSpatialRisk).toBeCloseTo(3.2791869444, 8);
+});
+
+test("enhancement timing conflict zeros both unavailable delivery contributions", () => {
+    const parsed = v.parse(offSiteHabitatEnhancementUncheckedSchema, fixture({
+        habitatEnhancedInAdvance: 1,
+        habitatEnhancedDelay: 1,
+    }));
+    expect(parsed.areaCalculationAvailability.habitatUnitsDelivered).toBeFalse();
+    expect(parsed.areaCalculationAvailability.habitatUnitsDeliveredWithSpatialRisk).toBeFalse();
+    expect(parsed.habitatUnitsDelivered).toEqual(0);
+    expect(parsed.habitatUnitsDeliveredWithSpatialRisk).toEqual(0);
+});
+
+test("trading down enhancement movement makes raw and spatial delivery unavailable", () => {
+    const parsed = v.parse(offSiteHabitatEnhancementUncheckedSchema, fixture({
+        baseline: {
+            broadHabitat: "Grassland",
+            habitatType: "Other neutral grassland",
+            area: 1,
+            strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+            spatialRiskCategory: "Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA",
+            condition: "Moderate",
+            irreplaceableHabitat: false,
+            areaEnhanced: 1,
+            areaRetained: 0,
+            offSiteReferenceNumber: "OFF-001",
+        },
+        broadHabitat: "Grassland",
+        habitatType: "Modified grassland",
+        condition: "Good",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        offSiteReferenceNumber: "OFF-001",
+    }));
+    expect(parsed.distinctivenessChange).toEqual("Error Trading Down ▲");
+    expect(parsed.areaCalculationAvailability.habitatUnitsDelivered).toBeFalse();
+    expect(parsed.areaCalculationAvailability.habitatUnitsDeliveredWithSpatialRisk).toBeFalse();
+    expect(parsed.habitatUnitsDelivered).toEqual(0);
+    expect(parsed.habitatUnitsDeliveredWithSpatialRisk).toEqual(0);
+});
+
+test("D-3 permits the Woodland Other irreplaceable exception that A-3 rejects", () => {
+    const shared = {
+        broadHabitat: "Woodland and forest",
+        habitatType: "Other woodland; broadleaved",
+        area: 1,
+        strategicSignificance: "Location ecologically desirable but not in local strategy",
+        condition: "Poor",
+        irreplaceableHabitat: true,
+        areaEnhanced: 1,
+        areaRetained: 0,
+    } as const;
+    const proposed = {
+        broadHabitat: "Woodland and forest",
+        habitatType: "Lowland mixed deciduous woodland",
+        condition: "Good",
+        strategicSignificance: shared.strategicSignificance,
+    } as const;
+
+    const onSite = v.parse(onSiteHabitatEnhancementUncheckedSchema, {
+        baseline: shared,
+        ...proposed,
+    });
+    const offSite = v.parse(offSiteHabitatEnhancementUncheckedSchema, fixture({
+        baseline: {
+            ...shared,
+            spatialRiskCategory: "This metric is being used by an off-site provider",
+            offSiteReferenceNumber: "OFF-001",
+        },
+        ...proposed,
+        offSiteReferenceNumber: "OFF-001",
+    }));
+
+    expect(onSite.conditionChange).toBe("Error you cannot replace an irreplaceable habitat ▲");
+    expect(onSite.areaCalculationAvailability.habitatUnitsDelivered).toBeFalse();
+    expect(offSite.conditionChange).toBe("Lower Distinctiveness Habitat - Good");
+    expect(offSite.areaCalculationAvailability.habitatUnitsDelivered).toBeTrue();
+    expect(offSite.habitatUnitsDelivered).toBeGreaterThan(0);
+});
 })
 
 

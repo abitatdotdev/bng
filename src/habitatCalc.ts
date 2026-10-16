@@ -1,6 +1,7 @@
 import { type Quantity, Decimal, toDecimal } from './decimal';
 import type { BespokeCompensation } from './bespokeCompensation';
 import type { SuggestedTradingActions } from './distinctivenessCategories';
+import { isAreaAllocationOverrun } from './areaCalculationRules';
 
 /**
  * Pure calculation: derives baseline units retained/enhanced and area habitat lost.
@@ -50,9 +51,11 @@ export function calculateBaselineUnits(input: {
                   .mul(conditionScore)
                   .mul(strategicSignificanceMultiplier);
 
-    const areaHabitatLost = new Decimal(input.areaDecimal ?? toDecimal(input.area))
-        .minus(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
-        .minus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced));
+    const areaHabitatLost = isAreaAllocationOverrun(input)
+        ? toDecimal(0)
+        : new Decimal(input.areaDecimal ?? toDecimal(input.area))
+              .minus(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
+              .minus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced));
 
     return {
         baselineUnitsRetained: toDecimal(baselineUnitsRetained).toNumber(),
@@ -117,6 +120,8 @@ export function calculateTotalHabitatUnits(input: {
     strategicSignificanceMultiplier: Quantity;
     strategicSignificanceMultiplierDecimal?: Decimal;
     irreplaceableHabitat?: boolean;
+    totalHabitatUnits?: Quantity;
+    totalHabitatUnitsDecimal?: Decimal;
 }) {
     const bespokeRequired = input.requiredAction === 'Bespoke compensation likely to be required';
     const hasRetention = new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained)).gt(0);
@@ -134,8 +139,7 @@ export function calculateTotalHabitatUnits(input: {
     let totalHabitatUnits: Quantity = 0;
 
     if (input.irreplaceableHabitat) {
-        totalHabitatUnits = new Decimal(input.areaRetainedDecimal ?? toDecimal(input.areaRetained))
-            .plus(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
+        totalHabitatUnits = new Decimal(input.areaEnhancedDecimal ?? toDecimal(input.areaEnhanced))
             .mul(distinctivenessScore)
             .mul(conditionScore)
             .mul(strategicSignificanceMultiplier);

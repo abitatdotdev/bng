@@ -3,6 +3,7 @@ import { expect, test } from "bun:test";
 import * as v from "valibot";
 import {
     onSiteHabitatBaselineSchema,
+    onSiteHabitatBaselineUncheckedSchema,
     enrichWithBaselineUnitsData,
     enrichWithUnitsLost,
     type OnSiteHabitatBaselineSchema,
@@ -234,4 +235,37 @@ test("irreplaceable habitats cannot lose any area", () => {
         irreplaceableHabitat: true,
     });
     expect(v.safeParse(onSiteHabitatBaselineSchema, notOkay).success).toBeFalse();
+});
+
+test("allocation overruns keep independent baseline units available and zero the lost contribution", () => {
+    const parsed = v.parse(onSiteHabitatBaselineUncheckedSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",
+        condition: "Moderate",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        area: 1,
+        areaRetained: 0.75,
+        areaEnhanced: 0.5,
+    }));
+    expect(parsed.totalHabitatUnits).toEqual(8);
+    expect(parsed.baselineUnitsRetained).toEqual(6);
+    expect(parsed.baselineUnitsEnhanced).toEqual(4);
+    expect(parsed.areaHabitatLost).toEqual(0);
+    expect(parsed.unitsLost).toEqual(0);
+    expect(parsed.areaCalculationAvailability.unavailableResults.areaHabitatLost).toEqual("check-data");
+});
+
+test("irreplaceable on-site baseline totals use enhanced area only", () => {
+    const parsed = v.parse(onSiteHabitatBaselineSchema, fixture({
+        broadHabitat: "Wetland",
+        habitatType: "Blanket bog",
+        condition: "Moderate",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        area: 1,
+        areaRetained: 0.25,
+        areaEnhanced: 0.25,
+        irreplaceableHabitat: true,
+        bespokeCompensationAgreed: "Yes",
+    }));
+    expect(parsed.totalHabitatUnits).toEqual(4);
 });

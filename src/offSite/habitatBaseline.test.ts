@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { offSiteHabitatBaselineSchema, type OffSiteHabitatBaselineSchema } from "./habitatBaseline";
+import { offSiteHabitatBaselineSchema, offSiteHabitatBaselineUncheckedSchema, type OffSiteHabitatBaselineSchema } from "./habitatBaseline";
 import * as v from 'valibot';
 
 expect.extend({
@@ -85,3 +85,48 @@ test("irreplaceable habitats cannot lose any area", () => {
     })
     expect(v.safeParse(offSiteHabitatBaselineSchema, notOkay).success).toBeFalse()
 })
+
+test("irreplaceable off-site total and no-allocation spatial total follow the raw total", () => {
+    const allocated = v.parse(offSiteHabitatBaselineUncheckedSchema, fixture({
+        broadHabitat: "Wetland",
+        habitatType: "Blanket bog",
+        condition: "Moderate",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        area: 1,
+        areaRetained: 0.25,
+        areaEnhanced: 0.25,
+        irreplaceableHabitat: true,
+        bespokeCompensationAgreed: "Yes",
+    }));
+    const noAllocation = v.parse(offSiteHabitatBaselineUncheckedSchema, fixture({
+        broadHabitat: "Wetland",
+        habitatType: "Blanket bog",
+        condition: "Moderate",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        area: 1,
+        areaRetained: 0,
+        areaEnhanced: 0,
+        irreplaceableHabitat: true,
+        bespokeCompensationAgreed: "Yes",
+    }));
+    expect(allocated.totalHabitatUnits).toEqual(4);
+    expect(allocated.totalHabitatUnitsSRM).toEqual(4);
+    expect(noAllocation.totalHabitatUnits).toEqual(0);
+    expect(noAllocation.totalHabitatUnitsSRM).toEqual(0);
+});
+
+test("blank off-site reference marks only dependent raw baseline values unavailable", () => {
+    const parsed = v.parse(offSiteHabitatBaselineUncheckedSchema, fixture({
+        broadHabitat: "Grassland",
+        habitatType: "Other neutral grassland",
+        condition: "Moderate",
+        strategicSignificance: "Area/compensation not in local strategy/ no local strategy",
+        area: 1,
+        areaRetained: 0,
+        areaEnhanced: 0,
+        offSiteReferenceNumber: "",
+    }));
+    expect(parsed.totalHabitatUnits).toEqual(0);
+    expect(parsed.totalHabitatUnitsSRM).toBeGreaterThan(0);
+    expect(parsed.areaCalculationAvailability.unavailableResults.totalHabitatUnits).toEqual("blank");
+});

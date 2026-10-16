@@ -23,6 +23,7 @@ import {
     calculateTotalHabitatUnits,
     calculateVhdhBespokeCompensationUnits,
 } from '../habitatCalc';
+import { areaBaselineAvailability } from '../areaCalculationRules';
 
 const inputSchema = v.object({
     broadHabitat: broadHabitatSchema,
@@ -76,7 +77,6 @@ export const offSiteHabitatBaselineSchema = v.pipe(
     v.transform(enrichWithHabitatData),
     v.transform(enrichWithSpatialRiskMultiplier),
     v.transform(enrichWithBaselineUnitsData),
-    v.transform(enrichWithTotalHabitatUnitsSRM),
     // Initial validation checks
     v.forward(
         v.check(
@@ -122,6 +122,7 @@ export const offSiteHabitatBaselineSchema = v.pipe(
         ['offSiteReferenceNumber'],
     ),
     v.transform(enrichWithTotalHabitatUnits),
+    v.transform(enrichWithTotalHabitatUnitsSRM),
     // Checks from within the units lost cell (AA)
     v.forward(
         v.check(
@@ -155,8 +156,8 @@ export const offSiteHabitatBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithHabitatData),
     safeTransform(enrichWithSpatialRiskMultiplier),
     safeTransform(enrichWithBaselineUnitsData),
-    safeTransform(enrichWithTotalHabitatUnitsSRM),
     safeTransform(enrichWithTotalHabitatUnits),
+    safeTransform(enrichWithTotalHabitatUnitsSRM),
     safeTransform(enrichWithUnitsLost),
     safeTransform(enrichWithVhdhBespokeCompensationUnits),
     safeTransform(enrichWithBaselineUnitsRetainedSRM),
@@ -178,9 +179,19 @@ export function enrichWithBaselineUnitsData<
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
         broadHabitat: string;
+        requiredAction?: SuggestedTradingActions;
+        bespokeCompensationAgreed?: BespokeCompensation;
+        offSiteReferenceNumber?: string;
     },
 >(data: Data) {
-    return { ...data, ...calculateBaselineUnits(data) };
+    return {
+        ...data,
+        ...calculateBaselineUnits(data),
+        areaCalculationAvailability: areaBaselineAvailability({
+            ...data,
+            offSite: true,
+        }),
+    };
 }
 
 /**
@@ -204,6 +215,8 @@ export function calculateTotalHabitatUnitsSRM(input: {
     conditionScoreDecimal?: Decimal;
     strategicSignificanceMultiplier: number;
     strategicSignificanceMultiplierDecimal?: Decimal;
+    totalHabitatUnits?: number;
+    totalHabitatUnitsDecimal?: Decimal;
     spatialRiskMultiplier: number;
     spatialRiskMultiplierDecimal?: Decimal;
 }) {
@@ -215,9 +228,9 @@ export function calculateTotalHabitatUnitsSRM(input: {
     let totalHabitatUnitsSRM: number | Decimal = 0;
 
     if (bespokeRequired && !hasBiodiversityGain) {
-        totalHabitatUnitsSRM = new Decimal(input.areaDecimal ?? toDecimal(input.area)).mul(
-            input.spatialRiskMultiplierDecimal ?? toDecimal(input.spatialRiskMultiplier),
-        );
+        totalHabitatUnitsSRM = new Decimal(
+            input.totalHabitatUnitsDecimal ?? toDecimal(input.totalHabitatUnits ?? 0),
+        ).mul(input.spatialRiskMultiplierDecimal ?? toDecimal(input.spatialRiskMultiplier));
     } else if (bespokeRequired && hasBiodiversityGain) {
         totalHabitatUnitsSRM = new Decimal(
             input.baselineUnitsRetainedDecimal ?? toDecimal(input.baselineUnitsRetained),
@@ -262,8 +275,14 @@ export function enrichWithTotalHabitatUnitsSRM<
         strategicSignificanceMultiplierDecimal: Decimal;
         spatialRiskMultiplier: number;
         spatialRiskMultiplierDecimal: Decimal;
+        totalHabitatUnits: number;
+        totalHabitatUnitsDecimal: Decimal;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.totalHabitatUnitsSRM === false) {
+        return { ...data, totalHabitatUnitsSRM: 0, totalHabitatUnitsSRMDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateTotalHabitatUnitsSRM(data) };
 }
 
@@ -290,8 +309,12 @@ export function enrichWithTotalHabitatUnits<
         requiredAction: SuggestedTradingActions;
         areaHabitatLost: number;
         areaHabitatLostDecimal: Decimal;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.totalHabitatUnits === false) {
+        return { ...data, totalHabitatUnits: 0, totalHabitatUnitsDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateTotalHabitatUnits(data) };
 }
 
@@ -317,7 +340,7 @@ export function calculateUnitsLost(input: {
     } else if (
         (input.requiredAction === 'Same habitat required – bespoke compensation option ⚠' ||
             input.requiredAction === 'Bespoke compensation likely to be required') &&
-        input.bespokeCompensationAgreed === 'Yes'
+        (input.bespokeCompensationAgreed === 'Yes' || input.bespokeCompensationAgreed === 'Pending')
     ) {
         unitsLost = 0;
     } else {
@@ -341,8 +364,12 @@ export function enrichWithUnitsLost<
         baselineUnitsEnhancedDecimal: Decimal;
         bespokeCompensationAgreed: string;
         requiredAction: string;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.unitsLost === false) {
+        return { ...data, unitsLost: 0, unitsLostDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateUnitsLost(data) };
 }
 
@@ -356,8 +383,12 @@ export function enrichWithVhdhBespokeCompensationUnits<
         baselineUnitsRetainedDecimal: Decimal;
         baselineUnitsEnhanced: number;
         baselineUnitsEnhancedDecimal: Decimal;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.vhdhBespokeCompensationUnits === false) {
+        return { ...data, vhdhBespokeCompensationUnits: 0, vhdhBespokeCompensationUnitsDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
 }
 

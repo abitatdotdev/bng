@@ -24,6 +24,11 @@ import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
+import {
+    applyAreaEnhancementAvailability,
+    calculateAreaEnhancementMovement,
+    hasAreaEnhancementTimingConflict,
+} from '../areaCalculationRules';
 
 const inputSchema = v.object({
     baseline: onSiteHabitatBaselineSchema,
@@ -296,6 +301,39 @@ const addDistinctivenessAndConditionChange = <
     };
 };
 
+const applyWorkbookAreaEnhancementMovement = <
+    Data extends {
+        baseline: OnSiteHabitatBaseline;
+        _baselineHabitat: Habitat;
+        _habitat: Habitat;
+        condition: string;
+        conditionScore: number;
+        broadHabitat: string;
+        habitatType: string;
+        distinctivenessScore: number;
+    },
+>(data: Data) => ({
+    ...data,
+    ...calculateAreaEnhancementMovement({
+        requiredAction: data.baseline.requiredAction,
+        baselineLabel: data._baselineHabitat.label,
+        proposedLabel: data._habitat.label,
+        baselineBroadHabitat: data.baseline.broadHabitat,
+        proposedBroadHabitat: data.broadHabitat,
+        proposedHabitatType: data.habitatType,
+        baselineDistinctivenessCategory: data._baselineHabitat.distinctivenessCategory,
+        proposedDistinctivenessCategory: data._habitat.distinctivenessCategory,
+        baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+        proposedDistinctivenessScore: data.distinctivenessScore,
+        baselineCondition: data.baseline.condition,
+        proposedCondition: data.condition,
+        baselineConditionScore: data.baseline.conditionScore,
+        proposedConditionScore: data.conditionScore,
+        irreplaceableHabitat: data.baseline.irreplaceableHabitat,
+        offSite: false,
+    }),
+});
+
 /**
  * Calculate habitat units delivered from enhancement as NET GAIN over baseline
  *
@@ -311,6 +349,9 @@ const addDistinctivenessAndConditionChange = <
  */
 const enrichWithEnhancementUnitsDelivered = <
     Data extends {
+        baseline: OnSiteHabitatBaseline;
+        broadHabitat: string;
+        habitatType: string;
         area: number;
         areaDecimal: Decimal;
         _baselineHabitat: any;
@@ -326,6 +367,10 @@ const enrichWithEnhancementUnitsDelivered = <
         finalTimeToTargetMultiplierDecimal: Decimal | undefined;
         difficultyMultiplierApplied: number;
         difficultyMultiplierAppliedDecimal: Decimal;
+        habitatEnhancedInAdvance: number | '30+';
+        habitatEnhancedDelay: number | '30+';
+        movementAllowed: boolean;
+        conditionAllowed: boolean;
     },
 >(
     data: Data,
@@ -348,11 +393,20 @@ const enrichWithEnhancementUnitsDelivered = <
         difficultyMultiplierApplied: data.difficultyMultiplierApplied,
         difficultyMultiplierAppliedDecimal: data.difficultyMultiplierAppliedDecimal,
     });
-    return {
+    return applyAreaEnhancementAvailability({
         ...data,
         habitatUnitsDelivered: delivered.habitatUnitsDelivered,
         habitatUnitsDeliveredDecimal: delivered.habitatUnitsDeliveredDecimal,
-    };
+    }, {
+        movementAllowed: data.movementAllowed,
+        conditionAllowed: data.conditionAllowed,
+        timingAllowed: !hasAreaEnhancementTimingConflict(data.habitatEnhancedInAdvance, data.habitatEnhancedDelay),
+        rawContributionAllowed: !(
+            data.baseline.irreplaceableHabitat &&
+            data.baseline.broadHabitat === 'Individual trees' &&
+            data.area > 0
+        ),
+    });
 };
 
 export const onSiteHabitatEnhancementSchema = v.pipe(
@@ -403,6 +457,7 @@ export const onSiteHabitatEnhancementSchema = v.pipe(
 
     // Add distinctiveness and condition change labels
     v.transform(addDistinctivenessAndConditionChange),
+    v.transform(applyWorkbookAreaEnhancementMovement),
 
     // Validation checks for enhancement
     v.check((data) => {
@@ -525,6 +580,7 @@ export const onSiteHabitatEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichBaselineHabitatData),
     safeTransform(enrichWithHabitatData),
     safeTransform(addDistinctivenessAndConditionChange),
+    safeTransform(applyWorkbookAreaEnhancementMovement),
     safeTransform(lookupEnhancementTimeToTarget),
     safeTransform(calculateFinalTimeToTargetCondition),
     safeTransform(lookupFinalTimeToTargetMultiplier),

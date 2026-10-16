@@ -10,6 +10,7 @@ export function fixture(overrides: Partial<OffSiteHabitatCreationSchema> = {}): 
         area: 1,
         strategicSignificance: "Location ecologically desirable but not in local strategy",
         spatialRiskCategory: "This metric is being used by an off-site provider",
+        offSiteReferenceNumber: "OFF-001",
         condition: "Good",
         ...overrides,
     }
@@ -34,6 +35,30 @@ test("default years values", () => {
     expect(v.parse(offSiteHabitatCreationSchema, fixture()).habitatCreationInAdvance).toEqual(0)
     expect(v.parse(offSiteHabitatCreationSchema, fixture()).habitatCreationDelay).toEqual(0)
 })
+
+test("blank off-site reference gates raw creation delivery and keeps spatial delivery", () => {
+    const parsed = v.parse(offSiteHabitatCreationUncheckedSchema, fixture({ offSiteReferenceNumber: "" }));
+    expect(parsed.habitatUnitsDelivered).toEqual(0);
+    expect(parsed.habitatUnitsDeliveredWithSpatialRisk).toBeGreaterThan(0);
+    expect(parsed.areaCalculationAvailability.unavailableResults.habitatUnitsDelivered).toEqual("blank");
+});
+
+test("off-site reference display preserves independent timing unavailability", () => {
+    const parsed = v.parse(offSiteHabitatCreationUncheckedSchema, fixture({
+        offSiteReferenceNumber: "",
+        habitatCreationInAdvance: 5,
+        habitatCreationDelay: 3,
+    }));
+    expect(parsed.areaCalculationAvailability.rule).toBe("off-site-reference-required");
+    expect(parsed.areaCalculationAvailability.unavailableResults).toMatchObject({
+        habitatUnitsDelivered: "blank",
+        habitatUnitsDeliveredWithSpatialRisk: "blank",
+        finalTimeToTargetCondition: "check-data",
+        finalTimeToTargetMultiplier: "check-data",
+    });
+    expect(parsed.habitatUnitsDelivered).toEqual(0);
+    expect(parsed.habitatUnitsDeliveredWithSpatialRisk).toEqual(0);
+});
 
 test("cannot have both advanced and delayed habitat creation", () => {
     const result = v.safeParse(offSiteHabitatCreationSchema, fixture({

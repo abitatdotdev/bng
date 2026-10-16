@@ -40,3 +40,5 @@ export type {
     EnhancementConditionState,
     WatercourseEnhancementMovementState,
 } from './calculationAvailability';
+
+export type { AreaBaselineAvailability } from './areaCalculationRules';

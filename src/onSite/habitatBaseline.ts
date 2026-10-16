@@ -6,7 +6,7 @@ import { baselineHabitatType } from '../habitatTypes';
 import { conditionSchema } from '../conditions';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import {
-    addTotalHabitatUnits as enrichWithTotalHabitatUnits,
+    addTotalHabitatUnits as enrichWithStandardTotalHabitatUnits,
     areaSchema,
     enrichWithHabitatData,
     freeTextSchema,
@@ -15,7 +15,8 @@ import {
     isValidIrreplaceable,
     safeTransform,
 } from '../schemaUtils';
-import { calculateBaselineUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
+import { calculateBaselineUnits, calculateTotalHabitatUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
+import { areaBaselineAvailability } from '../areaCalculationRules';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
 
@@ -160,9 +161,48 @@ export function enrichWithBaselineUnitsData<
         conditionScoreDecimal: Decimal;
         strategicSignificanceMultiplier: number;
         strategicSignificanceMultiplierDecimal: Decimal;
+        requiredAction?: SuggestedTradingActions;
+        bespokeCompensationAgreed?: BespokeCompensation;
     },
 >(data: Data) {
-    return { ...data, ...calculateBaselineUnits(data) };
+    return {
+        ...data,
+        ...calculateBaselineUnits(data),
+        areaCalculationAvailability: areaBaselineAvailability({
+            ...data,
+            offSite: false,
+        }),
+    };
+}
+
+function enrichWithTotalHabitatUnits<Data extends {
+    irreplaceableHabitat: boolean;
+    area: number;
+    areaDecimal?: Decimal;
+    areaRetained: number;
+    areaRetainedDecimal?: Decimal;
+    areaEnhanced: number;
+    areaEnhancedDecimal?: Decimal;
+    requiredAction: SuggestedTradingActions;
+    bespokeCompensationAgreed: BespokeCompensation;
+    baselineUnitsRetained: number;
+    baselineUnitsRetainedDecimal: Decimal;
+    baselineUnitsEnhanced: number;
+    baselineUnitsEnhancedDecimal: Decimal;
+    distinctivenessScore: number;
+    distinctivenessScoreDecimal: Decimal;
+    conditionScore: number;
+    conditionScoreDecimal: Decimal;
+    strategicSignificanceMultiplier: number;
+    strategicSignificanceMultiplierDecimal: Decimal;
+    areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+}>(data: Data) {
+    if (data.areaCalculationAvailability?.totalHabitatUnits === false) {
+        return { ...data, totalHabitatUnits: 0, totalHabitatUnitsDecimal: toDecimal(0) };
+    }
+    return data.irreplaceableHabitat
+        ? { ...data, ...calculateTotalHabitatUnits({ ...data, irreplaceableHabitat: true }) }
+        : enrichWithStandardTotalHabitatUnits(data);
 }
 
 /**
@@ -177,8 +217,15 @@ export function calculateUnitsLost(input: {
     baselineUnitsRetainedDecimal?: Decimal;
     baselineUnitsEnhanced: number;
     baselineUnitsEnhancedDecimal?: Decimal;
+    bespokeCompensationAgreed?: BespokeCompensation;
+    requiredAction?: SuggestedTradingActions;
 }) {
-    const unitsLost = new Decimal(input.areaHabitatLostDecimal ?? toDecimal(input.areaHabitatLost)).isZero()
+    const hasLoss = new Decimal(input.areaHabitatLostDecimal ?? toDecimal(input.areaHabitatLost)).gt(0);
+    const compensationApplies = input.requiredAction === 'Same habitat required – bespoke compensation option ⚠' ||
+        input.requiredAction === 'Bespoke compensation likely to be required';
+    const compensationBlocksLoss = hasLoss && compensationApplies &&
+        (input.bespokeCompensationAgreed === 'Yes' || input.bespokeCompensationAgreed === 'Pending');
+    const unitsLost = !hasLoss || compensationBlocksLoss
         ? 0
         : new Decimal(input.totalHabitatUnitsDecimal ?? toDecimal(input.totalHabitatUnits))
               .minus(input.baselineUnitsRetainedDecimal ?? toDecimal(input.baselineUnitsRetained))
@@ -197,8 +244,14 @@ export function enrichWithUnitsLost<
         baselineUnitsRetainedDecimal: Decimal;
         baselineUnitsEnhanced: number;
         baselineUnitsEnhancedDecimal: Decimal;
+        bespokeCompensationAgreed?: BespokeCompensation;
+        requiredAction?: SuggestedTradingActions;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.unitsLost === false) {
+        return { ...data, unitsLost: 0, unitsLostDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateUnitsLost(data) };
 }
 
@@ -206,6 +259,7 @@ export function enrichWithVhdhBespokeCompensationUnits<
     Data extends {
         bespokeCompensationAgreed: BespokeCompensation;
         requiredAction: SuggestedTradingActions;
+        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
         totalHabitatUnits: number;
         totalHabitatUnitsDecimal: Decimal;
         baselineUnitsRetained: number;
@@ -214,5 +268,8 @@ export function enrichWithVhdhBespokeCompensationUnits<
         baselineUnitsEnhancedDecimal: Decimal;
     },
 >(data: Data) {
+    if (data.areaCalculationAvailability?.vhdhBespokeCompensationUnits === false) {
+        return { ...data, vhdhBespokeCompensationUnits: 0, vhdhBespokeCompensationUnitsDecimal: toDecimal(0) };
+    }
     return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
 }

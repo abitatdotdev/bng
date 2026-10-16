@@ -23,6 +23,11 @@ import {
 } from './common';
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
+import {
+    applyAreaEnhancementAvailability,
+    calculateAreaEnhancementMovement,
+    hasAreaEnhancementTimingConflict,
+} from '../areaCalculationRules';
 
 const inputSchema = v.object({
     baseline: offSiteHabitatBaselineSchema,
@@ -151,6 +156,39 @@ const addEnhancementPathway = <
         }),
     };
 };
+
+const applyWorkbookAreaEnhancementMovement = <
+    Data extends {
+        baseline: any;
+        _baselineHabitat: any;
+        _habitat: any;
+        condition: string;
+        conditionScore: number;
+        broadHabitat: string;
+        habitatType: string;
+        distinctivenessScore: number;
+    },
+>(data: Data) => ({
+    ...data,
+    ...calculateAreaEnhancementMovement({
+        requiredAction: data.baseline.requiredAction,
+        baselineLabel: data._baselineHabitat.label,
+        proposedLabel: data._habitat.label,
+        baselineBroadHabitat: data.baseline.broadHabitat,
+        proposedBroadHabitat: data.broadHabitat,
+        proposedHabitatType: data.habitatType,
+        baselineDistinctivenessCategory: data._baselineHabitat.distinctivenessCategory,
+        proposedDistinctivenessCategory: data._habitat.distinctivenessCategory,
+        baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
+        proposedDistinctivenessScore: data.distinctivenessScore,
+        baselineCondition: data.baseline.condition,
+        proposedCondition: data.condition,
+        baselineConditionScore: data.baseline.conditionScore,
+        proposedConditionScore: data.conditionScore,
+        irreplaceableHabitat: data.baseline.irreplaceableHabitat,
+        offSite: true,
+    }),
+});
 
 /**
  * Lookup enhancement time to target from habitat enhancement temporal multipliers (Column AD in Excel)
@@ -325,6 +363,8 @@ const enrichWithSpatialRiskData = <
  */
 const enrichWithEnhancementUnitsDelivered = <
     Data extends {
+        baseline: any;
+        _habitat: any;
         area: number;
         areaDecimal: Decimal;
         _baselineHabitat: any;
@@ -342,11 +382,16 @@ const enrichWithEnhancementUnitsDelivered = <
         difficultyMultiplierAppliedDecimal: Decimal;
         spatialRiskMultiplier: number;
         spatialRiskMultiplierDecimal: Decimal;
+        habitatEnhancedInAdvance: number | '30+';
+        habitatEnhancedDelay: number | '30+';
+        movementAllowed: boolean;
+        conditionAllowed: boolean;
+        offSiteReferenceNumber?: string;
     },
 >(
     data: Data,
 ) => {
-    return {
+    return applyAreaEnhancementAvailability({
         ...data,
         ...calculateEnhancementUnitsDelivered({
             area: data.area,
@@ -368,7 +413,21 @@ const enrichWithEnhancementUnitsDelivered = <
             spatialRiskMultiplier: data.spatialRiskMultiplier,
             spatialRiskMultiplierDecimal: data.spatialRiskMultiplierDecimal,
         }),
-    };
+    }, {
+        movementAllowed: data.movementAllowed,
+        conditionAllowed: data.conditionAllowed,
+        timingAllowed: !hasAreaEnhancementTimingConflict(data.habitatEnhancedInAdvance, data.habitatEnhancedDelay),
+        requiresReference: true,
+        preserveSpatialContribution:
+            data.baseline.irreplaceableHabitat &&
+            data.baseline.broadHabitat === 'Individual trees' &&
+            data._baselineHabitat.label !== data._habitat.label,
+        rawContributionAllowed: !(
+            data.baseline.irreplaceableHabitat &&
+            data.baseline.broadHabitat === 'Individual trees' &&
+            data.area > 0
+        ),
+    });
 };
 
 export const offSiteHabitatEnhancementSchema = v.pipe(
@@ -493,6 +552,7 @@ export const offSiteHabitatEnhancementSchema = v.pipe(
     }, 'Enhancement not possible for this habitat type from the selected baseline'),
     v.transform(addDistinctivenessChange),
     v.transform(addEnhancementPathway),
+    v.transform(applyWorkbookAreaEnhancementMovement),
     v.transform(enrichWithTimeToTargetCondition),
     v.transform(calculateFinalTimeToTargetCondition),
     v.transform(lookupFinalTimeToTargetMultiplier),
@@ -528,6 +588,7 @@ export const offSiteHabitatEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichWithHabitatData),
     safeTransform(addDistinctivenessChange),
     safeTransform(addEnhancementPathway),
+    safeTransform(applyWorkbookAreaEnhancementMovement),
     safeTransform(enrichWithTimeToTargetCondition),
     safeTransform(calculateFinalTimeToTargetCondition),
     safeTransform(lookupFinalTimeToTargetMultiplier),
