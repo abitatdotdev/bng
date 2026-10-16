@@ -31,8 +31,12 @@ export {
 // `parseFile`. Same schemas, but sourced from plain input arrays and
 // collecting issues instead of throwing.
 export {
+    bngStartPageInputSchema,
     featuresFromInput,
     type BngInput,
+    type BngInputKey,
+    type BngStartPageInput,
+    type ProjectIssue,
     type InputIssue,
     type FeaturesFromInputOptions,
     type FeaturesFromInputResult,

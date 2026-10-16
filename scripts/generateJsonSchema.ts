@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import { isFiniteQuantity } from '../src/decimal';
 import { isValidYearsQuantity } from '../src/schemaUtils';
 import { toJsonSchema } from '@valibot/to-json-schema';
+import { bngStartPageInputSchema } from '../src/parsers/featuresFromInput';
 
 import pkg from '../package.json' with { type: 'json' };
 
@@ -27,6 +28,7 @@ import { offSiteWatercourseEnhancementSchema } from '../src/offSite/watercourseE
 
 export function buildInputsJsonSchema() {
 const schemas = {
+    startPage: bngStartPageInputSchema,
     onSiteHabitatBaseline: onSiteHabitatBaselineSchema,
     onSiteHabitatCreation: onSiteHabitatCreationSchema,
     onSiteHabitatEnhancement: onSiteHabitatEnhancementSchema,
@@ -128,6 +130,16 @@ function* propsOf(
 }
 
 const defs = (jsonSchema as { properties?: Record<string, { properties?: Record<string, PropMeta> }> }).properties ?? {};
+
+if (defs.startPage?.properties) {
+    // Targets below zero remain valid quantities and trigger the minimum-target rule.
+    defs.startPage.properties.netGainTarget = {
+        anyOf: [
+            { type: 'number' },
+            { type: 'string', pattern: /^[+-]?(?:\d*\.)?\d+$/.source },
+        ],
+    } as PropMeta;
+}
 
 for (const [name, valibotSchema] of Object.entries(schemas)) {
     const defEntry = defs[name];

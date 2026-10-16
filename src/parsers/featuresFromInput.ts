@@ -1,5 +1,7 @@
 import * as v from 'valibot';
 import type { AllFeatures } from '../features';
+import { isFiniteQuantity, toDecimal } from '../decimal';
+import { quantitySchema } from '../schemaUtils';
 
 import { onSiteHabitatBaselineSchema, onSiteHabitatBaselineUncheckedSchema } from '../onSite/habitatBaseline';
 import { onSiteHabitatCreationSchema, onSiteHabitatCreationUncheckedSchema } from '../onSite/habitatCreation';
@@ -22,12 +24,12 @@ import { offSiteWatercourseEnhancementSchema, offSiteWatercourseEnhancementUnche
 
 /**
  * The JSON input contract for {@link featuresFromInput}: one optional array
- * per metric sheet, each element the input shape for that sheet. Mirrors the
- * published input JSON Schema (`inputs.json`) — every key optional, so
- * partial submissions are allowed. Missing keys are treated as empty.
+ * per metric sheet plus optional Start-sheet metadata. Row keys mirror
+ * `AllFeatures`; Start metadata is returned separately and never enters its
+ * 18 calculation arrays. Missing arrays are treated as empty.
  *
- * Keys are exactly the plural `AllFeatures` keys, so the assembled result
- * *is* an `AllFeatures`. Enhancement rows carry their paired baseline inline
+ * The array keys are exactly the plural `AllFeatures` keys. Enhancement rows
+ * carry their paired baseline inline
  * under a nested `baseline` field (the schema's `inputSchema` requires it),
  * so this is a flat per-array fan-out — no cross-array baseline threading,
  * unlike `parseFile`'s sheet-pairing in `parseAllEnhancementRows`.
@@ -55,10 +57,37 @@ export type BngInput = {
     offSiteWatercourseBaselines?: v.InferInput<typeof offSiteWatercourseBaselineSchema>[];
     offSiteWatercourseCreations?: v.InferInput<typeof offSiteWatercourseCreationSchema>[];
     offSiteWatercourseEnhancements?: v.InferInput<typeof offSiteWatercourseEnhancementSchema>[];
+    startPage?: BngStartPageInput;
 };
 
+const optionalText = v.optional(v.nullable(v.string()));
+const optionalCompletionDate = v.optional(v.nullable(v.union([
+    v.string(),
+    v.pipe(v.number(), v.check((value: number) => Number.isFinite(value), 'Expected a finite date serial')),
+])));
+const optionalEntered = v.optional(v.boolean());
+
+export const bngStartPageInputSchema = v.object({
+    completedBy: optionalText,
+    dateOfMetricCompletion: optionalCompletionDate,
+    netGainTarget: v.optional(quantitySchema),
+    netGainTargetEntered: optionalEntered,
+    containsMetricDeviations: optionalText,
+});
+
+/** Start-sheet values needed to evaluate workbook-wide project rules. */
+export type BngStartPageInput = v.InferInput<typeof bngStartPageInputSchema>;
+
 /** A `BngInput` / `AllFeatures` array key — one of the 18 metric sheets. */
-export type BngInputKey = keyof BngInput;
+export type BngInputKey = Exclude<keyof BngInput, 'startPage'>;
+
+export type ProjectIssue = {
+    sheet: 'start';
+    field: 'startPage' | 'completedBy' | 'dateOfMetricCompletion' | 'netGainTarget' | 'netGainTargetEntered' | 'containsMetricDeviations';
+    rule: 'completed-by-date-required' | 'minimum-target' | 'metric-deviations' | 'invalid-start-input';
+    message: string;
+    kind: 'rule' | 'parse';
+};
 
 /**
  * Pairs each sheet key with its checked (business-logic guards on) and
@@ -112,6 +141,10 @@ export type FeaturesFromInputResult = {
     features: AllFeatures;
     /** Every row that failed to parse, in input order. Empty on full success. */
     issues: InputIssue[];
+    /** Project-sheet metadata is kept outside AllFeatures' 18 row arrays. */
+    startPage?: BngStartPageInput;
+    /** Project rules use semantic fields and remain separate from row issues. */
+    projectIssues: ProjectIssue[];
 };
 
 /**
@@ -137,6 +170,7 @@ export function featuresFromInput(
 ): FeaturesFromInputResult {
     const validate = options.validate !== false;
     const issues: InputIssue[] = [];
+    const projectIssues: ProjectIssue[] = [];
 
     // Built key-by-key from `schemaConfig`; keys are exactly the `AllFeatures`
     // keys, so the finished record satisfies `AllFeatures`.
@@ -161,5 +195,95 @@ export function featuresFromInput(
 
     // Freeze to match `parseFile` — downstream calculators cache against a
     // stable object identity and assume the shape doesn't mutate.
-    return { features: Object.freeze(features) as unknown as AllFeatures, issues };
+    let startPage: BngStartPageInput | undefined;
+    if (input.startPage !== undefined) {
+        if (!input.startPage || typeof input.startPage !== 'object' || Array.isArray(input.startPage)) {
+            projectIssues.push({
+                sheet: 'start',
+                field: 'startPage',
+                rule: 'invalid-start-input',
+                message: 'Invalid Start metadata: expected an object',
+                kind: 'parse',
+            });
+        } else {
+            const parsedStartPage: Partial<BngStartPageInput> = {};
+            const fields = {
+                completedBy: optionalText,
+                dateOfMetricCompletion: optionalCompletionDate,
+                netGainTarget: v.optional(quantitySchema),
+                netGainTargetEntered: optionalEntered,
+                containsMetricDeviations: optionalText,
+            } as const;
+            for (const field of Object.keys(fields) as (keyof typeof fields)[]) {
+                const result = v.safeParse(fields[field], input.startPage[field]);
+                if (result.success) {
+                    if (result.output !== undefined) parsedStartPage[field] = result.output as never;
+                } else {
+                    projectIssues.push({
+                        sheet: 'start',
+                        field,
+                        rule: 'invalid-start-input',
+                        message: `Invalid Start field: ${result.issues[0]?.message ?? 'invalid value'}`,
+                        kind: 'parse',
+                    });
+                }
+            }
+            startPage = parsedStartPage as BngStartPageInput;
+        }
+    }
+    if (validate && startPage) {
+        if (startPage.completedBy === undefined || startPage.completedBy === null || startPage.completedBy === '') {
+            projectIssues.push({
+                sheet: 'start',
+                field: 'completedBy',
+                rule: 'completed-by-date-required',
+                message: "'Completed by' and 'Date of metric completion' fields must be filled in ▲",
+                kind: 'rule',
+            });
+        }
+        if (
+            startPage.dateOfMetricCompletion === undefined ||
+            startPage.dateOfMetricCompletion === null ||
+            startPage.dateOfMetricCompletion === ''
+        ) {
+            projectIssues.push({
+                sheet: 'start',
+                field: 'dateOfMetricCompletion',
+                rule: 'completed-by-date-required',
+                message: "'Completed by' and 'Date of metric completion' fields must be filled in ▲",
+                kind: 'rule',
+            });
+        }
+        const targetEntered = startPage.netGainTargetEntered ?? (startPage.netGainTarget !== undefined);
+        if (
+            targetEntered &&
+            startPage.netGainTarget !== undefined &&
+            isFiniteQuantity(startPage.netGainTarget) &&
+            toDecimal(startPage.netGainTarget).lessThan(0.1)
+        ) {
+            projectIssues.push({
+                sheet: 'start',
+                field: 'netGainTarget',
+                rule: 'minimum-target',
+                message: 'Target set below 10% ▲',
+                kind: 'rule',
+            });
+        }
+        if (startPage.containsMetricDeviations === 'Yes') {
+            projectIssues.push({
+                sheet: 'start',
+                field: 'containsMetricDeviations',
+                rule: 'metric-deviations',
+                message: 'Only acceptable in exceptionally rare circumstances, ensure any deviations have been agreed with the consenting body ⚠',
+                kind: 'rule',
+            });
+        }
+    }
+
+    return {
+        features: Object.freeze(features) as unknown as AllFeatures,
+        issues,
+        ...(startPage ? { startPage } : {}),
+        projectIssues,
+    };
 }
