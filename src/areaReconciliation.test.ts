@@ -1,26 +1,41 @@
 import { describe, expect, test } from 'bun:test';
 import { calculateAreaReconciliation, countsTowardsSiteArea } from './areaReconciliation';
-import type { AllFeatures } from './features';
+import { featuresFromInput, type BngInput } from './parsers/featuresFromInput';
 
-function emptyFeatures(overrides: Partial<AllFeatures> = {}): AllFeatures {
-    return {
-        onSiteHabitatBaselines: [], onSiteHabitatCreations: [], onSiteHabitatEnhancements: [],
-        offSiteHabitatBaselines: [], offSiteHabitatCreations: [], offSiteHabitatEnhancements: [],
-        onSiteHedgerowBaselines: [], onSiteHedgerowCreations: [], onSiteHedgerowEnhancements: [],
-        offSiteHedgerowBaselines: [], offSiteHedgerowCreations: [], offSiteHedgerowEnhancements: [],
-        onSiteWatercourseBaselines: [], onSiteWatercourseCreations: [], onSiteWatercourseEnhancements: [],
-        offSiteWatercourseBaselines: [], offSiteWatercourseCreations: [], offSiteWatercourseEnhancements: [],
-        ...overrides,
-    };
+const baseline = {
+    broadHabitat: 'Grassland',
+    habitatType: 'Modified grassland',
+    condition: 'Moderate',
+    strategicSignificance: 'Location ecologically desirable but not in local strategy',
+    irreplaceableHabitat: false,
+    area: 1,
+    areaRetained: 0.79,
+    areaEnhanced: 0.2,
+} as const;
+
+function reconcile(input: BngInput) {
+    return calculateAreaReconciliation(featuresFromInput(input, { validate: false }).features);
 }
 
 describe('area reconciliation', () => {
     test('uses the workbook 0.01 creation tolerance and exact enhancement equality', () => {
-        const result = calculateAreaReconciliation(emptyFeatures({
-            onSiteHabitatBaselines: [{ habitatType: 'Modified grassland', area: 1, areaHabitatLost: 1, areaEnhanced: 0.2 } as never],
-            onSiteHabitatCreations: [{ habitatType: 'Other neutral grassland', area: 0.99 } as never],
-            onSiteHabitatEnhancements: [{ habitatType: 'Other neutral grassland', area: '0.2000000000000001' } as never],
-        }));
+        const result = reconcile({
+            onSiteHabitatBaselines: [baseline],
+            onSiteHabitatCreations: [{
+                broadHabitat: 'Grassland',
+                habitatType: 'Modified grassland',
+                condition: 'Moderate',
+                strategicSignificance: 'Location ecologically desirable but not in local strategy',
+                area: 0.02,
+            }],
+            onSiteHabitatEnhancements: [{
+                baseline: { ...baseline, areaEnhanced: '0.2000000000000001' },
+                broadHabitat: 'Grassland',
+                habitatType: 'Modified grassland',
+                condition: 'Moderate',
+                strategicSignificance: 'Location ecologically desirable but not in local strategy',
+            }],
+        });
 
         expect(result.onSite.creationMatchesLoss).toBe(true);
         expect(result.onSite.enhancementMatchesBaseline).toBe(false);
@@ -28,18 +43,47 @@ describe('area reconciliation', () => {
     });
 
     test('keeps irreplaceable headline presence separate from narrow area exclusions', () => {
-        const result = calculateAreaReconciliation(emptyFeatures({
+        const result = reconcile({
             onSiteHabitatBaselines: [
-                { habitatType: 'Rural tree', area: 2, irreplaceableHabitat: true } as never,
-                { habitatType: 'Artificial hard structures', area: 3, irreplaceableHabitat: true } as never,
-                { habitatType: 'Modified grassland', area: 1, irreplaceableHabitat: true } as never,
+                { ...baseline, broadHabitat: 'Individual trees', habitatType: 'Rural tree', area: 2, irreplaceableHabitat: true },
+                { ...baseline, broadHabitat: 'Intertidal hard structures', habitatType: 'Artificial hard structures', area: 3, irreplaceableHabitat: true },
+                { ...baseline, area: 1, irreplaceableHabitat: true },
             ],
-            offSiteHabitatBaselines: [{ habitatType: 'Modified grassland', area: 0, irreplaceableHabitat: true } as never],
-        }));
+            offSiteHabitatBaselines: [{
+                ...baseline,
+                spatialRiskCategory: 'Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA',
+                offSiteReferenceNumber: 'OFF-001',
+                area: 0,
+                irreplaceableHabitat: true,
+            }],
+        });
 
         expect(countsTowardsSiteArea('Artificial hard structures')).toBe(false);
         expect(result.irreplaceableHabitatPresent).toBe(true);
         expect(result.onSite.irreplaceableArea.toString()).toBe('4');
         expect(result.offSite.irreplaceableArea.toString()).toBe('0');
+    });
+
+    test('excludes tree creation area from the workbook creation total', () => {
+        const result = reconcile({
+            onSiteHabitatCreations: [
+                {
+                    broadHabitat: 'Grassland',
+                    habitatType: 'Modified grassland',
+                    condition: 'Moderate',
+                    strategicSignificance: 'Location ecologically desirable but not in local strategy',
+                    area: 0.25,
+                },
+                {
+                    broadHabitat: 'Individual trees',
+                    habitatType: 'Rural tree',
+                    condition: 'Moderate',
+                    strategicSignificance: 'Location ecologically desirable but not in local strategy',
+                    area: 2,
+                },
+            ],
+        });
+
+        expect(result.onSite.createdArea.toString()).toBe('0.25');
     });
 });
