@@ -1,6 +1,7 @@
 import type { BespokeCompensation } from './bespokeCompensation';
 import type { BroadHabitat } from './broadHabitats';
 import type { Condition } from './conditions';
+import type { Decimal, Quantity } from './decimal';
 import type { DistinctivenessCategory, SuggestedTradingActions } from './distinctivenessCategories';
 import type { Habitat, HabitatLabel } from './habitats';
 import type { BaselineHabitatType, CreationHabitatType, EnhancedHabitatType } from './habitatTypes';
@@ -100,7 +101,8 @@ export type AreaEnhancementMovementInput = {
     baselineConditionScore: HabitatConditionScore | undefined;
     proposedConditionScore: HabitatConditionScore | undefined;
     irreplaceableHabitat: boolean;
-    offSite: boolean;
+    bespokeWoodlandReplacementAllowed: boolean;
+    irreplaceableWoodlandReplacementAllowed: boolean;
 };
 
 export type AreaEnhancementMovementRow = {
@@ -149,13 +151,6 @@ export type AreaEnhancementAvailabilityInput = {
     movementAllowed: boolean;
     conditionAllowed: boolean;
     timingAllowed: boolean;
-    rawReferencePresent?: boolean;
-};
-
-export type AreaEnhancementAvailabilityOptions = AreaEnhancementAvailabilityInput & {
-    requiresReference?: boolean;
-    preserveSpatialContribution?: boolean;
-    rawContributionAllowed?: boolean;
 };
 
 export type AreaCreationTimingState = {
@@ -169,6 +164,13 @@ export type AreaBaselineRuleInput = {
     irreplaceableHabitat: boolean;
     bespokeCompensationAgreed?: BespokeCompensation;
     requiredAction?: SuggestedTradingActions;
-    offSiteReferenceNumber?: string;
-    offSite?: boolean;
+};
+
+export type AreaBaselineCalculationInput = AreaBaselineRuleInput & {
+    area: Quantity;
+    areaRetained: Quantity;
+    areaEnhanced: Quantity;
+    areaDecimal?: Decimal;
+    areaRetainedDecimal?: Decimal;
+    areaEnhancedDecimal?: Decimal;
 };

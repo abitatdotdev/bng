@@ -24,11 +24,7 @@ import { lookupFinalTimeToTargetMultiplier } from '../offSite/common';
 
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
-import {
-    applyAreaEnhancementAvailability,
-    calculateAreaEnhancementMovement,
-    hasAreaEnhancementTimingConflict,
-} from '../areaCalculationRules';
+import { applyOnSiteHabitatEnhancementAvailability, calculateOnSiteAreaEnhancementMovement } from './habitatAvailability';
 import type { AreaEnhancementMovementRow } from '../areaCalculationTypes';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 import type { Condition } from '../conditions';
@@ -308,24 +304,7 @@ const addDistinctivenessAndConditionChange = <
 
 const applyWorkbookAreaEnhancementMovement = <Data extends AreaEnhancementMovementRow>(data: Data) => ({
     ...data,
-    ...calculateAreaEnhancementMovement({
-        requiredAction: data.baseline.requiredAction,
-        baselineLabel: data._baselineHabitat.label,
-        proposedLabel: data._habitat.label,
-        baselineBroadHabitat: data.baseline.broadHabitat,
-        proposedBroadHabitat: data.broadHabitat,
-        proposedHabitatType: data.habitatType,
-        baselineDistinctivenessCategory: data._baselineHabitat.distinctivenessCategory,
-        proposedDistinctivenessCategory: data._habitat.distinctivenessCategory,
-        baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
-        proposedDistinctivenessScore: data.distinctivenessScore,
-        baselineCondition: data.baseline.condition,
-        proposedCondition: data.condition,
-        baselineConditionScore: data.baseline.conditionScore,
-        proposedConditionScore: data.conditionScore,
-        irreplaceableHabitat: data.baseline.irreplaceableHabitat,
-        offSite: false,
-    }),
+    ...calculateOnSiteAreaEnhancementMovement(data),
 });
 
 /**
@@ -387,19 +366,10 @@ const enrichWithEnhancementUnitsDelivered = <
         difficultyMultiplierApplied: data.difficultyMultiplierApplied,
         difficultyMultiplierAppliedDecimal: data.difficultyMultiplierAppliedDecimal,
     });
-    return applyAreaEnhancementAvailability({
+    return applyOnSiteHabitatEnhancementAvailability({
         ...data,
         habitatUnitsDelivered: delivered.habitatUnitsDelivered,
         habitatUnitsDeliveredDecimal: delivered.habitatUnitsDeliveredDecimal,
-    }, {
-        movementAllowed: data.movementAllowed,
-        conditionAllowed: data.conditionAllowed,
-        timingAllowed: !hasAreaEnhancementTimingConflict(data.habitatEnhancedInAdvance, data.habitatEnhancedDelay),
-        rawContributionAllowed: !(
-            data.baseline.irreplaceableHabitat &&
-            data.baseline.broadHabitat === 'Individual trees' &&
-            data.area > 0
-        ),
     });
 };
 

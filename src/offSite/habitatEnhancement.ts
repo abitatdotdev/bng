@@ -27,11 +27,7 @@ import {
 } from './common';
 import { calculateEnhancementUnitsDelivered } from '../habitatCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
-import {
-    applyAreaEnhancementAvailability,
-    calculateAreaEnhancementMovement,
-    hasAreaEnhancementTimingConflict,
-} from '../areaCalculationRules';
+import { applyOffSiteHabitatEnhancementAvailability, calculateOffSiteAreaEnhancementMovement } from './habitatAvailability';
 import type { AreaEnhancementMovementRow } from '../areaCalculationTypes';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 import type { BroadHabitat } from '../broadHabitats';
@@ -166,24 +162,7 @@ const addEnhancementPathway = <
 
 const applyWorkbookAreaEnhancementMovement = <Data extends AreaEnhancementMovementRow>(data: Data) => ({
     ...data,
-    ...calculateAreaEnhancementMovement({
-        requiredAction: data.baseline.requiredAction,
-        baselineLabel: data._baselineHabitat.label,
-        proposedLabel: data._habitat.label,
-        baselineBroadHabitat: data.baseline.broadHabitat,
-        proposedBroadHabitat: data.broadHabitat,
-        proposedHabitatType: data.habitatType,
-        baselineDistinctivenessCategory: data._baselineHabitat.distinctivenessCategory,
-        proposedDistinctivenessCategory: data._habitat.distinctivenessCategory,
-        baselineDistinctivenessScore: data._baselineHabitat.distinctivenessScore,
-        proposedDistinctivenessScore: data.distinctivenessScore,
-        baselineCondition: data.baseline.condition,
-        proposedCondition: data.condition,
-        baselineConditionScore: data.baseline.conditionScore,
-        proposedConditionScore: data.conditionScore,
-        irreplaceableHabitat: data.baseline.irreplaceableHabitat,
-        offSite: true,
-    }),
+    ...calculateOffSiteAreaEnhancementMovement(data),
 });
 
 /**
@@ -387,7 +366,7 @@ const enrichWithEnhancementUnitsDelivered = <
 >(
     data: Data,
 ) => {
-    return applyAreaEnhancementAvailability({
+    return applyOffSiteHabitatEnhancementAvailability({
         ...data,
         ...calculateEnhancementUnitsDelivered({
             area: data.area,
@@ -409,20 +388,6 @@ const enrichWithEnhancementUnitsDelivered = <
             spatialRiskMultiplier: data.spatialRiskMultiplier,
             spatialRiskMultiplierDecimal: data.spatialRiskMultiplierDecimal,
         }),
-    }, {
-        movementAllowed: data.movementAllowed,
-        conditionAllowed: data.conditionAllowed,
-        timingAllowed: !hasAreaEnhancementTimingConflict(data.habitatEnhancedInAdvance, data.habitatEnhancedDelay),
-        requiresReference: true,
-        preserveSpatialContribution:
-            data.baseline.irreplaceableHabitat &&
-            data.baseline.broadHabitat === 'Individual trees' &&
-            data._baselineHabitat.label !== data._habitat.label,
-        rawContributionAllowed: !(
-            data.baseline.irreplaceableHabitat &&
-            data.baseline.broadHabitat === 'Individual trees' &&
-            data.area > 0
-        ),
     });
 };
 

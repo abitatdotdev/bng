@@ -23,7 +23,13 @@ import {
     calculateTotalHabitatUnits,
     calculateVhdhBespokeCompensationUnits,
 } from '../habitatCalc';
-import { areaBaselineAvailability } from '../areaCalculationRules';
+import {
+    applyOffSiteBaselineLossAvailability,
+    applyOffSiteBaselineSpatialTotalAvailability,
+    applyOffSiteBaselineTotalAvailability,
+    applyOffSiteCompensationAvailability,
+    offSiteAreaBaselineAvailability,
+} from './habitatAvailability';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 
 function toConditionScoreDecimal(score: Quantity | undefined, decimalScore?: Decimal): Decimal {
@@ -194,10 +200,7 @@ export function enrichWithBaselineUnitsData<
     return {
         ...data,
         ...calculateBaselineUnits(data),
-        areaCalculationAvailability: areaBaselineAvailability({
-            ...data,
-            offSite: true,
-        }),
+        areaCalculationAvailability: offSiteAreaBaselineAvailability(data),
     };
 }
 
@@ -284,13 +287,10 @@ export function enrichWithTotalHabitatUnitsSRM<
         spatialRiskMultiplierDecimal: Decimal;
         totalHabitatUnits: number;
         totalHabitatUnitsDecimal: Decimal;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof offSiteAreaBaselineAvailability>;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.totalHabitatUnitsSRM === false) {
-        return { ...data, totalHabitatUnitsSRM: 0, totalHabitatUnitsSRMDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateTotalHabitatUnitsSRM(data) };
+    return applyOffSiteBaselineSpatialTotalAvailability({ ...data, ...calculateTotalHabitatUnitsSRM(data) });
 }
 
 export function enrichWithTotalHabitatUnits<
@@ -316,13 +316,10 @@ export function enrichWithTotalHabitatUnits<
         requiredAction: SuggestedTradingActions;
         areaHabitatLost: number;
         areaHabitatLostDecimal: Decimal;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof offSiteAreaBaselineAvailability>;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.totalHabitatUnits === false) {
-        return { ...data, totalHabitatUnits: 0, totalHabitatUnitsDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateTotalHabitatUnits(data) };
+    return applyOffSiteBaselineTotalAvailability({ ...data, ...calculateTotalHabitatUnits(data) });
 }
 
 /**
@@ -371,13 +368,10 @@ export function enrichWithUnitsLost<
         baselineUnitsEnhancedDecimal: Decimal;
         bespokeCompensationAgreed: string;
         requiredAction: string;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof offSiteAreaBaselineAvailability>;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.unitsLost === false) {
-        return { ...data, unitsLost: 0, unitsLostDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateUnitsLost(data) };
+    return applyOffSiteBaselineLossAvailability({ ...data, ...calculateUnitsLost(data) });
 }
 
 export function enrichWithVhdhBespokeCompensationUnits<
@@ -390,13 +384,10 @@ export function enrichWithVhdhBespokeCompensationUnits<
         baselineUnitsRetainedDecimal: Decimal;
         baselineUnitsEnhanced: number;
         baselineUnitsEnhancedDecimal: Decimal;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof offSiteAreaBaselineAvailability>;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.vhdhBespokeCompensationUnits === false) {
-        return { ...data, vhdhBespokeCompensationUnits: 0, vhdhBespokeCompensationUnitsDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
+    return applyOffSiteCompensationAvailability({ ...data, ...calculateVhdhBespokeCompensationUnits(data) });
 }
 
 /**

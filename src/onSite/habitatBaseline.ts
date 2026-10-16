@@ -16,7 +16,12 @@ import {
     safeTransform,
 } from '../schemaUtils';
 import { calculateBaselineUnits, calculateTotalHabitatUnits, calculateVhdhBespokeCompensationUnits } from '../habitatCalc';
-import { areaBaselineAvailability } from '../areaCalculationRules';
+import {
+    applyOnSiteBaselineLossAvailability,
+    applyOnSiteBaselineTotalAvailability,
+    applyOnSiteCompensationAvailability,
+    onSiteAreaBaselineAvailability,
+} from './habitatAvailability';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 import { bespokeCompensationSchema, type BespokeCompensation } from '../bespokeCompensation';
 import type { SuggestedTradingActions } from '../distinctivenessCategories';
@@ -169,10 +174,7 @@ export function enrichWithBaselineUnitsData<
     return {
         ...data,
         ...calculateBaselineUnits(data),
-        areaCalculationAvailability: areaBaselineAvailability({
-            ...data,
-            offSite: false,
-        }),
+        areaCalculationAvailability: onSiteAreaBaselineAvailability(data),
     };
 }
 
@@ -196,14 +198,12 @@ function enrichWithTotalHabitatUnits<Data extends {
     conditionScoreDecimal: Decimal | undefined;
     strategicSignificanceMultiplier: number;
     strategicSignificanceMultiplierDecimal: Decimal;
-    areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+    areaCalculationAvailability?: ReturnType<typeof onSiteAreaBaselineAvailability>;
 }>(data: Data) {
-    if (data.areaCalculationAvailability?.totalHabitatUnits === false) {
-        return { ...data, totalHabitatUnits: 0, totalHabitatUnitsDecimal: toDecimal(0) };
-    }
-    return data.irreplaceableHabitat
+    const calculated = data.irreplaceableHabitat
         ? { ...data, ...calculateTotalHabitatUnits({ ...data, irreplaceableHabitat: true }) }
         : enrichWithStandardTotalHabitatUnits(data);
+    return applyOnSiteBaselineTotalAvailability(calculated);
 }
 
 /**
@@ -247,20 +247,17 @@ export function enrichWithUnitsLost<
         baselineUnitsEnhancedDecimal: Decimal;
         bespokeCompensationAgreed?: BespokeCompensation;
         requiredAction?: SuggestedTradingActions;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof onSiteAreaBaselineAvailability>;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.unitsLost === false) {
-        return { ...data, unitsLost: 0, unitsLostDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateUnitsLost(data) };
+    return applyOnSiteBaselineLossAvailability({ ...data, ...calculateUnitsLost(data) });
 }
 
 export function enrichWithVhdhBespokeCompensationUnits<
     Data extends {
         bespokeCompensationAgreed: BespokeCompensation;
         requiredAction: SuggestedTradingActions;
-        areaCalculationAvailability?: ReturnType<typeof areaBaselineAvailability>;
+        areaCalculationAvailability?: ReturnType<typeof onSiteAreaBaselineAvailability>;
         totalHabitatUnits: number;
         totalHabitatUnitsDecimal: Decimal;
         baselineUnitsRetained: number;
@@ -269,8 +266,5 @@ export function enrichWithVhdhBespokeCompensationUnits<
         baselineUnitsEnhancedDecimal: Decimal;
     },
 >(data: Data) {
-    if (data.areaCalculationAvailability?.vhdhBespokeCompensationUnits === false) {
-        return { ...data, vhdhBespokeCompensationUnits: 0, vhdhBespokeCompensationUnitsDecimal: toDecimal(0) };
-    }
-    return { ...data, ...calculateVhdhBespokeCompensationUnits(data) };
+    return applyOnSiteCompensationAvailability({ ...data, ...calculateVhdhBespokeCompensationUnits(data) });
 }

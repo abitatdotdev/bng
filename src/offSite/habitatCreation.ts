@@ -26,8 +26,7 @@ import {
     enrichWithSpatialRisk,
 } from './common';
 import { calculateHabitatUnitsDelivered } from '../habitatCalc';
-import { applyHabitatCreationTimingAvailability } from '../calculationAvailability';
-import { applyAreaRawReferenceAvailability } from '../areaCalculationRules';
+import { applyOffSiteHabitatCreationAvailability } from './habitatAvailability';
 import type { AreaDistinctivenessScore, HabitatConditionScore } from '../areaCalculationTypes';
 
 export { calculateDifficultyData } from '../onSite/habitatCreation';
@@ -216,7 +215,7 @@ export const offSiteHabitatCreationSchema = v.pipe(
     v.transform(enrichWithDifficultyData),
     v.transform(enrichWithSpatialRiskData),
     v.transform(enrichWithHabitatUnitsDelivered),
-    v.transform((data) => applyAreaRawReferenceAvailability(applyHabitatCreationTimingAvailability(data, true))),
+    v.transform(applyOffSiteHabitatCreationAvailability),
 );
 
 export type OffSiteHabitatCreationSchema = v.InferInput<typeof offSiteHabitatCreationSchema>;
@@ -246,5 +245,5 @@ export const offSiteHabitatCreationUncheckedSchema = v.pipe(
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithHabitatUnitsDelivered),
-    safeTransform((data) => applyAreaRawReferenceAvailability(applyHabitatCreationTimingAvailability(data, true))),
+    safeTransform(applyOffSiteHabitatCreationAvailability),
 );
