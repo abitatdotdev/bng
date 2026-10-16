@@ -6,33 +6,81 @@ import {
 } from './offSiteGainSiteSummary';
 
 describe('calculateOffSiteGainSiteSummary', () => {
-    test('aggregates contributions for the same trimmed gain-site reference', () => {
+    test('matches workbook reference criteria while preserving labels', () => {
         const contributions: OffSiteGainSiteContribution[] = [
-            { reference: ' Site A ', baseline: 10, retained: 2, created: 3 },
-            { reference: 'Site A', baseline: 4, retained: 1, enhanced: 5 },
-            { reference: 'Site B', baseline: 2, created: 2 },
+            { reference: 'A', baseline: 1 },
+            { reference: 'a', created: 1 },
+            { reference: ' A', baseline: 1 },
+            { reference: ' ', baseline: 1 },
         ];
 
         expect(calculateOffSiteGainSiteSummary(contributions)).toMatchObject([
             {
-                reference: 'Site A',
-                baseline: 14,
-                retained: 3,
-                created: 3,
-                enhanced: 5,
-                netChange: -3,
-                isLoss: true,
-            },
-            {
-                reference: 'Site B',
-                baseline: 2,
-                retained: 0,
-                created: 2,
-                enhanced: 0,
+                reference: 'A',
+                baseline: 1,
+                created: 1,
                 netChange: 0,
                 isLoss: false,
             },
+            {
+                reference: ' A',
+                baseline: 1,
+                netChange: -1,
+                isLoss: true,
+            },
+            { reference: ' ', baseline: 1, netChange: -1, isLoss: true },
         ]);
+    });
+
+    test('uses wildcard and escaped-wildcard criteria', () => {
+        expect(calculateOffSiteGainSiteSummary([
+            { reference: '*', baseline: 1 },
+            { reference: 'other', created: 1 },
+        ])).toMatchObject([
+            { reference: '*', baseline: 1, created: 1, netChange: 0 },
+            { reference: 'other', created: 1, netChange: 1 },
+        ]);
+
+        expect(calculateOffSiteGainSiteSummary([
+            { reference: '~*', baseline: 1 },
+            { reference: '*', created: 1 },
+        ])).toMatchObject([
+            { reference: '~*', baseline: 0, created: 1, netChange: 1 },
+            { reference: '*', baseline: 1, created: 1, netChange: 0 },
+        ]);
+    });
+
+    test('matches probed Excel operator criteria across text reference cells', () => {
+        const source: OffSiteGainSiteContribution[] = [
+            { reference: 'A', baseline: 1 }, { reference: 'a', baseline: 2 },
+            { reference: ' A', baseline: 3 }, { reference: ' ', baseline: 4 },
+            { reference: '*', baseline: 5 }, { reference: '?', baseline: 6 },
+            { reference: '~', baseline: 7 }, { reference: '0', baseline: 8 },
+            { reference: '01', baseline: 9 }, { reference: '1', baseline: 10 },
+            { reference: '10', baseline: 11 }, { reference: 'B', baseline: 12 },
+        ];
+        const criteria = ['=0', '=00', '=1', '<>1', '<1', '<=1', '>1', '>=1', '=1*', '<>1*', '=*', '<>*', '=~*', '=A*', '<>A*'];
+        const results = calculateOffSiteGainSiteSummary([
+            ...source,
+            ...criteria.map((reference) => ({ reference, baseline: 0 })),
+        ]);
+        const totalFor = (reference: string) => results.find((result) => result.reference === reference)?.baseline;
+
+        expect(totalFor('=0')).toBe(8);
+        expect(totalFor('=00')).toBe(8);
+        expect(totalFor('=1')).toBe(19);
+        expect(totalFor('<>1')).toBe(78);
+        expect(totalFor('<1')).toBe(0);
+        expect(totalFor('<=1')).toBe(0);
+        expect(totalFor('>1')).toBe(0);
+        expect(totalFor('>=1')).toBe(0);
+        expect(totalFor('=1*')).toBe(21);
+        expect(totalFor('<>1*')).toBe(57);
+        expect(totalFor('=*')).toBe(78);
+        expect(totalFor('<>*')).toBe(0);
+        expect(totalFor('=~*')).toBe(5);
+        expect(totalFor('=A*')).toBe(3);
+        expect(totalFor('<>A*')).toBe(75);
     });
 
     test('treats omitted unit values as zero and preserves decimal arithmetic', () => {
@@ -54,11 +102,8 @@ describe('calculateOffSiteGainSiteSummary', () => {
         ]);
     });
 
-    test('ignores blank references and returns no groups for empty input', () => {
-        expect(calculateOffSiteGainSiteSummary([
-            { reference: '   ', baseline: 10 },
-            { reference: '\t', created: 2 },
-        ])).toEqual([]);
+    test('ignores literal blank references and returns no groups for empty input', () => {
+        expect(calculateOffSiteGainSiteSummary([{ reference: '', baseline: 10 }])).toEqual([]);
         expect(calculateOffSiteGainSiteSummary([])).toEqual([]);
     });
 
