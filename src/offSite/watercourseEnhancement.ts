@@ -1,6 +1,4 @@
 import { Decimal, toDecimal } from '../decimal';
-import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
-import { addLinearTimingGuidance, applyLinearTimingAvailability, applyWatercourseOffSiteAvailability, applyWatercourseEnhancementUnitReview } from '../linearRuleAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -24,6 +22,15 @@ import {
     calculateEnhancementUnitsDelivered,
 } from '../watercourses/shared';
 import { enrichWithWatercourseSpatialRisk } from './common';
+import {
+    applyOffSiteWatercourseEnhancementAvailability,
+    applyOffSiteWatercourseEnhancementReferenceAvailability,
+    applyOffSiteWatercourseEnhancementUnitReview,
+} from './watercourseAvailability';
+import {
+    addOffSiteWatercourseEnhancementTimingGuidance,
+    applyOffSiteWatercourseEnhancementTimingAvailability,
+} from './watercourseTiming';
 
 const inputSchema = v.object({
     baseline: offSiteWatercourseBaselineSchema,
@@ -39,20 +46,6 @@ const inputSchema = v.object({
     habitatReferenceNumber: freeTextSchema,
     offSiteReferenceNumber: v.optional(v.pipe(v.string(), v.description('Independent off-site gain-site reference (F-3 AT).'))),
 });
-
-function excludeUnreferencedRawUnits<T extends {
-    baseline: { spatialRiskCategory: string };
-    offSiteReferenceNumber?: string;
-    watercourseUnitsDelivered: number;
-    watercourseUnitsDeliveredDecimal: Decimal;
-}>(data: T): T {
-    if (!data.baseline.spatialRiskCategory || data.offSiteReferenceNumber) return data;
-    return {
-        ...data,
-        watercourseUnitsDelivered: 0,
-        watercourseUnitsDeliveredDecimal: new Decimal(0),
-    };
-}
 
 const offSiteWatercourseEnhancementValidatedSchema = v.pipe(
     inputSchema,
@@ -169,23 +162,14 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory }),
     ),
     v.transform((data) =>
-        applyWatercourseEnhancementAvailability(
-            enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data), true,
+        applyOffSiteWatercourseEnhancementAvailability(
+            enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data),
         ),
     ),
-    v.transform((data) =>
-        applyWatercourseEnhancementUnitReview(
-            applyWatercourseOffSiteAvailability(
-                applyLinearTimingAvailability(
-                    addLinearTimingGuidance(data),
-                    'watercourse',
-                    true,
-                    data.watercourseEnhancedInAdvance,
-                    data.watercourseEnhancedDelay,
-                ),
-            ),
-        ),
-    ),
+    v.transform(addOffSiteWatercourseEnhancementTimingGuidance),
+    v.transform(applyOffSiteWatercourseEnhancementTimingAvailability),
+    v.transform(applyOffSiteWatercourseEnhancementReferenceAvailability),
+    v.transform(applyOffSiteWatercourseEnhancementUnitReview),
 );
 
 export type OffSiteWatercourseEnhancementSchema = v.InferInput<typeof offSiteWatercourseEnhancementSchema>;
@@ -223,18 +207,12 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
         enrichWithWatercourseSpatialRisk({ ...d, spatialRiskCategory: d.baseline.spatialRiskCategory }),
     ),
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
-    // F-3 AP requires its own reference; AO calculates spatial units independently.
-    safeTransform(excludeUnreferencedRawUnits),
-    safeTransform((data) => applyWatercourseEnhancementAvailability(data, true)),
+    safeTransform(applyOffSiteWatercourseEnhancementAvailability),
     safeTransform((data) =>
-        applyWatercourseEnhancementUnitReview(
-            applyWatercourseOffSiteAvailability(
-                applyLinearTimingAvailability(
-                    addLinearTimingGuidance(data),
-                    'watercourse',
-                    true,
-                    data.watercourseEnhancedInAdvance,
-                    data.watercourseEnhancedDelay,
+        applyOffSiteWatercourseEnhancementUnitReview(
+            applyOffSiteWatercourseEnhancementReferenceAvailability(
+                applyOffSiteWatercourseEnhancementTimingAvailability(
+                    addOffSiteWatercourseEnhancementTimingGuidance(data),
                 ),
             ),
         ),

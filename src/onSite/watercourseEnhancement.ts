@@ -1,6 +1,4 @@
 import { toDecimal } from '../decimal';
-import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
-import { addLinearTimingGuidance, applyLinearTimingAvailability, applyWatercourseEnhancementUnitReview } from '../linearRuleAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -22,6 +20,14 @@ import {
     enrichEnhancementWithEncroachmentData,
     calculateEnhancementUnitsDelivered,
 } from '../watercourses/shared';
+import {
+    applyOnSiteWatercourseEnhancementAvailability,
+    applyOnSiteWatercourseEnhancementUnitReview,
+} from './watercourseAvailability';
+import {
+    addOnSiteWatercourseEnhancementTimingGuidance,
+    applyOnSiteWatercourseEnhancementTimingAvailability,
+} from './watercourseTiming';
 
 const inputSchema = v.object({
     baseline: onSiteWatercourseBaselineSchema,
@@ -37,9 +43,9 @@ const inputSchema = v.object({
     habitatReferenceNumber: freeTextSchema,
 });
 
-export const onSiteWatercourseEnhancementSchema = v.pipe(
+const onSiteWatercourseEnhancementValidatedSchema = v.pipe(
     inputSchema,
-    v.transform((data) => ({
+    v.transform((data: v.InferOutput<typeof inputSchema>) => ({
         ...data,
         watercourseEnhancedInAdvance: data.watercourseEnhancedInAdvance,
         watercourseEnhancedInAdvanceDecimal:
@@ -120,33 +126,20 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
         ['riparianEncroachment'],
     ),
 
-    // Calculate enhancement pathway label
-    v.transform(addEnhancementPathway),
+);
 
-    // Temporal calculation
+export const onSiteWatercourseEnhancementSchema = v.pipe(
+    onSiteWatercourseEnhancementValidatedSchema,
+    v.transform(addEnhancementPathway),
     v.transform(lookupEnhancementTimeToTarget),
     v.transform(calculateFinalTimeToTargetValues),
-
-    // Difficulty logic
     v.transform(determineEnhancementDifficulty),
-
-    // Encroachment multipliers
     v.transform(enrichEnhancementWithEncroachmentData),
-
-    // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
-    v.transform((data) => applyWatercourseEnhancementAvailability(data, false)),
-    v.transform((data) =>
-        applyWatercourseEnhancementUnitReview(
-            applyLinearTimingAvailability(
-                addLinearTimingGuidance(data),
-                'watercourse',
-                false,
-                data.watercourseEnhancedInAdvance,
-                data.watercourseEnhancedDelay,
-            ),
-        ),
-    ),
+    v.transform(applyOnSiteWatercourseEnhancementAvailability),
+    v.transform(addOnSiteWatercourseEnhancementTimingGuidance),
+    v.transform(applyOnSiteWatercourseEnhancementTimingAvailability),
+    v.transform(applyOnSiteWatercourseEnhancementUnitReview),
 );
 
 export type OnSiteWatercourseEnhancementSchema = v.InferInput<typeof onSiteWatercourseEnhancementSchema>;
@@ -159,7 +152,7 @@ const uncheckedInputSchema = v.object({
 
 export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     uncheckedInputSchema,
-    v.transform((data) => ({
+    v.transform((data: v.InferOutput<typeof uncheckedInputSchema>) => ({
         ...data,
         watercourseEnhancedInAdvance: data.watercourseEnhancedInAdvance,
         watercourseEnhancedInAdvanceDecimal:
@@ -180,15 +173,11 @@ export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichEnhancementWithEncroachmentData),
     safeTransform(calculateEnhancementUnitsDelivered),
-    safeTransform((data) => applyWatercourseEnhancementAvailability(data, false)),
+    safeTransform(applyOnSiteWatercourseEnhancementAvailability),
     safeTransform((data) =>
-        applyWatercourseEnhancementUnitReview(
-            applyLinearTimingAvailability(
-                addLinearTimingGuidance(data),
-                'watercourse',
-                false,
-                data.watercourseEnhancedInAdvance,
-                data.watercourseEnhancedDelay,
+        applyOnSiteWatercourseEnhancementUnitReview(
+            applyOnSiteWatercourseEnhancementTimingAvailability(
+                addOnSiteWatercourseEnhancementTimingGuidance(data),
             ),
         ),
     ),

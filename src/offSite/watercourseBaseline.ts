@@ -1,7 +1,7 @@
 import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
-import { applyWatercourseBaselineAvailability } from '../linearRuleAvailability';
+import { applyOffSiteWatercourseBaselineAvailability } from './watercourseAvailability';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
@@ -112,7 +112,7 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
     v.transform(enrichWithUnitsRetainedWithSRM),
-    v.transform(applyWatercourseBaselineAvailability),
+    v.transform(applyOffSiteWatercourseBaselineAvailability),
 );
 
 export type OffSiteWatercourseBaselineSchema = v.InferInput<typeof offSiteWatercourseBaselineSchema>;
@@ -137,7 +137,7 @@ export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithUnitsLost),
     safeTransform(enrichWithVhdhBespokeCompensationUnits),
     safeTransform(enrichWithUnitsRetainedWithSRM),
-    safeTransform(applyWatercourseBaselineAvailability),
+    safeTransform(applyOffSiteWatercourseBaselineAvailability),
 );
 
 /**
