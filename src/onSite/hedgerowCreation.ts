@@ -9,6 +9,7 @@ import {
 } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
+import { addLinearTimingGuidance } from '../linearRuleAvailability';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
 import {
@@ -80,6 +81,7 @@ export const onSiteHedgerowCreationSchema = v.pipe(
     v.transform(enrichWithDifficultyData),
     // Calculate hedgerow units delivered
     v.transform(enrichWithHedgerowUnitsDelivered),
+    v.transform(addLinearTimingGuidance),
 );
 
 export type OnSiteHedgerowCreationSchema = v.InferInput<typeof onSiteHedgerowCreationSchema>;
@@ -108,6 +110,7 @@ export const onSiteHedgerowCreationUncheckedSchema = v.pipe(
     safeTransform(lookupTemporalMultiplierStep),
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichWithHedgerowUnitsDelivered),
+    safeTransform(addLinearTimingGuidance),
 );
 
 /**

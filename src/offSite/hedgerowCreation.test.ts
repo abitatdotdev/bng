@@ -183,7 +183,7 @@ test("calculates difficulty data - created in advance with final time <= 0", () 
     expect(result.difficultyMultiplier).toBe(1);
 })
 
-test("calculates hedgerow units delivered - without spatial risk", () => {
+test("missing spatial risk category makes off-site hedgerow delivery unavailable", () => {
     const result = v.parse(offSiteHedgerowCreationSchema, fixture({
         length: 1,
         habitatType: "Native hedgerow",
@@ -191,14 +191,12 @@ test("calculates hedgerow units delivered - without spatial risk", () => {
         strategicSignificance: "Location ecologically desirable but not in local strategy",
     }));
 
-    // Native hedgerow: distinctiveness = 2, condition = 3, strategic = 1.1
-    // Standard time to Good = 12 years, temporal multiplier = 0.6521203607
-    // Technical difficulty = Low, multiplier = 1
-    // Expected: 1 * 2 * 3 * 1.1 * 0.6521203607 * 1 = 4.303994380620001
-    expect(result.hedgerowUnitsDelivered).toBeCloseTo(4.303994380620001, 5);
-
-    // Without spatial risk, both should be the same
-    expect(result.hedgerowUnitsDeliveredWithSpatialRisk).toBeCloseTo(4.303994380620001, 5);
+    expect(result.hedgerowUnitsDelivered).toBe(0);
+    expect(result.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
+    expect(result.hedgerowOffSiteAvailability.unavailableResults).toEqual({
+        hedgerowUnitsDelivered: 'blank',
+        hedgerowUnitsDeliveredWithSpatialRisk: 'blank',
+    });
 })
 
 test("calculates hedgerow units delivered - with spatial risk", () => {
@@ -247,9 +245,8 @@ test("calculates units for Poor condition", () => {
     expect(result.finalTimeToTargetCondition).toBe(1);
     expect(result.temporalMultiplier).toBe(0.965);
 
-    // 1 * 2 * 1 * 1.1 * 0.965 * 1 = 2.123
-    expect(result.hedgerowUnitsDelivered).toBeCloseTo(2.123, 5);
-    expect(result.hedgerowUnitsDeliveredWithSpatialRisk).toBeCloseTo(2.123, 5);
+    expect(result.hedgerowUnitsDelivered).toBe(0);
+    expect(result.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
 })
 
 test("full schema validation - Native hedgerow with trees", () => {
@@ -279,8 +276,8 @@ test("full schema validation - Native hedgerow with trees", () => {
     expect(result.difficultyMultiplier).toBe(1);
 
     // Units: 2.5 * 4 * 2 * 1.15 * 0.8368287006 * 1
-    const expectedUnits = 2.5 * 4 * 2 * 1.15 * 0.8368287006 * 1;
-    expect(result.hedgerowUnitsDelivered).toBeCloseTo(expectedUnits, 5);
+    expect(result.hedgerowUnitsDelivered).toBe(0);
+    expect(result.hedgerowOffSiteAvailability.unavailableResults.hedgerowUnitsDelivered).toBe('blank');
 })
 
 test("full schema validation - Native hedgerow - associated with bank or ditch", () => {

@@ -138,6 +138,7 @@ for (const site of sites) {
                     habitatType: 'Native hedgerow',
                     condition: 'Moderate',
                     strategicSignificance,
+                    ...(site.name === 'off-site' ? { offSiteReferenceNumber: 'enhancement-site' } : {}),
                 };
                 for (const schema of [site.checked, site.unchecked]) {
                     const row = v.parse(schema, input);
@@ -158,6 +159,7 @@ for (const site of sites) {
                 habitatType: 'Native hedgerow',
                 condition: 'Moderate',
                 strategicSignificance,
+                ...(site.name === 'off-site' ? { offSiteReferenceNumber: 'enhancement-site' } : {}),
             };
             for (const rowInput of [
                 { ...input, baseline: { ...input.baseline, condition: 'Good' } },

@@ -25,6 +25,7 @@ import {
 } from '../hedgerowCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
 import { applyEnhancementConditionAvailability } from '../calculationAvailability';
+import { addLinearTimingGuidance, applyHedgerowEnhancementQuality, applyLinearTimingAvailability, applyHedgerowOffSiteAvailability } from '../linearRuleAvailability';
 import {
     enrichHedgerowEnhancementMovement,
     gateHedgerowEnhancementMovement,
@@ -301,10 +302,10 @@ const enrichWithSpatialRiskData = <
 >(
     data: Data,
 ) => {
-    return enrichWithSpatialRisk({
-        ...data,
-        spatialRiskCategory: data.baseline.spatialRiskCategory || 'Low',
-    });
+    const spatialRiskCategory = data.baseline.spatialRiskCategory;
+    return spatialRiskCategory
+        ? enrichWithSpatialRisk({ ...data, spatialRiskCategory })
+        : { ...data, spatialRiskMultiplier: 1, spatialRiskMultiplierDecimal: toDecimal(1) };
 };
 
 /**
@@ -372,7 +373,7 @@ const enrichWithEnhancementUnitsDelivered = <
     };
 };
 
-export const offSiteHedgerowEnhancementSchema = v.pipe(
+const offSiteHedgerowEnhancementValidatedSchema = v.pipe(
     inputSchema,
     v.transform((data) => ({
         ...data,
@@ -417,6 +418,13 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
             ),
         'Cannot have both hedgerow enhanced in advance and delay in starting hedgerow enhancement',
     ),
+    v.forward(
+        v.check(
+            (data) => !data.baseline.spatialRiskCategory || !!data.offSiteReferenceNumber,
+            'Off-site reference required ▲',
+        ),
+        ['offSiteReferenceNumber'],
+    ),
 
     // Extract baseline data and length
     v.transform(enrichBaselineHedgerowData),
@@ -451,6 +459,11 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
         'Enhancement does not improve hedgerow quality',
     ),
 
+);
+
+export const offSiteHedgerowEnhancementSchema = v.pipe(
+    offSiteHedgerowEnhancementValidatedSchema,
+
     // Calculate enhancement pathway label
     v.transform(addEnhancementPathway),
 
@@ -464,11 +477,26 @@ export const offSiteHedgerowEnhancementSchema = v.pipe(
 
     // Spatial risk multiplier
     v.transform(enrichWithSpatialRiskData),
-
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
     v.transform((data) =>
-        applyEnhancementConditionAvailability(gateHedgerowEnhancementMovement(data), 'hedgerow', true),
+        applyEnhancementConditionAvailability(
+            gateHedgerowEnhancementMovement(
+                applyHedgerowOffSiteAvailability(
+                    applyLinearTimingAvailability(
+                        {
+                            ...applyHedgerowEnhancementQuality(addLinearTimingGuidance(data), true),
+                        },
+                        'hedgerow',
+                        true,
+                        data.hedgerowEnhancedInAdvance,
+                        data.hedgerowEnhancedDelay,
+                    ),
+                ),
+            ),
+            'hedgerow',
+            true,
+        ),
     ),
 );
 
@@ -505,6 +533,23 @@ export const offSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithSpatialRiskData),
     safeTransform(enrichWithEnhancementUnitsDelivered),
-    safeTransform(gateHedgerowEnhancementMovement),
-    safeTransform((data) => applyEnhancementConditionAvailability(data, 'hedgerow', true)),
+    safeTransform((data) =>
+        applyEnhancementConditionAvailability(
+            gateHedgerowEnhancementMovement(
+                applyHedgerowOffSiteAvailability(
+                    applyLinearTimingAvailability(
+                        {
+                            ...applyHedgerowEnhancementQuality(addLinearTimingGuidance(data), true),
+                        },
+                        'hedgerow',
+                        true,
+                        data.hedgerowEnhancedInAdvance,
+                        data.hedgerowEnhancedDelay,
+                    ),
+                ),
+            ),
+            'hedgerow',
+            true,
+        ),
+    ),
 );

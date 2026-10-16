@@ -1,5 +1,6 @@
 import { Decimal, toDecimal } from '../decimal';
 import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
+import { addLinearTimingGuidance, applyLinearTimingAvailability, applyWatercourseOffSiteAvailability, applyWatercourseEnhancementUnitReview } from '../linearRuleAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -53,7 +54,7 @@ function excludeUnreferencedRawUnits<T extends {
     };
 }
 
-export const offSiteWatercourseEnhancementSchema = v.pipe(
+const offSiteWatercourseEnhancementValidatedSchema = v.pipe(
     inputSchema,
     v.transform((data) => ({
         ...data,
@@ -144,6 +145,11 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
         ['riparianEncroachment'],
     ),
 
+);
+
+export const offSiteWatercourseEnhancementSchema = v.pipe(
+    offSiteWatercourseEnhancementValidatedSchema,
+
     // Calculate enhancement pathway label
     v.transform(addEnhancementPathway),
 
@@ -165,6 +171,19 @@ export const offSiteWatercourseEnhancementSchema = v.pipe(
     v.transform((data) =>
         applyWatercourseEnhancementAvailability(
             enrichWithWatercourseUnitsDeliveredWithSpatialRisk(data), true,
+        ),
+    ),
+    v.transform((data) =>
+        applyWatercourseEnhancementUnitReview(
+            applyWatercourseOffSiteAvailability(
+                applyLinearTimingAvailability(
+                    addLinearTimingGuidance(data),
+                    'watercourse',
+                    true,
+                    data.watercourseEnhancedInAdvance,
+                    data.watercourseEnhancedDelay,
+                ),
+            ),
         ),
     ),
 );
@@ -207,6 +226,19 @@ export const offSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     // F-3 AP requires its own reference; AO calculates spatial units independently.
     safeTransform(excludeUnreferencedRawUnits),
     safeTransform((data) => applyWatercourseEnhancementAvailability(data, true)),
+    safeTransform((data) =>
+        applyWatercourseEnhancementUnitReview(
+            applyWatercourseOffSiteAvailability(
+                applyLinearTimingAvailability(
+                    addLinearTimingGuidance(data),
+                    'watercourse',
+                    true,
+                    data.watercourseEnhancedInAdvance,
+                    data.watercourseEnhancedDelay,
+                ),
+            ),
+        ),
+    ),
 );
 
 /**

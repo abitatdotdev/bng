@@ -7,6 +7,11 @@ import { watercourseConditionSchema } from '../watercourseCondition';
 import { watercourseTypeSchema } from '../watercourseType';
 import { riparianEncroachmentSchema, watercourseEncroachmentSchema } from '../watercourseEncroachment';
 import { watercourseSpatialRiskCategorySchema, getWatercourseSpatialRiskMultiplier } from '../spatialRisk';
+import {
+    addLinearTimingGuidance,
+    applyWatercourseCreationReferenceAvailability,
+    applyWatercourseCreationTimingAvailability,
+} from '../linearRuleAvailability';
 
 import {
     enrichWithCreationWatercourseData,
@@ -171,8 +176,11 @@ export const offSiteWatercourseCreationSchema = v.pipe(
     v.transform(enrichCreationWithEncroachmentData),
     // Calculate final net unit change
     v.transform(enrichWithUnitsDelivered),
+    v.transform(addLinearTimingGuidance),
     // Calculate SRM-adjusted net unit change
     v.transform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
+    v.transform((data) => applyWatercourseCreationTimingAvailability(data, true)),
+    v.transform(applyWatercourseCreationReferenceAvailability),
 );
 
 export type OffSiteWatercourseCreationSchema = v.InferInput<typeof offSiteWatercourseCreationSchema>;
@@ -199,7 +207,10 @@ export const offSiteWatercourseCreationUncheckedSchema = v.pipe(
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichCreationWithEncroachmentData),
     safeTransform(enrichWithUnitsDelivered),
+    safeTransform(addLinearTimingGuidance),
     safeTransform(enrichWithWatercourseUnitsDeliveredWithSpatialRisk),
     // F-2 AC requires a reference; AB calculates spatial units independently.
     safeTransform(excludeUnreferencedRawUnits),
+    safeTransform((data) => applyWatercourseCreationTimingAvailability(data, true)),
+    safeTransform(applyWatercourseCreationReferenceAvailability),
 );

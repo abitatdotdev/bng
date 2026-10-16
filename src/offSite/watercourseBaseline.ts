@@ -1,6 +1,7 @@
 import { Decimal, toDecimal } from '../decimal';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
+import { applyWatercourseBaselineAvailability } from '../linearRuleAvailability';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
 import { freeTextSchema, lengthSchema, safeTransform } from '../schemaUtils';
 import { watercourseConditionSchema } from '../watercourseCondition';
@@ -110,6 +111,8 @@ export const offSiteWatercourseBaselineSchema = v.pipe(
     // Calculate units lost
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithVhdhBespokeCompensationUnits),
+    v.transform(enrichWithUnitsRetainedWithSRM),
+    v.transform(applyWatercourseBaselineAvailability),
 );
 
 export type OffSiteWatercourseBaselineSchema = v.InferInput<typeof offSiteWatercourseBaselineSchema>;
@@ -133,6 +136,8 @@ export const offSiteWatercourseBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithTotalWatercourseUnits),
     safeTransform(enrichWithUnitsLost),
     safeTransform(enrichWithVhdhBespokeCompensationUnits),
+    safeTransform(enrichWithUnitsRetainedWithSRM),
+    safeTransform(applyWatercourseBaselineAvailability),
 );
 
 /**
@@ -173,6 +178,24 @@ export function calculateTotalWatercourseUnitsSRM(input: {
     return {
         totalWatercourseUnitsSRM: totalWatercourseUnitsSRM.toNumber(),
         totalWatercourseUnitsSRMDecimal: totalWatercourseUnitsSRM,
+    };
+}
+
+export function enrichWithUnitsRetainedWithSRM<Data extends {
+    unitsRetained: number;
+    unitsRetainedDecimal: Decimal;
+    vhdhBespokeCompensationUnits: number;
+    vhdhBespokeCompensationUnitsDecimal: Decimal;
+    spatialRiskMultiplier: number;
+    spatialRiskMultiplierDecimal: Decimal;
+}>(data: Data) {
+    const unitsRetainedWithSRMDecimal = new Decimal(data.unitsRetainedDecimal)
+        .plus(data.vhdhBespokeCompensationUnitsDecimal)
+        .mul(data.spatialRiskMultiplierDecimal);
+    return {
+        ...data,
+        unitsRetainedWithSRM: unitsRetainedWithSRMDecimal.toNumber(),
+        unitsRetainedWithSRMDecimal,
     };
 }
 

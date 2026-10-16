@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { offSiteHedgerowBaselineSchema, type OffSiteHedgerowBaselineSchema } from "./hedgerowBaseline";
+import { offSiteHedgerowBaselineSchema, offSiteHedgerowBaselineUncheckedSchema, type OffSiteHedgerowBaselineSchema } from "./hedgerowBaseline";
 import * as v from 'valibot';
 
 expect.extend({
@@ -101,3 +101,46 @@ test("calculates units with spatial risk correctly", () => {
     // Units lost is based on total units (without SRM)
     expect(result.unitsLost).toBe(result.totalHedgerowUnits);
 })
+
+test("keeps off-site baseline results selectively available for allocation, reference, and risk errors", () => {
+    const overAllocated = v.parse(offSiteHedgerowBaselineUncheckedSchema, fixture({
+        length: 1,
+        lengthRetained: 1.5,
+        spatialRiskCategory: "This metric is being used by an off-site provider",
+        offSiteReferenceNumber: "OFF-001",
+    }));
+    expect(overAllocated.totalHedgerowUnits).toBe(0);
+    expect(overAllocated.totalHedgerowUnitsDecimal.isZero()).toBe(true);
+    expect(overAllocated.hedgerowBaselineAvailability.unavailableResults.totalHedgerowUnits).toBe("check-data");
+    expect(overAllocated.totalHedgerowUnitsSRM).toBeGreaterThan(0);
+    expect(overAllocated.unitsRetained).toBeGreaterThan(0);
+    expect(overAllocated.unitsRetainedWithSRM).toBeGreaterThan(0);
+    expect(overAllocated.lengthLost).toBe(0);
+    expect(overAllocated.unitsLost).toBe(0);
+    expect(overAllocated.hedgerowBaselineAvailability.unavailableResults.lengthLost).toBe("check-data");
+
+    const missingReference = v.parse(offSiteHedgerowBaselineUncheckedSchema, fixture({
+        length: 1,
+        lengthRetained: 0.2,
+        spatialRiskCategory: "This metric is being used by an off-site provider",
+        offSiteReferenceNumber: "",
+    }));
+    expect(missingReference.totalHedgerowUnits).toBe(0);
+    expect(missingReference.totalHedgerowUnitsSRM).toBeGreaterThan(0);
+    expect(missingReference.lengthLost).toBeGreaterThan(0);
+    expect(missingReference.unitsLost).toBe(0);
+    expect(missingReference.hedgerowBaselineAvailability.unitsLostError).toBe(true);
+
+    const missingRisk = v.parse(offSiteHedgerowBaselineUncheckedSchema, fixture({
+        length: 1,
+        lengthRetained: 0.2,
+        spatialRiskCategory: undefined,
+        offSiteReferenceNumber: "",
+    }));
+    expect(missingRisk.totalHedgerowUnits).toBe(0);
+    expect(missingRisk.totalHedgerowUnitsSRM).toBe(0);
+    expect(missingRisk.unitsRetained).toBeGreaterThan(0);
+    expect(missingRisk.unitsRetainedWithSRM).toBe(0);
+    expect(missingRisk.lengthLost).toBeGreaterThan(0);
+    expect(missingRisk.unitsLost).toBe(0);
+});

@@ -256,6 +256,26 @@ test("enhancement with encroachment multipliers", () => {
     }
 });
 
+test("marks a numeric enhancement below its formula-derived baseline requirement", () => {
+    const baseline = createBaseline({
+        condition: "Moderate",
+        conditionScore: 2,
+        unitsEnhanced: 4.4,
+        totalWatercourseUnits: 8.8,
+    });
+    const result = v.parse(onSiteWatercourseEnhancementSchema, fixture({
+        baseline,
+        condition: "Moderate",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
+    }));
+
+    expect(result.watercourseUnitsDelivered).toBeLessThan(result.baseline.unitsEnhanced);
+    expect(result.enhancementUnitReview.status).toBe("review");
+    expect(result.enhancementUnitReview.requiredUnitsDecimal.eq(result.baseline.unitsEnhancedDecimal)).toBeTrue();
+    expect(result.watercourseUnitsDeliveredDecimal.eq(result.watercourseUnitsDelivered)).toBeTrue();
+});
+
 test("calculates units correctly with delta method - proposed length > baseline", () => {
     const baseline = createBaseline({
         lengthEnhanced: 0.5,

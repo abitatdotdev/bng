@@ -11,6 +11,7 @@ import {
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { hedgerowTypeSchema } from '../hedgerowType';
 import { calculateBaselineUnits, calculateTotalHedgerowUnits, calculateUnitsLost } from '../hedgerowCalc';
+import { applyHedgerowBaselineAvailability } from '../linearRuleAvailability';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -69,6 +70,7 @@ export const onSiteHedgerowBaselineSchema = v.pipe(
     v.transform(enrichWithTotalHedgerowUnits),
     // Calculate units lost (Columns T, U)
     v.transform(enrichWithUnitsLost),
+    v.transform(applyHedgerowBaselineAvailability),
 );
 
 export type OnSiteHedgerowBaselineSchema = v.InferInput<typeof onSiteHedgerowBaselineSchema>;
@@ -89,6 +91,7 @@ export const onSiteHedgerowBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithBaselineUnitsData),
     safeTransform(enrichWithTotalHedgerowUnits),
     safeTransform(enrichWithUnitsLost),
+    safeTransform(applyHedgerowBaselineAvailability),
 );
 
 /**

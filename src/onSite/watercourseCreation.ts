@@ -1,4 +1,5 @@
 import { toDecimal } from '../decimal';
+import { addLinearTimingGuidance, applyWatercourseCreationTimingAvailability } from '../linearRuleAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -96,6 +97,8 @@ export const onSiteWatercourseCreationSchema = v.pipe(
     v.transform(enrichCreationWithEncroachmentData),
     // Calculate final net unit change
     v.transform(enrichWithUnitsDelivered),
+    v.transform(addLinearTimingGuidance),
+    v.transform((data) => applyWatercourseCreationTimingAvailability(data, false)),
 );
 
 export type OnSiteWatercourseCreationSchema = v.InferInput<typeof onSiteWatercourseCreationSchema>;
@@ -121,4 +124,6 @@ export const onSiteWatercourseCreationUncheckedSchema = v.pipe(
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichCreationWithEncroachmentData),
     safeTransform(enrichWithUnitsDelivered),
+    safeTransform(addLinearTimingGuidance),
+    safeTransform((data) => applyWatercourseCreationTimingAvailability(data, false)),
 );

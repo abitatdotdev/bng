@@ -12,6 +12,7 @@ import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialR
 import { hedgerowTypeSchema } from '../hedgerowType';
 
 import { calculateBaselineUnits, calculateTotalHedgerowUnits, calculateUnitsLost } from '../hedgerowCalc';
+import { applyHedgerowBaselineAvailability } from '../linearRuleAvailability';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -81,6 +82,8 @@ export const offSiteHedgerowBaselineSchema = v.pipe(
     ),
     // Calculate units lost
     v.transform(enrichWithUnitsLost),
+    v.transform(enrichWithRetainedUnitsWithSRM),
+    v.transform((data) => applyHedgerowBaselineAvailability(data, true)),
 );
 
 export type OffSiteHedgerowBaselineSchema = v.InferInput<typeof offSiteHedgerowBaselineSchema>;
@@ -103,6 +106,8 @@ export const offSiteHedgerowBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithTotalHedgerowUnitsSRM),
     safeTransform(enrichWithTotalHedgerowUnits),
     safeTransform(enrichWithUnitsLost),
+    safeTransform(enrichWithRetainedUnitsWithSRM),
+    safeTransform((data) => applyHedgerowBaselineAvailability(data, true)),
 );
 
 /**
@@ -168,6 +173,22 @@ export function enrichWithBaselineUnitsData<
     },
 >(data: Data) {
     return { ...data, ...calculateBaselineUnits(data) };
+}
+
+export function enrichWithRetainedUnitsWithSRM<
+    Data extends {
+        unitsRetained: number;
+        unitsRetainedDecimal: Decimal;
+        spatialRiskMultiplier: number;
+        spatialRiskMultiplierDecimal: Decimal;
+    },
+>(data: Data) {
+    const unitsRetainedWithSRMDecimal = data.unitsRetainedDecimal.mul(data.spatialRiskMultiplierDecimal);
+    return {
+        ...data,
+        unitsRetainedWithSRM: unitsRetainedWithSRMDecimal.toNumber(),
+        unitsRetainedWithSRMDecimal,
+    };
 }
 
 /**

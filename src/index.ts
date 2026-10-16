@@ -41,4 +41,13 @@ export type {
     WatercourseEnhancementMovementState,
 } from './calculationAvailability';
 
+export type {
+    HedgerowOffSiteAvailability,
+    HedgerowEnhancementQuality,
+    HedgerowBaselineAvailability,
+    LinearTimingAvailability,
+    WatercourseBaselineAvailability,
+    WatercourseOffSiteAvailability,
+    WatercourseEnhancementUnitReview,
+} from './linearRuleAvailability';
 export type { AreaBaselineAvailability } from './areaCalculationRules';

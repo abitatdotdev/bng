@@ -262,6 +262,26 @@ test("enhancement with encroachment multipliers", () => {
     }
 });
 
+test("marks an off-site delivery below its formula-derived baseline requirement", () => {
+    const baseline = createBaseline({
+        condition: "Moderate",
+        conditionScore: 2,
+        unitsEnhanced: 4.4,
+        totalWatercourseUnits: 8.8,
+    });
+    const result = v.parse(offSiteWatercourseEnhancementSchema, fixture({
+        baseline,
+        condition: "Moderate",
+        watercourseEncroachment: "Minor",
+        riparianEncroachment: "Moderate/ Minor",
+    }));
+
+    expect(result.watercourseUnitsDelivered).toBeLessThan(result.baseline.unitsEnhanced);
+    expect(result.enhancementUnitReview.status).toBe("review");
+    expect(result.enhancementUnitReview.requiredUnitsDecimal.eq(result.baseline.unitsEnhancedDecimal)).toBeTrue();
+    expect(result.watercourseUnitsDeliveredDecimal.eq(result.watercourseUnitsDelivered)).toBeTrue();
+});
+
 test("enhancement with 30+ year advance caps to 0 time", () => {
     const result = v.safeParse(offSiteWatercourseEnhancementSchema, fixture({
         condition: "Moderate",

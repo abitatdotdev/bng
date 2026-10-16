@@ -1,5 +1,6 @@
 import { toDecimal } from '../decimal';
 import { applyWatercourseEnhancementAvailability } from '../calculationAvailability';
+import { addLinearTimingGuidance, applyLinearTimingAvailability, applyWatercourseEnhancementUnitReview } from '../linearRuleAvailability';
 import * as v from 'valibot';
 import { allWatercourses } from '../watercourses';
 import { strategicSignificanceSchema } from '../strategicSignificanceSchema';
@@ -135,6 +136,17 @@ export const onSiteWatercourseEnhancementSchema = v.pipe(
     // Final calculation
     v.transform(calculateEnhancementUnitsDelivered),
     v.transform((data) => applyWatercourseEnhancementAvailability(data, false)),
+    v.transform((data) =>
+        applyWatercourseEnhancementUnitReview(
+            applyLinearTimingAvailability(
+                addLinearTimingGuidance(data),
+                'watercourse',
+                false,
+                data.watercourseEnhancedInAdvance,
+                data.watercourseEnhancedDelay,
+            ),
+        ),
+    ),
 );
 
 export type OnSiteWatercourseEnhancementSchema = v.InferInput<typeof onSiteWatercourseEnhancementSchema>;
@@ -169,4 +181,15 @@ export const onSiteWatercourseEnhancementUncheckedSchema = v.pipe(
     safeTransform(enrichEnhancementWithEncroachmentData),
     safeTransform(calculateEnhancementUnitsDelivered),
     safeTransform((data) => applyWatercourseEnhancementAvailability(data, false)),
+    safeTransform((data) =>
+        applyWatercourseEnhancementUnitReview(
+            applyLinearTimingAvailability(
+                addLinearTimingGuidance(data),
+                'watercourse',
+                false,
+                data.watercourseEnhancedInAdvance,
+                data.watercourseEnhancedDelay,
+            ),
+        ),
+    ),
 );
