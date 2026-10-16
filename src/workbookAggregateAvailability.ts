@@ -126,11 +126,7 @@ function waterAllocationAvailable(
 }
 
 function deliveryBelowBaseline(rows: readonly WatercourseEnhancement[]): boolean {
-    return rows.some((row) => {
-        const delivered = row.watercourseUnitsDeliveredDecimal;
-        const required = row.baseline?.unitsEnhancedDecimal;
-        return Decimal.isDecimal(delivered) && Decimal.isDecimal(required) && delivered.lessThan(required);
-    });
+    return rows.some((row) => row.enhancementUnitReview?.status === 'review');
 }
 
 function totalValue<Feature, Field extends DecimalBackedField<Feature>>(rows: readonly Feature[], field: Field, positiveOnly: boolean): Decimal {

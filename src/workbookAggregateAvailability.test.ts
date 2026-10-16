@@ -93,10 +93,10 @@ describe('workbook total availability', () => {
             offSiteHedgerowBaselines: [{
                 habitatType: 'Native hedgerow',
                 condition: 'Moderate',
-                strategicSignificance,
+                strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
                 offSiteReferenceNumber: 'OFF-001',
                 spatialRiskCategory: 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA',
-                length: 2,
+                length: 1,
                 lengthRetained: 0.2,
                 lengthEnhanced: 0,
             }],
@@ -104,7 +104,7 @@ describe('workbook total availability', () => {
         const row = features.offSiteHedgerowBaselines[0]!;
         const result = calculateWorkbookAggregateAvailability(features);
 
-        expect(row.unitsRetainedWithSRM).toBeGreaterThan(0);
+        expect(row.unitsRetainedWithSRMDecimal.toString()).toBe('0.6');
         expect(result.inputTotals['E-1'].unitsRetainedWithSRM?.valueDecimal.eq(row.unitsRetainedWithSRMDecimal)).toBe(true);
     });
 
@@ -136,5 +136,80 @@ describe('workbook total availability', () => {
         expect(f1.watercourseBaselineAvailability?.unavailableResults.unitsRetainedWithSRM).toBe('blank');
         expect(result.inputTotals['F-1'].unitsRetainedWithSRM?.value).toBe(0);
         expect(result.inputTotals['F-1'].unitsRetainedWithSRM?.available).toBe(true);
+    });
+
+    test('uses source review status for C3 and F3 caps, ordinary shortfall, and unavailable rows', () => {
+        const cappedBaseline = { ...waterBaseline, lengthEnhanced: 1.5 };
+        const { features: cappedC3 } = featuresFromInput({
+            onSiteWatercourseEnhancements: [{
+                baseline: cappedBaseline,
+                watercourseType: 'Ditches',
+                condition: 'Moderate',
+                strategicSignificance,
+                watercourseEncroachment: 'Minor',
+                riparianEncroachment: 'No Encroachment/ No Encroachment',
+            }],
+        }, { validate: false });
+        const c3CapRow = cappedC3.onSiteWatercourseEnhancements[0]!;
+        const cappedResult = calculateWorkbookAggregateAvailability(cappedC3);
+
+        expect(c3CapRow.watercourseUnitsDelivered).toBeLessThan(c3CapRow.baseline.unitsEnhanced);
+        expect(c3CapRow.enhancementUnitReview.status).toBe('clear');
+        expect(cappedResult.inputSheets['C-3'].watercourseUnitsDelivered).toBe(true);
+
+        const risk = 'Outside waterbody catchment, but within operational catchment';
+        const reviewedBaseline = { ...waterBaseline, lengthEnhanced: 0.5, spatialRiskCategory: risk, offSiteReferenceNumber: 'OFF-001' };
+        const { features: reviewedF3 } = featuresFromInput({
+            offSiteWatercourseEnhancements: [{
+                baseline: reviewedBaseline,
+                watercourseType: 'Ditches',
+                condition: 'Moderate',
+                strategicSignificance,
+                watercourseEncroachment: 'Minor',
+                riparianEncroachment: 'No Encroachment/ No Encroachment',
+                offSiteReferenceNumber: 'OFF-001',
+            }],
+        }, { validate: false });
+        const reviewedRow = reviewedF3.offSiteWatercourseEnhancements[0]!;
+        const reviewedResult = calculateWorkbookAggregateAvailability(reviewedF3);
+
+        expect(reviewedRow.enhancementUnitReview.status).toBe('review');
+        expect(reviewedResult.inputSheets['F-3'].watercourseUnitsDelivered).toBe(false);
+        expect(reviewedResult.inputSheets['F-3'].watercourseUnitsDeliveredWithSpatialRisk).toBe(false);
+
+        const { features: unavailableC3 } = featuresFromInput({
+            onSiteWatercourseEnhancements: [{
+                baseline: { ...waterBaseline, lengthEnhanced: 0.5 },
+                watercourseType: 'Ditches',
+                condition: 'Moderate',
+                strategicSignificance,
+                watercourseEnhancedInAdvance: 1,
+                watercourseEnhancedDelay: 1,
+                watercourseEncroachment: 'No Encroachment',
+                riparianEncroachment: 'No Encroachment/ No Encroachment',
+            }],
+        }, { validate: false });
+        const unavailableC3Row = unavailableC3.onSiteWatercourseEnhancements[0]!;
+        const unavailableC3Result = calculateWorkbookAggregateAvailability(unavailableC3);
+
+        expect(unavailableC3Row.enhancementUnitReview.status).toBe('unavailable');
+        expect(unavailableC3Result.inputSheets['C-3'].watercourseUnitsDelivered).toBe(true);
+
+        const { features: unavailableF3 } = featuresFromInput({
+            offSiteWatercourseEnhancements: [{
+                baseline: reviewedBaseline,
+                watercourseType: 'Ditches',
+                condition: 'Moderate',
+                strategicSignificance,
+                watercourseEncroachment: 'No Encroachment',
+                riparianEncroachment: 'No Encroachment/ No Encroachment',
+            }],
+        }, { validate: false });
+        const unavailableF3Row = unavailableF3.offSiteWatercourseEnhancements[0]!;
+        const unavailableF3Result = calculateWorkbookAggregateAvailability(unavailableF3);
+
+        expect(unavailableF3Row.enhancementUnitReview.status).toBe('unavailable');
+        expect(unavailableF3Result.inputSheets['F-3'].watercourseUnitsDelivered).toBe(true);
+        expect(unavailableF3Result.inputSheets['F-3'].watercourseUnitsDeliveredWithSpatialRisk).toBe(true);
     });
 });
