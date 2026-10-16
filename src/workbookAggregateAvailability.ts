@@ -1,61 +1,47 @@
-import type { AllFeatures } from './features';
 import { Decimal } from './decimal';
+import type { AllFeatures } from './features';
+import type { AreaBaselineResult } from './areaCalculationTypes';
+import type {
+    HedgerowBaselineAvailability,
+    WatercourseBaselineAvailability,
+} from './linearRuleAvailability';
 
-type Row = Record<string, unknown>;
-type Unavailable = 'blank' | 'check-data';
+export type WorkbookSheet = 'A-1' | 'A-2' | 'A-3' | 'D-1' | 'D-2' | 'D-3' | 'B-1' | 'B-2' | 'B-3' | 'E-1' | 'E-2' | 'E-3' | 'C-1' | 'C-2' | 'C-3' | 'F-1' | 'F-2' | 'F-3';
 
-function unavailable(row: Row, stateKey: string, result: string): boolean {
-    const state = row[stateKey] as { unavailableResults?: Record<string, unknown> } | undefined;
-    const status = state?.unavailableResults?.[result];
-    return status === 'blank' || status === 'check-data';
-}
+const SHEET_FEATURES = {
+    'A-1': 'onSiteHabitatBaselines',
+    'A-2': 'onSiteHabitatCreations',
+    'A-3': 'onSiteHabitatEnhancements',
+    'D-1': 'offSiteHabitatBaselines',
+    'D-2': 'offSiteHabitatCreations',
+    'D-3': 'offSiteHabitatEnhancements',
+    'B-1': 'onSiteHedgerowBaselines',
+    'B-2': 'onSiteHedgerowCreations',
+    'B-3': 'onSiteHedgerowEnhancements',
+    'E-1': 'offSiteHedgerowBaselines',
+    'E-2': 'offSiteHedgerowCreations',
+    'E-3': 'offSiteHedgerowEnhancements',
+    'C-1': 'onSiteWatercourseBaselines',
+    'C-2': 'onSiteWatercourseCreations',
+    'C-3': 'onSiteWatercourseEnhancements',
+    'F-1': 'offSiteWatercourseBaselines',
+    'F-2': 'offSiteWatercourseCreations',
+    'F-3': 'offSiteWatercourseEnhancements',
+} as const satisfies Record<WorkbookSheet, keyof AllFeatures>;
 
-function rowsAvailable(rows: Row[], stateKey: string, result: string): boolean {
-    return rows.every((row) => !unavailable(row, stateKey, result));
-}
+type RowsFor<Sheet extends WorkbookSheet> = AllFeatures[(typeof SHEET_FEATURES)[Sheet]];
+type RowFor<Sheet extends WorkbookSheet> = RowsFor<Sheet>[number];
+type DecimalBackedField<Feature> = {
+    [Field in keyof Feature & string]: Feature[Field] extends number | string | Decimal | undefined
+        ? `${Field}Decimal` extends keyof Feature
+            ? Feature[`${Field}Decimal` & keyof Feature] extends Decimal | string | undefined
+                ? Field
+                : never
+            : never
+        : never;
+}[keyof Feature & string];
 
-function hedgeBaselineAvailable(rows: Row[], result: string): boolean {
-    return rows.every((row) => {
-        const state = row.hedgerowBaselineAvailability as {
-            status?: string;
-            allocationState?: string;
-            unavailableResults?: Record<string, Unavailable>;
-        } | undefined;
-        const legacyBaselineFailure = result === 'baselineTotals' &&
-            (state?.status === 'over-allocated' || state?.allocationState === 'over-allocated');
-        return !legacyBaselineFailure &&
-            state?.unavailableResults?.[result] !== 'blank' &&
-            state?.unavailableResults?.[result] !== 'check-data';
-    });
-}
-
-function waterBaselineAvailable(rows: Row[], result: string): boolean {
-    return rowsAvailable(rows, 'watercourseBaselineAvailability', result);
-}
-
-function waterAllocationAvailable(rows: Row[], result: string): boolean {
-    return rows.every((row) => {
-        const state = row.watercourseBaselineAvailability as {
-            retainedExceedsLength?: boolean;
-            unavailableResults?: Record<string, Unavailable>;
-        } | undefined;
-        return !state?.retainedExceedsLength &&
-            state?.unavailableResults?.[result] !== 'check-data';
-    });
-}
-
-function deliveryBelowBaseline(rows: Row[]): boolean {
-    return rows.some((row) => {
-        const baseline = row.baseline as Row | undefined;
-        const delivered = row.watercourseUnitsDeliveredDecimal;
-        const required = baseline?.unitsEnhancedDecimal;
-        return Decimal.isDecimal(delivered) && Decimal.isDecimal(required) && delivered.lessThan(required);
-    });
-}
-
-type InputTotal = { value: number; valueDecimal: Decimal; available: boolean };
-
-const TOTAL_FIELDS: Record<string, string[]> = {
+const TOTAL_FIELDS = {
     'A-1': ['area', 'totalHabitatUnits', 'areaRetained', 'areaEnhanced', 'baselineUnitsRetained', 'baselineUnitsEnhanced', 'areaHabitatLost', 'unitsLost', 'vhdhBespokeCompensationUnits'],
     'A-2': ['area', 'habitatUnitsDelivered'],
     'A-3': ['area', 'habitatUnitsDelivered'],
@@ -65,7 +51,7 @@ const TOTAL_FIELDS: Record<string, string[]> = {
     'B-1': ['length', 'totalHedgerowUnits', 'lengthRetained', 'lengthEnhanced', 'unitsRetained', 'unitsEnhanced', 'lengthLost', 'unitsLost'],
     'B-2': ['length', 'hedgerowUnitsDelivered'],
     'B-3': ['length', 'hedgerowUnitsDelivered'],
-    'E-1': ['length', 'totalHedgerowUnitsSRM', 'totalHedgerowUnits', 'lengthRetained', 'lengthEnhanced', 'unitsRetained', 'unitsEnhanced', 'lengthLost', 'unitsLost', 'baselineUnitsRetainedWithSRM'],
+    'E-1': ['length', 'totalHedgerowUnitsSRM', 'totalHedgerowUnits', 'lengthRetained', 'lengthEnhanced', 'unitsRetained', 'unitsEnhanced', 'lengthLost', 'unitsLost', 'unitsRetainedWithSRM'],
     'E-2': ['length', 'hedgerowUnitsDeliveredWithSpatialRisk', 'hedgerowUnitsDelivered'],
     'E-3': ['length', 'hedgerowUnitsDeliveredWithSpatialRisk', 'hedgerowUnitsDelivered'],
     'C-1': ['length', 'totalWatercourseUnits', 'lengthRetained', 'lengthEnhanced', 'unitsRetained', 'unitsEnhanced', 'lengthLost', 'unitsLost', 'vhdhBespokeCompensationUnits'],
@@ -74,154 +60,177 @@ const TOTAL_FIELDS: Record<string, string[]> = {
     'F-1': ['length', 'totalWatercourseUnitsSRM', 'totalWatercourseUnits', 'lengthRetained', 'lengthEnhanced', 'unitsRetained', 'unitsEnhanced', 'lengthLost', 'unitsLost', 'unitsRetainedWithSRM', 'vhdhBespokeCompensationUnits'],
     'F-2': ['length', 'netUnitChangeWithSpatialRisk', 'unitsDelivered'],
     'F-3': ['length', 'watercourseUnitsDeliveredWithSpatialRisk', 'watercourseUnitsDelivered'],
-};
+} as const satisfies { [Sheet in WorkbookSheet]: readonly DecimalBackedField<RowFor<Sheet>>[] };
 
-function totalValue(rows: Row[], field: string, positiveOnly = false): Decimal {
+export type WorkbookTotalField<Sheet extends WorkbookSheet> = (typeof TOTAL_FIELDS)[Sheet][number];
+type InputTotal = { value: number; valueDecimal: Decimal; available: boolean };
+type InputTotals = { [Sheet in WorkbookSheet]: Record<WorkbookTotalField<Sheet>, InputTotal> };
+
+type AvailabilityFields = {
+    'A-1': 'areaHabitatLost' | 'unitsLost' | 'totalHabitatUnits' | 'totalHabitatUnitsSRM' | 'vhdhBespokeCompensationUnits';
+    'A-2': never;
+    'A-3': never;
+    'D-1': 'areaHabitatLost' | 'unitsLost' | 'totalHabitatUnits' | 'totalHabitatUnitsSRM' | 'baselineUnitsRetained' | 'baselineUnitsEnhanced' | 'baselineUnitsRetainedWithSRM' | 'vhdhBespokeCompensationUnits';
+    'D-2': never;
+    'D-3': never;
+    'B-1': 'totalHedgerowUnits' | 'totalHedgerowUnitsSRM' | 'unitsRetained' | 'unitsEnhanced';
+    'B-2': never;
+    'B-3': never;
+    'E-1': 'totalHedgerowUnits' | 'totalHedgerowUnitsSRM' | 'unitsRetained' | 'unitsEnhanced' | 'unitsLost' | 'unitsRetainedWithSRM';
+    'E-2': never;
+    'E-3': never;
+    'C-1': 'totalWatercourseUnits' | 'totalWatercourseUnitsSRM' | 'unitsRetained' | 'unitsEnhanced' | 'unitsLost' | 'vhdhBespokeCompensationUnits';
+    'C-2': never;
+    'C-3': 'watercourseUnitsDelivered';
+    'F-1': 'totalWatercourseUnits' | 'totalWatercourseUnitsSRM' | 'unitsRetained' | 'unitsEnhanced' | 'unitsLost' | 'unitsRetainedWithSRM' | 'vhdhBespokeCompensationUnits';
+    'F-2': never;
+    'F-3': 'watercourseUnitsDelivered' | 'watercourseUnitsDeliveredWithSpatialRisk';
+};
+type InputSheets = { [Sheet in WorkbookSheet]: Partial<Record<AvailabilityFields[Sheet], boolean>> };
+type TotalGates = { [Sheet in WorkbookSheet]?: Partial<Record<WorkbookTotalField<Sheet>, boolean>> };
+
+type HabitatBaseline = AllFeatures['onSiteHabitatBaselines'][number];
+type HedgerowBaseline = AllFeatures['onSiteHedgerowBaselines'][number];
+type WatercourseBaseline = AllFeatures['onSiteWatercourseBaselines'][number];
+type WatercourseEnhancement = AllFeatures['onSiteWatercourseEnhancements'][number];
+
+function areaRowsAvailable(rows: readonly HabitatBaseline[], result: AreaBaselineResult): boolean {
+    return rows.every((row) => !row.areaCalculationAvailability?.unavailableResults[result]);
+}
+
+function hedgerowBaselineAvailable(
+    rows: readonly HedgerowBaseline[],
+    result: keyof HedgerowBaselineAvailability['unavailableResults'],
+): boolean {
+    return rows.every((row) => {
+        const state = row.hedgerowBaselineAvailability;
+        return state?.unavailableResults[result] === undefined;
+    });
+}
+
+function waterBaselineAvailable(
+    rows: readonly WatercourseBaseline[],
+    result: keyof WatercourseBaselineAvailability['unavailableResults'],
+): boolean {
+    return rows.every((row) => row.watercourseBaselineAvailability?.unavailableResults[result] === undefined);
+}
+
+function waterAllocationAvailable(
+    rows: readonly WatercourseBaseline[],
+    result: 'unitsRetained' | 'unitsEnhanced' | 'unitsRetainedWithSRM',
+): boolean {
+    return rows.every((row) => {
+        const state = row.watercourseBaselineAvailability;
+        return !state?.retainedExceedsLength && state?.unavailableResults[result] !== 'check-data';
+    });
+}
+
+function deliveryBelowBaseline(rows: readonly WatercourseEnhancement[]): boolean {
+    return rows.some((row) => {
+        const delivered = row.watercourseUnitsDeliveredDecimal;
+        const required = row.baseline?.unitsEnhancedDecimal;
+        return Decimal.isDecimal(delivered) && Decimal.isDecimal(required) && delivered.lessThan(required);
+    });
+}
+
+function totalValue<Feature, Field extends DecimalBackedField<Feature>>(rows: readonly Feature[], field: Field, positiveOnly: boolean): Decimal {
     return rows.reduce((sum, row) => {
-        const exact = row[`${field}Decimal`];
-        const value = Decimal.isDecimal(exact) ? exact :
-            typeof row[field] === 'number' && Number.isFinite(row[field]) ? new Decimal(row[field] as number) : undefined;
+        const projected = row[field];
+        const exact = row[`${field}Decimal` as keyof Feature];
+        const value = Decimal.isDecimal(exact)
+            ? exact
+            : typeof projected === 'number' && Number.isFinite(projected)
+                ? new Decimal(projected)
+                : undefined;
         if (!value || (positiveOnly && !value.greaterThan(0))) return sum;
         return sum.plus(value);
     }, new Decimal(0));
 }
 
-function totalsFor(rows: Row[], sheet: string): Record<string, InputTotal> {
-    const allocationGates: Record<string, Record<string, boolean>> = {
-        'D-1': {
-            baselineUnitsRetained: rowsAvailable(rows, 'areaCalculationAvailability', 'areaHabitatLost'),
-            baselineUnitsEnhanced: rowsAvailable(rows, 'areaCalculationAvailability', 'areaHabitatLost'),
-            baselineUnitsRetainedWithSRM: rowsAvailable(rows, 'areaCalculationAvailability', 'areaHabitatLost'),
-        },
-        'B-1': {
-            unitsRetained: hedgeBaselineAvailable(rows, 'lengthLost'),
-            unitsEnhanced: hedgeBaselineAvailable(rows, 'lengthLost'),
-        },
-        'E-1': {
-            unitsRetained: hedgeBaselineAvailable(rows, 'lengthLost'),
-            unitsEnhanced: hedgeBaselineAvailable(rows, 'lengthLost'),
-            baselineUnitsRetainedWithSRM: hedgeBaselineAvailable(rows, 'lengthLost'),
-        },
-        'C-1': {
-            unitsRetained: waterAllocationAvailable(rows, 'unitsRetained'),
-            unitsEnhanced: waterAllocationAvailable(rows, 'unitsEnhanced'),
-        },
-        'F-1': {
-            unitsRetained: waterAllocationAvailable(rows, 'unitsRetained'),
-            unitsEnhanced: waterAllocationAvailable(rows, 'unitsEnhanced'),
-            unitsRetainedWithSRM: waterAllocationAvailable(rows, 'unitsRetainedWithSRM'),
-        },
-    };
-    const aggregateError = sheet === 'C-3' || sheet === 'F-3' ? deliveryBelowBaseline(rows) : false;
-    return Object.fromEntries(TOTAL_FIELDS[sheet]!.map((field) => {
+function totalsFor<Sheet extends WorkbookSheet>(
+    rows: readonly RowFor<Sheet>[],
+    sheet: Sheet,
+    gates: Partial<Record<WorkbookTotalField<Sheet>, boolean>> = {},
+): Record<WorkbookTotalField<Sheet>, InputTotal> {
+    const totals = Object.fromEntries(TOTAL_FIELDS[sheet].map((field) => {
         const positiveOnly = (sheet === 'C-1' || sheet === 'F-1') && field === 'unitsLost';
-        const explicitGate = allocationGates[sheet]?.[field];
-        const hedgeErrorGate = sheet === 'E-1' && field === 'unitsLost' && rows.some((row) =>
-            Boolean((row.hedgerowBaselineAvailability as Row | undefined)?.unitsLostError));
-        const gate = explicitGate ?? (hedgeErrorGate
-            ? false
-            : aggregateError && ((sheet === 'C-3' && field === 'watercourseUnitsDelivered') ||
-                (sheet === 'F-3' && (field === 'watercourseUnitsDelivered' || field === 'watercourseUnitsDeliveredWithSpatialRisk')))
-            ? false
-            : true);
-        const valueDecimal = totalValue(rows, field, positiveOnly);
-        return [field, { value: valueDecimal.toNumber(), valueDecimal, available: gate }];
+        const typedField = field as DecimalBackedField<RowFor<Sheet>>;
+        const valueDecimal = totalValue(rows, typedField, positiveOnly);
+        const gate = Object.entries(gates).find(([gateField]) => gateField === field)?.[1];
+        return [field, { value: valueDecimal.toNumber(), valueDecimal, available: typeof gate === 'boolean' ? gate : true }];
     }));
+    return totals as Record<WorkbookTotalField<Sheet>, InputTotal>;
 }
+
+type AggregateDependency = {
+    [Sheet in WorkbookSheet]: { sheet: Sheet; field: WorkbookTotalField<Sheet> };
+}[WorkbookSheet];
 
 /** Availability follows the explicit error dependencies of workbook column totals. */
 export function calculateWorkbookAggregateAvailability(features: AllFeatures) {
-    const a1 = features.onSiteHabitatBaselines as unknown as Row[];
-    const d1 = features.offSiteHabitatBaselines as unknown as Row[];
-    const b1 = features.onSiteHedgerowBaselines as unknown as Row[];
-    const e1 = features.offSiteHedgerowBaselines as unknown as Row[];
-    const c1 = features.onSiteWatercourseBaselines as unknown as Row[];
-    const f1 = features.offSiteWatercourseBaselines as unknown as Row[];
-    const c3 = features.onSiteWatercourseEnhancements as unknown as Row[];
-    const f3 = features.offSiteWatercourseEnhancements as unknown as Row[];
+    const a1 = features.onSiteHabitatBaselines;
+    const d1 = features.offSiteHabitatBaselines;
+    const b1 = features.onSiteHedgerowBaselines;
+    const e1 = features.offSiteHedgerowBaselines;
+    const c1 = features.onSiteWatercourseBaselines;
+    const f1 = features.offSiteWatercourseBaselines;
+    const c3 = features.onSiteWatercourseEnhancements;
+    const f3 = features.offSiteWatercourseEnhancements;
+
+    const d1RetainedAvailable = areaRowsAvailable(d1, 'areaHabitatLost');
+    const b1AllocationAvailable = hedgerowBaselineAvailable(b1, 'lengthLost');
+    const e1AllocationAvailable = hedgerowBaselineAvailable(e1, 'lengthLost');
+    const c1RetainedAvailable = waterAllocationAvailable(c1, 'unitsRetained');
+    const f1RetainedAvailable = waterAllocationAvailable(f1, 'unitsRetained');
+    const c3DeliveryAvailable = !deliveryBelowBaseline(c3);
+    const f3DeliveryAvailable = !deliveryBelowBaseline(f3);
 
     const inputSheets = {
-        'A-1': {
-            areaHabitatLost: true,
-            unitsLost: true,
-            totalHabitatUnits: true,
-            totalHabitatUnitsSRM: true,
-            vhdhBespokeCompensationUnits: true,
-        },
-        'D-1': {
-            areaHabitatLost: true,
-            unitsLost: true,
-            totalHabitatUnits: true,
-            totalHabitatUnitsSRM: true,
-            baselineUnitsRetained: rowsAvailable(d1, 'areaCalculationAvailability', 'areaHabitatLost'),
-            baselineUnitsEnhanced: rowsAvailable(d1, 'areaCalculationAvailability', 'areaHabitatLost'),
-            baselineUnitsRetainedWithSRM: rowsAvailable(d1, 'areaCalculationAvailability', 'areaHabitatLost'),
-            vhdhBespokeCompensationUnits: true,
-        },
-        'B-1': {
-            totalHedgerowUnits: true,
-            totalHedgerowUnitsSRM: true,
-            unitsRetained: hedgeBaselineAvailable(b1, 'lengthLost'),
-            unitsEnhanced: hedgeBaselineAvailable(b1, 'lengthLost'),
-        },
-        'E-1': {
-            totalHedgerowUnits: true,
-            totalHedgerowUnitsSRM: true,
-            unitsRetained: hedgeBaselineAvailable(e1, 'lengthLost'),
-            unitsEnhanced: hedgeBaselineAvailable(e1, 'lengthLost'),
-            unitsLost: !e1.some((row) => Boolean((row.hedgerowBaselineAvailability as Row | undefined)?.unitsLostError)),
-            baselineUnitsRetainedWithSRM: hedgeBaselineAvailable(e1, 'lengthLost'),
-        },
-        'C-1': {
-            totalWatercourseUnits: true,
-            totalWatercourseUnitsSRM: waterBaselineAvailable(c1, 'totalWatercourseUnitsSRM'),
-            unitsRetained: waterAllocationAvailable(c1, 'unitsRetained'),
-            unitsEnhanced: waterAllocationAvailable(c1, 'unitsEnhanced'),
-            unitsLost: true,
-            vhdhBespokeCompensationUnits: waterBaselineAvailable(c1, 'vhdhBespokeCompensationUnits'),
-        },
-        'F-1': {
-            totalWatercourseUnits: true,
-            totalWatercourseUnitsSRM: true,
-            unitsRetained: waterAllocationAvailable(f1, 'unitsRetained'),
-            unitsEnhanced: waterAllocationAvailable(f1, 'unitsEnhanced'),
-            unitsLost: true,
-            unitsRetainedWithSRM: waterAllocationAvailable(f1, 'unitsRetainedWithSRM'),
-            vhdhBespokeCompensationUnits: waterBaselineAvailable(f1, 'vhdhBespokeCompensationUnits'),
-        },
-        'C-3': {
-            watercourseUnitsDelivered: !deliveryBelowBaseline(c3),
-        },
-        'F-3': {
-            watercourseUnitsDelivered: !deliveryBelowBaseline(f3),
-            watercourseUnitsDeliveredWithSpatialRisk: !deliveryBelowBaseline(f3),
-        },
-    };
-    const inputTotals = {
-        'A-1': totalsFor(a1, 'A-1'),
-        'A-2': totalsFor(features.onSiteHabitatCreations as unknown as Row[], 'A-2'),
-        'A-3': totalsFor(features.onSiteHabitatEnhancements as unknown as Row[], 'A-3'),
-        'D-1': totalsFor(d1, 'D-1'),
-        'D-2': totalsFor(features.offSiteHabitatCreations as unknown as Row[], 'D-2'),
-        'D-3': totalsFor(features.offSiteHabitatEnhancements as unknown as Row[], 'D-3'),
-        'B-1': totalsFor(b1, 'B-1'),
-        'B-2': totalsFor(features.onSiteHedgerowCreations as unknown as Row[], 'B-2'),
-        'B-3': totalsFor(features.onSiteHedgerowEnhancements as unknown as Row[], 'B-3'),
-        'E-1': totalsFor(e1, 'E-1'),
-        'E-2': totalsFor(features.offSiteHedgerowCreations as unknown as Row[], 'E-2'),
-        'E-3': totalsFor(features.offSiteHedgerowEnhancements as unknown as Row[], 'E-3'),
-        'C-1': totalsFor(c1, 'C-1'),
-        'C-2': totalsFor(features.onSiteWatercourseCreations as unknown as Row[], 'C-2'),
-        'C-3': totalsFor(c3, 'C-3'),
-        'F-1': totalsFor(f1, 'F-1'),
-        'F-2': totalsFor(features.offSiteWatercourseCreations as unknown as Row[], 'F-2'),
-        'F-3': totalsFor(f3, 'F-3'),
-    };
+        'A-1': { areaHabitatLost: true, unitsLost: true, totalHabitatUnits: true, totalHabitatUnitsSRM: true, vhdhBespokeCompensationUnits: true },
+        'A-2': {},
+        'A-3': {},
+        'D-1': { areaHabitatLost: true, unitsLost: true, totalHabitatUnits: true, totalHabitatUnitsSRM: true, baselineUnitsRetained: d1RetainedAvailable, baselineUnitsEnhanced: d1RetainedAvailable, baselineUnitsRetainedWithSRM: d1RetainedAvailable, vhdhBespokeCompensationUnits: true },
+        'D-2': {},
+        'D-3': {},
+        'B-1': { totalHedgerowUnits: true, totalHedgerowUnitsSRM: true, unitsRetained: b1AllocationAvailable, unitsEnhanced: b1AllocationAvailable },
+        'B-2': {},
+        'B-3': {},
+        'E-1': { totalHedgerowUnits: true, totalHedgerowUnitsSRM: true, unitsRetained: e1AllocationAvailable, unitsEnhanced: e1AllocationAvailable, unitsLost: !e1.some((row) => row.hedgerowBaselineAvailability?.unitsLostError), unitsRetainedWithSRM: e1AllocationAvailable },
+        'E-2': {},
+        'E-3': {},
+        'C-1': { totalWatercourseUnits: true, totalWatercourseUnitsSRM: waterBaselineAvailable(c1, 'totalWatercourseUnitsSRM'), unitsRetained: c1RetainedAvailable, unitsEnhanced: waterAllocationAvailable(c1, 'unitsEnhanced'), unitsLost: true, vhdhBespokeCompensationUnits: waterBaselineAvailable(c1, 'vhdhBespokeCompensationUnits') },
+        'C-2': {},
+        'C-3': { watercourseUnitsDelivered: c3DeliveryAvailable },
+        'F-1': { totalWatercourseUnits: true, totalWatercourseUnitsSRM: true, unitsRetained: f1RetainedAvailable, unitsEnhanced: waterAllocationAvailable(f1, 'unitsEnhanced'), unitsLost: true, unitsRetainedWithSRM: waterAllocationAvailable(f1, 'unitsRetainedWithSRM'), vhdhBespokeCompensationUnits: waterBaselineAvailable(f1, 'vhdhBespokeCompensationUnits') },
+        'F-2': {},
+        'F-3': { watercourseUnitsDelivered: f3DeliveryAvailable, watercourseUnitsDeliveredWithSpatialRisk: f3DeliveryAvailable },
+    } satisfies InputSheets;
 
-    const available = (sheet: keyof typeof inputTotals, field: string) =>
-        inputTotals[sheet][field as keyof (typeof inputTotals)[typeof sheet]]?.available ?? false;
-    const combine = (dependencies: [keyof typeof inputTotals, string][]) =>
-        dependencies.every(([sheet, field]) => available(sheet, field));
+    const inputTotals: InputTotals = {
+        'A-1': totalsFor(a1, 'A-1'),
+        'A-2': totalsFor(features.onSiteHabitatCreations, 'A-2'),
+        'A-3': totalsFor(features.onSiteHabitatEnhancements, 'A-3'),
+        'D-1': totalsFor(d1, 'D-1', { baselineUnitsRetained: d1RetainedAvailable, baselineUnitsEnhanced: d1RetainedAvailable, baselineUnitsRetainedWithSRM: d1RetainedAvailable }),
+        'D-2': totalsFor(features.offSiteHabitatCreations, 'D-2'),
+        'D-3': totalsFor(features.offSiteHabitatEnhancements, 'D-3'),
+        'B-1': totalsFor(b1, 'B-1', { unitsRetained: b1AllocationAvailable, unitsEnhanced: b1AllocationAvailable }),
+        'B-2': totalsFor(features.onSiteHedgerowCreations, 'B-2'),
+        'B-3': totalsFor(features.onSiteHedgerowEnhancements, 'B-3'),
+        'E-1': totalsFor(e1, 'E-1', { unitsRetained: e1AllocationAvailable, unitsEnhanced: e1AllocationAvailable, unitsLost: !e1.some((row) => row.hedgerowBaselineAvailability?.unitsLostError), unitsRetainedWithSRM: e1AllocationAvailable }),
+        'E-2': totalsFor(features.offSiteHedgerowCreations, 'E-2'),
+        'E-3': totalsFor(features.offSiteHedgerowEnhancements, 'E-3'),
+        'C-1': totalsFor(c1, 'C-1', { unitsRetained: c1RetainedAvailable, unitsEnhanced: waterAllocationAvailable(c1, 'unitsEnhanced') }),
+        'C-2': totalsFor(features.onSiteWatercourseCreations, 'C-2'),
+        'C-3': totalsFor(c3, 'C-3', { watercourseUnitsDelivered: c3DeliveryAvailable }),
+        'F-1': totalsFor(f1, 'F-1', { unitsRetained: f1RetainedAvailable, unitsEnhanced: waterAllocationAvailable(f1, 'unitsEnhanced'), unitsRetainedWithSRM: waterAllocationAvailable(f1, 'unitsRetainedWithSRM') }),
+        'F-2': totalsFor(features.offSiteWatercourseCreations, 'F-2'),
+        'F-3': totalsFor(f3, 'F-3', { watercourseUnitsDelivered: f3DeliveryAvailable, watercourseUnitsDeliveredWithSpatialRisk: f3DeliveryAvailable }),
+    } satisfies InputTotals;
+
+    const available = <Sheet extends WorkbookSheet>(sheet: Sheet, field: WorkbookTotalField<Sheet>) =>
+        inputTotals[sheet][field].available;
+    const combine = (dependencies: readonly AggregateDependency[]) =>
+        dependencies.every(({ sheet, field }) => available(sheet, field));
     const baseline = {
         onSite: {
             habitat: available('A-1', 'totalHabitatUnits'),
@@ -236,21 +245,21 @@ export function calculateWorkbookAggregateAvailability(features: AllFeatures) {
     };
     const postIntervention = {
         onSite: {
-            habitat: combine([['A-1', 'baselineUnitsRetained'], ['A-1', 'vhdhBespokeCompensationUnits'], ['A-2', 'habitatUnitsDelivered'], ['A-3', 'habitatUnitsDelivered']]),
-            hedgerow: combine([['B-1', 'unitsRetained'], ['B-2', 'hedgerowUnitsDelivered'], ['B-3', 'hedgerowUnitsDelivered']]),
-            watercourse: combine([['C-1', 'unitsRetained'], ['C-1', 'vhdhBespokeCompensationUnits'], ['C-2', 'unitsDelivered'], ['C-3', 'watercourseUnitsDelivered']]),
+            habitat: combine([{ sheet: 'A-1', field: 'baselineUnitsRetained' }, { sheet: 'A-1', field: 'vhdhBespokeCompensationUnits' }, { sheet: 'A-2', field: 'habitatUnitsDelivered' }, { sheet: 'A-3', field: 'habitatUnitsDelivered' }]),
+            hedgerow: combine([{ sheet: 'B-1', field: 'unitsRetained' }, { sheet: 'B-2', field: 'hedgerowUnitsDelivered' }, { sheet: 'B-3', field: 'hedgerowUnitsDelivered' }]),
+            watercourse: combine([{ sheet: 'C-1', field: 'unitsRetained' }, { sheet: 'C-1', field: 'vhdhBespokeCompensationUnits' }, { sheet: 'C-2', field: 'unitsDelivered' }, { sheet: 'C-3', field: 'watercourseUnitsDelivered' }]),
         },
         offSite: {
-            habitat: combine([['D-1', 'baselineUnitsRetained'], ['D-1', 'vhdhBespokeCompensationUnits'], ['D-2', 'habitatUnitsDelivered'], ['D-3', 'habitatUnitsDelivered']]),
-            hedgerow: combine([['E-1', 'unitsRetained'], ['E-2', 'hedgerowUnitsDelivered'], ['E-3', 'hedgerowUnitsDelivered']]),
-            watercourse: combine([['F-1', 'unitsRetained'], ['F-1', 'vhdhBespokeCompensationUnits'], ['F-2', 'unitsDelivered'], ['F-3', 'watercourseUnitsDelivered']]),
+            habitat: combine([{ sheet: 'D-1', field: 'baselineUnitsRetained' }, { sheet: 'D-1', field: 'vhdhBespokeCompensationUnits' }, { sheet: 'D-2', field: 'habitatUnitsDelivered' }, { sheet: 'D-3', field: 'habitatUnitsDelivered' }]),
+            hedgerow: combine([{ sheet: 'E-1', field: 'unitsRetained' }, { sheet: 'E-2', field: 'hedgerowUnitsDelivered' }, { sheet: 'E-3', field: 'hedgerowUnitsDelivered' }]),
+            watercourse: combine([{ sheet: 'F-1', field: 'unitsRetained' }, { sheet: 'F-1', field: 'vhdhBespokeCompensationUnits' }, { sheet: 'F-2', field: 'unitsDelivered' }, { sheet: 'F-3', field: 'watercourseUnitsDelivered' }]),
         },
     };
     const postInterventionWithSpatialRisk = {
         offSite: {
-            habitat: combine([['D-1', 'baselineUnitsRetainedWithSRM'], ['D-2', 'habitatUnitsDeliveredWithSpatialRisk'], ['D-3', 'habitatUnitsDeliveredWithSpatialRisk']]),
-            hedgerow: combine([['E-1', 'baselineUnitsRetainedWithSRM'], ['E-2', 'hedgerowUnitsDeliveredWithSpatialRisk'], ['E-3', 'hedgerowUnitsDeliveredWithSpatialRisk']]),
-            watercourse: combine([['F-1', 'unitsRetainedWithSRM'], ['F-2', 'netUnitChangeWithSpatialRisk'], ['F-3', 'watercourseUnitsDeliveredWithSpatialRisk']]),
+            habitat: combine([{ sheet: 'D-1', field: 'baselineUnitsRetainedWithSRM' }, { sheet: 'D-2', field: 'habitatUnitsDeliveredWithSpatialRisk' }, { sheet: 'D-3', field: 'habitatUnitsDeliveredWithSpatialRisk' }]),
+            hedgerow: combine([{ sheet: 'E-1', field: 'unitsRetainedWithSRM' }, { sheet: 'E-2', field: 'hedgerowUnitsDeliveredWithSpatialRisk' }, { sheet: 'E-3', field: 'hedgerowUnitsDeliveredWithSpatialRisk' }]),
+            watercourse: combine([{ sheet: 'F-1', field: 'unitsRetainedWithSRM' }, { sheet: 'F-2', field: 'netUnitChangeWithSpatialRisk' }, { sheet: 'F-3', field: 'watercourseUnitsDeliveredWithSpatialRisk' }]),
         },
     };
     const netChange = {
@@ -265,8 +274,8 @@ export function calculateWorkbookAggregateAvailability(features: AllFeatures) {
             watercourse: baseline.offSite.watercourse && postIntervention.offSite.watercourse,
         },
     };
-    const total = (sheet: keyof typeof inputTotals, field: string) =>
-        inputTotals[sheet][field as keyof (typeof inputTotals)[typeof sheet]]?.valueDecimal ?? new Decimal(0);
+    const total = <Sheet extends WorkbookSheet>(sheet: Sheet, field: WorkbookTotalField<Sheet>) =>
+        inputTotals[sheet][field].valueDecimal;
     const offSiteNetCandidates = {
         habitat: total('D-1', 'baselineUnitsRetained').plus(total('D-1', 'vhdhBespokeCompensationUnits')).plus(total('D-2', 'habitatUnitsDelivered')).plus(total('D-3', 'habitatUnitsDelivered')).minus(total('D-1', 'totalHabitatUnits')),
         hedgerow: total('E-1', 'unitsRetained').plus(total('E-2', 'hedgerowUnitsDelivered')).plus(total('E-3', 'hedgerowUnitsDelivered')).minus(total('E-1', 'totalHedgerowUnits')),

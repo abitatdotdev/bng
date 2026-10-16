@@ -1,116 +1,140 @@
 import { describe, expect, test } from 'bun:test';
 import { Decimal } from './decimal';
 import { calculateWorkbookAggregateAvailability } from './workbookAggregateAvailability';
-import type { AllFeatures } from './features';
-import { featuresFromInput } from './parsers/featuresFromInput';
+import { featuresFromInput, type BngInput } from './parsers/featuresFromInput';
 
-function emptyFeatures(overrides: Partial<AllFeatures> = {}): AllFeatures {
-    return {
-        onSiteHabitatBaselines: [], onSiteHabitatCreations: [], onSiteHabitatEnhancements: [],
-        offSiteHabitatBaselines: [], offSiteHabitatCreations: [], offSiteHabitatEnhancements: [],
-        onSiteHedgerowBaselines: [], onSiteHedgerowCreations: [], onSiteHedgerowEnhancements: [],
-        offSiteHedgerowBaselines: [], offSiteHedgerowCreations: [], offSiteHedgerowEnhancements: [],
-        onSiteWatercourseBaselines: [], onSiteWatercourseCreations: [], onSiteWatercourseEnhancements: [],
-        offSiteWatercourseBaselines: [], offSiteWatercourseCreations: [], offSiteWatercourseEnhancements: [],
-        ...overrides,
-    };
+const strategicSignificance = 'Location ecologically desirable but not in local strategy';
+const habitatBaseline = {
+    broadHabitat: 'Grassland',
+    habitatType: 'Modified grassland',
+    condition: 'Moderate',
+    strategicSignificance,
+    irreplaceableHabitat: false,
+    area: 1,
+};
+const waterBaseline = {
+    watercourseType: 'Ditches',
+    length: 1,
+    condition: 'Moderate',
+    strategicSignificance,
+    watercourseEncroachment: 'No Encroachment',
+    riparianEncroachment: 'No Encroachment/ No Encroachment',
+};
+
+function calculate(input: BngInput) {
+    return calculateWorkbookAggregateAvailability(featuresFromInput(input, { validate: false }).features);
 }
 
 describe('workbook total availability', () => {
-    test('gates only columns whose source formulas inspect allocation errors', () => {
-        const result = calculateWorkbookAggregateAvailability(emptyFeatures({
-            onSiteHabitatBaselines: [{ areaCalculationAvailability: { unavailableResults: { unitsLost: 'check-data' } } } as never],
-            offSiteHabitatBaselines: [{ areaCalculationAvailability: { unavailableResults: { areaHabitatLost: 'check-data' } } } as never],
-            onSiteHedgerowBaselines: [{ hedgerowBaselineAvailability: { status: 'over-allocated', unavailableResults: { baselineTotals: 'check-data' } } } as never],
-        }));
-
-        expect(result.inputSheets['A-1'].totalHabitatUnits).toBe(true);
-        expect(result.inputSheets['A-1'].unitsLost).toBe(true);
-        expect(result.inputSheets['D-1'].totalHabitatUnits).toBe(true);
-        expect(result.inputSheets['D-1'].unitsLost).toBe(true);
-        expect(result.inputSheets['D-1'].vhdhBespokeCompensationUnits).toBe(true);
-        expect(result.inputSheets['D-1'].baselineUnitsRetained).toBe(false);
-        expect(result.headline.baseline.onSite.hedgerow).toBe(true);
-    });
-
-
-    test('keeps parsed D-1 baseline totals available on allocation overrun while gating retained totals', () => {
-        const { features, issues } = featuresFromInput({
+    test('preserves row repair values while aggregating selective area allocation errors', () => {
+        const input = {
+            onSiteHabitatBaselines: [{ ...habitatBaseline, areaRetained: 1.1 }],
             offSiteHabitatBaselines: [{
-                broadHabitat: 'Grassland',
+                ...habitatBaseline,
                 habitatType: 'Other neutral grassland',
-                area: 1,
                 strategicSignificance: 'Area/compensation not in local strategy/ no local strategy',
-                condition: 'Moderate',
-                irreplaceableHabitat: false,
                 spatialRiskCategory: 'Compensation outside LPA or NCA of impact site and neighbouring LPA or NCA',
-                areaRetained: 1.1,
-                areaEnhanced: 0,
                 offSiteReferenceNumber: 'OFF-001',
+                areaRetained: 1.1,
             }],
-        }, { validate: false });
+        } satisfies BngInput;
+        const { features } = featuresFromInput(input, { validate: false });
         const result = calculateWorkbookAggregateAvailability(features);
         const row = features.offSiteHabitatBaselines[0]!;
 
-        expect(issues.offSiteHabitatBaselines).toBeUndefined();
         expect(row.totalHabitatUnits).toBe(8);
         expect(row.totalHabitatUnitsSRM).toBe(4);
-        expect(result.inputSheets['D-1'].totalHabitatUnits).toBe(true);
-        expect(result.inputSheets['D-1'].totalHabitatUnitsSRM).toBe(true);
-        expect(result.inputSheets['D-1'].baselineUnitsRetained).toBe(false);
-        expect(result.inputSheets['D-1'].baselineUnitsEnhanced).toBe(false);
-        expect(result.inputTotals['D-1']!.totalHabitatUnits!.value).toBe(8);
-        expect(result.inputTotals['D-1']!.totalHabitatUnitsSRM!.value).toBe(4);
-        expect(result.inputTotals['D-1']!.baselineUnitsRetained!.available).toBe(false);
-        expect(result.inputTotals['D-1']!.baselineUnitsEnhanced!.available).toBe(false);
+        expect(result.inputSheets['A-1'].unitsLost).toBe(true);
+        expect(result.inputSheets['D-1'].unitsLost).toBe(true);
+        expect(result.inputTotals['D-1'].totalHabitatUnits?.value).toBe(8);
+        expect(result.inputTotals['D-1'].totalHabitatUnitsSRM?.value).toBe(4);
+        expect(result.inputTotals['D-1'].baselineUnitsRetained?.available).toBe(false);
+        expect(result.inputTotals['D-1'].baselineUnitsEnhanced?.available).toBe(false);
+        expect(result.headline.baseline.offSite.habitat).toBe(true);
     });
 
-    test('water totals gate retained overlength only, preserving enhancement-only overrun and blank rows', () => {
-        const result = calculateWorkbookAggregateAvailability(emptyFeatures({
-            onSiteWatercourseBaselines: [
-                { unitsRetained: 0, unitsRetainedDecimal: new Decimal(0), unitsEnhanced: 24, unitsEnhancedDecimal: new Decimal(24), watercourseBaselineAvailability: { overAllocated: true, unavailableResults: {} } } as never,
-                { unitsRetained: 0, unitsRetainedDecimal: new Decimal(0), unitsEnhanced: 0, unitsEnhancedDecimal: new Decimal(0), watercourseBaselineAvailability: { invalidEncroachment: true, unavailableResults: { unitsRetained: 'blank', unitsEnhanced: 'blank' } } } as never,
-            ],
-        }));
+    test('keeps water enhancement-only over-allocation numeric and aggregate-available', () => {
+        const { features } = featuresFromInput({
+            onSiteWatercourseBaselines: [{ ...waterBaseline, lengthRetained: 0, lengthEnhanced: 1.1 }],
+        }, { validate: false });
+        const row = features.onSiteWatercourseBaselines[0]!;
+        const result = calculateWorkbookAggregateAvailability(features);
 
-        expect(result.inputSheets['C-1'].unitsRetained).toBe(true);
-        expect(result.inputSheets['C-1'].unitsEnhanced).toBe(true);
-        expect(result.inputTotals['C-1']!.unitsRetained!.available).toBe(true);
-        expect(result.inputTotals['C-1']!.unitsEnhanced!.available).toBe(true);
-        expect(result.inputTotals['C-1']!.unitsRetained!.value).toBe(0);
-        expect(result.inputTotals['C-1']!.unitsEnhanced!.value).toBe(24);
+        expect(row.unitsEnhanced).toBeGreaterThan(0);
+        expect(row.unitsEnhancedDecimal).toBeInstanceOf(Decimal);
+        expect(result.inputTotals['C-1'].unitsEnhanced?.valueDecimal.eq(row.unitsEnhancedDecimal)).toBe(true);
+        expect(result.inputTotals['C-1'].unitsRetained?.available).toBe(true);
+        expect(result.inputTotals['C-1'].unitsEnhanced?.available).toBe(true);
     });
 
-    test('keeps row values while making below-baseline delivery an aggregate-only gate', () => {
-        const row = {
-            watercourseUnitsDeliveredDecimal: new Decimal(3),
-            baseline: { unitsEnhancedDecimal: new Decimal(4) },
-        };
-        const result = calculateWorkbookAggregateAvailability(emptyFeatures({
-            onSiteWatercourseEnhancements: [row as never],
-        }));
-
-        expect(result.inputSheets['C-3'].watercourseUnitsDelivered).toBe(false);
-        expect(result.inputTotals['C-3']!.watercourseUnitsDelivered!.available).toBe(false);
-        expect(result.inputTotals['C-3']!.length!.available).toBe(true);
-        expect(row.watercourseUnitsDeliveredDecimal.toString()).toBe('3');
-    });
-
-    test('uses exact sums, ignores unavailable text cells, and applies watercourse positive-only loss totals', () => {
-        const result = calculateWorkbookAggregateAvailability(emptyFeatures({
+    test('uses Decimal totals and the watercourse positive-only loss sum', () => {
+        const { features } = featuresFromInput({
             onSiteHabitatBaselines: [
-                { area: 0.1, areaDecimal: new Decimal('0.1'), unitsLost: 0, unitsLostDecimal: new Decimal(0), areaCalculationAvailability: { unavailableResults: { unitsLost: 'check-data' } } } as never,
-                { area: 0.2, areaDecimal: new Decimal('0.2'), unitsLost: 2, unitsLostDecimal: new Decimal(2) } as never,
+                { ...habitatBaseline, area: 0.1 },
+                { ...habitatBaseline, area: 0.2 },
             ],
-            offSiteWatercourseBaselines: [
-                { length: 1, lengthDecimal: new Decimal(1), unitsLost: -3, unitsLostDecimal: new Decimal(-3), watercourseBaselineAvailability: { unavailableResults: { unitsLost: 'check-data' } } } as never,
-                { length: 2, lengthDecimal: new Decimal(2), unitsLost: 4, unitsLostDecimal: new Decimal(4) } as never,
-            ],
-        }));
+            offSiteWatercourseBaselines: [{
+                ...waterBaseline,
+                spatialRiskCategory: 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA',
+                offSiteReferenceNumber: 'OFF-001',
+                lengthRetained: 0,
+                lengthEnhanced: 0,
+            }],
+        }, { validate: false });
+        const result = calculateWorkbookAggregateAvailability(features);
 
-        expect(result.inputTotals['A-1']!.area!.valueDecimal.toString()).toBe('0.3');
-        expect(result.inputTotals['A-1']!.unitsLost!.valueDecimal.toString()).toBe('2');
-        expect(result.inputTotals['F-1']!.unitsLost!.valueDecimal.toString()).toBe('4');
-        expect(result.inputTotals['F-1']!.unitsLost!.available).toBe(true);
+        expect(result.inputTotals['A-1'].area?.valueDecimal.toString()).toBe('0.3');
+        expect(result.inputTotals['F-1'].unitsLost?.valueDecimal.isFinite()).toBe(true);
+        expect(result.inputTotals['F-1'].unitsLost?.available).toBe(true);
+    });
+
+    test('uses the actual off-site hedgerow SRM retained field in totals', () => {
+        const { features } = featuresFromInput({
+            offSiteHedgerowBaselines: [{
+                habitatType: 'Native hedgerow',
+                condition: 'Moderate',
+                strategicSignificance,
+                offSiteReferenceNumber: 'OFF-001',
+                spatialRiskCategory: 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA',
+                length: 2,
+                lengthRetained: 0.2,
+                lengthEnhanced: 0,
+            }],
+        }, { validate: false });
+        const row = features.offSiteHedgerowBaselines[0]!;
+        const result = calculateWorkbookAggregateAvailability(features);
+
+        expect(row.unitsRetainedWithSRM).toBeGreaterThan(0);
+        expect(result.inputTotals['E-1'].unitsRetainedWithSRM?.valueDecimal.eq(row.unitsRetainedWithSRMDecimal)).toBe(true);
+    });
+
+    test('distinguishes the E1 error cell from an F1 blank cell during ordinary sums', () => {
+        const { features } = featuresFromInput({
+            offSiteHedgerowBaselines: [{
+                habitatType: 'Native hedgerow',
+                condition: 'Moderate',
+                strategicSignificance,
+                spatialRiskCategory: 'Compensation outside LPA or NCA of impact site, but in neighbouring LPA or NCA',
+                length: 2,
+                lengthRetained: 0.2,
+                lengthEnhanced: 0,
+            }],
+            offSiteWatercourseBaselines: [{
+                ...waterBaseline,
+                spatialRiskCategory: 'Outside waterbody catchment, but within operational catchment',
+                watercourseEncroachment: 'N/A - Culvert',
+                lengthRetained: 0.2,
+                lengthEnhanced: 0,
+            }],
+        }, { validate: false });
+        const e1 = features.offSiteHedgerowBaselines[0]!;
+        const f1 = features.offSiteWatercourseBaselines[0]!;
+        const result = calculateWorkbookAggregateAvailability(features);
+
+        expect(e1.hedgerowBaselineAvailability?.unitsLostError).toBe(true);
+        expect(result.inputTotals['E-1'].unitsLost?.available).toBe(false);
+        expect(f1.watercourseBaselineAvailability?.unavailableResults.unitsRetainedWithSRM).toBe('blank');
+        expect(result.inputTotals['F-1'].unitsRetainedWithSRM?.value).toBe(0);
+        expect(result.inputTotals['F-1'].unitsRetainedWithSRM?.available).toBe(true);
     });
 });

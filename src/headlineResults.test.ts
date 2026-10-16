@@ -105,7 +105,7 @@ describe("headline aggregate availability", () => {
 
         const result = headlineResults(features, emptyTradingSummary());
 
-        expect(issues.offSiteHabitatBaselines).toBeUndefined();
+        expect(issues).toEqual([]);
         expect(result.offSiteHabitatBaseline).toBe(8);
         expect(result.aggregateAvailability.inputTotals['D-1']!.totalHabitatUnits!.value).toBe(8);
         expect(result.aggregateAvailability.inputTotals['D-1']!.totalHabitatUnitsSRM!.value).toBe(4);

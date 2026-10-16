@@ -59,3 +59,4 @@ export type {
     AreaEnhancementMovementInput,
     AreaEnhancementMovementResult,
 } from './areaCalculationTypes';
+export type { WorkbookSheet, WorkbookTotalField } from './workbookAggregateAvailability';
