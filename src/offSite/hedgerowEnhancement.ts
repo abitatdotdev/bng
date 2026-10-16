@@ -16,7 +16,7 @@ import {
     offSiteHedgerowBaselineUncheckedSchema,
     type OffSiteHedgerowBaseline,
 } from './hedgerowBaseline';
-import { enrichWithSpatialRisk } from './common';
+import { enrichWithSpatialRisk } from './spatialRisk';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import {
     calculateEnhancementPathway,
