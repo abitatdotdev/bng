@@ -631,3 +631,47 @@ test('workbook B-3 timing evidence distinguishes advance branches and unchanged 
         'Error -both advance and delayed habitat creation ▲',
     );
 });
+
+test('unchecked no-enhancement rows retain timing candidates while withholding delivery', () => {
+    const row = v.parse(onSiteHedgerowEnhancementUncheckedSchema, fixture({
+        habitatType: 'Native hedgerow',
+        condition: 'Poor',
+    }));
+
+    expect(row.hedgerowEnhancementQuality.status).toBe('no-enhancement');
+    expect(row.hedgerowEnhancementQuality.unavailableResults).toMatchObject({
+        finalTimeToTargetCondition: 'check-data',
+        appliedDifficultyMultiplier: 'check-data',
+        hedgerowUnitsDelivered: 'blank',
+    });
+    expect(row.hedgerowUnitsDelivered).toBe(0);
+    expect(row.hedgerowUnitsDeliveredDecimal.isZero()).toBeTrue();
+    expect(row.finalTimeToTargetCondition).toBe('Not possible ▲');
+    expect(row.appliedDifficultyMultiplier).toBe('Standard difficulty applied');
+
+    const improved = v.parse(onSiteHedgerowEnhancementUncheckedSchema, fixture({
+        habitatType: 'Species-rich native hedgerow',
+        condition: 'Poor',
+    }));
+    expect(improved.hedgerowEnhancementQuality.status).toBe('allowed');
+    expect(improved.hedgerowUnitsDelivered).toBeGreaterThan(0);
+});
+
+test('unchecked condition reduction reports guidance and withholds the on-site delivery', () => {
+    const baseline = createBaseline({ condition: 'Good', conditionScore: 3 });
+    const row = v.parse(onSiteHedgerowEnhancementUncheckedSchema, fixture({
+        baseline,
+        habitatType: 'Native hedgerow',
+        condition: 'Moderate',
+    }));
+
+    expect(row.enhancementCondition.status).toBe('forbidden');
+    expect(row.enhancementCondition.message).toBe('Error - Can not reduce condition ▲');
+    expect(row.enhancementCondition.unavailableResults).toMatchObject({
+        standardOrAdjustedTimeToTargetCondition: 'check-data',
+        finalDifficultyOfEnhancement: 'check-data',
+        hedgerowUnitsDelivered: 'blank',
+    });
+    expect(row.hedgerowUnitsDelivered).toBe(0);
+    expect(row.hedgerowUnitsDeliveredDecimal.isZero()).toBeTrue();
+});

@@ -23,12 +23,16 @@ import {
     calculateEnhancementUnitsDelivered,
 } from '../hedgerowCalc';
 import { calculateEnhancementDifficulty as calculateEnhancementDifficultyShared } from '../enhancementDifficultyCalc';
-import { applyEnhancementConditionAvailability } from '../calculationAvailability';
-import { addLinearTimingGuidance, applyHedgerowEnhancementQuality, applyLinearTimingAvailability, applyHedgerowOffSiteAvailability } from '../linearRuleAvailability';
 import {
-    enrichHedgerowEnhancementMovement,
-    gateHedgerowEnhancementMovement,
-} from '../hedgerowEnhancementMovementGate';
+    applyOnSiteHedgerowEnhancementCondition,
+    addOnSiteHedgerowEnhancementMovement,
+    applyOnSiteHedgerowEnhancementQuality,
+    gateOnSiteHedgerowEnhancementMovement,
+} from './hedgerowAvailability';
+import {
+    addOnSiteHedgerowEnhancementTimingGuidance,
+    applyOnSiteHedgerowEnhancementTiming,
+} from './hedgerowTiming';
 
 const inputSchema = v.object({
     baseline: onSiteHedgerowBaselineSchema,
@@ -404,7 +408,7 @@ const onSiteHedgerowEnhancementValidatedSchema = v.pipe(
                 : data.hedgerowEnhancedDelay,
     })),
 
-    v.transform((data) => enrichHedgerowEnhancementMovement(data, false)),
+    v.transform(addOnSiteHedgerowEnhancementMovement),
     v.forward(
         v.check(
             (data) => data.enhancementMovement.status !== 'forbidden',
@@ -487,20 +491,14 @@ export const onSiteHedgerowEnhancementSchema = v.pipe(
     // Final calculation
     v.transform(enrichWithEnhancementUnitsDelivered),
     v.transform((data) =>
-        applyEnhancementConditionAvailability(
-            gateHedgerowEnhancementMovement(
-                applyLinearTimingAvailability(
-                    {
-                            ...applyHedgerowEnhancementQuality(addLinearTimingGuidance(data), false),
-                    },
-                    'hedgerow',
-                    false,
-                        data.hedgerowEnhancedInAdvance,
-                        data.hedgerowEnhancedDelay,
+        applyOnSiteHedgerowEnhancementCondition(
+            gateOnSiteHedgerowEnhancementMovement(
+                applyOnSiteHedgerowEnhancementTiming(
+                    applyOnSiteHedgerowEnhancementQuality(
+                        addOnSiteHedgerowEnhancementTimingGuidance(data),
+                    ),
                 ),
             ),
-            'hedgerow',
-            false,
         ),
     ),
 );
@@ -528,7 +526,7 @@ export const onSiteHedgerowEnhancementUncheckedSchema = v.pipe(
                 ? toDecimal(data.hedgerowEnhancedDelay)
                 : data.hedgerowEnhancedDelay,
     })),
-    safeTransform((data) => enrichHedgerowEnhancementMovement(data, false)),
+    safeTransform(addOnSiteHedgerowEnhancementMovement),
     safeTransform(enrichBaselineHedgerowData),
     safeTransform(enrichProposedHedgerowData),
     safeTransform(addEnhancementPathway),
@@ -538,9 +536,9 @@ export const onSiteHedgerowEnhancementUncheckedSchema = v.pipe(
     safeTransform(lookupTemporalMultiplierStep),
     safeTransform(determineEnhancementDifficulty),
     safeTransform(enrichWithEnhancementUnitsDelivered),
-    safeTransform(addLinearTimingGuidance),
-    safeTransform((data) => applyHedgerowEnhancementQuality(data, false)),
-    safeTransform((data) => applyLinearTimingAvailability(data, 'hedgerow', false, data.hedgerowEnhancedInAdvance, data.hedgerowEnhancedDelay)),
-    safeTransform(gateHedgerowEnhancementMovement),
-    safeTransform((data) => applyEnhancementConditionAvailability(data, 'hedgerow', false)),
+    safeTransform(addOnSiteHedgerowEnhancementTimingGuidance),
+    safeTransform(applyOnSiteHedgerowEnhancementQuality),
+    safeTransform(applyOnSiteHedgerowEnhancementTiming),
+    safeTransform(gateOnSiteHedgerowEnhancementMovement),
+    safeTransform(applyOnSiteHedgerowEnhancementCondition),
 );

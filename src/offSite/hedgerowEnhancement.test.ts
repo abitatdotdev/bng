@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import * as v from 'valibot';
 import {
     offSiteHedgerowEnhancementSchema,
+    offSiteHedgerowEnhancementUncheckedSchema,
     type OffSiteHedgerowEnhancementSchema
 } from "./hedgerowEnhancement";
 import type { OffSiteHedgerowBaseline } from "./hedgerowBaseline";
@@ -613,4 +614,55 @@ test("handles '30+' time to target correctly", () => {
         expect(result.output.finalTimeToTargetCondition).toBe("30+");
         expect(result.output.temporalMultiplier).toBeCloseTo(0.3197967361, 5);
     }
+});
+
+test('unchecked no-enhancement rows retain timing candidates while withholding both deliveries', () => {
+    const row = v.parse(offSiteHedgerowEnhancementUncheckedSchema, fixture({
+        habitatType: 'Native hedgerow',
+        condition: 'Poor',
+    }));
+
+    expect(row.hedgerowEnhancementQuality.status).toBe('no-enhancement');
+    expect(row.hedgerowEnhancementQuality.unavailableResults).toMatchObject({
+        finalTimeToTargetCondition: 'check-data',
+        appliedDifficultyMultiplier: 'check-data',
+        hedgerowUnitsDelivered: 'blank',
+        hedgerowUnitsDeliveredWithSpatialRisk: 'blank',
+    });
+    expect(row.hedgerowUnitsDelivered).toBe(0);
+    expect(row.hedgerowUnitsDeliveredDecimal.isZero()).toBeTrue();
+    expect(row.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
+    expect(row.hedgerowUnitsDeliveredWithSpatialRiskDecimal.isZero()).toBeTrue();
+    expect(row.finalTimeToTargetCondition).toBe('Not possible ▲');
+    expect(row.appliedDifficultyMultiplier).toBe('Standard difficulty applied');
+
+    const improved = v.parse(offSiteHedgerowEnhancementUncheckedSchema, fixture({
+        habitatType: 'Species-rich native hedgerow',
+        condition: 'Poor',
+    }));
+    expect(improved.hedgerowEnhancementQuality.status).toBe('allowed');
+    expect(improved.hedgerowUnitsDelivered).toBeGreaterThan(0);
+});
+
+test('unchecked condition reduction reports guidance and withholds both off-site deliveries', () => {
+    const baseline = createBaseline({ condition: 'Good', conditionScore: 3 });
+    const row = v.parse(offSiteHedgerowEnhancementUncheckedSchema, fixture({
+        baseline,
+        habitatType: 'Native hedgerow',
+        condition: 'Moderate',
+    }));
+
+    expect(row.enhancementCondition.status).toBe('forbidden');
+    expect(row.enhancementCondition.message).toBe('Error - Can not reduce condition ▲');
+    expect(row.enhancementCondition.unavailableResults).toMatchObject({
+        standardOrAdjustedTimeToTargetCondition: 'check-data',
+        finalDifficultyOfEnhancement: 'check-data',
+        finalTimeToTargetMultiplier: 'check-data',
+        hedgerowUnitsDelivered: 'blank',
+        hedgerowUnitsDeliveredWithSpatialRisk: 'blank',
+    });
+    expect(row.hedgerowUnitsDelivered).toBe(0);
+    expect(row.hedgerowUnitsDeliveredDecimal.isZero()).toBeTrue();
+    expect(row.hedgerowUnitsDeliveredWithSpatialRisk).toBe(0);
+    expect(row.hedgerowUnitsDeliveredWithSpatialRiskDecimal.isZero()).toBeTrue();
 });

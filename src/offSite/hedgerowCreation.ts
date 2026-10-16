@@ -9,7 +9,8 @@ import {
 } from '../strategicSignificanceSchema';
 import { hedgerowConditionSchema, type HedgerowCondition } from '../hedgerowCondition';
 import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialRisk';
-import { addLinearTimingGuidance, applyHedgerowOffSiteAvailability } from '../linearRuleAvailability';
+import { applyOffSiteHedgerowDeliveryAvailability } from './hedgerowAvailability';
+import { addOffSiteHedgerowCreationTimingGuidance } from './hedgerowTiming';
 import { lookupTemporalMultiplier } from '../temporalMultipliers';
 import { difficulty } from '../difficulty';
 import { hedgerowTypeSchema } from '../hedgerowType';
@@ -93,8 +94,8 @@ export const offSiteHedgerowCreationSchema = v.pipe(
     ),
     // Calculate hedgerow units delivered (with and without spatial risk)
     v.transform(enrichWithHedgerowUnitsDelivered),
-    v.transform(addLinearTimingGuidance),
-    v.transform(applyHedgerowOffSiteAvailability),
+    v.transform(addOffSiteHedgerowCreationTimingGuidance),
+    v.transform(applyOffSiteHedgerowDeliveryAvailability),
 );
 
 export type OffSiteHedgerowCreationSchema = v.InferInput<typeof offSiteHedgerowCreationSchema>;
@@ -124,8 +125,8 @@ export const offSiteHedgerowCreationUncheckedSchema = v.pipe(
     safeTransform(lookupTemporalMultiplierStep),
     safeTransform(enrichWithDifficultyData),
     safeTransform(enrichWithHedgerowUnitsDelivered),
-    safeTransform(addLinearTimingGuidance),
-    safeTransform(applyHedgerowOffSiteAvailability),
+    safeTransform(addOffSiteHedgerowCreationTimingGuidance),
+    safeTransform(applyOffSiteHedgerowDeliveryAvailability),
 );
 
 /**

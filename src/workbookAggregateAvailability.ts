@@ -1,10 +1,6 @@
 import { Decimal } from './decimal';
 import type { AllFeatures } from './features';
 import type { AreaBaselineResult } from './areaCalculationTypes';
-import type {
-    HedgerowBaselineAvailability,
-    WatercourseBaselineAvailability,
-} from './linearRuleAvailability';
 
 export type WorkbookSheet = 'A-1' | 'A-2' | 'A-3' | 'D-1' | 'D-2' | 'D-3' | 'B-1' | 'B-2' | 'B-3' | 'E-1' | 'E-2' | 'E-3' | 'C-1' | 'C-2' | 'C-3' | 'F-1' | 'F-2' | 'F-3';
 
@@ -90,8 +86,10 @@ type InputSheets = { [Sheet in WorkbookSheet]: Partial<Record<AvailabilityFields
 type TotalGates = { [Sheet in WorkbookSheet]?: Partial<Record<WorkbookTotalField<Sheet>, boolean>> };
 
 type HabitatBaseline = AllFeatures['onSiteHabitatBaselines'][number];
-type HedgerowBaseline = AllFeatures['onSiteHedgerowBaselines'][number];
-type WatercourseBaseline = AllFeatures['onSiteWatercourseBaselines'][number];
+type HedgerowBaseline = AllFeatures['onSiteHedgerowBaselines'][number] | AllFeatures['offSiteHedgerowBaselines'][number];
+type WatercourseBaseline = AllFeatures['onSiteWatercourseBaselines'][number] | AllFeatures['offSiteWatercourseBaselines'][number];
+type HedgerowBaselineAvailability = AllFeatures['offSiteHedgerowBaselines'][number]['hedgerowBaselineAvailability'];
+type WatercourseBaselineAvailability = AllFeatures['offSiteWatercourseBaselines'][number]['watercourseBaselineAvailability'];
 type WatercourseEnhancement = AllFeatures['onSiteWatercourseEnhancements'][number];
 
 function areaRowsAvailable(rows: readonly HabitatBaseline[], result: AreaBaselineResult): boolean {
@@ -112,7 +110,11 @@ function waterBaselineAvailable(
     rows: readonly WatercourseBaseline[],
     result: keyof WatercourseBaselineAvailability['unavailableResults'],
 ): boolean {
-    return rows.every((row) => row.watercourseBaselineAvailability?.unavailableResults[result] === undefined);
+    return rows.every((row) => {
+        const unavailableResults: WatercourseBaselineAvailability['unavailableResults'] =
+            row.watercourseBaselineAvailability?.unavailableResults ?? {};
+        return unavailableResults[result] === undefined;
+    });
 }
 
 function waterAllocationAvailable(
@@ -121,7 +123,8 @@ function waterAllocationAvailable(
 ): boolean {
     return rows.every((row) => {
         const state = row.watercourseBaselineAvailability;
-        return !state?.retainedExceedsLength && state?.unavailableResults[result] !== 'check-data';
+        const unavailableResults: WatercourseBaselineAvailability['unavailableResults'] = state?.unavailableResults ?? {};
+        return !state?.retainedExceedsLength && unavailableResults[result] !== 'check-data';
     });
 }
 

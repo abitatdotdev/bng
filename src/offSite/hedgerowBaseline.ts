@@ -12,7 +12,7 @@ import { spatialRiskCategorySchema, getSpatialRiskMultiplier } from '../spatialR
 import { hedgerowTypeSchema } from '../hedgerowType';
 
 import { calculateBaselineUnits, calculateTotalHedgerowUnits, calculateUnitsLost } from '../hedgerowCalc';
-import { applyHedgerowBaselineAvailability } from '../linearRuleAvailability';
+import { applyOffSiteHedgerowBaselineAvailability } from './hedgerowAvailability';
 
 const inputSchema = v.object({
     habitatType: hedgerowTypeSchema,
@@ -83,7 +83,7 @@ export const offSiteHedgerowBaselineSchema = v.pipe(
     // Calculate units lost
     v.transform(enrichWithUnitsLost),
     v.transform(enrichWithRetainedUnitsWithSRM),
-    v.transform((data) => applyHedgerowBaselineAvailability(data, true)),
+    v.transform(applyOffSiteHedgerowBaselineAvailability),
 );
 
 export type OffSiteHedgerowBaselineSchema = v.InferInput<typeof offSiteHedgerowBaselineSchema>;
@@ -107,7 +107,7 @@ export const offSiteHedgerowBaselineUncheckedSchema = v.pipe(
     safeTransform(enrichWithTotalHedgerowUnits),
     safeTransform(enrichWithUnitsLost),
     safeTransform(enrichWithRetainedUnitsWithSRM),
-    safeTransform((data) => applyHedgerowBaselineAvailability(data, true)),
+    safeTransform(applyOffSiteHedgerowBaselineAvailability),
 );
 
 /**
