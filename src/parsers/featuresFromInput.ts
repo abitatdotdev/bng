@@ -206,29 +206,16 @@ export function featuresFromInput(
                 kind: 'parse',
             });
         } else {
-            const parsedStartPage: Partial<BngStartPageInput> = {};
-            const fields = {
-                completedBy: optionalText,
-                dateOfMetricCompletion: optionalCompletionDate,
-                netGainTarget: v.optional(quantitySchema),
-                netGainTargetEntered: optionalEntered,
-                containsMetricDeviations: optionalText,
-            } as const;
-            for (const field of Object.keys(fields) as (keyof typeof fields)[]) {
-                const result = v.safeParse(fields[field], input.startPage[field]);
-                if (result.success) {
-                    if (result.output !== undefined) parsedStartPage[field] = result.output as never;
-                } else {
-                    projectIssues.push({
-                        sheet: 'start',
-                        field,
-                        rule: 'invalid-start-input',
-                        message: `Invalid Start field: ${result.issues[0]?.message ?? 'invalid value'}`,
-                        kind: 'parse',
-                    });
-                }
-            }
-            startPage = parsedStartPage as BngStartPageInput;
+            const parsedStartPage = parseStartPage(input.startPage, (field, message) => {
+                projectIssues.push({
+                    sheet: 'start',
+                    field,
+                    rule: 'invalid-start-input',
+                    message: `Invalid Start field: ${message}`,
+                    kind: 'parse',
+                });
+            });
+            startPage = parsedStartPage;
         }
     }
     if (validate && startPage) {
@@ -286,4 +273,33 @@ export function featuresFromInput(
         ...(startPage ? { startPage } : {}),
         projectIssues,
     };
+}
+
+type StartPageField = keyof typeof bngStartPageInputSchema.entries;
+
+function parseStartPage(
+    input: Record<string, unknown>,
+    onInvalid: (field: StartPageField, message: string) => void,
+): BngStartPageInput {
+    const output: BngStartPageInput = {};
+    const completedBy = v.safeParse(bngStartPageInputSchema.entries.completedBy, input.completedBy);
+    if (!completedBy.success) onInvalid('completedBy', completedBy.issues[0]?.message ?? 'invalid value');
+    else if (completedBy.output !== undefined) output.completedBy = completedBy.output;
+
+    const dateOfMetricCompletion = v.safeParse(bngStartPageInputSchema.entries.dateOfMetricCompletion, input.dateOfMetricCompletion);
+    if (!dateOfMetricCompletion.success) onInvalid('dateOfMetricCompletion', dateOfMetricCompletion.issues[0]?.message ?? 'invalid value');
+    else if (dateOfMetricCompletion.output !== undefined) output.dateOfMetricCompletion = dateOfMetricCompletion.output;
+
+    const netGainTarget = v.safeParse(bngStartPageInputSchema.entries.netGainTarget, input.netGainTarget);
+    if (!netGainTarget.success) onInvalid('netGainTarget', netGainTarget.issues[0]?.message ?? 'invalid value');
+    else if (netGainTarget.output !== undefined) output.netGainTarget = netGainTarget.output;
+
+    const netGainTargetEntered = v.safeParse(bngStartPageInputSchema.entries.netGainTargetEntered, input.netGainTargetEntered);
+    if (!netGainTargetEntered.success) onInvalid('netGainTargetEntered', netGainTargetEntered.issues[0]?.message ?? 'invalid value');
+    else if (netGainTargetEntered.output !== undefined) output.netGainTargetEntered = netGainTargetEntered.output;
+
+    const containsMetricDeviations = v.safeParse(bngStartPageInputSchema.entries.containsMetricDeviations, input.containsMetricDeviations);
+    if (!containsMetricDeviations.success) onInvalid('containsMetricDeviations', containsMetricDeviations.issues[0]?.message ?? 'invalid value');
+    else if (containsMetricDeviations.output !== undefined) output.containsMetricDeviations = containsMetricDeviations.output;
+    return output;
 }

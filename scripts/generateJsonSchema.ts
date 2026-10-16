@@ -94,6 +94,17 @@ type PropMeta = {
     description?: string;
 };
 
+type JsonSchemaNode = {
+    anyOf?: JsonSchemaNode[];
+    description?: string;
+    enum?: string[];
+    minimum?: number;
+    pattern?: string;
+    properties?: Record<string, JsonSchemaNode>;
+    title?: string;
+    type?: string;
+};
+
 // Walk into a schema collecting picklist options and metadata (title/description),
 // descending through pipes and optional wrappers.
 function collectMeta(schema: AnyAction | undefined, meta: PropMeta = {}): PropMeta {
@@ -129,7 +140,7 @@ function* propsOf(
     }
 }
 
-const defs = (jsonSchema as { properties?: Record<string, { properties?: Record<string, PropMeta> }> }).properties ?? {};
+const defs = (jsonSchema as JsonSchemaNode).properties ?? {};
 
 if (defs.startPage?.properties) {
     // Targets below zero remain valid quantities and trigger the minimum-target rule.
@@ -138,7 +149,7 @@ if (defs.startPage?.properties) {
             { type: 'number' },
             { type: 'string', pattern: /^[+-]?(?:\d*\.)?\d+$/.source },
         ],
-    } as PropMeta;
+    };
 }
 
 for (const [name, valibotSchema] of Object.entries(schemas)) {
